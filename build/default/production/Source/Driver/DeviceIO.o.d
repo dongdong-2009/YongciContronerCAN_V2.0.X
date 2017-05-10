@@ -21,4 +21,5 @@ Source/Driver/../Driver/InitTemp.h  \
 Source/Driver/../Yongci/yongci.h  \
  Source/Driver/../Yongci/../Driver/tydef.h  \
  Source/Driver/../Yongci/SwtichCondition.h  \
+ Source/Driver/../Yongci/DeviceParameter.h  \
 Source/Driver/DevicdIO.h 

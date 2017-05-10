@@ -520,6 +520,9 @@ void RefParameterInit(void)
     g_SystemState.heFenState2 = CHECK_2_FEN_STATE;    //默认为分位
     g_SystemState.heFenState3 = CHECK_3_FEN_STATE;    //默认为分位
     
+    //远方与本地的初始化
+    kairuValue = ReHC74165();
+    Delay_ms(10);
     kairuValue = ReHC74165();
     if (kairuValue == YUAN_INPUT)//远控
     {
@@ -535,8 +538,16 @@ void RefParameterInit(void)
     g_SystemState.warning = 0x00;        //默认无警告
     
     //系统参数上下限
-    g_SystemLimit.workVoltage.upper = 3.5f;
-    g_SystemLimit.workVoltage.down =  3.1f;
+    g_SystemLimit.workVoltage.upper = 3.4f;
+    g_SystemLimit.workVoltage.down =  2.1f;
+    
+    g_SystemLimit.capVoltage1.upper = 2.1f;
+    g_SystemLimit.capVoltage2.upper = 2.1f;
+    g_SystemLimit.capVoltage2.upper = 2.1f;
+    
+    g_SystemLimit.capVoltage1.down = 2.1f;
+    g_SystemLimit.capVoltage2.down = 2.1f;
+    g_SystemLimit.capVoltage2.down = 2.1f;
     
     //同步预制等待时间
     g_SyncReadyWaitTime = 3000;
@@ -549,14 +560,13 @@ void RefParameterInit(void)
     error = AccumulateSumVerify();  //累加和校验    
     while(error)
     {
-//        UpdateIndicateState(ON_ERROR_LED, TURN_ON);
+        
+        UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
+        Delay_ms(500);        
+        UpdateLEDIndicateState(ERROR3_LED,TURN_OFF);
+        Delay_ms(500);
         //调试时使用错误指示灯熄灭，表示产生了错误
-    }
-    /*测试使用*/
-    g_SystemLimit.capVoltage1.down = 3.1f;
-    g_SystemLimit.capVoltage2.down = 3.1f;
-    g_SystemLimit.capVoltage2.down = 3.1f;
-    
+    }    
 }
 
 /**

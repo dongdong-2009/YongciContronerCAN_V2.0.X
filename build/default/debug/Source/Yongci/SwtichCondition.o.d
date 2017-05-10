@@ -23,4 +23,5 @@ Source/Yongci/../Driver/InitTemp.h  \
 Source/Yongci/../Yongci/yongci.h  \
  Source/Yongci/../Yongci/../Driver/tydef.h  \
  Source/Yongci/../Yongci/SwtichCondition.h  \
+ Source/Yongci/../Yongci/DeviceParameter.h  \
  Source/Yongci/DeviceParameter.h 

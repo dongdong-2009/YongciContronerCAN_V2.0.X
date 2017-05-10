@@ -8,19 +8,33 @@
 #include "../Header.h"
 #include "DeviceParameter.h"
 
+uint32 g_kairuValue = 0;    //165返回值
+
 #define DELAY_MS    20
 
-#define STATE_HE_ZHA_Z  0x5505  //同时合闸命令
-#define STATE_FEN_ZHA_Z 0x550A  //同时分闸命令
+#define STATE_HE_ZHA_Z  0x5535  //检测同时合闸信号
+#define STATE_FEN_ZHA_Z 0x553A  //检测同时分闸信号
 
-#define STATE_HE_ZHA_1  0x5515  //机构1合闸命令
-#define STATE_FEN_ZHA_1 0x551A  //机构1分闸命令
+#define STATE_HE_ZHA_1  0x5505  //检测机构1合闸信号
+#define STATE_FEN_ZHA_1 0x550A  //检测机构1分闸信号
 
-#define STATE_HE_ZHA_2  0x5525  //机构2合闸命令
-#define STATE_FEN_ZHA_2 0x552A  //机构2分闸命令
+#define STATE_HE_ZHA_2  0x5515  //检测机构2合闸信号
+#define STATE_FEN_ZHA_2 0x551A  //检测机构2分闸信号
 
-#define STATE_HE_ZHA_3  0x5535  //机构3合闸命令
-#define STATE_FEN_ZHA_3 0x553A  //机构3分闸命令
+#define STATE_HE_ZHA_3  0x5525  //检测机构3合闸信号
+#define STATE_FEN_ZHA_3 0x552A  //检测机构3分闸信号
+
+/**
+ * <p>Discription: [检测机构的状态，处于合位还是分位]</p>
+ */
+#define STATE_HE_WEI_1  0x2205  //机构1合位检测
+#define STATE_FEN_WEI_1 0x220A  //机构1分位检测
+
+#define STATE_HE_WEI_2  0x2215  //机构2合位检测
+#define STATE_FEN_WEI_2 0x221A  //机构2分位检测
+
+#define STATE_HE_WEI_3  0x2225  //机构3合位检测
+#define STATE_FEN_WEI_3 0x222A  //机构3分位检测
 
 /**
  * <p>Discription: [检测机构出现错误的命令]</p>
@@ -42,38 +56,43 @@
 
 #define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT)   //机构2合闸条件
 #define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT)    //机构2分闸条件
-    
-uint32 g_kairuValue = 0;    //165返回值
 
-//本地的总合闸条件：总分位 && 总合闸信号 && 电压满足 && 本地控制 && 调试模式 && 不带电
-#define Z_HEZHA_CONDITION()    \
-    ((g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT)) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage1.down) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage2.down))
+//远方\本地控制检测
+#define YUAN_BEN_CONDITION()    ((g_kairuValue & YUAN_INPUT) == YUAN_INPUT)
 
-//本地的总分闸条件：总合位 && 总分闸信号 && 电压满足 && 本地控制 && 调试模式 && 不带电
-#define Z_FENZHA_CONDITION()    \
-    ((g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT)) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage1.down) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage2.down))
+//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 合闸信号未输入
+#define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
 
-//本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电
-#define HEZHA1_CONDITION()      \
-    (((g_kairuValue & (COIL1_HEZHA() | YUAN_AND_WORK())) == COIL1_HEZHA()) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage1.down))
-//本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电
-#define FENZHA1_CONDITION()      \
-    (((g_kairuValue & (COIL1_FENZHA() | YUAN_AND_WORK())) == COIL1_FENZHA()) &&     \
-    (g_SystemVoltageParameter.voltageCap1 >= g_SystemLimit.capVoltage1.down))
+//本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
+#define Z_FENZHA_CONDITION()    (g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT))
 
-//本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电
-#define HEZHA2_CONDITION()      \
-    (((g_kairuValue & (COIL2_HEZHA() | YUAN_AND_WORK())) == COIL2_HEZHA()) &&     \
-    (g_SystemVoltageParameter.voltageCap2 >= g_SystemLimit.capVoltage2.down))
-//本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电
-#define FENZHA2_CONDITION()      \
-    (((g_kairuValue & (COIL2_FENZHA() | YUAN_AND_WORK())) == COIL2_FENZHA()) &&    \
-    (g_SystemVoltageParameter.voltageCap2 >= g_SystemLimit.capVoltage2.down))
+//本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 合闸信号未输入
+#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | YUAN_AND_WORK())) == COIL1_HEZHA())
+//本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
+#define FENZHA1_CONDITION()     ((g_kairuValue & (COIL1_FENZHA() | YUAN_AND_WORK())) == COIL1_FENZHA())
+
+//本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 合闸信号未输入
+#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | YUAN_AND_WORK())) == COIL2_HEZHA())
+//本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
+#define FENZHA2_CONDITION()     ((g_kairuValue & (COIL2_FENZHA() | YUAN_AND_WORK())) == COIL2_FENZHA())
+
+
+/**
+ * 
+ * <p>Discription: [对机构的合分位检测]</p>
+ */
+//******************************************************************************
+//机构1的合位检测
+#define HEWEI1_CONDITION()  ((g_kairuValue & HEWEI1_INPUT) == HEWEI1_INPUT)
+//机构1的分位检测
+#define FENWEI1_CONDITION()  ((g_kairuValue & FENWEI1_INPUT) == FENWEI1_INPUT)
+
+//机构1的合位检测
+#define HEWEI2_CONDITION()  ((g_kairuValue & HEWEI2_INPUT) == HEWEI2_INPUT)
+//机构1的分位检测
+#define FENWEI2_CONDITION()  ((g_kairuValue & FENWEI2_INPUT) == FENWEI2_INPUT)
+//******************************************************************************
+
 
 /**
  * <p>Discription: [一下错误均为不可屏蔽掉的错误，且错误严重]</p>
@@ -93,320 +112,16 @@ uint32 g_kairuValue = 0;    //165返回值
 #define ERROR3_CONDITION()      \
         ((g_kairuValue & (FENWEI3_INPUT | HEWEI3_INPUT)) == (FENWEI3_INPUT | HEWEI3_INPUT) ||   \
         ((g_kairuValue & (FENWEI3_INPUT | HEWEI3_INPUT)) == 0))
-
-//本地错误条件: 机构1同时输入了合分闸信号
-#define ERROR4_CONDITION()  ((g_kairuValue & (HZHA1_INPUT | FZHA1_INPUT)) == (HZHA1_INPUT | FZHA1_INPUT))
-
-//本地错误条件: 机构2同时输入了合分闸信号
-#define ERROR5_CONDITION()  ((g_kairuValue & (HZHA2_INPUT | FZHA2_INPUT)) == (HZHA2_INPUT | FZHA2_INPUT))
-
-//本地错误条件: 机构3同时输入了合分闸信号
-#define ERROR6_CONDITION()  ((g_kairuValue & (HZHA3_INPUT | FZHA3_INPUT)) == (HZHA3_INPUT | FZHA3_INPUT))
-
-//本地错误条件: 同时输入了合分闸信号
-#define ERROR7_CONDITION()  ((g_kairuValue & (Z_HEZHA_INPUT | Z_FENZHA_INPUT)) == (Z_HEZHA_INPUT | Z_FENZHA_INPUT))
 //***************************************************************************************************
 
-#define FENZHA_CONDITION_CONTINOUS() (g_kairuValue == 0)
 
-/**
- * 
- * <p>Function name: [GetSwitchState]</p>
- * <p>Discription: [获取开关状态]</p>
- * @param state 需要检测的状态
- * @return 开关状态
- */
-uint16 GetSwitchState(uint16 state)
-{
-    ClrWdt();
-    g_kairuValue = ReHC74165(); //获取按键值
-    switch (state)
-    {
-        //整体合闸
-        case STATE_HE_ZHA_Z:
-        {
-            return  Z_HEZHA_CONDITION();
-            break;
-        }
-        //整体分闸
-        case STATE_FEN_ZHA_Z:
-        {
-            return  Z_FENZHA_CONDITION();
-            break;
-        }
-        //机构1合闸
-        case STATE_HE_ZHA_1:
-        {
-            return HEZHA1_CONDITION();
-            break;
-        }
-        //机构1分闸
-        case STATE_FEN_ZHA_1:
-        {
-            return FENZHA1_CONDITION();
-            break;
-        }
-        //机构2合闸
-        case STATE_HE_ZHA_2:
-        {
-            return HEZHA2_CONDITION();
-            break;
-        }
-        //机构2分闸
-        case STATE_FEN_ZHA_2:
-        {
-            return FENZHA2_CONDITION();
-            break;
-        }
-        
-        case STATE_ERROR_1:
-        {
-            return ERROR1_CONDITION();
-        }
-        
-        case STATE_ERROR_2:
-        {
-            return ERROR2_CONDITION();
-        }
-        
-        case STATE_ERROR_4:
-        {
-            return ERROR4_CONDITION();
-        }
-        
-        case STATE_ERROR_5:
-        {
-            return ERROR5_CONDITION();
-        }
-        
-        case STATE_ERROR_7:
-        {
-            return ERROR7_CONDITION();
-        }
-        
-        case STATE_FEN_CONTINOUS:
-        {
-            return FENZHA_CONDITION_CONTINOUS();
-        }
-        default : //命令错误
-        {
-            Reset(); //执行复位
-        }
-    }
-    return 0;
-    
-}
+#define KEY_COUNT_DOWN 50
+uint8 g_timeCount[20] = {0};
+uint8 g_lockflag[8] = {0}; 
+uint8 _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
 
-/**
- * 
- * <p>Function name: [StateCheck]</p>
- * <p>Discription: [获取开关状态]</p>
- * @param state 执行的状态
- * @return 指令有效返回0xFFFF，无效返回0
- */
-uint16 StateCheck(uint16 state)
-{
-    uint16 delay = DELAY_MS * 10;
-    uint16 trueCn = 0;
-    uint16 falseCn = 0;
-    uint16 i = 0;
-    ClrWdt();
-    if (GetSwitchState(state))
-    {
-        trueCn = 0;
-        falseCn = 0;
-        for ( i = 0 ; i < 100; i++)//100 * DELAY_MS * 10 = 2ms 实际大于2ms的循环
-        {
-            __delay_us(delay); 
-            ClrWdt();
-            if (GetSwitchState(state))
-            {
-                trueCn++;
-            }
-            else
-            {
-                falseCn++;
-            }
-            if (falseCn > 10)
-            {
-                break; //停止检测
-            }
-        } 
-        if (trueCn >= 90) //大于90次则认为指令有效 90%的采样满足要求
-        {
-            ClrWdt();
-            return 0xFFFF;
-        }
-    }
-    return 0;
-}
-/**
- * 
- * <p>Function name: [CheckSwitchAction]</p>
- * <p>Discription: [可能存在如下几种情况：
- * 1.故障合位检测与分位检测同时有信号或者无信号，合闸按钮或者
- * 分闸按钮同时有信号，此时判断为故障状态。
- * 2.在合闸状态下，仅能接收分闸指令；分闸状态下，仅能接收合闸指令。]</p>
- * @return 返回各个相对应的状态量
- */
-uint8 CheckSwitchAction(void) 
-{    
-    ClrWdt();    
-    //机构同时有合分闸信号输入
-    while(StateCheck(STATE_ERROR_7))
-    {
-        g_SystemState.heFenState1 = CHECK_ERROR4_STATE;
-        UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
-        UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
-        UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
-        __delay_ms(200);
-        UpdateLEDIndicateState(ERROR1_LED,TURN_OFF);
-        UpdateLEDIndicateState(ERROR2_LED,TURN_OFF);
-        UpdateLEDIndicateState(ERROR3_LED,TURN_OFF);
-        __delay_ms(200);
-    }
-    //机构1同时有合分闸信号输入
-    while(StateCheck(STATE_ERROR_4))
-    {
-        g_SystemState.heFenState1 = CHECK_ERROR4_STATE;
-        UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
-        __delay_ms(200);
-        UpdateLEDIndicateState(ERROR1_LED,TURN_OFF);
-        __delay_ms(200);
-    }    
-    //机构2同时有合分闸信号输入
-    while(StateCheck(STATE_ERROR_5))
-    {
-        g_SystemState.heFenState1 = CHECK_ERROR5_STATE;
-        UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
-        __delay_ms(200);
-        UpdateLEDIndicateState(ERROR2_LED,TURN_OFF);
-        __delay_ms(200);
-    }
-    
-    //机构1合位与分位同时检测 或者 都没检测到
-    if (StateCheck(STATE_ERROR_1))
-    {
-        g_SystemState.heFenState1 = CHECK_ERROR1_STATE;
-        ClrWdt();
-    }
-    else
-    {
-        g_SystemState.heFenState1 = NO_ERROR;
-    }
-    
-    //机构2合位与分位同时检测 或者 都没检测到
-    if (StateCheck(STATE_ERROR_2))
-    {
-        ClrWdt();
-        g_SystemState.heFenState2 = CHECK_ERROR2_STATE;
-    }
-    else
-    {
-        g_SystemState.heFenState2 = NO_ERROR;
-    }
-    
-    if((g_SystemState.heFenState1 == CHECK_ERROR1_STATE) || (g_SystemState.heFenState2 == CHECK_ERROR2_STATE))
-    {
-        g_SystemState.warning = CHECK_ERROR_STATE;
-        return CHECK_ERROR_STATE;
-    }
-    //无错误则关闭错误继电器和指示灯
-    UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
-    UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_OFF);
-    UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_OFF);
-    g_SystemState.warning = NO_ERROR;
-    
-    //在以上均不成立时 检测合分闸按钮状态
-    
-    //总的合分闸检测
-    //在合位时检测 分闸 按钮
-    ClrWdt();
-    if (StateCheck(STATE_FEN_ZHA_Z))
-    {
-        ClrWdt();
-//        FenOnLock();    //上锁
-        return CHECK_Z_FEN_ORDER;//返回分闸命令
-    }
-    ClrWdt();
-    ClrWdt();
-    // 在分位时检测 合闸 按钮 且不是 欠压状态
-    if (StateCheck(STATE_HE_ZHA_Z))
-    {
-        ClrWdt();
-//        HeOnLock();//上锁
-        return CHECK_Z_HE_ORDER;//返回分闸命令
-    }
-    ClrWdt();
-    
-    //机构1的合分闸检测
-    //在合位时检测 分闸 按钮
-    ClrWdt();
-    if (StateCheck(STATE_FEN_ZHA_1))
-    {
-        ClrWdt();
-//        FenOnLock();    //上锁
-        return CHECK_1_FEN_ORDER;//返回分闸命令
-    }
-    ClrWdt();
-    ClrWdt();
-    // 在分位时检测 合闸 按钮 且不是 欠压状态
-    if (StateCheck(STATE_HE_ZHA_1))
-    {
-        ClrWdt();
-//        HeOnLock();//上锁
-        return CHECK_1_HE_ORDER;//返回分闸命令
-    }
-    
-    //机构2的合分闸检测
-    //在合位时检测 分闸 按钮
-    ClrWdt();
-    if (StateCheck(STATE_FEN_ZHA_2))
-    {
-        ClrWdt();
-//        FenOnLock();    //上锁
-        return CHECK_2_FEN_ORDER;//返回分闸命令
-    }
-    ClrWdt();
-    ClrWdt();
-    // 在分位时检测 合闸 按钮 且不是 欠压状态
-    if (StateCheck(STATE_HE_ZHA_2))
-    {
-        ClrWdt();
-//        HeOnLock();//上锁
-        return CHECK_2_HE_ORDER;//返回分闸命令
-    }
-    
-    
-    //错状态退出
-    return  0;
-} 
-/**
- * 
- * <p>Function name: [CheckVoltage]</p>
- * <p>Discription: [检测电压的状态]</p>
- */
-void CheckVoltage(void)
-{
-    GetCapVoltage();
-    ClrWdt();
-    if (g_SystemVoltageParameter.voltageCap1  >= LOW_VOLTAGE_ADC)
-    {
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);
-    }
-    else
-    {
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF);        
-    }
-    if (g_SystemVoltageParameter.voltageCap2  >= LOW_VOLTAGE_ADC)
-    {
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);
-    }
-    else
-    {
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);        
-    }
-}
+void SwitchScan(void);
+
 /**
  * 
  * <p>Function name: [CheckIOState]</p>
@@ -415,53 +130,40 @@ void CheckVoltage(void)
  */
 uint8 CheckIOState(void)
 {
-    uint8 checkOrder = 0;
-    
-    //***********************首先检测按钮IO*******开始****************//
-    //远控本地切换
-    ClrWdt();   
-    checkOrder = CheckSwitchAction();  
-    ClrWdt();           
-    switch (checkOrder)
+    ClrWdt();     
+    switch (g_Order)
     {
-        case CHECK_ERROR_STATE:  //检测到错误
+        //检测按键状态
+        case CHECK_Z_HE_ORDER: //收到合闸命令 需要判断一下电容电压能否达到要求
         {
-            ClrWdt();      
-            checkOrder = 0;
-            break;
-        }
-        case CHECK_Z_HE_ORDER: //收到合闸命令
-        {
-            ClrWdt();           
+            ClrWdt();
             UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
+            //上锁
 //            HeZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         case CHECK_Z_FEN_ORDER: //收到分闸命令
         {
             ClrWdt();
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);
+            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
 //            FenZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         
         case CHECK_1_HE_ORDER: //收到机构1合闸命令
         {
-            ClrWdt();           
+            ClrWdt();        
+            g_Order = 0x00;   
             UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
 //            HeZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
         {
             ClrWdt();
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);
+            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
 //            FenZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         
         case CHECK_2_HE_ORDER: //收到机构2合闸命令
@@ -469,21 +171,19 @@ uint8 CheckIOState(void)
             ClrWdt();           
             UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
 //            HeZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
         {
             ClrWdt();
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);
+            g_Order = 0x00;
+            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
 //            FenZhaActionA();
-//            return 0xff;
-            return 0;
+            return 0xff;
         }
         default:
         {
             ClrWdt();
-            checkOrder = 0;
         }
     }
     return 0;
@@ -491,74 +191,75 @@ uint8 CheckIOState(void)
 /**
  * 
  * <p>Function name: [CheckSwitchState]</p>
- * <p>Discription: [检测开关状态]</p>
+ * <p>Discription: [执行相应的指示]</p>
  */
-void CheckSwitchState(void)
+void DsplaySwitchState(void)
 {
+    UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);   //测试使用
+    UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_OFF);   //测试使用
+    
     ClrWdt();
     if(g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //机构1错误
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
-        UpdateIndicateState(HEWEI1_RELAY,HEWEI1_LED,TURN_OFF);
-        UpdateIndicateState(FENWEI1_RELAY,FENWEI1_LED,TURN_OFF);
         ClrWdt();
+        g_SystemState.warning = CHECK_ERROR1_STATE;
     }
     else 
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
+        g_SystemState.warning = NO_ERROR;
     }
+    
     if(g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //机构2错误
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
-        UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_OFF);
-        UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_OFF);
         ClrWdt();
+        g_SystemState.warning = CHECK_ERROR2_STATE;
     }
     else
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_OFF);
+        g_SystemState.warning = NO_ERROR;
     }
     
-    if((g_SystemState.heFenState1 == CHECK_ERROR1_STATE) || 
-       (g_SystemState.heFenState2 == CHECK_ERROR2_STATE))
+    if((g_SystemState.warning == CHECK_ERROR1_STATE) ||
+       (g_SystemState.warning == CHECK_ERROR2_STATE))
     {
         return ;
     }
-    g_kairuValue = ReHC74165();
+    g_SystemState.warning = NO_ERROR;
     
     //以上既不是故障 也不是 合分闸命令情况下 检测合分状态，检测合分位时不考虑过多的因素
     //机构1的分合位检测    
     ClrWdt();
-    if((g_kairuValue & FENWEI1_INPUT) == FENWEI1_INPUT) //分闸状态
+    if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE) //分闸状态
     {
         UpdateIndicateState(FENWEI1_RELAY,FENWEI1_LED,TURN_ON);
         UpdateIndicateState(HEWEI1_RELAY,HEWEI1_LED,TURN_OFF);
         ClrWdt();
-        g_SystemState.heFenState1 = CHECK_1_FEN_STATE;
     }
-    else if((g_kairuValue & HEWEI1_INPUT) == HEWEI1_INPUT)  //合闸状态
+    else if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)  //合闸状态
     {
         UpdateIndicateState(HEWEI1_RELAY,HEWEI1_LED,TURN_ON);
         UpdateIndicateState(FENWEI1_RELAY,FENWEI1_LED,TURN_OFF);
         ClrWdt();
-        g_SystemState.heFenState1 = CHECK_1_HE_STATE;
     }
     
     //机构2的分合位检测    
     ClrWdt();
-    if((g_kairuValue & FENWEI2_INPUT) == FENWEI2_INPUT) //分闸状态
+    if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE) //分闸状态
     {
         UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_ON);
         UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_OFF);
         ClrWdt();
-        g_SystemState.heFenState2 = CHECK_2_FEN_STATE;
+        
     }    
-    else if((g_kairuValue & HEWEI2_INPUT) == HEWEI2_INPUT)   //合闸状态
+    else if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)   //合闸状态
     {
         UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_ON);
         UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_OFF);
         ClrWdt();
-        g_SystemState.heFenState2 = CHECK_2_HE_STATE;
     }
     
     //总的分合位检测    
@@ -583,107 +284,282 @@ void CheckSwitchState(void)
     }
     
 }
-
-//暂时不对其做任何处理
 /**
  * 
- * <p>Function name: [ContinuousCheck]</p>
- * <p>Discription: [用于合分闸动作完成后的立刻检测。]</p>
- * @param lastOrder 上一次执行的命令
- * @return  返回分合闸指令，否则返回0
+ * <p>Function name: [SwitchScan]</p>
+ * <p>Discription: [检测开入量]</p>
  */
-uint8 ContinuousCheck(uint16* lastOrder)
+void SwitchScan(void)
 {
-    uint16 i = 0;
-    ClrWdt();
-    if (g_SystemState.yuanBenState == YUAN_STATE)//远控
+    if(g_SystemState.yuanBenState == BEN_STATE)
     {
-        return 0;
-    }
-    if (HE_ORDER == *lastOrder)//刚执行完合闸命令
-    {
-        ClrWdt();
-        g_kairuValue = ReHC74165();
-        if ((HZHA1_INPUT & g_kairuValue) == 0)//合闸信号已经消失
+        //同时合闸信号检测
+        if(Z_HEZHA_CONDITION() && g_lockflag[0] == 0)   
         {
-            ClrWdt();
-            *lastOrder = IDLE_ORDER;
-            return 0;
-        }
-        else
-        {
-            i = 0;
-            g_kairuValue = ReHC74165();
-            while((HZHA1_INPUT & g_kairuValue) == 1)    //合闸命令一直存在
+            g_timeCount[0]++;
+            if(g_timeCount[0] >= KEY_COUNT_DOWN)
             {
-                g_kairuValue = ReHC74165();
-                ClrWdt();
-                //分闸条件 1处于合位 2电压足够 3有效的分闸信号 
-                if (StateCheck(STATE_FEN_CONTINOUS))
-                {
-                    //返回分闸命令
-                    ClrWdt();
-                    //返回分闸命令
-                    ClrWdt();
-                    FenOnLock();//上锁
-                    return CHECK_Z_FEN_ORDER;
-                }
-                ClrWdt();
-                __delay_ms(1);
-                i++;
-                //持续3s认为是错误，进行错误处理
-                if (i > 3000)
-                {
-                    
-                }
-            }
-            ClrWdt();
-            *lastOrder = IDLE_ORDER;
-            return 0;
-        }
-    }
-    ClrWdt();
-    if (FEN_ORDER == *lastOrder)//刚执行完分闸命令
-    {
-        //等待信号结束。
-        i = 0;
-        g_kairuValue = ReHC74165();
-        while(g_kairuValue & FZHA1_INPUT)
-        {
-            g_kairuValue = ReHC74165();
-            ClrWdt();
-            __delay_ms(1);
-            ClrWdt();
-            i++;
-            //持续3s认为是错误，进行错误处理
-            if (i > 3000)
-            {
-                
+                g_lockflag[0] = 1;
+                g_timeCount[0] = 0;
+                g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
             }
         }
-        ClrWdt();
-        //若此时有合闸信号，则认为为分闸信号未结束时就有 不执行动作
-        //等待信号结束。
-        i = 0;
-        g_kairuValue = ReHC74165();
-        while(g_kairuValue & HZHA1_INPUT)
+        else if(!Z_HEZHA_CONDITION())
         {
-            g_kairuValue = ReHC74165();
-            ClrWdt();
-            __delay_ms(1);
-            ClrWdt();
-            i++;
-            //持续3s认为是错误，进行错误处理
-            if (i > 3000)
+            if(g_timeCount[0] != 0)
             {
-                
+                g_timeCount[0] -= 1;
+            }
+            g_lockflag[0] = 0;
+        }
+
+        //同时分闸信号检测
+        if(Z_FENZHA_CONDITION() && g_lockflag[1] == 0)   
+        {
+            g_timeCount[1]++;
+            if(g_timeCount[1] >= KEY_COUNT_DOWN)
+            {
+                g_lockflag[1] = 1;
+                g_timeCount[1] = 0;
+                g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
             }
         }
-        *lastOrder = IDLE_ORDER;
-        return 0;
+        else if(!Z_FENZHA_CONDITION())
+        {
+            if(g_timeCount[1] != 0)
+            {
+                g_timeCount[1] -= 1;
+            }
+            g_lockflag[1] = 0;
+        }
+
+        //机构1合闸信号检测
+        if(HEZHA1_CONDITION() && g_lockflag[2] == 0)   
+        {
+            g_timeCount[2]++;
+            if(g_timeCount[2] >= KEY_COUNT_DOWN)
+            {
+                g_lockflag[2] = 1;
+                g_timeCount[2] = 0;
+                g_Order = CHECK_1_HE_ORDER;     //机构1合闸命令
+            }
+        }
+        else if(!HEZHA1_CONDITION())
+        {
+            if(g_timeCount[2] != 0)
+            {
+                g_timeCount[2] -= 1;
+            }
+            g_lockflag[2] = 0;
+        }
+
+        //机构1分闸信号检测
+        if(FENZHA1_CONDITION() && g_lockflag[3] == 0)   
+        {
+            g_timeCount[3]++;
+            if(g_timeCount[3] >= KEY_COUNT_DOWN)
+            {
+                g_lockflag[3] = 1;
+                g_timeCount[3] = 0;
+                g_Order = CHECK_1_FEN_ORDER;     //机构1分闸命令
+            }
+        }
+        else if(!FENZHA1_CONDITION())
+        {
+            if(g_timeCount[3] != 0)
+            {
+                g_timeCount[3] -= 1;
+            }
+            g_lockflag[3] = 0;
+        }
+
+        //机构2合闸信号检测
+        if(HEZHA2_CONDITION() && g_lockflag[4] == 0)   
+        {
+            g_timeCount[4]++;
+            if(g_timeCount[4] >= KEY_COUNT_DOWN)
+            {
+                g_lockflag[4] = 1;
+                g_timeCount[4] = 0;
+                g_Order = CHECK_2_HE_ORDER;     //机构2合闸命令
+            }
+        }
+        else if(!HEZHA2_CONDITION())
+        {
+            if(g_timeCount[4] != 0)
+            {
+                g_timeCount[4] -= 1;
+            }
+            g_lockflag[4] = 0;
+        }
+
+        //机构2分闸信号检测
+        if(FENZHA2_CONDITION() && g_lockflag[5] == 0)   
+        {
+            g_timeCount[5]++;
+            if(g_timeCount[5] >= KEY_COUNT_DOWN)
+            {
+                g_lockflag[5] = 1;
+                g_timeCount[5] = 0;
+                g_Order = CHECK_2_FEN_ORDER;     //机构2分闸命令
+            }
+        }
+        else if(!FENZHA2_CONDITION())
+        {
+            if(g_timeCount[5] != 0)
+            {
+                g_timeCount[5] -= 1;
+            }
+            g_lockflag[5] = 0;
+        }
     }
-    *lastOrder = IDLE_ORDER;
-    return 0;
     
+    //机构1的合位检测
+    if(HEWEI1_CONDITION())
+    {
+        g_timeCount[6]++;
+        if(g_timeCount[6] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[6] = 0;
+            g_SystemState.heFenState1 = CHECK_1_HE_STATE;  
+        }
+    }
+    else if(!HEWEI1_CONDITION())
+    {
+        if(g_timeCount[6] != 0)
+        {
+            g_timeCount[6] -= 1;
+        }
+    }   
+    
+    //机构1的分位检测
+    if(FENWEI1_CONDITION())
+    {
+        g_timeCount[7]++;
+        if(g_timeCount[7] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[7] = 0;
+            g_SystemState.heFenState1 = CHECK_1_FEN_STATE;  
+        }
+    }
+    else if(!FENWEI1_CONDITION())
+    {
+        if(g_timeCount[7] != 0)
+        {
+            g_timeCount[7] -= 1;
+        }
+    }   
+    
+    //机构2的合位检测
+    if(HEWEI2_CONDITION())
+    {
+        g_timeCount[8]++;
+        if(g_timeCount[8] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[8] = 0;
+            g_SystemState.heFenState2 = CHECK_2_HE_STATE;  
+        }
+    }
+    else if(!HEWEI2_CONDITION())
+    {
+        if(g_timeCount[8] != 0)
+        {
+            g_timeCount[8] -= 1;
+        }
+    }   
+    
+    //机构2的分位检测
+    if(FENWEI2_CONDITION())
+    {
+        g_timeCount[9]++;
+        if(g_timeCount[9] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[9] = 0;
+            g_SystemState.heFenState2 = CHECK_2_FEN_STATE;  
+        }
+    }
+    else if(!FENWEI2_CONDITION())
+    {
+        if(g_timeCount[9] != 0)
+        {
+            g_timeCount[9] -= 1;
+        }
+    }   
+    
+    
+    //机构1的合分位同时存在\不存在
+    if(ERROR1_CONDITION())
+    {
+        g_timeCount[12]++;
+        if(g_timeCount[12] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[12] = 0;
+            g_SystemState.heFenState1 = CHECK_ERROR1_STATE;     //合分位同时存在
+        }
+    }
+    else if(!ERROR1_CONDITION())
+    {
+        if(g_timeCount[12] != 0)
+        {
+            g_timeCount[12] -= 1;
+        }
+    }
+    
+    //机构2的合分位同时存在\不存在
+    if(ERROR2_CONDITION())
+    {
+        g_timeCount[13]++;
+        if(g_timeCount[13] >= KEY_COUNT_DOWN)
+        {
+            g_timeCount[13] = 0;
+            g_SystemState.heFenState2 = CHECK_ERROR2_STATE;     //合分位同时存在
+        }
+    }
+    else if(!ERROR2_CONDITION())
+    {
+        if(g_timeCount[13] != 0)
+        {
+            g_timeCount[13] -= 1;
+        }
+    }
+    
+    //远方\就地检测
+    if(YUAN_BEN_CONDITION() && (g_lockflag[6] == 0))
+    {
+        g_timeCount[14]++;
+        if(g_timeCount[14] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[6] = 1;
+            g_timeCount[14] = 0;
+            g_SystemState.yuanBenState = YUAN_STATE;
+        }
+        g_lockflag[7] = 0;
+        g_timeCount[15] = 0;
+    }
+    else if(!YUAN_BEN_CONDITION() && (g_lockflag[7] == 0))
+    {
+        g_timeCount[15]++;
+        if(g_timeCount[15] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[7] = 1;
+            g_timeCount[15] = 0;
+            g_SystemState.yuanBenState = BEN_STATE;
+        }
+        g_lockflag[6] = 0;
+        g_timeCount[14] = 0;
+    }
 }
+
+/**
+ * 
+ * <p>Function name: [_T5Interrupt]</p>
+ * <p>Discription: [定时器5的中断]</p>
+ */
+void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
+{
+    IFS1bits.T5IF = 0;  //clear
+    g_kairuValue = ReHC74165();
+    SwitchScan();
+}
+
 

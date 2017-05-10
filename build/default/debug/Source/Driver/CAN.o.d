@@ -21,6 +21,7 @@ Source/Driver/../Driver/InitTemp.h  \
 Source/Driver/../Yongci/yongci.h  \
  Source/Driver/../Yongci/../Driver/tydef.h  \
  Source/Driver/../Yongci/SwtichCondition.h  \
+ Source/Driver/../Yongci/DeviceParameter.h  \
 Source/Driver/CAN.h  \
  Source/Driver/../DeviceNet/DeviceNet.h  \
  Source/Driver/../SerialPort/RefParameter.h 

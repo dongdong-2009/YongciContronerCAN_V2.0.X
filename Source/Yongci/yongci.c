@@ -27,6 +27,7 @@ static uint16 HeActionLock = OFF_LOCK;
 static uint16 FenActionLock = OFF_LOCK;
 
 extern  frameRtu sendFrame, recvFrame;
+extern uint8 _PERSISTENT g_Order;  //需要执行的命令
 
 volatile uint16 HezhaTimeA = HEZHA_TIME_A;
 volatile uint16 FenzhaTimeA = FENZHA_TIME_A;
@@ -129,7 +130,6 @@ void YongciStopCurrentA(void)
 void YongciMainTask(void)
 {
     uint8 result = 0;
-    uint32 kairuValue = 0;
     while(0xFFFF) //主循环
     {
         switch (RunStateFlag)
@@ -187,39 +187,18 @@ void YongciMainTask(void)
                 OffLock();//解除上锁状态
                 UpdateCount(LastOrderState);//更新计数
                 
-                kairuValue = ReHC74165();
-                if (kairuValue == YUAN_AND_WORK())//远控
+                //判断远方与就地的延时消抖
+                if (g_SystemState.yuanBenState == YUAN_STATE)//远控
                 {
-                    g_SystemState.yuanBenState = YUAN_STATE;   //远方
+                    ON_INT();   //远方控制时允许通信
                 }
-                else
+                else if (g_SystemState.yuanBenState == BEN_STATE)
                 {
-                    g_SystemState.yuanBenState = BEN_STATE;   //就地
+                    OFF_INT();  //就地控制时不允许通信
                 }
-                //紧接着处理后任务,意味着刚从合分闸动作中跳出.
-                if ( IDLE_ORDER != LastOrderState )
-                {
-                    if(g_SystemState.yuanBenState == BEN_STATE)
-                    {
-                        result =  ContinuousCheck( &LastOrderState );
-                    }
-                    ClrWdt();
-                    if (CHECK_1_HE_ORDER  ==  result)
-                    {
-                        FenZhaActionA();
-                        continue; //继续下次循环
-                    }
-                    ClrWdt();
-                    //判断完后检测更新状态
-                    result = CheckIOState();
-                    if (result) //收到合分闸指令，退出后立即进行循环
-                    {
-                        continue;
-                    }
-                    LastOrderState = IDLE_ORDER;
-                }
-                LastOrderState = IDLE_ORDER;
                 
+                //暂时不要485通信，所以需要屏蔽
+                /***************************************************************************
                 if(g_SystemState.yuanBenState == YUAN_STATE)
                 {
                     ON_INT();//此时开启中断以方便接收
@@ -236,15 +215,19 @@ void YongciMainTask(void)
                         continue;
                     }
                 }
+                ***************************************************************************/
                 result = CheckIOState();
                 if (result) //收到合分闸指令，退出后立即进行循环
                 {
+                    g_Order = NULL_ORDER;    //将命令清零
                     continue;
                 }
                 ClrWdt(); 
                 //检测是否欠电压， 并更新显示
                 CheckVoltage();
-                CheckSwitchState();
+                //更新机构的状态显示
+                DsplaySwitchState();
+                LastOrderState = IDLE_ORDER;
                 ClrWdt();
                 //此处应不断刷新一些IO状态，如RD。
                 break;
@@ -296,6 +279,9 @@ void YongciFirstInit(void)
      
     HeActionLock = OFF_LOCK;
     FenActionLock = OFF_LOCK;
+    
+    g_Order = NULL_ORDER;   //初始化
+    
 }  
 
 /**************************************************
@@ -313,8 +299,8 @@ inline void HeZhaActionA(void)
     Init_Timer1(HezhaTimeA);
     RunStateFlag = HE_ORDER_A;
     RunStateFlag = HE_ORDER_A;
-    HEZHA_A();
-    HEZHA_A();
+//    HEZHA_A();
+//    HEZHA_A();
     LastOrderState = HE_ORDER_A;
     //此处添加上锁判断
     if (ON_HE_LOCK != HeActionLock) //若不为上锁态，说明指令下达有问题或者无故跳转到此处。
@@ -346,8 +332,8 @@ inline  void FenZhaActionA(void)
     Init_Timer1(FenzhaTimeA);
     RunStateFlag = FEN_ORDER_A;
     RunStateFlag = FEN_ORDER_A;
-    FENZHA_A();
-    FENZHA_A();
+//    FENZHA_A();
+//    FENZHA_A();
     LastOrderState = FEN_ORDER_A;
     
     //此处添加上锁判断

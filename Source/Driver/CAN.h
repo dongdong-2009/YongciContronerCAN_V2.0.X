@@ -81,10 +81,10 @@ extern "C" {
 enum  CANIntType {WakeInt = 0b111, RXB0Int = 0b110, RXB1Int = 0b101,  TXB0Int = 0b100, TXB1Int = 0b011,
       TXB2Int = 0b010, ErrorInt = 0b001, Null = 0b000};
     
- extern uint16 InitCANOne(EIDBits* pRm, EIDBits* pRf);
- extern uint16 InitStandardCAN(uint16 id, uint16 mask);
+extern uint16 InitCANOne(EIDBits* pRm, EIDBits* pRf);
+extern uint16 InitStandardCAN(uint16 id, uint16 mask);
 
- extern uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len);
+extern uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len);
 
 #ifdef	__cplusplus
 }

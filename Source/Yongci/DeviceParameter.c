@@ -55,4 +55,29 @@ uint16 GetCapVolatageState(void)
     }
 }
 
-
+/**
+ * 
+ * <p>Function name: [CheckVoltage]</p>
+ * <p>Discription: [检测电压的状态,并更新指示灯和继电器]</p>
+ */
+void CheckVoltage(void)
+{
+    GetCapVoltage();
+    ClrWdt();
+    if (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper)
+    {
+        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);
+    }
+    else if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
+    {
+        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF);        
+    }
+    if (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
+    {
+        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);
+    }
+    else if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
+    {
+        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);        
+    }
+}

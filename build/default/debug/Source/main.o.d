@@ -21,4 +21,5 @@ Source/SerialPort/RtuFrame.h  \
  Source/Yongci/yongci.h  \
 Source/Yongci/../Driver/tydef.h  \
  Source/Yongci/SwtichCondition.h  \
-Source/DeviceNet/DeviceNet.h 
+Source/Yongci/DeviceParameter.h  \
+ Source/DeviceNet/DeviceNet.h 

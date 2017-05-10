@@ -204,11 +204,11 @@
 #define LED14_OFF 0x4000 
 #define LED15_OFF 0x8000
 
-/************************
- * C1  G1  H1  F1  ZH   *
- * C2  G2  H2  F2  ZF   *
- * C3  G3  H3  F3  WORK *
- ************************/
+/******************************
+ * C1  G1  H1  F1  ZH   POWER *
+ * C2  G2  H2  F2  ZF   LASER *
+ * C3  G3  H3  F3  WORK LASER *
+ *****************************/
 /**
  * <p>Discription:[LED灯定义]</p>
  */
@@ -314,8 +314,9 @@ unsigned long ReHC74165(void);
 void InitInt1(void);
 void TurnOnInt1(void);
 void TurnOffInt1(void);
-
-void UpdateLEDIndicateState(uint16 port, uint8 state);
 void UpdateIndicateState(uint16 relayPort,uint16 ledPort,uint8 state);
+
+//向外部提供接口，以便在调试时可以找出错误原因，且可在调试时所有的错误都使用灯指出
+void UpdateLEDIndicateState(uint16 port, uint8 state);  
 
 #endif

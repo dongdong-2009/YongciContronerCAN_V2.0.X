@@ -92,7 +92,7 @@
 #include "DeviceNet/DeviceNet.h"
 
 frameRtu sendFrame, recvFrame;
-
+uint8 data[8] = {0xAA,0xAA,0xAA,0xAA,0xAA};
 int main()
 {
     __delay_ms(100);
@@ -118,8 +118,8 @@ int main()
     RX_TX_MODE = RX_MODE;
     ClrWdt(); //204cys 
 
-    SetTimer2(100);//用于超时检测
-    
+    SetTimer2(100); //用于超时检测
+    SetTimer5(2);   //用于按键扫描
     ClrWdt(); //452cycs
     ReciveFrameDataInit();              //接收帧初始化
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
@@ -134,16 +134,18 @@ int main()
     ReceiveStateFlag = IDLE_ORDER;   //合分闸预制标志位初始化
     
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON);
-//    while(1)
-//    {
-//        CheckVoltage();
-//    }
+    
 //    InitStandardCAN(0, 0);   
 //    
 //    ClrWdt();
 //    InitDeviceNet();        
-//
-//    ClrWdt();
+
+    //测试使用
+//    while(1)
+//    {
+//        CANSendData(0x01,data,3);
+//    }
+    ClrWdt();
 //    RefParameterInit(); //参数设置初始化
 
     //延时3s判断启动
@@ -152,6 +154,8 @@ int main()
         __delay_ms(1);
         ClrWdt();
     }
+    
+    StartTimer5();  //启动定时器5，开启按键扫描
     
     while(TRUE)
     {

@@ -23,4 +23,5 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Yongci/yongci.h  \
  Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Yongci/SwtichCondition.h  \
+ Source/SerialPort/../Yongci/DeviceParameter.h  \
 Source/SerialPort/CRC16.h 

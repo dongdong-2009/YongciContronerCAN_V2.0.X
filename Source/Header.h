@@ -17,6 +17,7 @@
 #include "SerialPort/RtuFrame.h"
 #include "Yongci/yongci.h"
 #include "Yongci/SwtichCondition.h"
+#include "Yongci/DeviceParameter.h"
 
 #define MAIN_ADDRESS    0xF0
 #define LOCAL_ADDRESS   0xA2 //双路调试控制板子地址

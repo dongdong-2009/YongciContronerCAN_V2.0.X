@@ -14,12 +14,11 @@
 extern "C" {
 #endif
 
-uint8  CheckSwitchAction(void);   
+uint8 CheckIOState(void);
+void DsplaySwitchState(void);   //显示相应的状态
 
-void CheckVoltage(void);    
-uint8 CheckIOState(void);   
-void CheckSwitchState(void);
-uint8 ContinuousCheck(uint16* lastOrder);
+
+
 
 #ifdef	__cplusplus
 }

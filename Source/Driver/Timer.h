@@ -31,6 +31,9 @@ void SetTimer4(unsigned  int ms);
 void StartTimer4(void);
 void StopTimer4(void);
 
+void SetTimer5(unsigned  int ms);
+void StartTimer5(void);
+void StopTimer5(void);
 
 #ifdef	__cplusplus
 }

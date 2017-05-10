@@ -31,6 +31,8 @@ extern "C" {
 void GetCapVoltage(void);
 //获取电压状态
 uint16 GetCapVolatageState(void);
+void CheckVoltage(void);
+
 #ifdef	__cplusplus
 }
 #endif /* __cplusplus */
