@@ -86,21 +86,10 @@ void ExecuteFunctioncode(frameRtu* pRtu)
             }
             case HEZHA: //立即合闸
             {
-                if (!GetRunStateFlagA()) //处于空闲状态
-                {
-                    HeOnLock();//上锁
-                    HeZhaActionA();
-                }
                 break;
             }
            case FENZHA: //立即分闸
             {
-                ClrWdt();
-                if (!GetRunStateFlagA()) //处于空闲状态
-                {
-                    FenOnLock();//上锁
-                    FenZhaActionA();
-                }
                 break;
             }
             case WRITE_HEZHA_TIME:
@@ -108,7 +97,7 @@ void ExecuteFunctioncode(frameRtu* pRtu)
                 ClrWdt();
                 if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
                 {
-                    HezhaTimeA = (pRtu->pData)[3];
+                    g_DelayTime.hezhaTime1 = (pRtu->pData)[3];
                 }
                 break;
             }
@@ -117,14 +106,13 @@ void ExecuteFunctioncode(frameRtu* pRtu)
                 ClrWdt();
                 if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
                 {
-                    FenzhaTimeA = (pRtu->pData)[3];
+                    g_DelayTime.fenzhaTime1 = (pRtu->pData)[3];
                 }
                 break;
             }
             case  YONGCI_WAIT_HE_ACTION:
             {
                 ClrWdt();
-                WaitIntOrder = WAIT_ORDER;
                 break;
             }
             default :
@@ -199,9 +187,8 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))  //防止多次预制,防止多次合闸
             {
                 ReceiveStateFlag = HE_ORDER;    //合闸命令
-                OverTime = g_RemoteWaitTime;    //超时时间设置
+                SetOverTime(g_RemoteWaitTime);  //设置合闸预制超时等待时间
                 SendData(pSendFrame);
-                StartTimer4();
             }
             else if(!(g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))
             {
@@ -219,27 +206,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             {
                 //判断回路数，回路数超过要求则返回错误
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                StopTimer4();
-                OverTimeCn = 0;
                 return;
             }
             if(ReceiveStateFlag == HE_ORDER)
             {
-                if(OverTimeCn >= OverTime)
+                if(CheckIsOverTime())
                 {
-                    StopTimer4();
-                    OverTimeCn = 0;
-                    SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
+                    if(GetCapVolatageState()) //处于空闲状态,且储能
+                    {
+                        SendData(pSendFrame);               
+                    }
                 }
                 else
                 {
-                    if((!GetRunStateFlagA()) && (GetCapVolatageState())) //处于空闲状态,且储能
-                    {
-                        StopTimer4();
-                        HeOnLock();     //合闸上锁
-                        HeZhaActionA();
-                        SendData(pSendFrame);               
-                    }
+                    SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
                 ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
@@ -261,9 +241,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_Z_HE_STATE))  //防止多次预制,防止多次合闸
             {
                 ReceiveStateFlag = FEN_ORDER;   //分闸命令
-                OverTime = g_RemoteWaitTime;    //超时时间设置
+                
+                SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
                 SendData(pSendFrame);
-                StartTimer4();
             }
             else if(!(g_SystemState.heFenState1 == CHECK_Z_HE_STATE))
             {
@@ -281,27 +261,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             {
                 //判断回路数，回路数超过要求则返回错误
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                StopTimer4();
-                OverTimeCn = 0;
                 return; 
             }
             if(ReceiveStateFlag == FEN_ORDER)
             {  
-                if(OverTimeCn >= OverTime)
+                if(CheckIsOverTime())
                 {
-                    StopTimer4();
-                    OverTimeCn = 0;
-                    SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
+                    if(GetCapVolatageState()) //处于空闲状态,且储能
+                    {
+                        SendData(pSendFrame);
+                    }
                 }
                 else
                 {
-                    if((!GetRunStateFlagA()) && (GetCapVolatageState())) //处于空闲状态,且储能
-                    {
-                        StopTimer4();
-                        FenOnLock();     //分闸上锁
-                        FenZhaActionA();
-                        SendData(pSendFrame);
-                    }
+                    SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
                 ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
@@ -397,13 +370,13 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             if(ReceiveStateFlag == IDLE_ORDER)
             {
-                if((g_SystemState.heFenState1 == CHECK_Z_FEN_STATE) && (GetCapVolatageState()) && (!GetRunStateFlagA()))
+                if((g_SystemState.heFenState1 == CHECK_Z_FEN_STATE) && (GetCapVolatageState()))
                 {
-                    ReceiveStateFlag = TONGBU_HEZHA;   //同步合闸命令
-                    OverTime = g_SyncReadyWaitTime;    //超时时间设置
+                    ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+                    SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
+                    
                     SendData(pSendFrame);
                     TurnOnInt1();   //必须是在成功的预制之后才能开启外部中断1
-                    StartTimer4();
                 }
                 else if(!(g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))
                 {
@@ -427,109 +400,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 6: //同步分闸预制
         {
-            if((pReciveFrame->len  & 0x01)) //数据长度不对，数据长度不应为奇数
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                return;
-            }
-
-            pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1] & 0x03;
-
-            if((pReciveFrame->pBuffer[1] <= 0x03) && (pReciveFrame->len == 2))  //只有一路需要控制
-            {
-                pSendFrame->len = 2;
-            }
-            else if((pReciveFrame->pBuffer[1] <= 0x0F) && (pReciveFrame->len == 4)) //只有两个回路需要控制
-            {
-                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                
-                if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2])    //不应该出现相同的回路数
-                {
-                    //错误消息为存在相同的回路数
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
-                }
-                
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                offestTimeOne = (highTime << 8) | lowTime;
-                
-                pSendFrame->len = 3;
-            }
-            else if((pReciveFrame->pBuffer[1] <= 0x3F) && (pReciveFrame->len == 6)) //只有三个回路需要控制
-            { pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-               
-                if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2] || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3])
-                        || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3]))//不应该出现相同的回路数
-                {
-                    //错误消息为存在相同的回路数
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
-                }
-                
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                offestTimeOne = (highTime << 8) | lowTime;
-                
-                lowTime = pReciveFrame->pBuffer[4];
-                highTime = pReciveFrame->pBuffer[5];
-                offestTimeTwo = (highTime << 8) | lowTime;
-                
-                pSendFrame->len = 4;
-            }
-            else if(pReciveFrame->len == 8) //只有四个回路需要控制
-            {
-                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-                pSendFrame->pBuffer[4] = (pReciveFrame->pBuffer[1] & 0xC0) >> 6;
-                
-                if((pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2]) || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3])
-                 || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[4]) || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3])
-                 || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[4])|| (pSendFrame->pBuffer[3] == pSendFrame->pBuffer[4]))//不应该出现相同的回路数
-                {
-                    //错误消息为存在相同的回路数
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
-                }
-
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                offestTimeOne = (highTime << 8) | lowTime;
-                
-                lowTime = pReciveFrame->pBuffer[4];
-                highTime = pReciveFrame->pBuffer[5];
-                offestTimeTwo = (highTime << 8) | lowTime;
-                
-                pSendFrame->len = 5;
-            }
-            else
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;                
-            }
-            if(ReceiveStateFlag == IDLE_ORDER)
-            {
-                if((g_SystemState.heFenState1 == CHECK_Z_FEN_STATE) && (GetCapVolatageState()) && (!GetRunStateFlagA()))
-                {
-                    ReceiveStateFlag = TONGBU_FENZHA;   //同步合闸命令
-                    OverTime = g_SyncReadyWaitTime;    //超时时间设置
-                    StartTimer4();
-                    SendData(pSendFrame);
-                    TurnOnInt1();   //必须是在成功的预制之后才能开启外部中断1
-                }
-                else
-                {
-                    SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    return;
-                }
-            }
-            else
-            {
-                TurnOffInt1();
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
-                ReceiveStateFlag = IDLE_ORDER;
-            }
             break;
         }
         case 0x10:  //顺序参数设置
@@ -643,40 +513,9 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID)
  */
 void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void)
 {
-//    uint8 time = 0;
-//    
-//    if(IntoINTFlag == FIRST_INT)
-//    {
-//        while(!(PORTDbits.RD0)) //判断IO口是否始终为低
-//        {
-//            time++;
-//            __delay_ms(1);
-//        }
-//        if((time >= 25) && (time <= 30))    //时间需要约定
-//        {
-//            //开定时器，计时
-//            StartTimer4();
-//            IntoINTFlag = SECEND_INT;
-//            UpdateIndicateState(ON_RUN_LED, TURN_OFF);
-//        }
-//    }
-//    else if(IntoINTFlag == SECEND_INT)
-//    {
-//        if((OverTimeCn >= 25) && (OverTimeCn <= 30))    //时间需要约定
-//        {
-//            //选相同步
-//            IntoINTFlag = FIRST_INT;    //Test
-//            TurnOffInt1();  //信号成功接收到，开始同步，首先需要关闭中断
-//            UpdateIndicateState(ON_RUN_LED, TURN_ON);
-//        }
-//        IntoINTFlag = FIRST_INT;    //无论都会初始化
-//        StopTimer4();   //关闭定时器
-//    }
-    if((ReceiveStateFlag == TONGBU_HEZHA) && (OverTimeCn <= g_SyncReadyWaitTime))
+    if((ReceiveStateFlag == TONGBU_HEZHA) && (CheckIsOverTime()))
     {
         OverTimeCn = 0; //正常工作，清零超时计数
-        HeOnLock();     //合闸上锁
-        HeZhaActionA();
     }
     else
     {
@@ -684,20 +523,5 @@ void __attribute__((interrupt, no_auto_psv)) _INT1Interrupt(void)
         OverTimeCn = 0;
     }
     TurnOffInt1();
-    StopTimer4();
     ReceiveStateFlag = IDLE_ORDER;
-}
-
-/**
- * @description 定时器4的中断处理函数
- */
-void __attribute__((interrupt, no_auto_psv)) _T4Interrupt(void)
-{
-    OverTimeCn++; //超时计数++
-    if(OverTimeCn > OverTime)  //在预制超时后关掉定时器
-    {
-       StopTimer4();
-    }
-    
-    IFS1bits.T4IF = 0;  //中断标志位清零
 }

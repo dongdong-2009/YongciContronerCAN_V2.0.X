@@ -7,4 +7,5 @@ Source/DeviceNet/../Driver/tydef.h  \
  Source/DeviceNet/../SerialPort/Action.h  \
  Source/DeviceNet/../SerialPort/RtuFrame.h  \
  Source/DeviceNet/../SerialPort/../Driver/tydef.h  \
- Source/DeviceNet/../SerialPort/../DeviceNet/DeviceNet.h 
+ Source/DeviceNet/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/DeviceNet/../Driver/Delay.h 

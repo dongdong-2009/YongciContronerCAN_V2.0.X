@@ -12,6 +12,7 @@
 #include "Driver/EEPROMOperate.h"
 #include "Driver/CAN.h"
 #include "Driver/InitTemp.h"
+#include "Driver/Delay.h"
 
 #include "SerialPort/Action.h"
 #include "SerialPort/RtuFrame.h"

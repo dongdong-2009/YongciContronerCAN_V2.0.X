@@ -17,6 +17,7 @@
 #include "../Driver/CAN.h"
 #include "../Driver/Timer.h"
 #include "../SerialPort/Action.h"
+#include "../Driver/Delay.h"
 
 
 //DeviceNet 工作模式
@@ -1164,8 +1165,9 @@ void SendData(struct DefFrameData* pFrame)
 ********************************************************************************/
 void StartOverTimer()
 {
-    SetTimer3(1000);   
-    StartTimer3();
+    g_SysTimeStamp.StarTime = g_MsTicks;
+    g_SysTimeStamp.delayTime = 1000;
+    IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime);
 }
 /*******************************************************************************
 * 函数名:	BOOL IsTimeRemain()----根据具体平台需要重新
@@ -1175,9 +1177,8 @@ void StartOverTimer()
 ********************************************************************************/
 BOOL IsTimeRemain()
 {
-    if ( IFS0bits.T3IF )
+    if (IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
     {
-        IFS0bits.T3IF = 0;
         return FALSE;
     }
     else

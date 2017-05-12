@@ -105,28 +105,19 @@ void InitDeviceIO(void)
     CE_DIR=0;
     CP_DIR =0;
     Q7_DIR =1;
-  
+    
+    RXD1_LASER_DIR = 1;
+    RXD2_LASER_DIR = 1; 
+    
+    TXD1_LASER_DIR = 0;
+    TXD2_LASER_DIR = 0;
+            
     RESET_CURRENT_A();
     RESET_CURRENT_B();
     RESET_CURRENT_C();
 
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯、继电器
 }
-/**
- * 
- * <p>Function name: [Delay_ms]</p>
- * <p>Discription: [中间插入喂狗指令的可变长延时函数]</p>
- * @param ms 延时时间ms
- */
-void Delay_ms(uint16 ms)
-{
-    while(ms--)
-    {
-        ClrWdt();
-        __delay_ms(1);
-    }
-}
-
 /**
  * 
  * <p>Function name: [HC595BSendData]</p>

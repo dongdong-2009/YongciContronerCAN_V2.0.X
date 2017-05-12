@@ -13,6 +13,22 @@ extern "C" {
 #endif
 #include "../Driver/tydef.h"
 
+typedef struct SynchroSwitchConfig
+{
+	uint8   State;	//当前的状态
+	uint16  Order;	//分合闸命令
+    uint16  LastOrder;  //上一次执行的指令
+	uint16  SwitchOnTime;		//合闸动作时间
+	uint16  SwitchOffTime;	//分闸动作时间
+	uint16  OffestTime;	//偏移时间
+	uint32  SysTime;	//当前的系统时间
+	void (*SwitchOn)(struct SynchroSwitchConfig* );	//开关合闸动作函数
+	void (*SwitchOff)(struct SynchroSwitchConfig* );	//开关分闸动作函数
+}SwitchConfig;
+
+#define RUN_STATE   0x77    //运行状态
+#define REDAY_STATE 0x88    //准备状态
+
 #define ON_HE_LOCK  0x55AA
 #define ON_FEN_LOCK 0xAA55    
 #define OFF_LOCK    0x0000
@@ -21,25 +37,20 @@ extern "C" {
 #define YUAN_STATE  0xAA
 #define BEN_STATE   0x55
     
+//工作模式和调试模式
+#define WORK_STATE  0x3F
+#define DEBUG_STATE 0x3F
+    
+    
 //IGBT工作状态
-#define HE_ORDER_A   0xAA05     //机构1合闸命令
-#define HE_ORDER_B   0xAA15     //机构2合闸命令
-#define HE_ORDER_C   0xAA25     //机构3合闸命令
-    
-#define FEN_ORDER_A  0xAA0A     //机构1分闸命令
-#define FEN_ORDER_B  0xAA1A     //机构2分闸命令
-#define FEN_ORDER_C  0xAA2A     //机构3分闸命令
-    
-#define HE_ORDER     0xAA35     //总的合闸命令
-#define FEN_ORDER    0xAA3A     //总的分闸命令
+#define HE_ORDER     0xAAAA     //总的合闸命令
+#define FEN_ORDER    0xAA55     //总的分闸命令
     
 #define IDLE_ORDER   0x0000     //空闲命令
 
-#define WAIT_ORDER 0xBBBB //等待指令
-#define NULL_ORDER 0x0000 //等待指令  
     
-#define HEZHA_TIME_A  50 //A路 合闸时间 默认
-#define FENZHA_TIME_A 30 //A路 分闸时间 默认
+#define HEZHA_TIME  50 //合闸时间 默认
+#define FENZHA_TIME 30 //分闸时间 默认
 
     
 //IO 检测对应状态
@@ -93,26 +104,11 @@ extern "C" {
 //*********************************************
     
 void YongciMainTask(void);
-void YongciStopCurrentA(void);
 void YongciFirstInit(void);
 
-void HeZhaActionA(void);
-void FenZhaActionA(void);
-
-void SetRunStateFlagA(uint16 newFlag);
-uint16 GetRunStateFlagA();
-
-void HeOnLock(void);
-void FenOnLock(void);
-void OffLock(void);
-
-void UpdateCount(uint16 states);
-
-
-extern volatile uint16 HezhaTimeA;
-extern volatile uint16 FenzhaTimeA;
-
-extern volatile uint16 WaitIntOrder;
+void HEZHA_Action(uint8 index,uint16 time);
+void FENZHA_Action(uint8 index,uint16 time);
+void TongBuHeZha(void);
 
 #ifdef	__cplusplus
 }

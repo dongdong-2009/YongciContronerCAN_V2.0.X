@@ -1,7 +1,7 @@
 #include "RtuFrame.h"
 #include "../Header.h"
 #include "CRC16.h"
-#include <xc.h>
+#include "../Driver/Delay.h"
 #include <string.h>
 
 /******************************************
@@ -108,9 +108,8 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
 {
     ClrWdt(); 
     RX_TX_MODE = RX_MODE; //刷新接收模式使能
-    if (IFS0bits.T2IF == 1) //说明超时则丢弃
+    if(!CheckIsOverTime()) //说明超时则丢弃
     {
-        StopTimer2();
         DealStep = 0;
     }
     if (TRUE != ReciveErrorFlag)//如果接收错误
@@ -136,7 +135,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
                 {
                     pReciveFrame->address =  data;
                     DealStep  = 1;
-                    StartTimer2(); //超时接收检测定时器
+                    SetOverTime(100);
                 }
                 break;
             }
@@ -196,8 +195,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
                         pReciveFrame->pData = (uint8*)FrameData;
                         pReciveFrame->completeFlag = TRUE;
                     }
-                    ClrWdt();
-                    StopTimer2();  //超时检测结束  100ns以内处理一帧数据若超时则丢弃                
+                    ClrWdt();            
                     DealStep = 0;
                 }
                 break;
@@ -264,6 +262,38 @@ void SendFrame(uint8* pFrame, uint8 len)
         UsartSend(pFrame[i]);
     }
     RX_TX_MODE = RX_MODE;
+}
+
+/**
+ * 
+ * <p>Function name: [SetOverTime]</p>
+ * <p>Discription: [设置超时时间]</p>
+ * @param delayTime 超时时间参数
+ */
+void SetOverTime(uint16 delayTime)
+{
+    g_SysTimeStamp.StarTime = g_MsTicks;
+    g_SysTimeStamp.delayTime = delayTime;
+    IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime);
+}
+
+/**
+ * 
+ * <p>Function name: [CheckIsOverTime]</p>
+ * <p>Discription: [检测超时时间是否到达]</p>
+ * @param delayTime 超时时间参数
+ * @return 如果超时则返回FALSE，否则返回TRUE
+ */
+uint8 CheckIsOverTime(void)
+{
+    if(IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
+    {
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;
+    }
 }
 
 

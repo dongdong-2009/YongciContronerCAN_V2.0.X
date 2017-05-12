@@ -82,9 +82,9 @@ typedef struct TagPointUint8
  */
 typedef struct FenHeZhaDelayTime
 {
-	uint8 hezhaTime1;  //合闸时间1 (ms) 
-	uint8 hezhaTime2;  //合闸时间2 (ms) 
-	uint8 hezhaTime3;  //合闸时间3 (ms) 
+	uint8 hezhaTime1;   //合闸时间1 (ms) 
+	uint8 hezhaTime2;   //合闸时间2 (ms) 
+	uint8 hezhaTime3;   //合闸时间3 (ms) 
     uint8 fenzhaTime1;  //分闸时间1 （ms）
     uint8 fenzhaTime2;  //分闸时间1 （ms）
     uint8 fenzhaTime3;  //分闸时间1 （ms）
@@ -200,6 +200,7 @@ extern SystemVoltageParameter g_SystemVoltageParameter; //系统电压
 extern LimitValue g_SystemLimit;
 extern ActionCount g_ActionCount;   //分合闸计数
 extern SystemState g_SystemState;   //系统状态量
+extern WaitTime g_DelayTime;    //分合闸时间
 
 extern uint16 g_SyncReadyWaitTime;  //同步预制等待时间
 extern uint16 g_RemoteWaitTime;     //遥控预制等待时间

@@ -13,7 +13,8 @@ Source/Driver/../Driver/EEPROMOperate.h  \
  Source/Driver/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/Driver/../Driver/CAN.h  \
 Source/Driver/../Driver/InitTemp.h  \
- Source/Driver/../SerialPort/Action.h  \
+ Source/Driver/../Driver/Delay.h  \
+Source/Driver/../SerialPort/Action.h  \
  Source/Driver/../SerialPort/RtuFrame.h  \
  Source/Driver/../SerialPort/../Driver/tydef.h  \
  Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \

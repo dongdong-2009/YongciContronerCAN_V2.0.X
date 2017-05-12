@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 
+void SwitchScan(void);
 uint8 CheckIOState(void);
 void DsplaySwitchState(void);   //显示相应的状态
 

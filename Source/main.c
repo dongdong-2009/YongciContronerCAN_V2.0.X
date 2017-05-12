@@ -102,7 +102,6 @@ int main()
     AdcInit(); //ADC采样初始化
     ClrWdt();
 
-    SetTimer4(1);   //1ms的固定延时时间
     ClrWdt(); 
     UsartInit(); //串口初始化 9600bps 785cycs 上
 
@@ -117,9 +116,14 @@ int main()
 
     RX_TX_MODE = RX_MODE;
     ClrWdt(); //204cys 
-
-    SetTimer2(100); //用于超时检测
-    SetTimer5(2);   //用于按键扫描
+    
+    OFF_UART_INT(); //485通信不开启
+    
+    UpdateLEDIndicateState(ERROR3_LED,TURN_ON);
+    
+    SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
+    
+    StartTimer2();  //开启系统时钟
     ClrWdt(); //452cycs
     ReciveFrameDataInit();              //接收帧初始化
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
@@ -128,7 +132,6 @@ int main()
     YongciFirstInit();
     ClrWdt(); //33cys
    
-    
     cn = 0;
 
     ReceiveStateFlag = IDLE_ORDER;   //合分闸预制标志位初始化
@@ -139,11 +142,16 @@ int main()
 //    
 //    ClrWdt();
 //    InitDeviceNet();        
-
+//    StartTimer3();
     //测试使用
 //    while(1)
 //    {
-//        CANSendData(0x01,data,3);
+//        while(TMR3 <= 30)
+//        {
+////            ClrWdt();
+//        }
+//        ClrWdt();
+//        TMR3 = 0;
 //    }
     ClrWdt();
 //    RefParameterInit(); //参数设置初始化
@@ -155,7 +163,6 @@ int main()
         ClrWdt();
     }
     
-    StartTimer5();  //启动定时器5，开启按键扫描
     
     while(TRUE)
     {

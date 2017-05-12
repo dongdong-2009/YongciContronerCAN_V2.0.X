@@ -15,6 +15,7 @@ Source/SerialPort/../Driver/Timer.h  \
  Source/SerialPort/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/SerialPort/../Driver/CAN.h  \
 Source/SerialPort/../Driver/InitTemp.h  \
+ Source/SerialPort/../Driver/Delay.h  \
  Source/SerialPort/../SerialPort/Action.h  \
  Source/SerialPort/../SerialPort/RtuFrame.h  \
  Source/SerialPort/../SerialPort/../Driver/tydef.h  \
@@ -24,4 +25,5 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Yongci/SwtichCondition.h  \
  Source/SerialPort/../Yongci/DeviceParameter.h  \
-Source/SerialPort/CRC16.h 
+Source/SerialPort/CRC16.h  \
+ Source/SerialPort/../Driver/Delay.h 

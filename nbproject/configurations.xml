@@ -21,6 +21,8 @@
       <itemPath>Source/SerialPort/RefParameter.h</itemPath>
       <itemPath>Source/Driver/EEPROMOperate.h</itemPath>
       <itemPath>Source/Driver/InitTemp.h</itemPath>
+      <itemPath>Delay.h</itemPath>
+      <itemPath>Source/Driver/Delay.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -41,6 +43,7 @@
         <itemPath>Source/Driver/traps.c</itemPath>
         <itemPath>Source/Driver/EEPROMOperate.c</itemPath>
         <itemPath>Source/Driver/InitTemp.c</itemPath>
+        <itemPath>Source/Driver/Delay.c</itemPath>
       </logicalFolder>
       <logicalFolder name="SerialPort" displayName="SerialPort" projectFiles="true">
         <itemPath>Source/SerialPort/Action.c</itemPath>
@@ -265,7 +268,6 @@
         <property key="UART 1" value="true"/>
         <property key="UART 2" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
@@ -373,7 +375,7 @@
         <property key="codecoverage.outputfile" value=""/>
         <property key="oscillator.auxfrequency" value="120"/>
         <property key="oscillator.auxfrequencyunit" value="Mega"/>
-        <property key="oscillator.frequency" value="1"/>
+        <property key="oscillator.frequency" value="4"/>
         <property key="oscillator.frequencyunit" value="Mega"/>
         <property key="oscillator.rcfrequency" value="250"/>
         <property key="oscillator.rcfrequencyunit" value="Kilo"/>

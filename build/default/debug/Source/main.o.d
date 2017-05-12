@@ -13,9 +13,10 @@ Source/Driver/../SerialPort/RefParameter.h  \
  Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
 Source/Driver/CAN.h  \
  Source/Driver/InitTemp.h  \
-Source/SerialPort/Action.h  \
- Source/SerialPort/RtuFrame.h  \
-Source/SerialPort/../Driver/tydef.h  \
+Source/Driver/Delay.h  \
+ Source/SerialPort/Action.h  \
+Source/SerialPort/RtuFrame.h  \
+ Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
 Source/SerialPort/RtuFrame.h  \
  Source/Yongci/yongci.h  \

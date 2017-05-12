@@ -303,12 +303,23 @@
 
 //******************************************
 
+//光纤模块
+//******************************************
+#define RXD1_LASER_DIR  TRISDbits.TRISD9
+#define RXD1_LASER  LATDbits.LATD9
+#define TXD1_LASER_DIR  TRISGbits.TRISG12
+#define TXD1_LASER  LATGbits.LATG12
+
+#define RXD2_LASER_DIR  TRISDbits.TRISD10
+#define RXD2_LASER  LATDbits.LATD10
+#define TXD2_LASER_DIR  TRISGbits.TRISG13
+#define TXD2_LASER  LATGbits.LATG13
+//******************************************
 
 #define HE_FEN_ERROR 0x00400001
 //*****************************************
 
 void InitDeviceIO(void);
-void Delay_ms(uint16 ms);
 unsigned long ReHC74165(void);
 
 void InitInt1(void);

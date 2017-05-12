@@ -60,6 +60,9 @@ uint32 g_kairuValue = 0;    //165返回值
 //远方\本地控制检测
 #define YUAN_BEN_CONDITION()    ((g_kairuValue & YUAN_INPUT) == YUAN_INPUT)
 
+//工作\调试模式检测
+#define WORK_DEBUG_CONDITION()  ((g_kairuValue & WORK_INPUT) == WORK_INPUT)
+
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 合闸信号未输入
 #define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
 
@@ -115,12 +118,11 @@ uint32 g_kairuValue = 0;    //165返回值
 //***************************************************************************************************
 
 
-#define KEY_COUNT_DOWN 50
+#define KEY_COUNT_DOWN 30
 uint8 g_timeCount[20] = {0};
-uint8 g_lockflag[8] = {0}; 
+uint8 g_lockflag[10] = {0}; 
 uint8 _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
 
-void SwitchScan(void);
 
 /**
  * 
@@ -137,48 +139,56 @@ uint8 CheckIOState(void)
         case CHECK_Z_HE_ORDER: //收到合闸命令 需要判断一下电容电压能否达到要求
         {
             ClrWdt();
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
-            //上锁
-//            HeZhaActionA();
-            return 0xff;
+            if(g_SystemState.workMode == WORK_STATE)
+            {
+                TongBuHeZha();
+                ClrWdt();
+                return 0xff;
+            }
+            else
+            {
+                return 0;
+            }
         }
         case CHECK_Z_FEN_ORDER: //收到分闸命令
         {
             ClrWdt();
-            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
-//            FenZhaActionA();
-            return 0xff;
+            if(g_SystemState.workMode == WORK_STATE) //多加入一重验证
+            {
+                FENZHA_Action(0,FENZHA_TIME);
+                FENZHA_Action(1,FENZHA_TIME);
+                ClrWdt();
+                return 0xff;
+            }
+            else
+            {
+                return 0;
+            }
         }
         
         case CHECK_1_HE_ORDER: //收到机构1合闸命令
         {
-            ClrWdt();        
-            g_Order = 0x00;   
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
-//            HeZhaActionA();
+            ClrWdt();
+            HEZHA_Action(0,HEZHA_TIME);
             return 0xff;
         }
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
         {
             ClrWdt();
-            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
-//            FenZhaActionA();
+            FENZHA_Action(0,FENZHA_TIME);
             return 0xff;
         }
         
         case CHECK_2_HE_ORDER: //收到机构2合闸命令
         {
             ClrWdt();           
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
-//            HeZhaActionA();
+            HEZHA_Action(1,HEZHA_TIME);
             return 0xff;
         }
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
         {
             ClrWdt();
-            g_Order = 0x00;
-            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
-//            FenZhaActionA();
+            FENZHA_Action(1,FENZHA_TIME);
             return 0xff;
         }
         default:
@@ -291,14 +301,18 @@ void DsplaySwitchState(void)
  */
 void SwitchScan(void)
 {
+    g_kairuValue = ReHC74165();
     if(g_SystemState.yuanBenState == BEN_STATE)
     {
+        ClrWdt();
         //同时合闸信号检测
         if(Z_HEZHA_CONDITION() && g_lockflag[0] == 0)   
         {
+            ClrWdt();
             g_timeCount[0]++;
             if(g_timeCount[0] >= KEY_COUNT_DOWN)
             {
+                ClrWdt();
                 g_lockflag[0] = 1;
                 g_timeCount[0] = 0;
                 g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
@@ -306,6 +320,7 @@ void SwitchScan(void)
         }
         else if(!Z_HEZHA_CONDITION())
         {
+            ClrWdt();
             if(g_timeCount[0] != 0)
             {
                 g_timeCount[0] -= 1;
@@ -317,8 +332,10 @@ void SwitchScan(void)
         if(Z_FENZHA_CONDITION() && g_lockflag[1] == 0)   
         {
             g_timeCount[1]++;
+            ClrWdt();
             if(g_timeCount[1] >= KEY_COUNT_DOWN)
             {
+                ClrWdt();
                 g_lockflag[1] = 1;
                 g_timeCount[1] = 0;
                 g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
@@ -328,6 +345,7 @@ void SwitchScan(void)
         {
             if(g_timeCount[1] != 0)
             {
+                ClrWdt();
                 g_timeCount[1] -= 1;
             }
             g_lockflag[1] = 0;
@@ -336,9 +354,11 @@ void SwitchScan(void)
         //机构1合闸信号检测
         if(HEZHA1_CONDITION() && g_lockflag[2] == 0)   
         {
+            ClrWdt();
             g_timeCount[2]++;
             if(g_timeCount[2] >= KEY_COUNT_DOWN)
             {
+                ClrWdt();
                 g_lockflag[2] = 1;
                 g_timeCount[2] = 0;
                 g_Order = CHECK_1_HE_ORDER;     //机构1合闸命令
@@ -346,8 +366,10 @@ void SwitchScan(void)
         }
         else if(!HEZHA1_CONDITION())
         {
+            ClrWdt();
             if(g_timeCount[2] != 0)
             {
+                ClrWdt();
                 g_timeCount[2] -= 1;
             }
             g_lockflag[2] = 0;
@@ -357,8 +379,10 @@ void SwitchScan(void)
         if(FENZHA1_CONDITION() && g_lockflag[3] == 0)   
         {
             g_timeCount[3]++;
+            ClrWdt();
             if(g_timeCount[3] >= KEY_COUNT_DOWN)
             {
+                ClrWdt();
                 g_lockflag[3] = 1;
                 g_timeCount[3] = 0;
                 g_Order = CHECK_1_FEN_ORDER;     //机构1分闸命令
@@ -366,8 +390,10 @@ void SwitchScan(void)
         }
         else if(!FENZHA1_CONDITION())
         {
+            ClrWdt();
             if(g_timeCount[3] != 0)
             {
+                ClrWdt();
                 g_timeCount[3] -= 1;
             }
             g_lockflag[3] = 0;
@@ -376,9 +402,11 @@ void SwitchScan(void)
         //机构2合闸信号检测
         if(HEZHA2_CONDITION() && g_lockflag[4] == 0)   
         {
+            ClrWdt();
             g_timeCount[4]++;
             if(g_timeCount[4] >= KEY_COUNT_DOWN)
             {
+                ClrWdt();
                 g_lockflag[4] = 1;
                 g_timeCount[4] = 0;
                 g_Order = CHECK_2_HE_ORDER;     //机构2合闸命令
@@ -386,8 +414,10 @@ void SwitchScan(void)
         }
         else if(!HEZHA2_CONDITION())
         {
+            ClrWdt();
             if(g_timeCount[4] != 0)
             {
+                ClrWdt();
                 g_timeCount[4] -= 1;
             }
             g_lockflag[4] = 0;
@@ -397,6 +427,7 @@ void SwitchScan(void)
         if(FENZHA2_CONDITION() && g_lockflag[5] == 0)   
         {
             g_timeCount[5]++;
+            ClrWdt();
             if(g_timeCount[5] >= KEY_COUNT_DOWN)
             {
                 g_lockflag[5] = 1;
@@ -406,6 +437,7 @@ void SwitchScan(void)
         }
         else if(!FENZHA2_CONDITION())
         {
+            ClrWdt();
             if(g_timeCount[5] != 0)
             {
                 g_timeCount[5] -= 1;
@@ -417,6 +449,7 @@ void SwitchScan(void)
     //机构1的合位检测
     if(HEWEI1_CONDITION())
     {
+        ClrWdt();
         g_timeCount[6]++;
         if(g_timeCount[6] >= KEY_COUNT_DOWN)
         {
@@ -426,6 +459,7 @@ void SwitchScan(void)
     }
     else if(!HEWEI1_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[6] != 0)
         {
             g_timeCount[6] -= 1;
@@ -435,6 +469,7 @@ void SwitchScan(void)
     //机构1的分位检测
     if(FENWEI1_CONDITION())
     {
+        ClrWdt();
         g_timeCount[7]++;
         if(g_timeCount[7] >= KEY_COUNT_DOWN)
         {
@@ -444,6 +479,7 @@ void SwitchScan(void)
     }
     else if(!FENWEI1_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[7] != 0)
         {
             g_timeCount[7] -= 1;
@@ -453,6 +489,7 @@ void SwitchScan(void)
     //机构2的合位检测
     if(HEWEI2_CONDITION())
     {
+        ClrWdt();
         g_timeCount[8]++;
         if(g_timeCount[8] >= KEY_COUNT_DOWN)
         {
@@ -462,6 +499,7 @@ void SwitchScan(void)
     }
     else if(!HEWEI2_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[8] != 0)
         {
             g_timeCount[8] -= 1;
@@ -471,6 +509,7 @@ void SwitchScan(void)
     //机构2的分位检测
     if(FENWEI2_CONDITION())
     {
+        ClrWdt();
         g_timeCount[9]++;
         if(g_timeCount[9] >= KEY_COUNT_DOWN)
         {
@@ -480,6 +519,7 @@ void SwitchScan(void)
     }
     else if(!FENWEI2_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[9] != 0)
         {
             g_timeCount[9] -= 1;
@@ -490,6 +530,7 @@ void SwitchScan(void)
     //机构1的合分位同时存在\不存在
     if(ERROR1_CONDITION())
     {
+        ClrWdt();
         g_timeCount[12]++;
         if(g_timeCount[12] >= KEY_COUNT_DOWN)
         {
@@ -499,6 +540,7 @@ void SwitchScan(void)
     }
     else if(!ERROR1_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[12] != 0)
         {
             g_timeCount[12] -= 1;
@@ -508,6 +550,7 @@ void SwitchScan(void)
     //机构2的合分位同时存在\不存在
     if(ERROR2_CONDITION())
     {
+        ClrWdt();
         g_timeCount[13]++;
         if(g_timeCount[13] >= KEY_COUNT_DOWN)
         {
@@ -517,6 +560,7 @@ void SwitchScan(void)
     }
     else if(!ERROR2_CONDITION())
     {
+        ClrWdt();
         if(g_timeCount[13] != 0)
         {
             g_timeCount[13] -= 1;
@@ -526,6 +570,7 @@ void SwitchScan(void)
     //远方\就地检测
     if(YUAN_BEN_CONDITION() && (g_lockflag[6] == 0))
     {
+        ClrWdt();
         g_timeCount[14]++;
         if(g_timeCount[14] >= KEY_COUNT_DOWN)
         {            
@@ -538,6 +583,7 @@ void SwitchScan(void)
     }
     else if(!YUAN_BEN_CONDITION() && (g_lockflag[7] == 0))
     {
+        ClrWdt();
         g_timeCount[15]++;
         if(g_timeCount[15] >= KEY_COUNT_DOWN)
         {            
@@ -548,18 +594,34 @@ void SwitchScan(void)
         g_lockflag[6] = 0;
         g_timeCount[14] = 0;
     }
-}
-
-/**
- * 
- * <p>Function name: [_T5Interrupt]</p>
- * <p>Discription: [定时器5的中断]</p>
- */
-void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
-{
-    IFS1bits.T5IF = 0;  //clear
-    g_kairuValue = ReHC74165();
-    SwitchScan();
+    
+    //工作\调试模式检测
+    if(WORK_DEBUG_CONDITION() && (g_lockflag[8] == 0))
+    {
+        ClrWdt();
+        g_timeCount[16]++;
+        if(g_timeCount[16] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[8] = 1;
+            g_timeCount[16] = 0;
+            g_SystemState.workMode = WORK_STATE;
+        }
+        g_lockflag[9] = 0;
+        g_timeCount[17] = 0;
+    }
+    else if(!WORK_DEBUG_CONDITION() && (g_lockflag[9] == 0))
+    {
+        ClrWdt();
+        g_timeCount[17]++;
+        if(g_timeCount[17] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[9] = 1;
+            g_timeCount[17] = 0;
+            g_SystemState.workMode = DEBUG_STATE;
+        }
+        g_lockflag[8] = 0;
+        g_timeCount[16] = 0;
+    }
 }
 
 

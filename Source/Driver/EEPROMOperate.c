@@ -11,10 +11,9 @@
 /**
  * EEPROM地址
  */
-#define EEPROM_STAR_ADDRESS 0x7FFC00    //EEPROM起始地址
-#define EEPROM_END_ADDRESS  0x7FFC6F    //EEPROM结束地址
+#define EEPROM_STAR_ADDRESS 0x7FF100    //EEPROM起始地址
+#define EEPROM_END_ADDRESS  0x7FFFF0    //EEPROM结束地址
 #define EEPROM_OFFSET_ADDRESS 0x04      //EEPROM偏移地址
-#define EEPROM_ADDCHECK_ADDRESS 0x02    //EEPROM中累加和的偏移地址
 #define ACCUMULATE_SUM_ADDRESS 0x7FFFFC   //累加和EEPROM地址
 
 /**************************************************

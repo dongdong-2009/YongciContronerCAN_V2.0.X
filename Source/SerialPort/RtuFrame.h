@@ -35,6 +35,8 @@ void  GenRTUFrame(uint8 addr, uint8 funcode,
 
 void SendFrame(uint8* pFrame, uint8 len);
 
+void SetOverTime(uint16 delayTime);
+uint8 CheckIsOverTime(void);
 
 #ifdef	__cplusplus
 }
