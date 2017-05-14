@@ -4,7 +4,7 @@
 #include "tydef.h"
 
 //Timer2 周期计数
-uint16 g_TPRCount = 0;
+uint16 g_TPR2Count = 0;
 
 /**
  * 
@@ -74,7 +74,7 @@ inline  void ResetTimer1(void)
     TMR2 = 0;
     
     PR2 = (unsigned int)((float)FCY/1000.00/256.0*(float)ms)-1;
-    g_TPRCount = PR2;
+    g_TPR2Count = PR2;
     T2CONbits.TON = 0;
 
 }
@@ -87,7 +87,7 @@ inline void StartTimer2(void)
 {
     IFS0bits.T2IF = 0;
     TMR2 = 0;
-    PR2 =  g_TPRCount;
+    PR2 =  g_TPR2Count;
     IEC0bits.T2IE = 1;
     T2CONbits.TON = 1;
 }
@@ -103,5 +103,49 @@ inline void StopTimer2(void)
     IFS0bits.T2IF = 0;
 }
 
+/**
+ * 
+ * <p>Function name: [Init_Timer3]</p>
+ * <p>Discription: [TIMER3用于永磁同步合闸偏移时间计时]</p>
+ * @param ms 定时器周期
+ */
+void Init_Timer3(void)
+{
+    ClrWdt();
+    T1CON = 0;
+    IPC1bits.T3IP = 7;  //最高的优先级
+    IFS0bits.T3IF = 0;
 
+    T3CONbits.TCKPS = 0b01; //1:8
+    T3CONbits.TCS = 0;
+    T3CONbits.TGATE = 0;
+
+    IFS0bits.T3IF = 0;
+    IEC0bits.T3IE = 1;  //允许中断
+    
+    TMR3 = 0;
+} 
+/**
+ * 
+ * <p>Function name: [StartTimer3]</p>
+ * <p>Discription: [启动定时器]</p>
+ */
+inline void StartTimer3(unsigned int us)
+{
+    PR3 = us - 2;
+    IFS0bits.T3IF = 0;
+    IEC0bits.T3IE = 1;
+    T3CONbits.TON = 1;
+}
+/**
+ * 
+ * <p>Function name: [ResetTimer3]</p>
+ * <p>Discription: [复位定时器]</p>
+ */
+inline  void ResetTimer3(void)
+{
+    T3CONbits.TON = 0;
+    IFS0bits.T3IF = 0;
+    IEC0bits.T3IE = 0;
+}
 

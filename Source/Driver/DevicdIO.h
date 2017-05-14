@@ -322,9 +322,9 @@
 void InitDeviceIO(void);
 unsigned long ReHC74165(void);
 
-void InitInt1(void);
-void TurnOnInt1(void);
-void TurnOffInt1(void);
+void InitInt2(void);
+void TurnOnInt2(void);
+void TurnOffInt2(void);
 void UpdateIndicateState(uint16 relayPort,uint16 ledPort,uint8 state);
 
 //向外部提供接口，以便在调试时可以找出错误原因，且可在调试时所有的错误都使用灯指出

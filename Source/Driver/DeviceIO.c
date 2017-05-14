@@ -63,6 +63,7 @@ uint16 g_RelayOutState = 0;
 void InitDeviceIO(void)
 {
     ADPCFG = 0xFFFF; //模拟端口全部作为数字端口
+    INTCON1bits.NSTDIS = 1; //禁止中断嵌套
     ClrWdt();
     
     //IGBT引脚
@@ -111,10 +112,16 @@ void InitDeviceIO(void)
     
     TXD1_LASER_DIR = 0;
     TXD2_LASER_DIR = 0;
+    
+    
+    TXD1_LASER = 0;    
+    TXD2_LASER = 0;
             
     RESET_CURRENT_A();
     RESET_CURRENT_B();
     RESET_CURRENT_C();
+    
+    InitInt2(); //初始化外部中断
 
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯、继电器
 }
@@ -222,33 +229,33 @@ unsigned long ReHC74165(void)
 /**
  * @description 外部中断1初始化
  */
-void InitInt1(void)
+void InitInt2(void)
 {
-    IPC4bits.INT1IP = 6;    //外部中断优先级仅次于定时器1
-    INTCON2bits.INT1EP = 1; //下降沿中断
-    IFS1bits.INT1IF = 0;
-    IEC1bits.INT1IE = 0;    //首先禁止中断
+    IPC5bits.INT2IP = 7;    //外部中断优先级为最高优先级
+//    INTCON2bits.INT2EP = 1; //负边沿触发中断
+    INTCON2bits.INT2EP = 0; //正边沿触发中断
+    IFS1bits.INT2IF = 0;
+    IEC1bits.INT2IE = 0;    //首先禁止中断
     
     ClrWdt();
-    TRISDbits.TRISD0 = 1;   //IN0 RB7
 }
 
 /**
  * @description 外部中断1开启
  */
-inline void TurnOnInt1(void)
+inline void TurnOnInt2(void)
 {
-    IFS1bits.INT1IF = 0;
-    IEC1bits.INT1IE = 1;
+    IFS1bits.INT2IF = 0;
+    IEC1bits.INT2IE = 1;
 }
 
 /**
  * @description 外部中断1关闭
  */
-inline void TurnOffInt1(void)
+inline void TurnOffInt2(void)
 {
-    IFS1bits.INT1IF = 0;
-    IEC1bits.INT1IE = 0;
+    IFS1bits.INT2IF = 0;
+    IEC1bits.INT2IE = 0;
 }
 
 /**

@@ -66,11 +66,11 @@ SystemState g_SystemState;
 /**
  *同步预制等待时间,单位ms
  */
-uint16 g_SyncReadyWaitTime;
+uint16 _PERSISTENT g_SyncReadyWaitTime;
 /**
  * 遥控预制等待时间
  */
-uint16 g_RemoteWaitTime;   
+uint16 _PERSISTENT g_RemoteWaitTime;   
 /**
  * 本地系统时钟
  */
@@ -534,8 +534,8 @@ void RefParameterInit(void)
     }
     
     
-    g_SystemState.workMode = 0x12;       //工作模式，默认值
-    g_SystemState.warning = 0x00;        //默认无警告
+    g_SystemState.workMode = WORK_STATE;    //工作模式，默认值
+    g_SystemState.warning = 0x00;           //默认无警告
     
     //系统参数上下限
     g_SystemLimit.workVoltage.upper = 3.4f;

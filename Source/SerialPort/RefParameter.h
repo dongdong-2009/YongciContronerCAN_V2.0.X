@@ -202,8 +202,8 @@ extern ActionCount g_ActionCount;   //分合闸计数
 extern SystemState g_SystemState;   //系统状态量
 extern WaitTime g_DelayTime;    //分合闸时间
 
-extern uint16 g_SyncReadyWaitTime;  //同步预制等待时间
-extern uint16 g_RemoteWaitTime;     //遥控预制等待时间
+extern uint16 _PERSISTENT g_SyncReadyWaitTime;  //同步预制等待时间
+extern uint16 _PERSISTENT g_RemoteWaitTime;     //遥控预制等待时间
 
 uint8 SetParamValue(uint8 id,PointUint8* pPoint);
 uint8 ReadParamValue(uint8 id,PointUint8* pPoint);

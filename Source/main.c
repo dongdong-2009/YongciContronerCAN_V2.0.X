@@ -122,6 +122,7 @@ int main()
     UpdateLEDIndicateState(ERROR3_LED,TURN_ON);
     
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
+    Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
     
     StartTimer2();  //开启系统时钟
     ClrWdt(); //452cycs
@@ -142,16 +143,10 @@ int main()
 //    
 //    ClrWdt();
 //    InitDeviceNet();        
-//    StartTimer3();
     //测试使用
 //    while(1)
 //    {
-//        while(TMR3 <= 30)
-//        {
-////            ClrWdt();
-//        }
 //        ClrWdt();
-//        TMR3 = 0;
 //    }
     ClrWdt();
 //    RefParameterInit(); //参数设置初始化
@@ -169,5 +164,4 @@ int main()
         YongciMainTask();
     }
 }
-
   

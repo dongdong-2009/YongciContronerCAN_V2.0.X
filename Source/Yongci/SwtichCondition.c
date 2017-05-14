@@ -141,7 +141,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(g_SystemState.workMode == WORK_STATE)
             {
-                TongBuHeZha();
+                TongBuHeZha(50,60);
                 ClrWdt();
                 return 0xff;
             }
@@ -155,8 +155,8 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(g_SystemState.workMode == WORK_STATE) //多加入一重验证
             {
-                FENZHA_Action(0,FENZHA_TIME);
-                FENZHA_Action(1,FENZHA_TIME);
+                FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
+                FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
                 ClrWdt();
                 return 0xff;
             }
@@ -169,26 +169,26 @@ uint8 CheckIOState(void)
         case CHECK_1_HE_ORDER: //收到机构1合闸命令
         {
             ClrWdt();
-            HEZHA_Action(0,HEZHA_TIME);
+            HEZHA_Action(SWITCH_ONE , HEZHA_TIME);
             return 0xff;
         }
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
         {
             ClrWdt();
-            FENZHA_Action(0,FENZHA_TIME);
+            FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
             return 0xff;
         }
         
         case CHECK_2_HE_ORDER: //收到机构2合闸命令
         {
             ClrWdt();           
-            HEZHA_Action(1,HEZHA_TIME);
+            HEZHA_Action(SWITCH_TWO , HEZHA_TIME);
             return 0xff;
         }
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
         {
             ClrWdt();
-            FENZHA_Action(1,FENZHA_TIME);
+            FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
             return 0xff;
         }
         default:

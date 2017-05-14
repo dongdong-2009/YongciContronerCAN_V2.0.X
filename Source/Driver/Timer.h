@@ -20,8 +20,8 @@ void StartTimer2(void);
 void StopTimer2(void);
 
 void Init_Timer3(void);
-void StartTimer3(void);
-void StopTimer3(void);
+void StartTimer3(unsigned int us);
+void ResetTimer3(void);
 
 
 #ifdef	__cplusplus

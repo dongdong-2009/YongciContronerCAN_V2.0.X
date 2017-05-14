@@ -19,11 +19,7 @@
 
 
 extern  frameRtu sendFrame, recvFrame;
-extern uint8 _PERSISTENT g_Order;  //需要执行的命令
-
-volatile uint16 HezhaTimeA = HEZHA_TIME;
-volatile uint16 FenzhaTimeA = FENZHA_TIME;
-
+extern uint8 _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 
@@ -41,21 +37,21 @@ void SwitchOnThirdPhase(SwitchConfig* pConfig);
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
     IFS0bits.T3IF = 0;
-	if(g_SetSwitchState[1].State == REDAY_STATE)
+	if((g_SetSwitchState[1].State == REDAY_STATE) && (g_SetSwitchState[1].Order == IDLE_ORDER))
 	{
 		g_SetSwitchState[1].State = RUN_STATE;
+        g_SetSwitchState[1].Order = HE_ORDER;
 		g_SetSwitchState[1].SysTime = g_MsTicks;
         g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
-//		Init_Timer3(g_SetSwitchState[2].OffestTime);	//偏移时间
-//		StartTimer3();
+        ResetTimer3();
+		StartTimer3(g_SetSwitchState[2].OffestTime);//偏移时间
 	}
-
-	if(g_SetSwitchState[2].State == REDAY_STATE)
+    else if((g_SetSwitchState[2].State == REDAY_STATE) && (g_SetSwitchState[2].Order == IDLE_ORDER))
 	{
 		g_SetSwitchState[2].State = RUN_STATE;
 		g_SetSwitchState[2].SysTime = g_MsTicks;
         g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
-        //StopTimer3();
+        ResetTimer3();
 	}
     
 }
@@ -65,30 +61,25 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
  * <p>Function name: [TongBuHeZha]</p>
  * <p>Discription: [对机构执行同步合闸操作]</p>
  */
-void TongBuHeZha(void)
+void TongBuHeZha(uint16 offsetTime1,uint16 offsetTime2)
 {
-	g_SetSwitchState[0].State = REDAY_STATE;
-    g_SetSwitchState[0].Order = HE_ORDER;
-	g_SetSwitchState[0].SwitchOnTime = HEZHA_TIME;
-	g_SetSwitchState[0].OffestTime = 0;
-
 	g_SetSwitchState[1].State = REDAY_STATE;
-    g_SetSwitchState[1].Order = HE_ORDER;
-	g_SetSwitchState[1].SwitchOnTime = HEZHA_TIME;
-	g_SetSwitchState[1].OffestTime = 0;
+    g_SetSwitchState[1].Order = IDLE_ORDER;
+	g_SetSwitchState[1].SwitchOnTime = HEZHA_TIME + 3;
+	g_SetSwitchState[1].OffestTime = offsetTime1;
 
 	g_SetSwitchState[2].State = REDAY_STATE;
-    g_SetSwitchState[2].Order = HE_ORDER;
-	g_SetSwitchState[2].SwitchOnTime = HEZHA_TIME;
-	g_SetSwitchState[2].OffestTime = 0;
-
-//	Init_Timer3(g_SetSwitchState[1].OffestTime);	//偏移时间
+    g_SetSwitchState[2].Order = IDLE_ORDER;
+	g_SetSwitchState[2].SwitchOnTime = HEZHA_TIME + 3;
+	g_SetSwitchState[2].OffestTime = offsetTime2;
 
 	g_SetSwitchState[0].State = RUN_STATE;
+    g_SetSwitchState[0].Order = HE_ORDER;
+	g_SetSwitchState[0].SwitchOnTime = HEZHA_TIME + 3;
 	g_SetSwitchState[0].SysTime = g_MsTicks;
 	g_SetSwitchState[0].SwitchOn(g_SetSwitchState);
 
-//    StartTimer3();
+    StartTimer3(g_SetSwitchState[1].OffestTime);    //120us,实际使用示波器为144us
 }
 /**
  * 
@@ -99,11 +90,13 @@ void TongBuHeZha(void)
  */
 void HEZHA_Action(uint8 index,uint16 time)
 {
+    ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = HE_ORDER;
     g_SetSwitchState[index].SysTime = g_MsTicks;
-    g_SetSwitchState[index].SwitchOffTime = time;
-    g_SetSwitchState[index].SwitchOff(g_SetSwitchState + index);
+    g_SetSwitchState[index].SwitchOnTime = time + 3;   //使用示波器发现时间少3ms左右
+    ClrWdt();
+    g_SetSwitchState[index].SwitchOn(g_SetSwitchState + index);
     g_SetSwitchState[index].SysTime = g_MsTicks;
 }
 
@@ -120,7 +113,7 @@ void FENZHA_Action(uint8 index,uint16 time)
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = FEN_ORDER;
     g_SetSwitchState[index].SysTime = g_MsTicks;
-    g_SetSwitchState[index].SwitchOffTime = time;
+    g_SetSwitchState[index].SwitchOffTime = time + 2;   //使用示波器发现分闸时间少2ms左右
     ClrWdt();
     g_SetSwitchState[index].SwitchOff(g_SetSwitchState + index);
     g_SetSwitchState[index].SysTime = g_MsTicks;
@@ -171,10 +164,11 @@ void YongciMainTask(void)
             g_SetSwitchState[0].State = IDLE_ORDER;
             g_SetSwitchState[1].State = IDLE_ORDER;
             //判断远方与就地的延时消抖
-            if (g_SystemState.yuanBenState == YUAN_STATE)//远控
+            if ((g_SystemState.yuanBenState == YUAN_STATE) && (g_SystemState.workMode = WORK_STATE))//远控
             {
                 ON_INT();   
-                //远方控制时允许通信//暂时不要485通信，所以需要屏蔽
+                //远方控制时允许通信
+                //暂时不要485通信，所以需要屏蔽
 //                /***************************************************************************
 //                if(g_SystemState.yuanBenState == YUAN_STATE)
 //                {
@@ -245,6 +239,7 @@ void YongciFirstInit(void)
     RESET_CURRENT_B();
     
     g_Order = IDLE_ORDER;   //初始化
+    ReceiveStateFlag = IDLE_ORDER;  //初始化通信所需的命令状态
     
     InitSetSwitchState();
 }  
@@ -338,6 +333,7 @@ void SwitchOnThirdPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
+        TXD2_LASER = 1;
 //		HEZHA_C();
 //		HEZHA_C();
 	}

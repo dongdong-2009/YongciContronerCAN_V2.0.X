@@ -27,9 +27,9 @@ void GetCapVoltage(void)
 {
     SoftSampleOnce();
     g_SystemVoltageParameter.workVoltage = ADCBUF0 * 0.001220703125;
-    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * 0.001220703125;
-    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * 0.001220703125;
-//    g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * 0.001220703125;
+    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * 0.127773597592213;
+    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * 0.127773597592213;
+//    g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * 0.127773597592213;
     ClrWdt();
     ClrWdt();
 }

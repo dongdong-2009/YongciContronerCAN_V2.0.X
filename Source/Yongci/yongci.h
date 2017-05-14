@@ -28,10 +28,6 @@ typedef struct SynchroSwitchConfig
 
 #define RUN_STATE   0x77    //运行状态
 #define REDAY_STATE 0x88    //准备状态
-
-#define ON_HE_LOCK  0x55AA
-#define ON_FEN_LOCK 0xAA55    
-#define OFF_LOCK    0x0000
     
 //远方就地
 #define YUAN_STATE  0xAA
@@ -39,7 +35,7 @@ typedef struct SynchroSwitchConfig
     
 //工作模式和调试模式
 #define WORK_STATE  0x3F
-#define DEBUG_STATE 0x3F
+#define DEBUG_STATE 0xCF
     
     
 //IGBT工作状态
@@ -48,7 +44,6 @@ typedef struct SynchroSwitchConfig
     
 #define IDLE_ORDER   0x0000     //空闲命令
 
-    
 #define HEZHA_TIME  50 //合闸时间 默认
 #define FENZHA_TIME 30 //分闸时间 默认
 
@@ -108,7 +103,7 @@ void YongciFirstInit(void);
 
 void HEZHA_Action(uint8 index,uint16 time);
 void FENZHA_Action(uint8 index,uint16 time);
-void TongBuHeZha(void);
+void TongBuHeZha(uint16 offsetTime1,uint16 offsetTime2);
 
 #ifdef	__cplusplus
 }

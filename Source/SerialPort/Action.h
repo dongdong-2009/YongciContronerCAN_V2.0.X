@@ -53,7 +53,6 @@
 /**
  * 外部中断所需的固定值
  */
-#define FIRST_INT   0xA5
 #define SECEND_INT   0x5A
 #define TONGBU_HEZHA    0x0505
 #define TONGBU_FENZHA   0x0606
