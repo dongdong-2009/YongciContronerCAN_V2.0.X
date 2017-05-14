@@ -558,13 +558,11 @@ void RefParameterInit(void)
     InitReadonlyParameterCollect();    
     
     error = AccumulateSumVerify();  //累加和校验    
-    while(error)
+    if(error)
     {
-        
         UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
         Delay_ms(500);        
         UpdateLEDIndicateState(ERROR3_LED,TURN_OFF);
-        Delay_ms(500);
         //调试时使用错误指示灯熄灭，表示产生了错误
     }    
 }

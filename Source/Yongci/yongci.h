@@ -98,6 +98,9 @@ typedef struct SynchroSwitchConfig
 #define JG3_FEN_COUNT_ADDRESS 0x007FF00C
 //*********************************************
     
+#define ON_INT() {ON_UART_INT(); ON_CAN_INT();}
+#define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+
 void YongciMainTask(void);
 void YongciFirstInit(void);
 

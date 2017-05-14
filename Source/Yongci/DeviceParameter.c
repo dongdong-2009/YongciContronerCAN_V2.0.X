@@ -26,10 +26,10 @@
 void GetCapVoltage(void)
 {
     SoftSampleOnce();
-    g_SystemVoltageParameter.workVoltage = ADCBUF0 * 0.001220703125;
-    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * 0.127773597592213;
-    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * 0.127773597592213;
-//    g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * 0.127773597592213;
+    g_SystemVoltageParameter.workVoltage = ADCBUF0 * ADC_MODULUS;
+    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * LOCAL_CAP_MODULUS;
+    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * LOCAL_CAP_MODULUS;
+    VOLTAGE_CAP3(); //电容3赋值函数
     ClrWdt();
     ClrWdt();
 }
@@ -44,7 +44,8 @@ uint16 GetCapVolatageState(void)
 {
     GetCapVoltage();
     if ((g_SystemVoltageParameter.voltageCap1  >= LOW_VOLTAGE_ADC) && 
-        (g_SystemVoltageParameter.voltageCap2  >= LOW_VOLTAGE_ADC))
+        (g_SystemVoltageParameter.voltageCap2  >= LOW_VOLTAGE_ADC) && 
+        (g_SystemVoltageParameter.voltageCap3  >= LOW_VOLTAGE_ADC))
     {
         ClrWdt();
         return 0xAAAA;
@@ -64,6 +65,7 @@ void CheckVoltage(void)
 {
     GetCapVoltage();
     ClrWdt();
+    //机构3电容状态更新
     if (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper)
     {
         UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);
@@ -72,6 +74,8 @@ void CheckVoltage(void)
     {
         UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF);        
     }
+    
+    //机构3电容状态更新
     if (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
     {
         UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);
@@ -79,5 +83,18 @@ void CheckVoltage(void)
     else if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
     {
         UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);        
+    }
+    
+    if(CAP3_STATE)
+    {
+        //机构3电容状态更新
+        if (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper)
+        {
+            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
+        }
+        else if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
+        {
+            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);        
+        }
     }
 }

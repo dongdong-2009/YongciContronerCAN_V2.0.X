@@ -233,7 +233,7 @@ void InitInt2(void)
 {
     IPC5bits.INT2IP = 7;    //外部中断优先级为最高优先级
 //    INTCON2bits.INT2EP = 1; //负边沿触发中断
-    INTCON2bits.INT2EP = 0; //正边沿触发中断
+    INTCON2bits.INT2EP = 0;   //正边沿触发中断
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;    //首先禁止中断
     

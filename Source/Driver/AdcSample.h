@@ -14,6 +14,8 @@
 extern "C" {
 #endif
 
+#define ADC_MODULUS 0.001220703125f
+
 void AdcInit(void);
 void SoftSampleOnce(void);
 #define  NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可

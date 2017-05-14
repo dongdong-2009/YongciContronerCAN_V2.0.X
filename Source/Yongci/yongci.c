@@ -14,8 +14,6 @@
 #include "../Header.h"
 #include "yongci.h"
 
-#define ON_INT() {ON_UART_INT(); ON_CAN_INT();}
-#define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
 
 
 extern  frameRtu sendFrame, recvFrame;
@@ -44,11 +42,16 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 		g_SetSwitchState[1].SysTime = g_MsTicks;
         g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
         ResetTimer3();
-		StartTimer3(g_SetSwitchState[2].OffestTime);//偏移时间
+        if(CAP3_STATE)
+        {
+            StartTimer3(g_SetSwitchState[2].OffestTime);//偏移时间
+        }
+		
 	}
     else if((g_SetSwitchState[2].State == REDAY_STATE) && (g_SetSwitchState[2].Order == IDLE_ORDER))
 	{
 		g_SetSwitchState[2].State = RUN_STATE;
+        g_SetSwitchState[2].Order = HE_ORDER;
 		g_SetSwitchState[2].SysTime = g_MsTicks;
         g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
         ResetTimer3();
@@ -68,10 +71,13 @@ void TongBuHeZha(uint16 offsetTime1,uint16 offsetTime2)
 	g_SetSwitchState[1].SwitchOnTime = HEZHA_TIME + 3;
 	g_SetSwitchState[1].OffestTime = offsetTime1;
 
-	g_SetSwitchState[2].State = REDAY_STATE;
-    g_SetSwitchState[2].Order = IDLE_ORDER;
-	g_SetSwitchState[2].SwitchOnTime = HEZHA_TIME + 3;
-	g_SetSwitchState[2].OffestTime = offsetTime2;
+    if(CAP3_STATE)
+    {
+        g_SetSwitchState[2].State = REDAY_STATE;
+        g_SetSwitchState[2].Order = IDLE_ORDER;
+        g_SetSwitchState[2].SwitchOnTime = HEZHA_TIME + 3;
+        g_SetSwitchState[2].OffestTime = offsetTime2;
+    }
 
 	g_SetSwitchState[0].State = RUN_STATE;
     g_SetSwitchState[0].Order = HE_ORDER;
@@ -127,9 +133,10 @@ void FENZHA_Action(uint8 index,uint16 time)
 ****************************************************/
 void YongciMainTask(void)
 {
-    uint8 result = 0;
+//    uint8 result = 0;
     while(0xFFFF) //主循环
     {
+        //机构1合闸、分闸刷新
         if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
         {
             g_SetSwitchState[0].SwitchOn(g_SetSwitchState);
@@ -139,6 +146,7 @@ void YongciMainTask(void)
             g_SetSwitchState[0].SwitchOff(g_SetSwitchState);
         }
         
+        //机构2合闸、分闸刷新
         if((g_SetSwitchState[1].Order == HE_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
         {
             g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
@@ -148,23 +156,45 @@ void YongciMainTask(void)
             g_SetSwitchState[1].SwitchOff(g_SetSwitchState + 1);
         }
         
-        if((g_SetSwitchState[0].Order == IDLE_ORDER) && (g_SetSwitchState[1].Order == IDLE_ORDER))
+        if(CAP3_STATE)
         {
-            if((g_SetSwitchState[0].State == IDLE_ORDER) && (g_SetSwitchState[1].State == IDLE_ORDER))
+            //机构3合闸、分闸刷新
+            if((g_SetSwitchState[2].Order == HE_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
+            {
+                g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
+            }
+            else if((g_SetSwitchState[2].Order == FEN_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
+            {
+                g_SetSwitchState[2].SwitchOff(g_SetSwitchState + 2);
+            }
+        }
+        
+        //机构空闲状态刷新
+        if((g_SetSwitchState[0].Order == IDLE_ORDER) && (g_SetSwitchState[1].Order == IDLE_ORDER) && 
+           (g_SetSwitchState[2].Order == IDLE_ORDER))
+        {
+            if((g_SetSwitchState[0].State == IDLE_ORDER) && (g_SetSwitchState[1].State == IDLE_ORDER) && 
+               (g_SetSwitchState[2].State == IDLE_ORDER))
             {
                 RESET_CURRENT_A();
                 RESET_CURRENT_B();
+                RESET_CURRENT_C();
                 RESET_CURRENT_A();
                 RESET_CURRENT_B();
+                RESET_CURRENT_C();
             }
             UpdateCount();//更新计数
+            //注意更新计数函数的位置，防止在执行远方操作时将通信中断全部关闭
             
             g_SetSwitchState[0].Order = IDLE_ORDER; //清零
             g_SetSwitchState[1].Order = IDLE_ORDER;
+            g_SetSwitchState[2].Order = IDLE_ORDER;
             g_SetSwitchState[0].State = IDLE_ORDER;
             g_SetSwitchState[1].State = IDLE_ORDER;
+            g_SetSwitchState[2].State = IDLE_ORDER;
+            
             //判断远方与就地的延时消抖
-            if ((g_SystemState.yuanBenState == YUAN_STATE) && (g_SystemState.workMode = WORK_STATE))//远控
+            if ((g_SystemState.yuanBenState == YUAN_STATE) && (g_SystemState.workMode == WORK_STATE))//远控
             {
                 ON_INT();   
                 //远方控制时允许通信
@@ -238,6 +268,14 @@ void YongciFirstInit(void)
     DRIVER_D_2_DIR = 0;
     RESET_CURRENT_B();
     
+    //IGBT引脚
+    //B
+    DRIVER_A_3_DIR = 0;
+    DRIVER_B_3_DIR = 0;
+    DRIVER_C_3_DIR = 0;
+    DRIVER_D_3_DIR = 0;
+    RESET_CURRENT_C();
+    
     g_Order = IDLE_ORDER;   //初始化
     ReceiveStateFlag = IDLE_ORDER;  //初始化通信所需的命令状态
     
@@ -284,6 +322,7 @@ void InitSetSwitchState(void)
 	g_SetSwitchState[index].SysTime = 0;    //默认系统时间为零
 	g_SetSwitchState[index].SwitchOn = SwitchOnThirdPhase;
 	g_SetSwitchState[index].SwitchOff = SwitchOffThirdPhase;
+	index++;
     
 }
 
@@ -294,15 +333,13 @@ void SwitchOnFirstPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
-        TXD2_LASER = 1;
-//		HEZHA_A();
-//		HEZHA_A();
+		HEZHA_A();
+		HEZHA_A();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();
-        TXD2_LASER = 0;
 		pConfig->Order = IDLE_ORDER;
 		pConfig->State = IDLE_ORDER;
         pConfig->LastOrder = HE_ORDER; //刚执行完合闸指令
@@ -313,15 +350,13 @@ void SwitchOnSecondPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
-        TXD2_LASER = 1;
-//		HEZHA_B();
-//		HEZHA_B();
+		HEZHA_B();
+		HEZHA_B();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_B();
 		RESET_CURRENT_B();
-        TXD2_LASER = 0;
 		pConfig->Order = IDLE_ORDER;
 		pConfig->State = IDLE_ORDER;
         pConfig->LastOrder = HE_ORDER; //刚执行完合闸指令
@@ -333,9 +368,8 @@ void SwitchOnThirdPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
-        TXD2_LASER = 1;
-//		HEZHA_C();
-//		HEZHA_C();
+		HEZHA_C();
+		HEZHA_C();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
 	{
@@ -356,15 +390,13 @@ void SwitchOffFirstPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
 	{
-        TXD2_LASER = 1;
-//		FENZHA_A();
-//		FENZHA_A();
+		FENZHA_A();
+		FENZHA_A();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();
-        TXD2_LASER = 0;
 		pConfig->Order = IDLE_ORDER;
 		pConfig->State = IDLE_ORDER;
         pConfig->LastOrder = FEN_ORDER; //刚执行完分闸指令
@@ -375,15 +407,13 @@ void SwitchOffSecondPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
 	{
-        TXD2_LASER = 1;
-//		FENZHA_B();
-//		FENZHA_B();
+		FENZHA_B();
+		FENZHA_B();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_B();
 		RESET_CURRENT_B();
-        TXD2_LASER = 0;
 		pConfig->Order = IDLE_ORDER;
 		pConfig->State = IDLE_ORDER;
         pConfig->LastOrder = FEN_ORDER; //刚执行完分闸指令
@@ -395,8 +425,8 @@ void SwitchOffThirdPhase(SwitchConfig* pConfig)
 {
     if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
 	{
-//		FENZHA_C();
-//		FENZHA_C();
+		FENZHA_C();
+		FENZHA_C();
 	}
 	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
 	{
@@ -423,33 +453,44 @@ void UpdateCount(void)
 {
     //应禁止中断
     _prog_addressT addr; 
+    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
     if (g_SetSwitchState[0].LastOrder == HE_ORDER) //机构1合闸
     {
         addr = (_prog_addressT)JG1_HE_COUNT_ADDRESS;
-        OFF_INT();  //不允许CAN中断
         WriteFenzhaCount(addr);
     }
     else if (g_SetSwitchState[0].LastOrder == FEN_ORDER)  //机构1分闸
     {
         addr = (_prog_addressT)JG1_FEN_COUNT_ADDRESS;
-        OFF_INT();  //不允许CAN中断
         WriteFenzhaCount(addr);
     }
     
     if (g_SetSwitchState[1].LastOrder == HE_ORDER)   //机构2合闸
     {
         addr = (_prog_addressT)JG2_HE_COUNT_ADDRESS;
-        OFF_INT();  //不允许CAN中断
         WriteFenzhaCount(addr);
     }
     else if (g_SetSwitchState[1].LastOrder == FEN_ORDER)  //机构2分闸
     {
         addr = (_prog_addressT)JG2_FEN_COUNT_ADDRESS;
-        OFF_INT();  //不允许CAN中断
         WriteFenzhaCount(addr);
     }
     
+    if(CAP3_STATE)
+    {
+        if (g_SetSwitchState[2].LastOrder == HE_ORDER)   //机构3合闸
+        {
+            addr = (_prog_addressT)JG3_HE_COUNT_ADDRESS;
+            WriteFenzhaCount(addr);
+        }
+        else if (g_SetSwitchState[2].LastOrder == FEN_ORDER)  //机构3分闸
+        {
+            addr = (_prog_addressT)JG3_FEN_COUNT_ADDRESS;
+            WriteFenzhaCount(addr);
+        }
+    }
     g_SetSwitchState[0].LastOrder = IDLE_ORDER;    //清零防止重复写入
     g_SetSwitchState[1].LastOrder = IDLE_ORDER;    //清零防止重复写入
+    g_SetSwitchState[2].LastOrder = IDLE_ORDER;    //清零防止重复写入
     
 }

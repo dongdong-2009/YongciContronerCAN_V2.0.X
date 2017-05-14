@@ -28,8 +28,7 @@ void AdcInit(void)
 {
     ADPCFG = 0xFFFF;
    
-//    ADPCFG = 0xFFF0;    //AN0--AN3
-    ADPCFG = 0xFFF8;    //AN0--AN2
+    ADPC(); //开启ADC功能的IO口
     
     TRISBbits.TRISB0 = 1;   // AN0
     TRISBbits.TRISB1 = 1;   // AN1
@@ -59,7 +58,7 @@ void AdcInit(void)
     ADCON3bits.ADCS = 5;    // ADC Conversion Clock Tad = Tcy/2*(ADCS+1)= (1/4M/2) * 6 = 0.75us
     
     ADCSSL = 0x0000;    
-    ADCSSL = 0x0007;        //0x0000 0000 0000 0111 
+    ADCS(); //扫描的通道数量
     
     IFS0bits.ADIF = 0;			// Clear the A/D interrupt flag bit
     IEC0bits.ADIE = 0;			// Disable A/D interrupt

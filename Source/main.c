@@ -139,17 +139,17 @@ int main()
     
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON);
     
-//    InitStandardCAN(0, 0);   
-//    
-//    ClrWdt();
-//    InitDeviceNet();        
+    InitStandardCAN(0, 0);   
+    
+    ClrWdt();
+    InitDeviceNet();        
     //测试使用
 //    while(1)
 //    {
 //        ClrWdt();
 //    }
     ClrWdt();
-//    RefParameterInit(); //参数设置初始化
+    RefParameterInit(); //参数设置初始化
 
     //延时3s判断启动
     while(cn++ <3000)
@@ -157,7 +157,7 @@ int main()
         __delay_ms(1);
         ClrWdt();
     }
-    
+    GetCapVolatageState();
     
     while(TRUE)
     {

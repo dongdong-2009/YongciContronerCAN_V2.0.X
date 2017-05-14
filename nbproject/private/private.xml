@@ -11,20 +11,21 @@
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/SerialPort/RtuFrame.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/SerialPort/RtuFrame.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/main.c</file>
-            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/Delay.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Yongci/SwtichCondition.h</file>
+            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/Delay.c</file>
+            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Yongci/DeviceParameter.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Yongci/SwtichCondition.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/Timer.c</file>
-            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Yongci/DeviceParameter.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/CAN.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/Delay.h</file>
+            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/EEPROMOperate.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/ReadMe.txt</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/DeviceIO.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/EEPROMOperate.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/Timer.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/DeviceNet/DeviceNet.c</file>
-            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/SerialPort/RefParameter.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Driver/DevicdIO.h</file>
+            <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/SerialPort/RefParameter.c</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/Yongci/yongci.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/DeviceNet/DeviceNet.h</file>
             <file>file:/E:/00-MyDocument/MPLAB%20Project/YongciControner/YongciContronerCAN_V2.0.X/Source/SerialPort/Action.h</file>

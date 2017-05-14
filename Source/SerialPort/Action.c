@@ -22,8 +22,8 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID);
 
 extern uint8 volatile SendFrameData[SEND_FRAME_LEN];
 
-uint16 g_offestTimeOne = 0;
-uint16 g_offestTimeTwo = 0;
+uint16 g_offestTimeOne = 50;
+uint16 g_offestTimeTwo = 60;
 
 //分合状态指令 单片机在看门狗复位的情况下不会改变该值
 _PERSISTENT uint16 ReceiveStateFlag;  
@@ -189,13 +189,17 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
-            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))  //防止多次预制,防止多次合闸
+            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_1_FEN_STATE) && 
+                    (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) && 
+                    (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))  //防止多次预制,防止多次合闸
             {
                 ReceiveStateFlag = HE_ORDER;    //合闸命令
                 SetOverTime(g_RemoteWaitTime);  //设置合闸预制超时等待时间
                 SendData(pSendFrame);
             }
-            else if(!(g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))
+            else if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
+                    (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
+                    (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
             }
@@ -219,8 +223,12 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 {
                     if(GetCapVolatageState()) //电容电压足够
                     {
-                        TongBuHeZha(0,0);   //在远方状态下只能是执行工作模式
+                        TongBuHeZha(50,60);   //在远方状态下只能是执行工作模式
                         SendData(pSendFrame);
+                    }
+                    else
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     }
                 }
                 else
@@ -244,14 +252,18 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
-            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_Z_HE_STATE))  //防止多次预制,防止多次合闸
+            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_1_HE_STATE) && 
+                    (g_SystemState.heFenState2 == CHECK_2_HE_STATE) && 
+                    (g_SystemState.heFenState3 == CHECK_3_HE_STATE))  //防止多次预制,防止多次合闸
             {
                 ReceiveStateFlag = FEN_ORDER;   //分闸命令
                 
                 SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
                 SendData(pSendFrame);
             }
-            else if(!(g_SystemState.heFenState1 == CHECK_Z_HE_STATE))
+            else if((g_SystemState.heFenState1 != CHECK_1_HE_STATE) || 
+                    (g_SystemState.heFenState2 != CHECK_2_HE_STATE) || 
+                    (g_SystemState.heFenState3 != CHECK_3_HE_STATE))
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
             }
@@ -278,8 +290,15 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                         //执行的是同步分闸操作
                         FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
                         FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
-                        FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                        if(CAP3_STATE)
+                        {
+                            FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                        }
                         SendData(pSendFrame);
+                    }
+                    else
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     }
                 }
                 else
@@ -380,7 +399,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             if(ReceiveStateFlag == IDLE_ORDER)
             {
-                if((g_SystemState.heFenState1 == CHECK_Z_FEN_STATE) && (GetCapVolatageState()))
+                if((g_SystemState.heFenState1 == CHECK_1_FEN_STATE) && (GetCapVolatageState()) && 
+                   (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) && 
+                   (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
                 {
                     ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
                     SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
@@ -388,7 +409,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     SendData(pSendFrame);
                     TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
                 }
-                else if(!(g_SystemState.heFenState1 == CHECK_Z_FEN_STATE))
+                else if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
+                        (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
+                        (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
                 {
                     SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
                     return;
@@ -521,16 +544,18 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID)
  * 上升沿，此时不退出中断，检测上升沿的时间，以上条件都满足后，在下一个下降沿到来时
  * 选相同步合闸（退出中断）。
  */
-//void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
-//{
-//    if((ReceiveStateFlag == TONGBU_HEZHA) && (CheckIsOverTime()))
-//    {
-//        TongBuHeZha(g_offestTimeOne,g_offestTimeTwo);   //执行同步合闸命令
-//    }
-//    else
-//    {
-//        SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
-//    }
-//    TurnOffInt2();
-//    ReceiveStateFlag = IDLE_ORDER;
-//}
+void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
+{
+    if((ReceiveStateFlag == TONGBU_HEZHA) && (CheckIsOverTime()))
+    {
+        OFF_INT();
+        TongBuHeZha(g_offestTimeOne,g_offestTimeTwo);   //执行同步合闸命令
+        UpdateLEDIndicateState(CAP3_LED,TURN_ON);
+    }
+    else
+    {
+        SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
+    }
+    TurnOffInt2();
+    ReceiveStateFlag = IDLE_ORDER;
+}

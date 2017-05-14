@@ -48,7 +48,7 @@
 #define NOT_PERFABRICATE_ERROR  0x07        //没有预制就先执行的错误
 #define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
 #define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
-#define HEFEN_STATE_ERROR 0x0A      //欠压动作错误
+#define HEFEN_STATE_ERROR 0x0A      //合、分位错误
 
 /**
  * 外部中断所需的固定值
