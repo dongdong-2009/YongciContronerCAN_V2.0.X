@@ -17,6 +17,29 @@
 #include "../Yongci/DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
 
+#define  SUDDEN_ID 0x1A     //突发状态上传ID
+/**
+ * @description: 以下为错误代码，返回的错误标号等
+ */
+#define ERROR_REPLY_ID  0x14
+#define ERROR_EXTEND_ID 0xAA
+#define ERROR_DATA_LEN  4
+/**
+ * @description: 错误代码
+ */
+#define ID_ERROR     0x01       //ID号错误
+#define DATA_LEN_ERROR   0x02   //数据长度错误
+#define LOOP_ERROR   0x03       //回路数错误
+#define SET_VALUE_ERROR   0x04  //设置值错误
+#define WORK_MODE_ERROR   0x05  //在处于就地控制时使用了远方控制
+#define OVER_TIME_ERROR   0x06  //预制超时错误
+#define NOT_PERFABRICATE_ERROR  0x07        //没有预制就先执行的错误
+#define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
+#define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
+#define HEFEN_STATE_ERROR 0x0A      //合、分位错误
+
+#define TONGBU_HEZHA    0x0055
+
 void SendAckMesssage(uint8 fun);
 void SendErrorFrame(uint8 receiveID,uint8 errorID);
 
@@ -28,6 +51,7 @@ uint16 g_offestTimeTwo = 60;
 //分合状态指令 单片机在看门狗复位的情况下不会改变该值
 _PERSISTENT uint16 ReceiveStateFlag;  
 
+GetState g_GetState;    //需要上传的机构状态值
 
 /**************************************************
  *函数名： SendAckMesssage()
@@ -85,7 +109,7 @@ void ExecuteFunctioncode(frameRtu* pRtu)
                 {
                     TongBuHeZha(g_offestTimeOne,g_offestTimeTwo);
                     ClrWdt();
-                    return 0xff;
+                    return ;
                 }
                 break;
             }
@@ -95,8 +119,13 @@ void ExecuteFunctioncode(frameRtu* pRtu)
                 {
                     FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
                     FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
+                    if(CAP3_STATE)
+                    {
+                        FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                    }
                     ClrWdt();
                 }
+                return ;
                 break;
             }
             case WRITE_HEZHA_TIME:
@@ -535,6 +564,41 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID)
     pSendFrame.pBuffer[2] = errorID;   //错误代码
     pSendFrame.pBuffer[3] = ERROR_EXTEND_ID;  //扩展ID号            
     pSendFrame.len = ERROR_DATA_LEN;   //错误帧长度
+    SendData(&pSendFrame);
+}
+
+/**
+ * 
+ * <p>Function name: [UpdataState]</p>
+ * <p>Discription: [对运行状态进行更新显示]</p>
+ */
+void UpdataState(void)
+{
+    uint8 Data[8] = {0,0,0,0,0,0,0,0};
+
+    struct DefFrameData pSendFrame;
+
+    pSendFrame.pBuffer = Data;
+    pSendFrame.complteFlag = 0xFF;
+
+	pSendFrame.ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
+
+	pSendFrame.pBuffer[1] = g_GetState.SwitchState1 | g_GetState.SwitchState2 | g_GetState.SwitchState3;	
+	pSendFrame.pBuffer[2] = g_GetState.ExecuteOrder1 | g_GetState.ExecuteOrder2 | g_GetState.ExecuteOrder3;	
+	pSendFrame.pBuffer[3] = g_GetState.CapState1 | g_GetState.CapState2 | g_GetState.CapState3;	
+    
+	if(!g_SystemState.warning)
+	{
+		pSendFrame.pBuffer[4] = 1;
+	}
+	else
+	{
+		pSendFrame.pBuffer[4] = 0;
+	}
+	pSendFrame.pBuffer[5] = g_SystemState.yuanBenState;  
+
+    pSendFrame.len = 6;   //数据帧长度
     SendData(&pSendFrame);
 }
 

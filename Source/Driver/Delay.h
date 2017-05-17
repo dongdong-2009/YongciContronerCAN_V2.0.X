@@ -78,10 +78,12 @@ typedef struct SysTime
 {
     uint32 StarTime;    //超时判断起始时间
     uint32 delayTime;
+    uint16 GetTempTime; //获取温度时间
+    uint16 SendDataTime;//运行时间
+    uint8  ScanTime;    //按键扫描间隔时间
 }SysTimeStamp;
 
 extern uint32 g_MsTicks;
-extern uint8 g_ScanTime;    //按键扫描间隔时间
 
 extern SysTimeStamp g_SysTimeStamp;
 

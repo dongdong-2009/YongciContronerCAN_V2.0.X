@@ -143,14 +143,13 @@ void ReadAccumulateSum(uint16* readData)
  * 写入分合闸次数
  * @param writeData 所需读取的数据
  */
-void WriteFenzhaCount(_prog_addressT addr)
+void WriteFenzhaCount(_prog_addressT addr , uint16* eedata)
 {
-    uint16 eedata[4] = {0,0,0,0};
-    ReadWord_EEPROM(addr,eedata);
+    ReadWord_EEPROM(addr , eedata);
     
-    eedata[0] += 1;//直接加1 对于为擦除的不予处理，直接溢出
-    g_ActionCount.fenzhaCount1 = eedata[0];
+    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+    eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
     
-    WriteWord_EEPROM(addr,eedata);
-    
+    WriteWord_EEPROM(addr , eedata);
+    ON_INT();
 }

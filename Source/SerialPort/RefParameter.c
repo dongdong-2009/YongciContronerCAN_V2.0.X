@@ -508,8 +508,16 @@ void RefParameterInit(void)
     ReadWord_EEPROM(JG1_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount1);
     ReadWord_EEPROM(JG2_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount2);
     ReadWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
-    g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
-    g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
+    if(CAP3_STATE)
+    {
+        ReadWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
+        ReadWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
+    }
+    else
+    {
+        g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
+        g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
+    }
     
     //系统电容电压初始化
     g_SystemVoltageParameter.workVoltage = 0x0490;   //实际需要读取ADC值

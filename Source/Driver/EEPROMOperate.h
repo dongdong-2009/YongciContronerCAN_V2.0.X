@@ -78,7 +78,7 @@ void WriteEEPROM(uint8 id,PointUint8* pPoint);
 void ReadEEPROM(uint8 id,PointUint8* pPoint);
 void WriteAccumulateSum_EEPROM(uint16* writeData);
 void ReadAccumulateSum(uint16* readData);
-void WriteFenzhaCount(_prog_addressT addr);
+void WriteFenzhaCount(_prog_addressT addr , uint16* eedata);
 
 #ifdef	__cplusplus
 }

@@ -18,20 +18,20 @@ typedef struct SynchroSwitchConfig
 	uint8   State;	//当前的状态
 	uint16  Order;	//分合闸命令
     uint16  LastOrder;  //上一次执行的指令
-	uint16  SwitchOnTime;		//合闸动作时间
+	uint16  SwitchOnTime;   //合闸动作时间
 	uint16  SwitchOffTime;	//分闸动作时间
 	uint16  OffestTime;	//偏移时间
 	uint32  SysTime;	//当前的系统时间
-	void (*SwitchOn)(struct SynchroSwitchConfig* );	//开关合闸动作函数
-	void (*SwitchOff)(struct SynchroSwitchConfig* );	//开关分闸动作函数
+	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
+	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
 
 #define RUN_STATE   0x77    //运行状态
 #define REDAY_STATE 0x88    //准备状态
     
 //远方就地
-#define YUAN_STATE  0xAA
-#define BEN_STATE   0x55
+#define YUAN_STATE  0xA1
+#define BEN_STATE   0xA5
     
 //工作模式和调试模式
 #define WORK_STATE  0x3F
@@ -74,8 +74,8 @@ typedef struct SynchroSwitchConfig
 #define CHECK_3_HE_ORDER  0x28  //执行机构3合闸动作
 #define CHECK_3_FEN_ORDER 0x29  //执行机构3分闸动作
     
-#define CHECK_Z_HE_STATE  0x32  //总的合闸状态
-#define CHECK_Z_FEN_STATE 0x33  //总的分闸状态
+#define CHECK_HE_STATE  0x32  //总的合闸状态
+#define CHECK_FEN_STATE 0x33  //总的分闸状态
 
 #define CHECK_1_HE_STATE  0x34  //机构1合闸状态
 #define CHECK_1_FEN_STATE 0x35  //机构1分闸状态

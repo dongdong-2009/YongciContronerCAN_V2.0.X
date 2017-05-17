@@ -43,9 +43,9 @@ void GetCapVoltage(void)
 uint16 GetCapVolatageState(void)
 {
     GetCapVoltage();
-    if ((g_SystemVoltageParameter.voltageCap1  >= LOW_VOLTAGE_ADC) && 
-        (g_SystemVoltageParameter.voltageCap2  >= LOW_VOLTAGE_ADC) && 
-        (g_SystemVoltageParameter.voltageCap3  >= LOW_VOLTAGE_ADC))
+    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
+        (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+        (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
     {
         ClrWdt();
         return 0xAAAA;
@@ -65,36 +65,78 @@ void CheckVoltage(void)
 {
     GetCapVoltage();
     ClrWdt();
-    //机构3电容状态更新
-    if (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper)
+    //机构1电容状态更新
+    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper) && 
+        (g_GetState.CapState1 != 0x03))
     {
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);
+        UpdateIndicateState(ERROR1_RELAY , ERROR1_LED ,TURN_ON);
+        if(g_GetState.SuddenFlag == FALSE)
+        {
+            g_GetState.CapState1 = 0x03;    //0b11
+            g_GetState.SuddenFlag = TRUE;   //该状态属于突发状态
+        }
     }
-    else if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
+    else if((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
+            (g_GetState.CapState1 != 0x02))
     {
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF);        
+        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);     
+        g_GetState.CapState1 = 0x02;    //0b10
+    }
+    else if((g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down - 2) && 
+            (g_GetState.CapState1 != 0x01))
+    {
+        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF); 
+        g_GetState.CapState1 = 0x01;    //0b01
     }
     
-    //机构3电容状态更新
-    if (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
+    //机构2电容状态更新
+    if ((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper) && 
+        (g_GetState.CapState2 != 0x0C))
     {
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);
+        UpdateIndicateState(ERROR2_RELAY , ERROR2_LED ,TURN_ON);
+        if(g_GetState.SuddenFlag == FALSE)
+        {
+            g_GetState.CapState2 = 0x0C;    //0b11
+            g_GetState.SuddenFlag = TRUE;   //该状态属于突发状态
+        }
     }
-    else if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
+    else if((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+            (g_GetState.CapState2 != 0x08))
     {
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);        
+        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);      
+        g_GetState.CapState2 = 0x08;    //0b10 
+    }
+    else if((g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down - 2) && 
+            (g_GetState.CapState2 != 0x04))
+    {
+        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);      
+        g_GetState.CapState2 = 0x04;    //0b01 
     }
     
     if(CAP3_STATE)
     {
         //机构3电容状态更新
-        if (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper)
+        if ((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper) && 
+            (g_GetState.CapState3 != 0x30))
         {
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);
+            UpdateIndicateState(ERROR3_RELAY , ERROR3_LED ,TURN_ON);
+            if(g_GetState.SuddenFlag == FALSE)
+            {
+                g_GetState.CapState3 = 0x30;    //0b11
+                g_GetState.SuddenFlag = TRUE;   //该状态属于突发状态
+            }
         }
-        else if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
+        else if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
+                (g_GetState.CapState3 != 0x20))
         {
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);        
+            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);   
+            g_GetState.CapState3 = 0x20;    //0b10      
+        }
+        else if((g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down - 2) && 
+                (g_GetState.CapState3 != 0x10))
+        {
+            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);  
+            g_GetState.CapState3 = 0x10;    //0b01 
         }
     }
 }

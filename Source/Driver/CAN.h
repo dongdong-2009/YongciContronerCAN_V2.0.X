@@ -75,8 +75,8 @@ extern "C" {
 #define GET_SID5_0(id) (uint8)(id & 0x3F) //获取ID的0-5bit
 #define GET_SID10_6(id) (uint8)((id>>6 ) & 0x01F) //获取ID的6-10 bit
     
-#define ON_CAN_INT()    {IEC1bits.C1IE = 1;}   
-#define OFF_CAN_INT()    {IEC1bits.C1IE = 0;}    
+#define ON_CAN_INT()    {IEC2bits.C2IE = 1;}   
+#define OFF_CAN_INT()    {IEC2bits.C2IE = 0;}    
     
 enum  CANIntType {WakeInt = 0b111, RXB0Int = 0b110, RXB1Int = 0b101,  TXB0Int = 0b100, TXB1Int = 0b011,
       TXB2Int = 0b010, ErrorInt = 0b001, Null = 0b000};

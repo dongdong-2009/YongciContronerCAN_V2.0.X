@@ -119,8 +119,6 @@ int main()
     
     OFF_UART_INT(); //485通信不开启
     
-    UpdateLEDIndicateState(ERROR3_LED,TURN_ON);
-    
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
     Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
     
