@@ -1,3 +1,14 @@
+/** 
+ * <p>application name： DevicedIO.h</p> 
+ * <p>application describing： DevicedIO宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
+ */
 #ifndef _DEVICEIO_H_
 #define _DEVICEIO_H_
 #include "tydef.h"
@@ -306,12 +317,12 @@
 //光纤模块
 //******************************************
 #define RXD1_LASER_DIR  TRISDbits.TRISD9
-#define RXD1_LASER  LATDbits.LATD9
+#define RXD1_LASER  PORTDbits.RD9
 #define TXD1_LASER_DIR  TRISGbits.TRISG12
 #define TXD1_LASER  LATGbits.LATG12
 
 #define RXD2_LASER_DIR  TRISDbits.TRISD10
-#define RXD2_LASER  LATDbits.LATD10
+#define RXD2_LASER  PORTDbits.RD10
 #define TXD2_LASER_DIR  TRISGbits.TRISG13
 #define TXD2_LASER  LATGbits.LATG13
 //******************************************

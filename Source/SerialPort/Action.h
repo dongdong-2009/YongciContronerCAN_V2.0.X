@@ -49,6 +49,10 @@ typedef struct GetSwitchState
 	uint8 CapState2;		//电容状态
 	uint8 CapState3;		//电容状态
 	uint8 SuddenFlag;		//更新状态
+    
+    uint8 Cap1Error;    //电容电压错误
+    uint8 Cap2Error;    //电容电压错误
+    uint8 Cap3Error;    //电容电压错误
 }GetState;
 
 
@@ -56,6 +60,7 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
+void SynchronizationSignalCheck(void);
 
 extern _PERSISTENT uint16 ReceiveStateFlag;
 

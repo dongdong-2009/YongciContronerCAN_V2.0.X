@@ -1,10 +1,14 @@
-/* 
- * File:   CRC16.h
- * Author: ZFreeGo
- *
- * Created on 2014年9月17日, 上午9:56
+/** 
+ * <p>application name： CRC16.h</p> 
+ * <p>application describing： CRC16宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
-
 #ifndef CRC16_H
 #define	CRC16_H
 

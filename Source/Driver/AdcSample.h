@@ -1,8 +1,13 @@
-/* 
- * File:   AdcSample.h
- * Author: FreeGo
- *
- * Created on 2015年4月23日, 下午6:34
+/** 
+ * <p>application name： AdcSample.h</p> 
+ * <p>application describing： AdcSample宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
 #ifndef ADCSAMPLE_H

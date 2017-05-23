@@ -1,8 +1,13 @@
-/* 
- * File:   CAN.h
- * Author: LiDehai
- *
- * Created on 2015年11月10日, 下午2:16
+/** 
+ * <p>application name： CAN.h</p> 
+ * <p>application describing： CAN宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
 #ifndef CAN_H

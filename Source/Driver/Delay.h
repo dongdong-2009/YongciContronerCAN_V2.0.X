@@ -19,11 +19,16 @@
  * TERMS. 
  */
 
-/* 
- * File:   
- * Author: 
- * Comments:
- * Revision history: 
+/** 
+ * <p>application name： Delay.h</p> 
+ * <p>application describing： Delay宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
 // This is a guard condition so that contents of this file are not included
@@ -79,7 +84,7 @@ typedef struct SysTime
     uint32 StarTime;    //超时判断起始时间
     uint32 delayTime;
     uint16 GetTempTime; //获取温度时间
-    uint16 SendDataTime;//运行时间
+    uint16 SendDataTime;//循环发送数据时间
     uint8  ScanTime;    //按键扫描间隔时间
 }SysTimeStamp;
 

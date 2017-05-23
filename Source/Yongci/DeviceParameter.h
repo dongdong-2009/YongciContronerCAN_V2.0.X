@@ -1,17 +1,14 @@
-/***********************************************
-*Copyright(c) 2016,FreeGo
-*保留所有权利
-*文件名称:Main.c
-*文件标识:
-*创建日期： 2016年12月23日 
-*摘要:
-
-*当前版本:1.0
-*作者: FreeGo
-*取代版本:
-*作者:
-*完成时间:
-************************************************************/
+/** 
+ * <p>application name： DeviceParameter.h</p> 
+ * <p>application describing： DeviceParameter宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
+ */
 #ifndef XC_DEVICE_PARAMETER_H
 #define	XC_DEVICE_PARAMETER_H
 
@@ -26,7 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
    
-
+#define CAP1_ERROR  0xC1
+#define CAP2_ERROR  0xC2
+#define CAP3_ERROR  0xC3
+    
 //获取电压
 void GetCapVoltage(void);
 //获取电压状态

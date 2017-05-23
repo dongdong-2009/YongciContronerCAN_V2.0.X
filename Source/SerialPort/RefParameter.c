@@ -1,18 +1,14 @@
-/****************************************************
-*Copyright(c) 2015,FreeGo
-*保留所有权利
-*文件名称:MonitorCalculate.c
-*文件标识:
-*创建日期： 2017年4月4日
-*摘要:
-*2017/4/4:用来存放计算使用的各种数据
-*当前版本:1.0
-*作者: FreeGo
-*取代版本:
-*作者:
-*完成时间:
- * @updata 2017-04-07 张东旭 更改其内容为适应永磁控制器程序
-*******************************************************/
+/** 
+ * <p>application name： RefParameter.c</p> 
+ * <p>application describing： 用来存放计算使用的各种数据</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[2017-04-07] [张东旭][更改其内容为适应永磁控制器程序]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "../Header.h"
 #include "RefParameter.h"
 #include "../DeviceNet/DeviceNet.h"
@@ -109,6 +105,7 @@ uint8 SetParamValue(uint8 id,PointUint8* pPoint)
 {    
 	for(uint8 i = 0; i < PARAMETER_LEN; i++)
 	{
+		ClrWdt();
 		if(g_SetParameterCollect[i].ID == id)
 		{
 			//TODO :添加错误处理——每一个Set/Get函数添加相应的处理内容。
@@ -120,14 +117,14 @@ uint8 SetParamValue(uint8 id,PointUint8* pPoint)
             
             g_pointData.len = pPoint->len;
             WriteEEPROM(id , pPoint);   //写EEPROM           
-            
+            ClrWdt();
             ReadEEPROM(id , &g_pointData);      //读取EEPROM
             //添加判断读取出来的数据是否与变换之后的一致性
-            
+            ClrWdt();
             g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
             
 //            WriteAccumulateSum();  //写入累加和
-            
+            ClrWdt();
 			if (pPoint->len == 0)
 			{
 				return 0xF2;
@@ -152,8 +149,10 @@ uint8 ReadParamValue(uint8 id,PointUint8* pPoint)
 	{
 		for(uint8 i = 0; i < PARAMETER_LEN; i++)
 		{
+			ClrWdt();
 			if(g_SetParameterCollect[i].ID == id)
 			{
+				ClrWdt();
 				//TODO :添加错误处理——每一个Get函数添加相应的处理内容。
 
 				g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
@@ -171,10 +170,11 @@ uint8 ReadParamValue(uint8 id,PointUint8* pPoint)
 	{
 		for(uint8 i = 0; i < READONLY_PARAMETER_LEN; i++)
 		{
+			ClrWdt();
 			if(g_ReadOnlyParameterCollect[i].ID == id)
 			{
 				//TODO :添加错误处理——每一个et函数添加相应的处理内容。
-                
+                ClrWdt();
 				g_ReadOnlyParameterCollect[i].fGetValue(pPoint, g_ReadOnlyParameterCollect + i);
 				if (pPoint->len == 0)
 				{
@@ -200,7 +200,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].type = 0x22;
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
-    
+    ClrWdt();
 	index++;
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.capVoltage1.down;   //电容电压1下限
@@ -226,6 +226,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.capVoltage2.down;
 	g_SetParameterCollect[index].type = 0x22;
@@ -238,6 +239,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.fenzhaVoltage2.down; //分闸电压2下限
 	g_SetParameterCollect[index].type = 0x22;
@@ -250,6 +252,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.capVoltage3.down;
 	g_SetParameterCollect[index].type = 0x22;
@@ -262,6 +265,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.fenzhaVoltage3.down; //分闸电压3下限
 	g_SetParameterCollect[index].type = 0x22;
@@ -274,6 +278,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.workVoltage.down;   //工作电压下限
 	g_SetParameterCollect[index].type = 0x22;
@@ -287,6 +292,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index ++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemCalibrationCoefficient.capVoltageCoefficient2;
 	g_SetParameterCollect[index].type = 0x22;
@@ -299,6 +305,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueFloatUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	//Uint16 --[0-65535]，单位ms
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_RemoteWaitTime;  //遥控预制等待时间
@@ -312,6 +319,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueUint16;
 	index++;
+	ClrWdt();
 	//Uint8 --[0-255]，单位ms    
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_DelayTime.hezhaTime1;  //合闸时间1
@@ -325,6 +333,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_DelayTime.hezhaTime2;  //合闸时间2
 	g_SetParameterCollect[index].type = 0x10;
@@ -337,6 +346,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_DelayTime.hezhaTime3;  //合闸时间3
 	g_SetParameterCollect[index].type = 0x10;
@@ -349,6 +359,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemState.MacID;  //MAC地址
 	g_SetParameterCollect[index].type = 0x10;
@@ -364,7 +375,8 @@ void InitSetParameterCollect(void)
 
 	if (PARAMETER_LEN < index)
 	{
-		while(1);
+		ClrWdt();
+		while(1);	//数据长度不正确则触发看门狗复位
 	}
 }
 
@@ -374,6 +386,7 @@ void InitSetParameterCollect(void)
 void InitReadonlyParameterCollect(void)
 {
 	uint8 index = 0, id = READONLY_START_ID;
+	ClrWdt();
     //uint16 -- 电容电压、工作电压
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.voltageCap1;
@@ -387,6 +400,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.voltageCap3;
 	g_ReadOnlyParameterCollect[index].type = 0x22;
@@ -405,6 +419,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
+	ClrWdt();
     //uint16 -- 合分闸计数
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_ActionCount.hezhaCount1;   //合闸次数1
@@ -418,6 +433,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint16;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_ActionCount.hezhaCount2;   //合闸次数2
 	g_ReadOnlyParameterCollect[index].type = 0x20;
@@ -430,6 +446,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint16;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_ActionCount.hezhaCount3;   //合闸次数3
 	g_ReadOnlyParameterCollect[index].type = 0x20;
@@ -442,6 +459,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint16;
 	index++;
+	ClrWdt();
     //uint8 -- 系统状态位    
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemState.heFenState1;   //合位分位1
@@ -455,6 +473,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemState.heFenState3;   //合位分位3
 	g_ReadOnlyParameterCollect[index].type = 0x10;
@@ -467,6 +486,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemState.workMode;   //工作模式
 	g_ReadOnlyParameterCollect[index].type = 0x10;
@@ -479,6 +499,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
+	ClrWdt();
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemState.MacID;   //MAC
 	g_ReadOnlyParameterCollect[index].type = 0x10;
@@ -488,7 +509,8 @@ void InitReadonlyParameterCollect(void)
     
 	if (READONLY_PARAMETER_LEN < index)
 	{
-		while(1);
+		ClrWdt();
+		while(1);	//数据长度不正确则触发看门狗复位
 	}
 }
 
@@ -506,8 +528,11 @@ void RefParameterInit(void)
     //合分闸次数初始化
     ReadWord_EEPROM(JG1_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount1);
     ReadWord_EEPROM(JG1_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount1);
+	ClrWdt();
     ReadWord_EEPROM(JG2_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount2);
     ReadWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
+	
+	ClrWdt();
     if(CAP3_STATE)
     {
         ReadWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
@@ -522,18 +547,22 @@ void RefParameterInit(void)
     //系统电容电压初始化
     g_SystemVoltageParameter.workVoltage = 0x0490;   //实际需要读取ADC值
     g_SystemVoltageParameter.temp = DS18B20GetTemperature();
+	ClrWdt();
     
     //系统状态值初始化
     g_SystemState.heFenState1 = CHECK_1_FEN_STATE;    //默认为分位
     g_SystemState.heFenState2 = CHECK_2_FEN_STATE;    //默认为分位
     g_SystemState.heFenState3 = CHECK_3_FEN_STATE;    //默认为分位
+	ClrWdt();
     
     //远方与本地的初始化
     kairuValue = ReHC74165();
     Delay_ms(10);
+	ClrWdt();
     kairuValue = ReHC74165();
     if (kairuValue == YUAN_INPUT)//远控
     {
+		ClrWdt();
         g_SystemState.yuanBenState = YUAN_STATE;   //远方
     }
     else
@@ -548,6 +577,7 @@ void RefParameterInit(void)
     //系统参数上下限
     g_SystemLimit.workVoltage.upper = 3.4f;
     g_SystemLimit.workVoltage.down =  2.1f;
+	ClrWdt();
     
     g_SystemLimit.capVoltage1.upper = 2.1f;
     g_SystemLimit.capVoltage2.upper = 2.1f;
@@ -564,13 +594,13 @@ void RefParameterInit(void)
     
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
+	ClrWdt();
     
     error = AccumulateSumVerify();  //累加和校验    
     if(error)
     {
         UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
-        Delay_ms(500);        
-        UpdateLEDIndicateState(ERROR3_LED,TURN_OFF);
+		while(1);	//定值验证错误触发看门狗复位
         //调试时使用错误指示灯熄灭，表示产生了错误
     }    
 }
@@ -594,12 +624,15 @@ void SetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 		float ration = 0.01f;
 		uint16 data = pPoint->pData[1];
 		data =  (data << 8) | pPoint->pData[0];
+		ClrWdt();
 		float result = (float)data * ration;
 		*(float*)pConfig->pData = result;
+		ClrWdt();
 		pPoint->len = 2;
 	}
 	else
 	{
+		ClrWdt();
 		pPoint->len = 0; //置为0，以示意错误
 	}
 }
@@ -622,11 +655,13 @@ void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
         float ration = 100.0f;
         uint16 result = (uint16)(*(float*)pConfig->pData * ration);
 		pPoint->pData[0] = (uint8)(result & 0x00FF);
+		ClrWdt();
 		pPoint->pData[1] = (uint8)(result >> 8);
 		pPoint->len = 2;
 	}
 	else
 	{
+		ClrWdt();
 		pPoint->len = 0; //置为0，以示意错误
 	}
 }
@@ -648,11 +683,13 @@ void SetValueUint16(PointUint8* pPoint, ConfigData* pConfig)
 	{
 		pPoint->len = 2;
 		uint16 data = pPoint->pData[1];
+		ClrWdt();
 		data = (data<<8) | pPoint->pData[0];
 		*(uint16*)pConfig->pData = data;
 	}
 	else
 	{
+		ClrWdt();
 		pPoint->len = 0; //置为0，以示意错误
 	}
 }
@@ -674,11 +711,13 @@ void GetValueUint16(PointUint8* pPoint, ConfigData* pConfig)
 	{
         uint16 data = *(uint16*)pConfig->pData;
         pPoint->pData[0] = (uint8)(data & 0x00FF);
+		ClrWdt();
         pPoint->pData[1] = (uint8)(data >> 8);
 		pPoint->len = 2;
 	}
 	else
 	{
+		ClrWdt();
 		pPoint->len = 0; //置为0，以示意错误
 	}
 }
@@ -699,11 +738,13 @@ void SetValueUint8(PointUint8* pPoint, ConfigData* pConfig)
 	if (pPoint->len >= 1)
 	{
 		*(uint8*)pConfig->pData = pPoint->pData[0];
+		ClrWdt();
         pPoint->len = 1;
 	}
 	else
 	{
 		pPoint->len = 0; //置为0，以示意错误
+		ClrWdt();
 	}
 }
 
@@ -723,11 +764,13 @@ void GetValueUint8(PointUint8* pPoint, ConfigData* pConfig)
 	if (pPoint->len >= 1)
 	{
         pPoint->pData[0] =  *(uint8*)pConfig->pData;
+		ClrWdt();
         pPoint->len = 1;
 	}
 	else
 	{
 		pPoint->len = 0; //置为0，以示意错误
+		ClrWdt();
 	}
 }
 /**
@@ -743,14 +786,18 @@ void WriteAccumulateSum(void)
     uint16 totalSum = 0;
     for(i = 0;i < PARAMETER_LEN;i++)
     {
+		ClrWdt();
         id = i + 1;
         if(g_SetParameterCollect[i].ID == id)
-        {
+        {			
+			ClrWdt();	
             len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
             g_pointData.len = len;
             ReadEEPROM(id, &g_pointData);
+			ClrWdt();
             for(uint8 j = 0;j < g_pointData.len;j++)
             {
+				ClrWdt();
                 totalSum += g_pointData.pData[j];
             }
         }
@@ -774,6 +821,7 @@ uint8 AccumulateSumVerify(void)
     
     for(id = 1;id < PARAMETER_LEN;id++)
     {
+		ClrWdt();
         i = id - 1;
         if(g_SetParameterCollect[i].ID == id)   //初始化各个设置值
         {
@@ -781,22 +829,27 @@ uint8 AccumulateSumVerify(void)
             len = g_SetParameterCollect[i].type >> 4;
             g_pointData.len = len;
             ReadEEPROM(id, &g_pointData);
+			ClrWdt();
             
             //初始化各个变量
             g_SetParameterCollect[i].fSetValue(&g_pointData, g_SetParameterCollect + i);
             for(i = 0;i < g_pointData.len;i++)
             {
+				ClrWdt();
                 addData += g_pointData.pData[i];
             }
         }
     }
+	ClrWdt();
     ReadAccumulateSum(&readAddData);
     if(readAddData == addData)
     {
+		ClrWdt();
         return 0x00;
     }
     else
     {
+		ClrWdt();
         //校验和不相等，需要报错，且需要重新设置所有的参数
         return 0xFF;
     }

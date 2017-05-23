@@ -1,19 +1,15 @@
-/***********************************************
-*Copyright(c) 2015,FreeGo
-*保留所有权利
-*文件名称:CAN.c
-*文件标识:
-*创建日期： 2015年11月10日 
-*摘要:
-*2015/11/10:编写CAN配置程序
-*当前版本:1.0
-*作者: FreeGo
-*取代版本:
-*作者:
-*完成时间:
-************************************************************/
+/** 
+ * <p>application name： CAN.c</p> 
+ * <p>application describing： CAN配置程序</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author FreeGo 
+ * @version ver 1.0
+ */
 #include "../Header.h"
-#include <p30F6012A.h>
 #include "CAN.h"
 #include "../DeviceNet/DeviceNet.h"
 #include "../SerialPort/RefParameter.h"
@@ -41,7 +37,7 @@ inline void ConfigCANOneBraud(void)
                                     // equal to Fcy.(Fcy=30Mhz)
     C2CFG1bits.SJW=00;				//1TQ 同步跳转宽度时间 Synchronized jump width time is 1 x TQ when SJW is equal to 00
     C2CFG1bits.BRP = BRP_VAL;		//波特率预分频比位 ((FCY/(2*NTQ*BITRATE))-1) 	
-
+    ClrWdt();
     //C2CFG2 = 0x03F5;               // SEG1PH=6Tq, SEG2PH=3Tq, PRSEG=5Tq    
                                     // Sample 3 times
                                     // Each bit time is 15Tq    
@@ -50,6 +46,7 @@ inline void ConfigCANOneBraud(void)
     C2CFG2bits.SEG2PHTS = 1;    //相位段 2 时间选择位 1-可自由编程， 0-SEG1PH 与信息处理时间 （ 3 TQ）中的较大值
     C2CFG2bits.SAM = 0;     //采样次数 1-采样1次， 0-采样3次    
     C2CFG2bits.PRSEG = 1;   //广播时间端bit
+    ClrWdt();
     C2CFG2bits.SEG2PH = 2;  //相位缓冲段 2 位 
 }
 
@@ -64,6 +61,7 @@ inline void ConfigCANOneMaskFilterRX0(EIDBits* pRm0, EIDBits* pRf0)
     C2RX0CON = 0x0000;
     C2RX0CONbits.FILHIT0 = 0; //选择接收滤波器RF0
     //RM0 屏蔽器配置 标准与扩展
+    ClrWdt();
     C2RXM0SIDbits.MIDE = 0; //过滤类型 扩展帧; //EXIDE = 1 其它29bit全为1， 0-标准帧
     C2RXM0SIDbits.SID = pRm0->regBits.SID10_0; 
     C2RXF0SIDbits.EXIDE = 0;//1-使能扩展帧 0-标准帧
@@ -81,11 +79,13 @@ inline void ConfigCANOneMaskFilterRX1(EIDBits* pRm1, EIDBits* pRf2)
     C2RX1CON = 0x0000;
     C2RX1CONbits.FILHIT = 0b010;//选择接收过滤器RXF2
     //RM1 屏蔽器配置 标准与扩展
+    ClrWdt();
     C2RXM1SIDbits.MIDE = 1; //过滤类型 扩展帧; //EXIDE = 1 其它29bit全为1
     C2RXM1SIDbits.SID = pRm1->regBits.SID10_0; 
     C2RXM1EIDH = pRm1->regBits.EID17_6;
     C2RXM1EIDLbits.EID5_0 = pRm1->regBits.EID5_0;       
     //接收滤波器 RF2 (RF2)
+    ClrWdt();
     C2RXF2SIDbits.EXIDE = 1;//使能扩展帧
     C2RXF2SIDbits.SID     = pRf2->regBits.SID10_0;  //CAN1 Receive Acceptance Filter2 SID 	 bit 12-2 SID<10:0>： 标准标识符屏蔽位
     C2RXF2EIDH            = pRf2->regBits.EID17_6;  //CAN1 Receive Acceptace  Filter2 Extended Identifier high byte  bit 11-0 EID<17:6>： 扩展标识符屏蔽位 17-6
@@ -101,24 +101,28 @@ uint16 InitCANOne(EIDBits* pRm, EIDBits* pRf)
 {
     uint16 i = 0, state = 0;
     
+    ClrWdt();
     ///Interrupt Section of CAN Peripheral 中断配置
     C2INTF = 0;					//Reset all The CAN Interrupts 
     IFS2bits.C2IF = 0;  			//Reset the Interrupt Flag status register
     C2INTE = 0x00FF;               //Enable all CAN interrupt sources
     IEC2bits.C2IE = 1;				//Enable the CAN1 Interrupt 
       
+    ClrWdt();
     C2CTRLbits.REQOP = REQOP_CONFIG;//设置为配置模式 
     
     ConfigCANOneBraud();//配置CAN1波特率
     ConfigCANOneMaskFilterRX0(pRm, pRf);//配置RX0接收屏蔽滤波器
     ConfigCANOneMaskFilterRX1(pRm, pRf);//配置RX1接收屏蔽滤波器
     
+    ClrWdt();
     C2CTRLbits.REQOP = REQOP_LOOPBACK;
     //2ms 看门狗等待
     i = 0;
     state = 0xAA;
     while(C2CTRLbits.OPMODE != REQOP_LOOPBACK)//Wait for CAN1 mode change from Configuration Mode to Loopback mode 
     {
+        ClrWdt();
         __delay_us(10);
         ClrWdt();
         if (i++ > 1000)
@@ -142,6 +146,7 @@ uint16 InitStandardCAN(uint16 id, uint16 mask)
     IEC2bits.C2IE = 1;				//Enable the CAN1 Interrupt 
 
     C2CTRLbits.REQOP = REQOP_CONFIG;//设置为配置模式 
+    ClrWdt();
 
     //配置CAN比特率
     C2CTRLbits.CANCKS = 0;			// 0-4Fcy 1-Fcy  Select the CAN Master Clock . It is equal to Fcy here. 
@@ -155,7 +160,7 @@ uint16 InitStandardCAN(uint16 id, uint16 mask)
     C2CFG2bits.PRSEG = 1; //广播时间端bit
     C2CFG2bits.SEG2PH = 5; //相位缓冲段 2 位 
 
-
+    ClrWdt();
 
     // Configure Receive registers, Filters and Masks配置接收滤波器与屏蔽滤波器
     //清空接收滤波器
@@ -173,7 +178,7 @@ uint16 InitStandardCAN(uint16 id, uint16 mask)
     C2INTE = 0xBF;    //允许中断,不允许总线唤醒中断
     C2INTF = 0x00;    //标志位清零
 
-
+    ClrWdt();
     C2CTRLbits.REQOP = REQOP_WORK   ; //正常工作模式REQOP_WORK
     //2ms 看门狗等待
     i = 0;
@@ -198,6 +203,7 @@ uint16 InitStandardCAN(uint16 id, uint16 mask)
 **********************************************/
 inline void ConfigEIDTX0(EIDBits* pEID)
 {
+    ClrWdt();
     C2TX0SIDbits.TXIDE = 1;//扩展帧
     C2TX0SIDbits.SRR = 1;
     C2TX0SIDbits.SID10_6 = pEID->txBits.SID10_6;
@@ -219,6 +225,7 @@ uint8 ConfigDataTXB0(uint8 len, CANFrame* pframe)
     uint8 i = 0, j = 0;
     if (len > 0 && len <= 8)
     {
+        ClrWdt();
         C2TX0DLCbits.DLC = len;
         C2TX0DLCbits.TXRTR = 0;//正常报文
 
@@ -228,23 +235,29 @@ uint8 ConfigDataTXB0(uint8 len, CANFrame* pframe)
             switch (j)
             {
                 case 0:
+                    ClrWdt();
                     C2TX0B1 = pframe->frameDataWord[j];
                     break;
                 case 1:
+                    ClrWdt();
                     C2TX0B2 = pframe->frameDataWord[j];
                     break;
                 case 2:
+                    ClrWdt();
                     C2TX0B3 = pframe->frameDataWord[j];
                     break;
                 case 3:
+                    ClrWdt();
                     C2TX0B4 = pframe->frameDataWord[j];
                     break;
             }
         }
+        ClrWdt();
         len = C2TX0DLCbits.DLC;
     }
     else
     {
+        ClrWdt();
         len =  0;
     }
     return len;
@@ -263,20 +276,26 @@ uint8 ConfigDataTXB1(uint8 len, CANFrame* pframe)
         C2TX1DLCbits.DLC = len ;
         C2TX1DLCbits.TXRTR = 0;//正常报文
         C2TX1CONbits.TXPRI = 2;
+        ClrWdt();
         for ( i = 0, j = 0; i < len; i += 2, j++)
         {
+            ClrWdt();
             switch (j)
             {
                 case 0:
                     C2TX1B1 = pframe->frameDataWord[j];
+                    ClrWdt();
                     break;
                 case 1:
+                    ClrWdt();
                     C2TX1B2 = pframe->frameDataWord[j];
                     break;
                 case 2:
+                    ClrWdt();
                     C2TX1B3 = pframe->frameDataWord[j];
                     break;
                case 3:
+                    ClrWdt();
                     C2TX1B4 = pframe->frameDataWord[j];
                     break;
             }
@@ -285,6 +304,7 @@ uint8 ConfigDataTXB1(uint8 len, CANFrame* pframe)
     }
     else
     {
+        ClrWdt();
         len =  0;
     }
     return len;
@@ -301,23 +321,29 @@ uint8 ConfigDataTXB2(uint8 len, CANFrame* pframe)
     uint8 i = 0, j = 0;
     if (len > 0 && len <= 8)
     {
+        ClrWdt();
         C2TX2DLCbits.DLC = len;
         C2TX2DLCbits.TXRTR = 0;//正常报文
         C2TX0CONbits.TXPRI = 1;
         for ( i = 0, j = 0; i < len; i += 2, j++)
         {
+            ClrWdt();
             switch (j)
             {
                 case 0:
+                    ClrWdt();
                     C2TX2B1 = pframe->frameDataWord[j];
                     break;
                 case 1:
+                    ClrWdt();
                     C2TX2B2 = pframe->frameDataWord[j];
                     break;
                 case 2:
+                    ClrWdt();
                     C2TX2B3 = pframe->frameDataWord[j];
                     break;
                 case 3:
+                    ClrWdt();
                     C2TX2B4 = pframe->frameDataWord[j];
                     break;
             }
@@ -326,6 +352,7 @@ uint8 ConfigDataTXB2(uint8 len, CANFrame* pframe)
     }
     else
     {
+        ClrWdt();
         len =  0;
     }
     return len;
@@ -341,6 +368,7 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
 {  
     if ((len <= 8) && (len > 0))
     {
+        ClrWdt();
         C2TX0SIDbits.TXIDE = 0;//标准帧
         C2TX0SIDbits.SRR = 0; //0-正常报文 1-报文将请求远程发送
         C2TX0SIDbits.SID10_6 = GET_SID10_6(id);
@@ -349,34 +377,40 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
         C2TX0DLCbits.DLC = len;
         C2TX0DLCbits.TXRTR = 0;//正常报文       
         C2TX0CONbits.TXPRI = 3;
+        ClrWdt();
          
         //可考虑使用地址，简化操作
         switch(len) 
         {
             case 1:
             {
+                ClrWdt();
                 C2TX0B1 =   pbuff[0];                 
                 break;
             }
             case 2:
             {
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];                 
+                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];            
+                ClrWdt();     
                 break;
             }
             case 3:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];       
                 C2TX0B2 =   pbuff[2];                 
                 break;
             }
             case 4:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
                 C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
                 break;
             } 
             case 5:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
                 C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
                 C2TX0B3 =   pbuff[4]; 
@@ -384,6 +418,7 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
             }
             case 6:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
                 C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
                 C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
@@ -391,6 +426,7 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
             } 
             case 7:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
                 C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
                 C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
@@ -399,6 +435,7 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
             }
             case 8:
             {
+                ClrWdt();
                 C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
                 C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
                 C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
@@ -406,7 +443,9 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
                 break;
             }    
         }
+        ClrWdt();
         C2TX0CONbits.TXREQ = 1;         //请求发送
+        //超时10ms看门狗复位
         while(C2TX0CONbits.TXREQ);      //发送完成后该标志位会被自动清零
     }
     return 0;
@@ -427,6 +466,7 @@ uint8 ReadRx0Frame(CANFrame* pframe)
         len = C2RX0DLCbits.DLC;
         for ( i = 0, j = 0; i < len; i += 2, j++)
         {
+            ClrWdt();
             switch (j)
             {
                 case 0:
@@ -446,6 +486,7 @@ uint8 ReadRx0Frame(CANFrame* pframe)
             }
         }
     }
+    ClrWdt();
     C2RX0CONbits.RXFUL = 0; 
     return len;
 }
@@ -458,6 +499,7 @@ uint8 ReadRx0Frame(CANFrame* pframe)
 **************************************************************/
 inline void GetReciveRX0EID(EIDBits* pEID)
 {
+    ClrWdt();
     pEID->regBits.SID10_0 = C2RX0SIDbits.SID;
     pEID->regBits.EID17_6 = C2RX0EID;
     pEID->regBits.EID5_0 = C2RX0DLCbits.EID5_0;         
@@ -472,15 +514,18 @@ EIDBits rEID;
  
 void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 {    
+    ClrWdt();
     uint8 rxErrorCount = C2EC & 0x00FF;
     uint8 txErrorCount = (C2EC & 0xFF00) >> 8;
     
+    ClrWdt();
     IFS2bits.C2IF = 0;         //Clear interrupt flag
     /*该错误是在CAN总线上产生任何一个错误都会引起该标志位置位*/
     C2INTFbits.IVRIF = 0; //该错误表示在CAN总线上不需要采取任何动作
 
     if(C2INTFbits.TX0IF)
     {
+        ClrWdt();
         C2INTFbits.TX0IF = 0;  //If the Interrupt is due to Transmit0 of CAN1 Clear the Interrupt
     }  
     else if(C2INTFbits.TX1IF)
@@ -490,28 +535,33 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 
     if(C2INTFbits.RX0IF)
     {   
+        ClrWdt();
         C2INTFbits.RX0IF = 0; 	//If the Interrupt is due to Receive0 of CAN1 Clear the Interrupt
         uint16 id = C2RX0SIDbits.SID;
         uint8 len = C2RX0DLCbits.DLC;
+        ClrWdt();
         ReadRx0Frame(&Rframe);
+        ClrWdt();
         DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
     }
     else if(C2INTFbits.RX1IF)
     {  
         C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
-
+        ClrWdt();
     }
 
     if((rxErrorCount < 120) || (txErrorCount < 120))
     {
         C2INTEbits.ERRIE = 1;   //开启错误中断
         IEC2bits.C2IE = 1;      //允许CAN中断
+        ClrWdt();
 //        UpdateIndicateState(ON_COM_ERROR_LED, TURN_OFF); //开启错误指示灯
     }
     
     /*总线关闭错误中断处理*/
     if((C2INTFbits.TXBO) && (C2INTFbits.ERRIF))
     {
+        ClrWdt();
         //总线关断，需要报错，但是此时可以退出中断服务程序，但是不会改变TXBO位
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
@@ -527,19 +577,23 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {
+            ClrWdt();
             C2INTFbits.RX0OVR = 0;  //清除接收缓冲器1溢出中断
         }
         else if(C2INTFbits.RX1OVR)
         {
+            ClrWdt();
             C2INTFbits.RX1OVR = 0;  //清除接收缓冲器1溢出中断
         }
         
         if((C2INTFbits.EWARN) && (C2INTFbits.RXWAR)) //接收错误计数器警告
         {
+            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
         }
         if(C2INTFbits.RXBP) //接收错误计数器警告
         {
+            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
 //            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
             //C2INTEbits.ERRIE = 0;  //禁止错误中断
@@ -548,10 +602,12 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         /*发送错误中断处理*/
         if((C2INTFbits.EWARN) && (C2INTFbits.TXWAR)) //发送错误计数器警告
         {
+            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
         }
         if(C2INTFbits.TXEP) //发送错误计数器警告
         {
+            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
 //            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
             //C2INTEbits.ERRIE = 0;  //禁止错误中断

@@ -19,11 +19,16 @@
  * TERMS. 
  */
 
-/* 
- * File:   
- * Author: 
- * Comments:
- * Revision history: 
+/** 
+ * <p>application name： RefParameter.h</p> 
+ * <p>application describing： RefParameter宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
 // This is a guard condition so that contents of this file are not included
@@ -86,8 +91,8 @@ typedef struct FenHeZhaDelayTime
 	uint8 hezhaTime2;   //合闸时间2 (ms) 
 	uint8 hezhaTime3;   //合闸时间3 (ms) 
     uint8 fenzhaTime1;  //分闸时间1 （ms）
-    uint8 fenzhaTime2;  //分闸时间1 （ms）
-    uint8 fenzhaTime3;  //分闸时间1 （ms）
+    uint8 fenzhaTime2;  //分闸时间2 （ms）
+    uint8 fenzhaTime3;  //分闸时间3 （ms）
 }WaitTime;
 
 /**
@@ -201,6 +206,7 @@ extern LimitValue g_SystemLimit;
 extern ActionCount g_ActionCount;   //分合闸计数
 extern SystemState g_SystemState;   //系统状态量
 extern WaitTime g_DelayTime;    //分合闸时间
+extern SystemCalibrationCoefficient g_SystemCalibrationCoefficient; //系统参数校准
 
 extern uint16 _PERSISTENT g_SyncReadyWaitTime;  //同步预制等待时间
 extern uint16 _PERSISTENT g_RemoteWaitTime;     //遥控预制等待时间

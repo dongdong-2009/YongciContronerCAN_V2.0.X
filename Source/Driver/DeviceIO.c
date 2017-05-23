@@ -73,6 +73,7 @@ void InitDeviceIO(void)
     DRIVER_C_1_DIR = 0;
     DRIVER_D_1_DIR = 0;
     RESET_CURRENT_A();
+    ClrWdt();
     
     //IGBT引脚
     //B
@@ -81,6 +82,7 @@ void InitDeviceIO(void)
     DRIVER_C_2_DIR = 0;
     DRIVER_D_2_DIR = 0;
     RESET_CURRENT_B();
+    ClrWdt();
 
     //IGBT引脚
     //C
@@ -89,29 +91,34 @@ void InitDeviceIO(void)
     DRIVER_C_3_DIR = 0;
     DRIVER_D_3_DIR = 0;
     RESET_CURRENT_C();
+    ClrWdt();
     
     IP595_B_DS_DIR=0;
     IP595_B_SHCP_DIR =0;  
     IP595_B_STCP_DIR=0;
     IP595_B_MR_DIR=0;
     IP595_B_MR=1;
+    ClrWdt();
     
     IP595_DS_DIR=0;
     IP595_SHCP_DIR =0;  
     IP595_STCP_DIR=0;
     IP595_MR_DIR=0;
     IP595_MR=1;
+    ClrWdt();
     
     PL_DIR=0;
     CE_DIR=0;
     CP_DIR =0;
     Q7_DIR =1;
+    ClrWdt();
     
     RXD1_LASER_DIR = 1;
     RXD2_LASER_DIR = 1; 
     
     TXD1_LASER_DIR = 0;
     TXD2_LASER_DIR = 0;
+    ClrWdt();
     
     
     TXD1_LASER = 0;    
@@ -120,9 +127,11 @@ void InitDeviceIO(void)
     RESET_CURRENT_A();
     RESET_CURRENT_B();
     RESET_CURRENT_C();
+    ClrWdt();
     
     InitInt2(); //初始化外部中断
 
+    ClrWdt();
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯、继电器
 }
 /**
@@ -136,6 +145,7 @@ void HC595BSendData(uint16 SendVal)
     uint8 i;
     for(i=0;i<16;i++) 
     {
+        ClrWdt();
         ClrWdt();
         if ((SendVal & 0x8000) == 0x8000)
         {
@@ -201,6 +211,8 @@ unsigned long ReHC74165(void)
 {  
     unsigned char i;
     unsigned long indata = 0;	 
+    
+    ClrWdt();
     PL = 0;  
     __delay_us(1);
     PL = 1;
@@ -231,6 +243,8 @@ unsigned long ReHC74165(void)
  */
 void InitInt2(void)
 {
+    
+    ClrWdt();
     IPC5bits.INT2IP = 7;    //外部中断优先级为最高优先级
 //    INTCON2bits.INT2EP = 1; //负边沿触发中断
     INTCON2bits.INT2EP = 0;   //正边沿触发中断
@@ -241,19 +255,27 @@ void InitInt2(void)
 }
 
 /**
- * @description 外部中断1开启
+ * 
+ * <p>Function name: [TurnOnInt2]</p>
+ * <p>Discription: [开启外部中断2]</p>
  */
 inline void TurnOnInt2(void)
 {
+    
+    ClrWdt();
     IFS1bits.INT2IF = 0;
-    IEC1bits.INT2IE = 1;
+//    IEC1bits.INT2IE = 1;
 }
 
 /**
- * @description 外部中断1关闭
+ * 
+ * <p>Function name: [TurnOffInt2]</p>
+ * <p>Discription: [关闭外部中断2]</p>
  */
 inline void TurnOffInt2(void)
 {
+    
+    ClrWdt();
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;
 }
@@ -320,4 +342,5 @@ void UpdateIndicateState(uint16 relayPort,uint16 ledPort,uint8 state)
     UpdateRelayIndicateState(relayPort,state);
     ClrWdt();
     UpdateLEDIndicateState(ledPort,state);
+    ClrWdt();
 }

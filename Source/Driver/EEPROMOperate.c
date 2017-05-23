@@ -1,10 +1,14 @@
-/*
- * File:   EEPROMOperate.c
- * Author: 张东旭
- *
- * Created on 2017年4月8日, 上午11:17
+/** 
+ * <p>application name： EEPROMOperate.c</p> 
+ * <p>application describing： 配置读写EEPROM函数</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
  */
-
 #include "../Header.h"
 #include "../SerialPort/RefParameter.h"
 
@@ -36,6 +40,7 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16* data)
         ClrWdt();
         __builtin_disi(0x3FFF); 
         __delay_us(100);
+        ClrWdt();
         if (cn++ >200) //超过20ms跳出
         {
             break;             
@@ -51,6 +56,7 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16* data)
         ClrWdt(); 
         __builtin_disi(0x3FFF); 
         __delay_us(100);
+        ClrWdt();
         if (cn++ >200) //超过20ms跳出
         {
             break;            
@@ -81,10 +87,12 @@ void ReadEEPROM(uint8 id,PointUint8* pPoint)
 {    
     uint16 readData = 0;
     uint8 i = 0;
+    ClrWdt();
     _prog_addressT address;
     address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
     for(i = 0;i < pPoint->len;i += 2)
-    {
+    { 
+        ClrWdt();
         ReadWord_EEPROM(address + i,&readData);
         pPoint->pData[i] = (readData & 0x00FF); //低位先读取
         if((pPoint->len % 2) == 0)  //对长度进行奇数校验
@@ -102,10 +110,12 @@ void WriteEEPROM(uint8 id,PointUint8* pPoint)
 {
     uint16 data[2] = {0,0};
     uint8 i = 0;
+    ClrWdt();
     _prog_addressT address;
     address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
     for(i = 0;i < pPoint->len;i += 2)
     {
+        ClrWdt();
         if((pPoint->len % 2) == 0)  //对长度进行奇数校验
         {
             data[i] = pPoint->pData[i + 1];               
@@ -121,7 +131,7 @@ void WriteEEPROM(uint8 id,PointUint8* pPoint)
 void WriteAccumulateSum_EEPROM(uint16* writeData)
 {
     OFF_CAN_INT();  //不允许CAN中断
-    
+    ClrWdt();
     _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
     WriteWord_EEPROM(address,writeData);    //写EEPROM时关闭CAN中断
     
@@ -135,6 +145,7 @@ void WriteAccumulateSum_EEPROM(uint16* writeData)
 void ReadAccumulateSum(uint16* readData)
 {
     _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
+    ClrWdt();
     ReadWord_EEPROM(address,readData);    
 }
 
@@ -147,9 +158,11 @@ void WriteFenzhaCount(_prog_addressT addr , uint16* eedata)
 {
     ReadWord_EEPROM(addr , eedata);
     
-    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
-    eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
+    ClrWdt();
+    *eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
     
+    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+    ClrWdt();
     WriteWord_EEPROM(addr , eedata);
     ON_INT();
 }

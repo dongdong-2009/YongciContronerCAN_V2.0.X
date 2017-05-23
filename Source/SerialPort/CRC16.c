@@ -1,3 +1,14 @@
+/** 
+ * <p>application name： CRC16.c</p> 
+ * <p>application describing： 16位CRC校验码</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "CRC16.h"
 #include "../Header.h"
 
@@ -57,7 +68,7 @@ uint16 CRC16(uint8 *puchMsg, uint8 usDataLen)
         uchCRCLo = auchCRCLo[uIndex];
         
     }
-     ClrWdt();
+    ClrWdt();
     return(uint16) (uchCRCHi << 8 | uchCRCLo);
 }
 

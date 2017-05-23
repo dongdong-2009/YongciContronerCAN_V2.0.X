@@ -1,8 +1,13 @@
-/* 
- * File:   
- * Author: 
- * Comments:
- * Revision history: 
+/** 
+ * <p>application name： DeviceNet.h</p> 
+ * <p>application describing： DeviceNet宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
 // This is a guard condition so that contents of this file are not included
@@ -180,21 +185,21 @@ struct DefConnectionObj
 #define IDENTIFIER_OBJ_NAME       7 //产品名称
 
 //Group1 功能码
-#define  GROUP1_STATUS_CYCLE_ACK           13///从站IO状态改变或循环报文
-#define  GROUP1_BIT_STROKE                 14///从站IO位选通应答报文
-#define  GROUP1_POLL_STATUS_CYCLER_ACK     15///从站IO轮询或状态变化/循环应答消息
+#define  GROUP1_STATUS_CYCLE_ACK           13   //从站IO状态改变或循环报文
+#define  GROUP1_BIT_STROKE                 14   //从站IO位选通应答报文
+#define  GROUP1_POLL_STATUS_CYCLER_ACK     15   //从站IO轮询或状态变化/循环应答消息
 
 
 //Group2 功能码
 #define GROUP2_BIT_STROBE     0 //主站IO位选通响应消息
-#define GROUP2_POLL           1  //主站IO多点响应消息响应消息
-#define GROUP2_STATUS_POLL        2  //主站状态变换或循环应答报文应答消息
-#define GROUP2_VISIBLE_UCN    3  //从站站显示响应消息
+#define GROUP2_POLL           1 //主站IO多点响应消息响应消息
+#define GROUP2_STATUS_POLL    2 //主站状态变换或循环应答报文应答消息
+#define GROUP2_VISIBLE_UCN    3 //从站站显示响应消息
 
 #define GROUP2_VSILBLE        4 //主站显示请求信息
-#define GROUP2_POLL_STATUS_CYCLE         5//主站IO轮询/状态变化/循环报文
-#define GROUP2_VSILBLE_ONLY2  6//仅限组2非连接显示请求信息
-#define GROUP2_REPEAT_MACID   7//重复MACID 检查消息
+#define GROUP2_POLL_STATUS_CYCLE    5   //主站IO轮询/状态变化/循环报文
+#define GROUP2_VSILBLE_ONLY2  6 //仅限组2非连接显示请求信息
+#define GROUP2_REPEAT_MACID   7 //重复MACID 检查消息
 
 //定义完整接收数据结构
 struct DefFrameData
@@ -213,7 +218,7 @@ struct DefFrameData
 //生成GROUP1 ID
 #define MAKE_GROUP1_ID( function, mac_id) (DINT)(((function &0x1F)<<6) | (mac_id & 0x3F))
 //生成GROUP2 ID
-#define MAKE_GROUP2_ID(  function,mac_id)  (DINT)( (0x0400) | ((DINT)(mac_id &0x3F)<<3) | (function & 0x07))
+#define MAKE_GROUP2_ID(  function,mac_id) (DINT)( (0x0400) | ((DINT)(mac_id &0x3F)<<3) | (function & 0x07))
 
 //#define FALSE (BYTE)0
 //#define TRUE (BYTE)0xFF

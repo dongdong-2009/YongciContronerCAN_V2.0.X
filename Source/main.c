@@ -52,10 +52,11 @@
 #pragma config FOSFPR = XT_PLL4         // Oscillator (XT w/PLL 4x)
 #pragma config FCKSMEN = CSW_FSCM_OFF   // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
 
-// FWDT
-#pragma config FWPSB = WDTPSB_8         // WDT Prescaler B (1:8)
+// FWDT 10ms
+#pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)    
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -95,7 +96,6 @@ frameRtu sendFrame, recvFrame;
 uint8 data[8] = {0xAA,0xAA,0xAA,0xAA,0xAA};
 int main()
 {
-    __delay_ms(100);
     uint16 cn = 0;
     
     InitDeviceIO(); //IO初始化 首先禁止中断
@@ -121,6 +121,7 @@ int main()
     
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
     Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
+    Init_Timer4();  //用于判断同步信号时长的计数器
     
     StartTimer2();  //开启系统时钟
     ClrWdt(); //452cycs
@@ -141,11 +142,7 @@ int main()
     
     ClrWdt();
     InitDeviceNet();        
-    //测试使用
-//    while(1)
-//    {
-//        ClrWdt();
-//    }
+    
     ClrWdt();
     RefParameterInit(); //参数设置初始化
 
@@ -159,6 +156,7 @@ int main()
     
     while(TRUE)
     {
+        ClrWdt();
         YongciMainTask();
     }
 }

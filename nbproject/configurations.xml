@@ -21,7 +21,6 @@
       <itemPath>Source/SerialPort/RefParameter.h</itemPath>
       <itemPath>Source/Driver/EEPROMOperate.h</itemPath>
       <itemPath>Source/Driver/InitTemp.h</itemPath>
-      <itemPath>Delay.h</itemPath>
       <itemPath>Source/Driver/Delay.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"

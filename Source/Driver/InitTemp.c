@@ -93,6 +93,7 @@ uint8 DS18B20ReadBit(void)    //读一位
     //读时隙起始于微处理器将总线拉低至少1us
     __delay_us(2);
 
+    ClrWdt();
     //拉低总线后接着释放总线，让从机18b20能够接管总线，输出有效数据
     TERM0_OUT = 1;
     TERM0_DIR = 1;
@@ -103,6 +104,7 @@ uint8 DS18B20ReadBit(void)    //读一位
     //主机读从机18b20输出的数据，这些数据在读时隙的下降沿出现//15us内有效
     dat = TERM0_IN;
     //所有读"时间隙"必须60~120us，这里80us
+    ClrWdt();
     __delay_us(80);
     return(dat);       //返回有效数据
 }
@@ -142,6 +144,7 @@ void DS18B20WriteByte(uint8 dat) //写一个字节
     uint8 onebit = 0;
     for(i=1; i<=8; i++) 
     {
+        ClrWdt();
         onebit= dat & 0x01;
         dat =dat>>1;
 
@@ -162,6 +165,7 @@ void DS18B20WriteByte(uint8 dat) //写一个字节
         {
             TERM0_DIR = 0;
             TERM0_OUT = 0;
+            ClrWdt();
             __delay_us(70);//主机要生成一个写0 时间隙，必须把数据线拉到低电平并保持至少60μs，这里70us
             TERM0_OUT = 1;
             TERM0_DIR = 1;

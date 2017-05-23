@@ -1,3 +1,14 @@
+/** 
+ * <p>application name： Header.h</p> 
+ * <p>application describing： 主函数宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
+ */
 #ifndef _Header_H_
 #define _Header_H_
 
@@ -33,7 +44,7 @@
 #ifdef	SMALL_CHOSE
     #define ADCS()  {ADCSSL = 0x000F;}  //ADC扫描通道数,AN0--AN3全部扫描
     #define ADPC()  {ADPCFG = 0xFFF0;}  //AN0--AN3
-    #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS;}
+    #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS *  * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
 
 #elif BIG_CHOSE

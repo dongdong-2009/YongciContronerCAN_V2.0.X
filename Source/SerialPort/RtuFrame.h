@@ -1,10 +1,14 @@
-/* 
- * File:   RtuFrame.h
- * Author: LiDehai
- *
- * Created on 2014年12月4日, 上午7:27
+/** 
+ * <p>application name： RtuFrame.h</p> 
+ * <p>application describing： RtuFrame宏定义</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
-
 #ifndef RTUFRAME_H
 #define	RTUFRAME_H
 

@@ -32,16 +32,20 @@ inline uint8 IsOverTime(uint32 startTime, uint32 delayTime)
 {
     if (UINT32_MAX - delayTime < startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
+        ClrWdt();
         if( g_MsTicks < startTime)//先判断是否小于startTime
         {
+            ClrWdt();
             if (g_MsTicks >= (delayTime + startTime))
             {
+                ClrWdt();
                 return 0xFF;
             }
         }
     }
     else
     {
+        ClrWdt();
         if (g_MsTicks >= startTime + delayTime)
         {
             return 0xFF;
@@ -60,7 +64,11 @@ inline void Delay_ms(uint32 dlyTicks)
 {
     uint32 curTicks;
     curTicks = g_MsTicks;
-    while ((g_MsTicks - curTicks) < dlyTicks);
+    ClrWdt();
+    while ((g_MsTicks - curTicks) < dlyTicks)
+    {
+        ClrWdt();
+    }
 }
 
 /**
@@ -71,8 +79,10 @@ inline void Delay_ms(uint32 dlyTicks)
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
     IFS0bits.T2IF = 0;
-    g_MsTicks++;                        /* increment counter necessary in Delay() */    
+    g_MsTicks++;                        /* increment counter necessary in Delay() */  
+    ClrWdt();  
     g_SysTimeStamp.ScanTime++;
     g_SysTimeStamp.SendDataTime++;
+    ClrWdt();
     g_SysTimeStamp.GetTempTime ++;
 }

@@ -1,30 +1,22 @@
-/* 
- * File:   yongci.h
- * Author: ZFreeGo
- *
+/** 
+ * <p>application name： yongci.h.c</p> 
+ * <p>application describing： 永磁控制器主要逻辑</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
  * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
+ * @version ver 1.0
  */
 
-#ifndef YONGCI_H
-#define	YONGCI_H
+#ifndef XC_YONGCI_H
+#define	XC_YONGCI_H
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 #include "../Driver/tydef.h"
-
-typedef struct SynchroSwitchConfig
-{
-	uint8   State;	//当前的状态
-	uint16  Order;	//分合闸命令
-    uint16  LastOrder;  //上一次执行的指令
-	uint16  SwitchOnTime;   //合闸动作时间
-	uint16  SwitchOffTime;	//分闸动作时间
-	uint16  OffestTime;	//偏移时间
-	uint32  SysTime;	//当前的系统时间
-	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
-	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
-}SwitchConfig;
 
 #define RUN_STATE   0x77    //运行状态
 #define REDAY_STATE 0x88    //准备状态
@@ -73,9 +65,6 @@ typedef struct SynchroSwitchConfig
     
 #define CHECK_3_HE_ORDER  0x28  //执行机构3合闸动作
 #define CHECK_3_FEN_ORDER 0x29  //执行机构3分闸动作
-    
-#define CHECK_HE_STATE  0x32  //总的合闸状态
-#define CHECK_FEN_STATE 0x33  //总的分闸状态
 
 #define CHECK_1_HE_STATE  0x34  //机构1合闸状态
 #define CHECK_1_FEN_STATE 0x35  //机构1分闸状态
@@ -101,12 +90,35 @@ typedef struct SynchroSwitchConfig
 #define ON_INT() {ON_UART_INT(); ON_CAN_INT();}
 #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
 
+typedef struct SynchroSwitchConfig
+{
+	uint8   State;	//当前的状态
+	uint16  Order;	//分合闸命令
+    uint16  LastOrder;  //上一次执行的指令
+	uint16  SwitchOnTime;   //合闸动作时间
+	uint16  SwitchOffTime;	//分闸动作时间
+	uint16  OffestTime;	//偏移时间
+	uint32  SysTime;	//当前的系统时间
+	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
+	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
+}SwitchConfig;
+
+typedef struct SystemIndexConfig
+{
+    uint8 indexLoop;
+    uint8 onTime;
+    uint16 offestTime;
+    void (*GetTime)(struct SystemIndexConfig* );
+}IndexConfig;
+
 void YongciMainTask(void);
 void YongciFirstInit(void);
 
 void HEZHA_Action(uint8 index,uint16 time);
 void FENZHA_Action(uint8 index,uint16 time);
-void TongBuHeZha(uint16 offsetTime1,uint16 offsetTime2);
+void TongBuHeZha(void);
+void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
+
 
 #ifdef	__cplusplus
 }

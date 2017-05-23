@@ -1,9 +1,19 @@
-/*****************88
+/** 
+ * <p>application name： SwtichCondition.c</p> 
+ * <p>application describing： 开入量值获取</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+
  * 摘要:
  * 2015/8/10:完善远本转换。
  * 2015/11/17: 改变IO检测模式，由纯延时形式，变成采样点样式。
  * 将远方检测IO与本地合并。
-***/
+
+ * @updata:[2017-05-20] [张东旭][更改IO读取方式，采用的是并口转串口，165采样。扫描改为定时器扫描]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "SwtichCondition.h"
 #include "../Header.h"
 #include "DeviceParameter.h"
@@ -51,14 +61,14 @@ uint32 g_kairuValue = 0;    //165返回值
 
 #define STATE_FEN_CONTINOUS        0xAA55
 
-#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT)   //机构1合闸条件
-#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT)    //机构1分闸条件
+#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT | YUAN_AND_WORK())   //机构1合闸条件
+#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT | YUAN_AND_WORK())    //机构1分闸条件
 
-#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT)   //机构2合闸条件
-#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT)    //机构2分闸条件
+#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT | YUAN_AND_WORK())   //机构2合闸条件
+#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT | YUAN_AND_WORK())    //机构2分闸条件
 
-#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT)   //机构3合闸条件
-#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT)    //机构3分闸条件
+#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT | YUAN_AND_WORK())   //机构3合闸条件
+#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT | YUAN_AND_WORK())    //机构3分闸条件
 
 //远方\本地控制检测
 #define YUAN_BEN_CONDITION()    ((g_kairuValue & YUAN_INPUT) == YUAN_INPUT)
@@ -67,35 +77,40 @@ uint32 g_kairuValue = 0;    //165返回值
 #define WORK_DEBUG_CONDITION()  ((g_kairuValue & WORK_INPUT) == WORK_INPUT)
 
 #ifdef SMALL_CHOSE
-//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
+//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
+#define Z_HEZHA_CONDITION()     ((g_kairuValue & ~DIANXIAN_INPUT)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
-#define Z_FENZHA_CONDITION()    (g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT))
+#define Z_FENZHA_CONDITION()    \
+(g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0))
 
 #elif	BIG_CHOSE
-//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
+//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
+#define Z_HEZHA_CONDITION()     ((g_kairuValue & ~DIANXIAN_INPUT) == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
-#define Z_FENZHA_CONDITION()    (g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT))
+#define Z_FENZHA_CONDITION()    \
+    (g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0)
 #endif
 
 
-//本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | YUAN_AND_WORK())) == COIL1_HEZHA())
+//本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
+#define HEZHA1_CONDITION()      ((g_kairuValue & COIL1_HEZHA()) == COIL1_HEZHA())
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
-#define FENZHA1_CONDITION()     ((g_kairuValue & (COIL1_FENZHA() | YUAN_AND_WORK())) == COIL1_FENZHA())
+#define FENZHA1_CONDITION()    \
+((g_kairuValue & COIL1_FENZHA()) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
-//本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | YUAN_AND_WORK())) == COIL2_HEZHA())
+//本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
+#define HEZHA2_CONDITION()      ((g_kairuValue & COIL2_HEZHA()) == COIL2_HEZHA())
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
-#define FENZHA2_CONDITION()     ((g_kairuValue & (COIL2_FENZHA() | YUAN_AND_WORK())) == COIL2_FENZHA())
+#define FENZHA2_CONDITION()    \
+((g_kairuValue & COIL2_FENZHA()) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
-//本地的机构3合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | YUAN_AND_WORK())) == COIL3_HEZHA())
+//本地的机构3合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
+#define HEZHA3_CONDITION()      ((g_kairuValue & COIL3_HEZHA()) == COIL3_HEZHA())
 //本地的机构3分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
-#define FENZHA3_CONDITION()     ((g_kairuValue & (COIL3_FENZHA() | YUAN_AND_WORK())) == COIL3_FENZHA())
+#define FENZHA3_CONDITION()    \
+((g_kairuValue & COIL3_FENZHA()) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 
 /**
@@ -164,7 +179,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState()))
             {
-                TongBuHeZha(50,60);
+                TongBuHeZha();
                 ClrWdt();
                 g_GetState.ExecuteOrder1 = 0x01;
                 g_GetState.ExecuteOrder2 = 0x04;
@@ -181,11 +196,12 @@ uint8 CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
             {
-                FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
-                FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
+                ClrWdt();
+                FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
+                FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 if(CAP3_STATE)  //判断第三块驱动是否存在
                 {
-                    FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                    FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 }
                 ClrWdt();
                 g_GetState.ExecuteOrder1 = 0x02;
@@ -204,7 +220,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                HEZHA_Action(SWITCH_ONE , HEZHA_TIME);
+                HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
                 g_GetState.ExecuteOrder1 = 0x02;
             }
             return 0xff;
@@ -214,7 +230,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
+                FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                 g_GetState.ExecuteOrder1 = 0x01;
             }
             return 0xff;
@@ -225,7 +241,7 @@ uint8 CheckIOState(void)
             ClrWdt();        
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                HEZHA_Action(SWITCH_TWO , HEZHA_TIME);
+                HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
                 g_GetState.ExecuteOrder2 = 0x08;
             }
             return 0xff;
@@ -235,7 +251,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
+                FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 g_GetState.ExecuteOrder2 = 0x04;
             }
             return 0xff;
@@ -246,7 +262,7 @@ uint8 CheckIOState(void)
             ClrWdt();        
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                HEZHA_Action(SWITCH_THREE , HEZHA_TIME);
+                HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
                 g_GetState.ExecuteOrder3 = 0x20;
             }            
             return 0xff;
@@ -256,7 +272,7 @@ uint8 CheckIOState(void)
             ClrWdt();
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 g_GetState.ExecuteOrder3 = 0x10;
             }            
             return 0xff;
@@ -276,7 +292,8 @@ uint8 CheckIOState(void)
 void DsplaySwitchState(void)
 {    
     ClrWdt();
-    if(g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //机构1错误
+    if(g_GetState.Cap1Error == CAP1_ERROR || 
+       g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //机构1错误
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
         ClrWdt();
@@ -284,11 +301,15 @@ void DsplaySwitchState(void)
     }
     else 
     {
+        if(g_SystemState.warning == CHECK_ERROR1_STATE)
+        {
+            g_SystemState.warning = NO_ERROR;
+        }
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
-        g_SystemState.warning = NO_ERROR;
     }
     
-    if(g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //机构2错误
+    if(g_GetState.Cap2Error == CAP2_ERROR || 
+       g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //机构2错误
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
         ClrWdt();
@@ -296,12 +317,35 @@ void DsplaySwitchState(void)
     }
     else
     {
+        if(g_SystemState.warning == CHECK_ERROR2_STATE)
+        {
+            g_SystemState.warning = NO_ERROR;
+        }
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_OFF);
-        g_SystemState.warning = NO_ERROR;
+    }
+    
+    if(CAP3_STATE)
+    {
+        if(g_GetState.Cap3Error == CAP3_ERROR || 
+           g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //机构3错误
+        {
+            UpdateIndicateState(ERROR3_RELAY,ERROR2_LED,TURN_ON);
+            ClrWdt();
+            g_SystemState.warning = CHECK_ERROR3_STATE;
+        }
+        else
+        {
+            if(g_SystemState.warning == CHECK_ERROR3_STATE)
+            {
+                g_SystemState.warning = NO_ERROR;
+            }
+            UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_OFF);
+        }
     }
     
     if((g_SystemState.warning == CHECK_ERROR1_STATE) ||
-       (g_SystemState.warning == CHECK_ERROR2_STATE))
+       (g_SystemState.warning == CHECK_ERROR2_STATE) ||
+       (g_SystemState.warning == CHECK_ERROR3_STATE))
     {
         return ;
     }

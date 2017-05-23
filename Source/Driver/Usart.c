@@ -1,3 +1,14 @@
+/** 
+ * <p>application name： Usart.c</p> 
+ * <p>application describing： 配置Usart</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "usart.h"
 #include <xc.h>
 #include "../SerialPort/RtuFrame.h"
@@ -29,6 +40,7 @@ void InitUART1(unsigned int baud)
     U1MODEbits.PDSEL = 0;	// Bits1,2 8bit, No Parity
     U1MODEbits.STSEL = 0;	// Bit0 One Stop Bit
 
+    ClrWdt();
     value = (float)FCY /(float)(16*baud) - 1; //波特率 = FCY/(16 * (BRG + 1))
     U1BRG = 25;	//25-9600
     
@@ -44,6 +56,7 @@ void InitUART1(unsigned int baud)
     U1STAbits.OERR = 0;		//Bit1 *Read Only Bit*
     U1STAbits.URXDA = 0;	//Bit0 *Read Only Bit*
 
+    ClrWdt();
     IFS0bits.U1TXIF = 0;	// Clear the Transmit Interrupt Flag
     IFS0bits.U1RXIF = 0;	// Clear the Recieve Interrupt Flag
     IEC0bits.U1RXIE = 1;	// 
@@ -78,6 +91,7 @@ void UsartSend(unsigned char abyte)
     U1TXREG = abyte;
     while(!U1STAbits.TRMT)
     {
+        //此处需要添加超时复位
         ClrWdt(); //2ms超时后,看门狗复位
     }
     
@@ -85,6 +99,7 @@ void UsartSend(unsigned char abyte)
 }
 void UsartRecive(unsigned char abyte)
 {
+    ClrWdt();
 }
 
 void __attribute__ ((interrupt, no_auto_psv)) _U1RXInterrupt(void)

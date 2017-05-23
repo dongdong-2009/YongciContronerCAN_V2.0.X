@@ -1,23 +1,19 @@
-/***********************************************
-*Copyright(c) 2015,FreeGo
-*保留所有权利
-*文件名称:Action.c
-*文件标识:
-*创建日期： 2015年月4月23日
-*摘要:
-
-*2015/4/23:套用历史版本框架.
-*当前版本:1.0
-*作者: FreeGo
-*取代版本:
-*作者:
-*完成时间:
-************************************************************/
+/** 
+ * <p>application name： Action.c</p> 
+ * <p>application describing： 配置Action</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "../Header.h"
 #include "../Yongci/DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
 
-#define  SUDDEN_ID 0x1A     //突发状态上传ID
+#define  SUDDEN_ID 0x9A     //突发状态上传ID
 /**
  * @description: 以下为错误代码，返回的错误标号等
  */
@@ -38,15 +34,17 @@
 #define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
 #define HEFEN_STATE_ERROR 0x0A      //合、分位错误
 
-#define TONGBU_HEZHA    0x0055
+#define TONGBU_HEZHA    0x5555
+
+#define FIRST_TIME   200 //50us
+#define SECEND_TIME  200 //50us
+#define SHORT_TIME   160 //40us
+
 
 void SendAckMesssage(uint8 fun);
 void SendErrorFrame(uint8 receiveID,uint8 errorID);
 
 extern uint8 volatile SendFrameData[SEND_FRAME_LEN];
-
-uint16 g_offestTimeOne = 50;
-uint16 g_offestTimeTwo = 60;
 
 //分合状态指令 单片机在看门狗复位的情况下不会改变该值
 _PERSISTENT uint16 ReceiveStateFlag;  
@@ -107,7 +105,7 @@ void ExecuteFunctioncode(frameRtu* pRtu)
             {
                 if(g_SystemState.workMode == WORK_STATE)
                 {
-                    TongBuHeZha(g_offestTimeOne,g_offestTimeTwo);
+                    TongBuHeZha();
                     ClrWdt();
                     return ;
                 }
@@ -117,11 +115,11 @@ void ExecuteFunctioncode(frameRtu* pRtu)
             {
                 if(g_SystemState.workMode == WORK_STATE) //多加入一重验证
                 {
-                    FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
-                    FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
+                    FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
+                    FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                     if(CAP3_STATE)
                     {
-                        FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                        FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                     }
                     ClrWdt();
                 }
@@ -153,6 +151,7 @@ void ExecuteFunctioncode(frameRtu* pRtu)
             }
             default :
             {
+                ClrWdt();
                 break;
             }
         }
@@ -174,8 +173,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     uint8 id = pReciveFrame->pBuffer[0];
     uint8 error = 0;    //错误
     uint8 idIndex = 1;  //索引，读取属性值时可用到
-    uint16 highTime = 0;
-    uint16 lowTime = 0;
     
     ClrWdt();
     uint8 Data[8] = {0,0,0,0,0,0,0,0};
@@ -215,6 +212,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
             {
                 //判断回路数，回路数超过要求则返回错误
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
@@ -222,6 +220,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) && 
                     (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))  //防止多次预制,防止多次合闸
             {
+                ClrWdt();
                 ReceiveStateFlag = HE_ORDER;    //合闸命令
                 SetOverTime(g_RemoteWaitTime);  //设置合闸预制超时等待时间
                 SendData(pSendFrame);
@@ -230,10 +229,12 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
                     (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
             }
             else
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
             }
             break;
@@ -243,6 +244,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
             {
                 //判断回路数，回路数超过要求则返回错误
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
@@ -252,22 +254,26 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 {
                     if(GetCapVolatageState()) //电容电压足够
                     {
-                        TongBuHeZha(50,60);   //在远方状态下只能是执行工作模式
+                        ClrWdt();
+                        TongBuHeZha();   //在远方状态下只能是执行工作模式
                         SendData(pSendFrame);
                     }
                     else
                     {
+                        ClrWdt();
                         SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     }
                 }
                 else
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
                 ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
             else
             {
+                ClrWdt();
                 ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
@@ -278,6 +284,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
             {
                 //判断回路数，回路数超过要求则返回错误
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
@@ -286,7 +293,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     (g_SystemState.heFenState3 == CHECK_3_HE_STATE))  //防止多次预制,防止多次合闸
             {
                 ReceiveStateFlag = FEN_ORDER;   //分闸命令
-                
+                ClrWdt();
                 SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
                 SendData(pSendFrame);
             }
@@ -294,10 +301,12 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     (g_SystemState.heFenState2 != CHECK_2_HE_STATE) || 
                     (g_SystemState.heFenState3 != CHECK_3_HE_STATE))
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
             }
             else
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
             }
             break;
@@ -307,6 +316,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
             {
                 //判断回路数，回路数超过要求则返回错误
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return; 
             }
@@ -315,29 +325,33 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 if(CheckIsOverTime())
                 {
                     if(GetCapVolatageState()) //处于空闲状态,且储能
-                    {                        
+                    {         
+                        ClrWdt();               
                         //执行的是同步分闸操作
-                        FENZHA_Action(SWITCH_ONE , FENZHA_TIME);
-                        FENZHA_Action(SWITCH_TWO , FENZHA_TIME);
+                        FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
+                        FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                         if(CAP3_STATE)
                         {
-                            FENZHA_Action(SWITCH_THREE , FENZHA_TIME);
+                            FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                         }
                         SendData(pSendFrame);
                     }
                     else
                     {
+                        ClrWdt();
                         SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     }
                 }
                 else
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
                 ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
             else
             {
+                ClrWdt();
                 ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
@@ -347,6 +361,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             if((pReciveFrame->len  & 0x01)) //数据长度不对，数据长度不应为奇数
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
@@ -355,27 +370,26 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 
             if((pReciveFrame->pBuffer[1] <= 0x03) && (pReciveFrame->len == 2))  //只有一路需要控制
             {
+                ClrWdt();
                 pSendFrame->len = 2;
             }
             else if((pReciveFrame->pBuffer[1] <= 0x0F) && (pReciveFrame->len == 4)) //只有两个回路需要控制
             {
+                ClrWdt();
                 pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
                 
                 if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2])    //不应该出现相同的回路数
                 {
                     //错误消息为存在相同的回路数
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                     return;
                 }
-                
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                g_offestTimeOne = (highTime << 8) | lowTime;
-                
                 pSendFrame->len = 3;
             }
             else if((pReciveFrame->pBuffer[1] <= 0x3F) && (pReciveFrame->len == 6)) //只有三个回路需要控制
-            { pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
+            { 
+                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
                 pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
                
                 if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2] || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3])
@@ -385,19 +399,11 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                     return;
                 }
-                
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                g_offestTimeOne = (highTime << 8) | lowTime;
-                
-                lowTime = pReciveFrame->pBuffer[4];
-                highTime = pReciveFrame->pBuffer[5];
-                g_offestTimeTwo = (highTime << 8) | lowTime;
-                
                 pSendFrame->len = 4;
             }
             else if(pReciveFrame->len == 8) //只有四个回路需要控制
             {
+                ClrWdt();
                 pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
                 pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
                 pSendFrame->pBuffer[4] = (pReciveFrame->pBuffer[1] & 0xC0) >> 6;
@@ -406,19 +412,11 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                  || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[4]) || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3])
                  || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[4])|| (pSendFrame->pBuffer[3] == pSendFrame->pBuffer[4]))//不应该出现相同的回路数
                 {
+                    ClrWdt();
                     //错误消息为存在相同的回路数
                     SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                     return;
                 }
-
-                lowTime = pReciveFrame->pBuffer[2];
-                highTime = pReciveFrame->pBuffer[3];
-                g_offestTimeOne = (highTime << 8) | lowTime;
-                
-                lowTime = pReciveFrame->pBuffer[4];
-                highTime = pReciveFrame->pBuffer[5];
-                g_offestTimeTwo = (highTime << 8) | lowTime;
-                
                 pSendFrame->len = 5;
             }
             else
@@ -433,10 +431,12 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                    (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
                 {
                     ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
-                    SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-                    
+                    ClrWdt();
                     SendData(pSendFrame);
+                    GetOffestTime(pReciveFrame , pSendFrame);
+                    SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
                     TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
+                    StartTimer4();  //开启定时器，计时
                 }
                 else if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
                         (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
@@ -447,6 +447,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 }
                 else
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     return;
                 }
@@ -454,7 +455,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             else
             {
                 TurnOffInt2();
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
+                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
                 ReceiveStateFlag = IDLE_ORDER;
             }
                 
@@ -462,34 +463,41 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 6: //同步分闸预制
         {
+            ClrWdt();
             break;
         }
         case 0x10:  //顺序参数设置
         {
+            ClrWdt();
             break;
         }
         case 0x11:  //非顺序参数设置
         {
+            ClrWdt();
             pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
             Point.pData = pReciveFrame->pBuffer + 2;
             error = SetParamValue(pReciveFrame->pBuffer[1],&Point);
             if(error == 0xFF)
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
                 return;
             }
             else if(error)
             {
+                ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
             pSendFrame->pBuffer[2] = Point.pData[0];
             pSendFrame->pBuffer[3] = Point.pData[1];
             pSendFrame->len = Point.len + 2;
+            ClrWdt();
             SendData(pSendFrame);
             
             if(pSendFrame->complteFlag == 0)    //当数据发送完毕后进行写累加和
             {
+                ClrWdt();
                 WriteAccumulateSum();  //写入累加和
             }
             
@@ -499,16 +507,19 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             for(idIndex = pReciveFrame->pBuffer[1];idIndex <= pReciveFrame->pBuffer[2];idIndex++)    //抛除ID号所占的长度
             {
+                ClrWdt();
                 Point.len = 8;
                 error = ReadParamValue(idIndex,&Point);
                 if((error == 0xF1)||(error == 0xF3))    //数据长度错误
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 }
                 pSendFrame->pBuffer[1] = idIndex;  //配置号  
                 pSendFrame->pBuffer[2] = Point.pData[0];
                 pSendFrame->pBuffer[3] = Point.pData[1];
                 pSendFrame->len = Point.len + 2;
+                ClrWdt();
                 SendData(pSendFrame);
             }
             break;
@@ -517,20 +528,24 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             for(i = 1;i < pReciveFrame->len;i++)    //抛除ID号所占的长度
             {
+                ClrWdt();
                 Point.len = 8;
                 error = ReadParamValue(pReciveFrame->pBuffer[i],&Point);
                 if((error == 0xF1)||(error == 0xF3))    //数据长度错误
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 }
                 if((error == 0xF2)||(error == 0xF4))    //ID号错误
                 {
+                    ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
                 }
                 pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[i];  //配置号
                 pSendFrame->pBuffer[2] = Point.pData[0];
                 pSendFrame->pBuffer[3] = Point.pData[1];
                 pSendFrame->len = Point.len + 2;
+                ClrWdt();
                 SendData(pSendFrame);
             }
             break;
@@ -538,6 +553,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         default:
         {
             //错误的ID号处理
+            ClrWdt();
             SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
             break;
         }          
@@ -557,13 +573,14 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID)
     
     pSendFrame.pBuffer = data;
     pSendFrame.complteFlag = 0xFF;
-    
+    ClrWdt();
     pSendFrame.ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame.pBuffer[0] = ERROR_REPLY_ID;   //错误应答ID
     pSendFrame.pBuffer[1] = receiveID;  //主站发送ID
     pSendFrame.pBuffer[2] = errorID;   //错误代码
     pSendFrame.pBuffer[3] = ERROR_EXTEND_ID;  //扩展ID号            
     pSendFrame.len = ERROR_DATA_LEN;   //错误帧长度
+    ClrWdt();
     SendData(&pSendFrame);
 }
 
@@ -581,7 +598,8 @@ void UpdataState(void)
     pSendFrame.pBuffer = Data;
     pSendFrame.complteFlag = 0xFF;
 
-	pSendFrame.ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    ClrWdt();
+    pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
 	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
 
 	pSendFrame.pBuffer[1] = g_GetState.SwitchState1 | g_GetState.SwitchState2 | g_GetState.SwitchState3;	
@@ -590,10 +608,12 @@ void UpdataState(void)
     
 	if(!g_SystemState.warning)
 	{
+        ClrWdt();
 		pSendFrame.pBuffer[4] = 1;
 	}
 	else
 	{
+        ClrWdt();
 		pSendFrame.pBuffer[4] = 0;
 	}
 	pSendFrame.pBuffer[5] = g_SystemState.yuanBenState;  
@@ -603,23 +623,83 @@ void UpdataState(void)
 }
 
 /**
- * @description 外部中断1的中断处理函数
- * 思想： 选择是下降沿中断，在进入中断时对其下降沿时间进行检测，然后再主控端更改其为
- * 上升沿，此时不退出中断，检测上升沿的时间，以上条件都满足后，在下一个下降沿到来时
- * 选相同步合闸（退出中断）。
+ * 
+ * <p>Function name: [SynchronizationSignalCheck]</p>
+ * <p>Discription: [检查同步信号]</p>
+ * @return 是同步信号返回0xFF，否则返回 0x00
  */
-void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
+void SynchronizationSignalCheck(void)
 {
-    if((ReceiveStateFlag == TONGBU_HEZHA) && (CheckIsOverTime()))
+    uint8 timerOne = 0;
+    uint8 timerTwo = 0;
+    
+    OFF_INT();
+    while(ReceiveStateFlag == TONGBU_HEZHA)
     {
-        OFF_INT();
-        TongBuHeZha(g_offestTimeOne,g_offestTimeTwo);   //执行同步合闸命令
-        UpdateLEDIndicateState(CAP3_LED,TURN_ON);
+        ClrWdt();
+        while(!IFS1bits.INT2IF)
+        {
+            if(!CheckIsOverTime())  //超时
+            {
+                ON_INT();
+                SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
+                TurnOffInt2();
+                StopTimer4();
+                ReceiveStateFlag = IDLE_ORDER;
+                return;
+            }
+        }
+        TurnOffInt2();
+        if(RXD1_LASER == 1)
+        {
+            TMR4 = 0;   //clear
+        }
+        else
+        {
+            //作用为消除5us以内的脉冲干扰
+            IFS1bits.INT2IF = 0;    //Clear INT2
+            continue;
+        }
+        while(RXD1_LASER)
+        {
+            ClrWdt();
+        }
+        if(RXD1_LASER == 0)
+        {
+            timerOne = TMR4;
+            TMR4 = 0;
+            if((timerOne > FIRST_TIME) || (timerOne <= SHORT_TIME))
+            {
+                IFS1bits.INT2IF = 0;    //Clear INT2
+                continue;
+            }
+        }
+        while(RXD1_LASER == 0)
+        {
+            ClrWdt();
+        }
+        if(RXD1_LASER == 1)
+        {
+            timerTwo = TMR4;
+            if((timerTwo > SECEND_TIME) || (timerTwo <= SHORT_TIME))
+            {
+                IFS1bits.INT2IF = 0;    //Clear INT2
+                continue;
+            }
+        }
+        while(RXD1_LASER);
+        //以上条件都满足时执行同步合闸操作
+        if((!RXD1_LASER) && (timerOne <= FIRST_TIME) && (timerTwo <= SECEND_TIME)) 
+            //下降沿到且以上条件都满足时才执行同步合闸操作
+        {
+            TongBuHeZha();   //执行同步合闸命令
+            ReceiveStateFlag = IDLE_ORDER;
+            StopTimer4();
+            TurnOffInt2();
+        }
+        ClrWdt();
     }
-    else
-    {
-        SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
-    }
-    TurnOffInt2();
-    ReceiveStateFlag = IDLE_ORDER;
 }
+
+
+

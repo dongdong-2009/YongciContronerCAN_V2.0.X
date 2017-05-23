@@ -1,8 +1,18 @@
+/** 
+ * <p>application name： RtuFrame.c</p> 
+ * <p>application describing： 接收数据帧处理</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "RtuFrame.h"
 #include "../Header.h"
 #include "CRC16.h"
 #include "../Driver/Delay.h"
-#include <string.h>
 
 /******************************************
 //针对此种情况出队与入队可能发生冲突。
@@ -274,6 +284,7 @@ void SetOverTime(uint16 delayTime)
 {
     g_SysTimeStamp.StarTime = g_MsTicks;
     g_SysTimeStamp.delayTime = delayTime;
+    ClrWdt();
     IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime);
 }
 
@@ -288,10 +299,12 @@ uint8 CheckIsOverTime(void)
 {
     if(IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
     {
+        ClrWdt();
         return FALSE;
     }
     else
     {
+        ClrWdt();
         return TRUE;
     }
 }
