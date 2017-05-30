@@ -60,7 +60,6 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
-void SynchronizationSignalCheck(void);
 
 extern _PERSISTENT uint16 ReceiveStateFlag;
 

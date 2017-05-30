@@ -264,7 +264,7 @@ inline void TurnOnInt2(void)
     
     ClrWdt();
     IFS1bits.INT2IF = 0;
-//    IEC1bits.INT2IE = 1;
+    IEC1bits.INT2IE = 1;
 }
 
 /**

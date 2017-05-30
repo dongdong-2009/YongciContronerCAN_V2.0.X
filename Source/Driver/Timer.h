@@ -16,9 +16,6 @@
 extern "C" {
 #endif
 
-#define MS_COUNT  62.5f //折算公式 1000 /(1/20 *256)    65536/79 = 800ms
-#define MFOSC 16.0f //主时钟单位MHz
-
 void SetTimer2(unsigned  int ms);
 void StartTimer2(void);
 void StopTimer2(void);
@@ -26,11 +23,6 @@ void StopTimer2(void);
 void Init_Timer3(void);
 void StartTimer3(unsigned int us);
 void ResetTimer3(void);
-
-void Init_Timer4(void);
-void StartTimer4(void);
-void ResetTimer4(void);
-void StopTimer4(void);
 
 #ifdef	__cplusplus
 }

@@ -40,17 +40,34 @@ uint16 GetCapVolatageState(void)
 {
     GetCapVoltage();
     ClrWdt();
-    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
-        (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
-        (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
+    if(CAP3_STATE)
     {
-        ClrWdt();        
-        ClrWdt();
-        return 0xAAAA;
+        if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
+            (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+            (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
+        {
+            ClrWdt();        
+            ClrWdt();
+            return 0xAAAA;
+        }
+        else
+        {
+            return 0;
+        }
     }
     else
     {
-        return 0;
+        if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
+            (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
+        {
+            ClrWdt();        
+            ClrWdt();
+            return 0xAAAA;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
 

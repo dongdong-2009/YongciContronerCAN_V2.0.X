@@ -13,15 +13,6 @@
 #include "RefParameter.h"
 #include "../DeviceNet/DeviceNet.h"
 
-/**
- * 获取有效位数
- */
-#define GET_ENOB(type) ((uint8)type & 0x0F)
-/**
-* 字节组成个数
-*/
-#define GET_BYTE_NUM(type) ((uint8)(type>>4) & 0x0F)
-
 /*
  * 局部函数定义
  */

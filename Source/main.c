@@ -55,8 +55,8 @@
 // FWDT 10ms
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)    
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
-#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -92,8 +92,7 @@
 #include "Header.h"
 #include "DeviceNet/DeviceNet.h"
 
-frameRtu sendFrame, recvFrame;
-uint8 data[8] = {0xAA,0xAA,0xAA,0xAA,0xAA};
+
 int main()
 {
     uint16 cn = 0;
@@ -117,11 +116,8 @@ int main()
     RX_TX_MODE = RX_MODE;
     ClrWdt(); //204cys 
     
-    OFF_UART_INT(); //485通信不开启
-    
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
     Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
-    Init_Timer4();  //用于判断同步信号时长的计数器
     
     StartTimer2();  //开启系统时钟
     ClrWdt(); //452cycs
@@ -129,30 +125,35 @@ int main()
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); //21cys
 
-    YongciFirstInit();
+    YongciFirstInit();  //永磁合闸参数初始化
     ClrWdt(); //33cys
    
     cn = 0;
-
     ReceiveStateFlag = IDLE_ORDER;   //合分闸预制标志位初始化
     
-    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON);
+    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
     
-    InitStandardCAN(0, 0);   
-    
-    ClrWdt();
-    InitDeviceNet();        
-    
-    ClrWdt();
-    RefParameterInit(); //参数设置初始化
+    if(CAN_OR_RS485)
+    {
+        OFF_UART_INT(); //485通信不开启
+        
+        InitStandardCAN(0, 0);      //初始化CAN模块
 
+        ClrWdt();
+        InitDeviceNet();            //初始化DeviceNet服务
+
+        ClrWdt();
+        RefParameterInit(); //参数设置初始化
+    }
+    
+    GetCapVolatageState();  //获取电容电压状态
+    
     //延时3s判断启动
     while(cn++ <3000)
     {
         __delay_ms(1);
         ClrWdt();
-    }
-    GetCapVolatageState();
+    }    
     
     while(TRUE)
     {

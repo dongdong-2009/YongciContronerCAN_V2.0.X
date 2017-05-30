@@ -22,12 +22,13 @@ extern "C" {
 #define REDAY_STATE 0x88    //准备状态
     
 //远方就地
-#define YUAN_STATE  0xA1
-#define BEN_STATE   0xA5
+#define YUAN_STATE  0xA1    //远方状态
+#define BEN_STATE   0xA5    //就地状态
+    
     
 //工作模式和调试模式
-#define WORK_STATE  0x3F
-#define DEBUG_STATE 0xCF
+#define WORK_STATE  0x3F    //工作状态
+#define DEBUG_STATE 0xCF    //调试状态
     
     
 //IGBT工作状态
@@ -51,8 +52,7 @@ extern "C" {
     
 #define CHECK_ERROR7_STATE 0x16  //同时输入了总的合闸、分闸信号
     
-#define NO_ERROR    0x1F
-#define CHECK_ERROR_STATE    0x1E
+#define NO_ERROR    0x00
     
 #define CHECK_Z_HE_ORDER  0x22  //执行同时合闸动作
 #define CHECK_Z_FEN_ORDER 0x23  //执行同时分闸动作
@@ -87,9 +87,13 @@ extern "C" {
 #define JG3_FEN_COUNT_ADDRESS 0x007FF00C
 //*********************************************
     
-#define ON_INT() {ON_UART_INT(); ON_CAN_INT();}
-#define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+#define SWITCH_ONE  0   //第一个动作的机构
+#define SWITCH_TWO  1   //第二个动作的机构
+#define SWITCH_THREE 2  //第三个动作的机构
 
+ /**
+  * 分合闸控制
+  */
 typedef struct SynchroSwitchConfig
 {
 	uint8   State;	//当前的状态
@@ -103,6 +107,9 @@ typedef struct SynchroSwitchConfig
 	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
 
+/**
+ * 获取同步合闸的偏移时间等 
+ */
 typedef struct SystemIndexConfig
 {
     uint8 indexLoop;
@@ -119,6 +126,8 @@ void FENZHA_Action(uint8 index,uint16 time);
 void TongBuHeZha(void);
 void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
 
+extern  frameRtu sendFrame, recvFrame;
+extern uint8 _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 
 #ifdef	__cplusplus
 }

@@ -15,9 +15,6 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../Driver/tydef.h"
 
-#define LOW_VOLTAGE_ADC  1.3
-
-
 
 #ifdef	__cplusplus
 extern "C" {

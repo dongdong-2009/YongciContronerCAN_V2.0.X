@@ -43,6 +43,7 @@
 
 void SendAckMesssage(uint8 fun);
 void SendErrorFrame(uint8 receiveID,uint8 errorID);
+void GetLoopSwitch(struct DefFrameData* pReciveFrame);
 
 extern uint8 volatile SendFrameData[SEND_FRAME_LEN];
 
@@ -209,28 +210,21 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     {
         case 1: //合闸预制
         {
-            if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
-            {
-                //判断回路数，回路数超过要求则返回错误
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
-            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_1_FEN_STATE) && 
-                    (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) && 
-                    (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))  //防止多次预制,防止多次合闸
-            {
-                ClrWdt();
-                ReceiveStateFlag = HE_ORDER;    //合闸命令
-                SetOverTime(g_RemoteWaitTime);  //设置合闸预制超时等待时间
-                SendData(pSendFrame);
-            }
-            else if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
+            if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
                     (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
                     (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                return;
+            }
+            if(ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
+            {                
+                GetLoopSwitch(pReciveFrame);
+                if(ReceiveStateFlag != IDLE_ORDER)
+                {
+                    SendData(pSendFrame);
+                }
             }
             else
             {
@@ -241,68 +235,88 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 2: //合闸执行
         {
-            if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
-            {
-                //判断回路数，回路数超过要求则返回错误
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
             if(ReceiveStateFlag == HE_ORDER)
             {
                 if(CheckIsOverTime())
                 {
-                    if(GetCapVolatageState()) //电容电压足够
+                    ClrWdt();               
+                    switch(pReciveFrame->pBuffer[1])
                     {
-                        ClrWdt();
-                        TongBuHeZha();   //在远方状态下只能是执行工作模式
-                        SendData(pSendFrame);
+                        case 0x01:
+                        case 0x02:
+                        case 0x04:
+                        {
+                            if(pReciveFrame->pBuffer[1] == 0x04)
+                            {
+                                pReciveFrame->pBuffer[1] --;
+                            }
+                            HEZHA_Action((pReciveFrame->pBuffer[1] - 1) , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x03:
+                        {
+                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x05:
+                        {
+                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x06:
+                        {
+                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x07:
+                        {
+                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        default :
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                            break;
+                        }
                     }
-                    else
-                    {
-                        ClrWdt();
-                        SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    }
+                    SendData(pSendFrame);
                 }
                 else
                 {
                     ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
-                ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
             else
             {
                 ClrWdt();
-                ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
+            ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             break;
         }
         case 3: //分闸预制
         {
-            if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
-            {
-                //判断回路数，回路数超过要求则返回错误
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
-            if((ReceiveStateFlag == IDLE_ORDER) && (g_SystemState.heFenState1 == CHECK_1_HE_STATE) && 
-                    (g_SystemState.heFenState2 == CHECK_2_HE_STATE) && 
-                    (g_SystemState.heFenState3 == CHECK_3_HE_STATE))  //防止多次预制,防止多次合闸
-            {
-                ReceiveStateFlag = FEN_ORDER;   //分闸命令
-                ClrWdt();
-                SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
-                SendData(pSendFrame);
-            }
-            else if((g_SystemState.heFenState1 != CHECK_1_HE_STATE) || 
+            if((g_SystemState.heFenState1 != CHECK_1_HE_STATE) || 
                     (g_SystemState.heFenState2 != CHECK_2_HE_STATE) || 
                     (g_SystemState.heFenState3 != CHECK_3_HE_STATE))
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                return;
+            }
+            if(ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次合闸
+            {
+                GetLoopSwitch(pReciveFrame);
+                if(ReceiveStateFlag != IDLE_ORDER)
+                {
+                    SendData(pSendFrame);
+                }
             }
             else
             {
@@ -313,152 +327,150 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 4: //分闸执行
         {
-            if((pReciveFrame->pBuffer[1] <= 0x00) || (pReciveFrame->pBuffer[1] > 0x07))
-            {
-                //判断回路数，回路数超过要求则返回错误
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return; 
-            }
             if(ReceiveStateFlag == FEN_ORDER)
-            {  
+            {
                 if(CheckIsOverTime())
                 {
-                    if(GetCapVolatageState()) //处于空闲状态,且储能
-                    {         
-                        ClrWdt();               
-                        //执行的是同步分闸操作
-                        FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
-                        FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                        if(CAP3_STATE)
-                        {
-                            FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
-                        }
-                        SendData(pSendFrame);
-                    }
-                    else
+                    ClrWdt();               
+                    switch(pReciveFrame->pBuffer[1])
                     {
-                        ClrWdt();
-                        SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                        case 0x01:
+                        case 0x02:
+                        case 0x04:
+                        {
+                            if(pReciveFrame->pBuffer[1] == 0x04)
+                            {
+                                pReciveFrame->pBuffer[1] --;
+                            }
+                            FENZHA_Action((pReciveFrame->pBuffer[1] - 1) , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x03:
+                        {
+                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x05:
+                        {
+                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x06:
+                        {
+                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        case 0x07:
+                        {
+                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            break;
+                        }
+                        default :
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                            break;
+                        }
                     }
+                    SendData(pSendFrame);
                 }
                 else
                 {
                     ClrWdt();
                     SendErrorFrame(pReciveFrame->pBuffer[0],OVER_TIME_ERROR);
                 }
-                ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             }
             else
             {
                 ClrWdt();
-                ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
+            ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             break;
         }        
         case 5: //同步合闸预制
         {
-            if((pReciveFrame->len  & 0x01)) //数据长度不对，数据长度不应为奇数
+            //分合位错误
+            if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
+               (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
+               (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
+            {
+                SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                return;
+            }
+            //电容电压未达到设定电压错误
+            if(GetCapVolatageState() == 0)
+            {
+                ClrWdt();
+                SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                return;
+            }
+            //数据长度不对，数据长度不应为奇数
+            if((pReciveFrame->len  & 0x01)) 
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
-
             pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1] & 0x03;
+            pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
 
-            if((pReciveFrame->pBuffer[1] <= 0x03) && (pReciveFrame->len == 2))  //只有一路需要控制
+            if(CAP3_STATE)
             {
-                ClrWdt();
-                pSendFrame->len = 2;
-            }
-            else if((pReciveFrame->pBuffer[1] <= 0x0F) && (pReciveFrame->len == 4)) //只有两个回路需要控制
-            {
-                ClrWdt();
-                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                
-                if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2])    //不应该出现相同的回路数
+                if((pReciveFrame->pBuffer[1] <= 0x34) && (pReciveFrame->len == 6)) //只有三个回路需要控制
                 {
-                    //错误消息为存在相同的回路数
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
+                    pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
+
+                    if((pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2]) || 
+                       (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3]) || 
+                       (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3]))//不应该出现相同的回路数
+                    {
+                        //错误消息为存在相同的回路数
+                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                        return;
+                    }
+                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[2];
+                    pSendFrame->pBuffer[5] = pReciveFrame->pBuffer[3];
+                    pSendFrame->pBuffer[6] = pReciveFrame->pBuffer[4];
+                    pSendFrame->pBuffer[7] = pReciveFrame->pBuffer[5];
+                    pSendFrame->len = 8;
                 }
-                pSendFrame->len = 3;
-            }
-            else if((pReciveFrame->pBuffer[1] <= 0x3F) && (pReciveFrame->len == 6)) //只有三个回路需要控制
-            { 
-                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-               
-                if(pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2] || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3])
-                        || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3]))//不应该出现相同的回路数
-                {
-                    //错误消息为存在相同的回路数
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
-                }
-                pSendFrame->len = 4;
-            }
-            else if(pReciveFrame->len == 8) //只有四个回路需要控制
-            {
-                ClrWdt();
-                pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-                pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-                pSendFrame->pBuffer[4] = (pReciveFrame->pBuffer[1] & 0xC0) >> 6;
-                
-                if((pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2]) || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3])
-                 || (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[4]) || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3])
-                 || (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[4])|| (pSendFrame->pBuffer[3] == pSendFrame->pBuffer[4]))//不应该出现相同的回路数
-                {
-                    ClrWdt();
-                    //错误消息为存在相同的回路数
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                    return;
-                }
-                pSendFrame->len = 5;
             }
             else
             {
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;                
-            }
-            if(ReceiveStateFlag == IDLE_ORDER)
-            {
-                if((g_SystemState.heFenState1 == CHECK_1_FEN_STATE) && (GetCapVolatageState()) && 
-                   (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) && 
-                   (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
+                //只有两个回路需要控制
+                if((pReciveFrame->pBuffer[1] == 0x01) || (pReciveFrame->pBuffer[1] == 0x04)) 
                 {
-                    ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
                     ClrWdt();
-                    SendData(pSendFrame);
-                    GetOffestTime(pReciveFrame , pSendFrame);
-                    SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-                    TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
-                    StartTimer4();  //开启定时器，计时
-                }
-                else if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-                        (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-                        (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
-                {
-                    SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                    return;
+                    pSendFrame->pBuffer[3] = pReciveFrame->pBuffer[2];
+                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[3];
+                    pSendFrame->len = 5;
                 }
                 else
                 {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                     return;
                 }
+            }
+            if(ReceiveStateFlag == IDLE_ORDER)
+            {                
+                ClrWdt();
+                SendData(pSendFrame);
+                GetOffestTime(pReciveFrame , pSendFrame);
+                TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
+                SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
+                ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
             }
             else
             {
                 TurnOffInt2();
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
                 ReceiveStateFlag = IDLE_ORDER;
-            }
-                
+                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
+            }                
             break;
         }
         case 6: //同步分闸预制
@@ -623,83 +635,285 @@ void UpdataState(void)
 }
 
 /**
- * 
- * <p>Function name: [SynchronizationSignalCheck]</p>
- * <p>Discription: [检查同步信号]</p>
- * @return 是同步信号返回0xFF，否则返回 0x00
+ * <p>Function name: [_INT2Interrupt]</p>
+ * <p>Discription: [外部中断函数]</p>
  */
-void SynchronizationSignalCheck(void)
+void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
-    uint8 timerOne = 0;
-    uint8 timerTwo = 0;
+    uint8 i = 0;
+    uint8 j = 0;
+    uint8 validCount = 0;
+    uint8 idleCount = 0;
     
+    IFS1bits.INT2IF = 0;
     OFF_INT();
-    while(ReceiveStateFlag == TONGBU_HEZHA)
+    if(ReceiveStateFlag != TONGBU_HEZHA)
     {
-        ClrWdt();
-        while(!IFS1bits.INT2IF)
-        {
-            if(!CheckIsOverTime())  //超时
-            {
-                ON_INT();
-                SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
-                TurnOffInt2();
-                StopTimer4();
-                ReceiveStateFlag = IDLE_ORDER;
-                return;
-            }
-        }
+        ON_INT();
+        return;
+    }
+    if(!CheckIsOverTime())  //超时
+    {
+        ON_INT();
         TurnOffInt2();
+        SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
+        ReceiveStateFlag = IDLE_ORDER;
+        return;
+    }
+    //第一次的高电平持续时间判断
+    for(i = 0;i < 20;i++)
+    {
         if(RXD1_LASER == 1)
         {
-            TMR4 = 0;   //clear
+            validCount++;
         }
         else
         {
-            //作用为消除5us以内的脉冲干扰
-            IFS1bits.INT2IF = 0;    //Clear INT2
-            continue;
+            idleCount++;
         }
-        while(RXD1_LASER)
+    }
+    if(idleCount >= 2)
+    {
+        return;
+    }
+    validCount = 0;
+    idleCount = 0;
+    //判断四次高低电平持续时间
+    for(j = 0;j < 4;j++)
+    {        
+        validCount = 0;
+        idleCount = 0;
+        for(i = 0;i < 25;i++)
         {
-            ClrWdt();
-        }
-        if(RXD1_LASER == 0)
-        {
-            timerOne = TMR4;
-            TMR4 = 0;
-            if((timerOne > FIRST_TIME) || (timerOne <= SHORT_TIME))
+            if(RXD1_LASER == 1)
             {
-                IFS1bits.INT2IF = 0;    //Clear INT2
-                continue;
+                validCount++;
+            }
+            else
+            {
+                idleCount++;
             }
         }
-        while(RXD1_LASER == 0)
+        if((RXD1_LASER == 1) && (idleCount > 2))
         {
-            ClrWdt();
+            return;
         }
+        else if((RXD1_LASER == 0) && (validCount > 2))
+        {
+            return;
+        }
+    }
+    //查找最后一个低电平
+    for(i = 0;i < 20;i++)
+    {
         if(RXD1_LASER == 1)
         {
-            timerTwo = TMR4;
-            if((timerTwo > SECEND_TIME) || (timerTwo <= SHORT_TIME))
-            {
-                IFS1bits.INT2IF = 0;    //Clear INT2
-                continue;
-            }
+            validCount++;
         }
-        while(RXD1_LASER);
-        //以上条件都满足时执行同步合闸操作
-        if((!RXD1_LASER) && (timerOne <= FIRST_TIME) && (timerTwo <= SECEND_TIME)) 
-            //下降沿到且以上条件都满足时才执行同步合闸操作
+        else
         {
-            TongBuHeZha();   //执行同步合闸命令
-            ReceiveStateFlag = IDLE_ORDER;
-            StopTimer4();
-            TurnOffInt2();
+            idleCount++;
         }
-        ClrWdt();
+        if(idleCount >= 5)
+        {
+            break;
+        }
+    }
+    validCount = 0;
+    while(!RXD1_LASER)
+    {
+        validCount++;
+        if(validCount > 10)
+        {
+            break;
+        }
+    }
+    if(RXD1_LASER || (validCount > 10))
+    {
+        TurnOffInt2();
+        ON_INT();
+        ReceiveStateFlag = IDLE_ORDER;
+        TongBuHeZha();
     }
 }
+
+/**
+ * 
+ * <p>Function name: [GetLoopSwitch]</p>
+ * <p>Discription: [获取需要动作的回路开关]</p>
+ * @param pReciveFrame 接收的数据结构
+ */
+void GetLoopSwitch(struct DefFrameData* pReciveFrame)
+{
+	uint8 orderID = pReciveFrame->pBuffer[0];
+	uint8 loop = pReciveFrame->pBuffer[1];
+    
+    if(orderID == 1)
+	{
+		ReceiveStateFlag = HE_ORDER;    //合闸命令
+	}	
+	else if(orderID == 3)
+	{
+		ReceiveStateFlag = FEN_ORDER;   //分闸命令
+	}
+
+	switch (loop)
+	{
+		case 1:
+		{
+			if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
+			{
+                ClrWdt();
+                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                return;
+			}
+			break;
+		}
+		case 2:
+		{
+			if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
+			{
+                ClrWdt();
+                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                return;
+			}
+			break;
+		}
+		case 4:
+		{
+			if(CAP3_STATE)
+			{
+				if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
+				{
+                	ClrWdt();
+                	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
+				}
+				else
+				{
+					ReceiveStateFlag = IDLE_ORDER;
+					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                    return;
+				}
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+			}
+			break;
+		}
+		case 3:
+		{
+			if((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+		       (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
+			{
+                ClrWdt();
+                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                return;
+			}
+			break;
+		}
+		case 5: 
+		{
+			if(CAP3_STATE)
+			{
+				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
+		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
+				{
+                	ClrWdt();
+                	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
+				}
+				else
+				{
+					ReceiveStateFlag = IDLE_ORDER;
+					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                    return;
+				}
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+			}
+			break;
+		}
+		case 6:
+		{
+			if(CAP3_STATE)
+			{
+				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
+		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
+				{
+                	ClrWdt();
+                	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
+				}
+				else
+				{
+					ReceiveStateFlag = IDLE_ORDER;
+					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                    return;
+				}
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+			}
+			break;
+		}
+		case 7:
+		{
+			if(CAP3_STATE)
+			{
+				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
+		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
+				{
+                	ClrWdt();
+                	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
+				}
+				else
+				{
+					ReceiveStateFlag = IDLE_ORDER;
+					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
+                    return;
+				}
+			}
+			else
+			{
+				ReceiveStateFlag = IDLE_ORDER;
+				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+			}
+			break;
+		}
+		default:
+		{
+			ReceiveStateFlag = IDLE_ORDER;
+			SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+			break;
+		}
+	}
+}
+
 
 
 

@@ -90,7 +90,7 @@ typedef struct SysTime
 
 extern uint32 g_MsTicks;
 
-extern SysTimeStamp g_SysTimeStamp;
+
 
 #ifdef	__cplusplus
 }

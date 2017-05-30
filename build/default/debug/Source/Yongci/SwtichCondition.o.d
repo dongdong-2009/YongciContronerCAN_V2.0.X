@@ -21,8 +21,8 @@ Source/Yongci/../SerialPort/Action.h  \
  Source/Yongci/../SerialPort/../Driver/tydef.h  \
  Source/Yongci/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/Yongci/../SerialPort/RtuFrame.h  \
-Source/Yongci/../Yongci/yongci.h  \
- Source/Yongci/../Yongci/../Driver/tydef.h  \
  Source/Yongci/../Yongci/SwtichCondition.h  \
+ Source/Yongci/../Yongci/yongci.h  \
+ Source/Yongci/../Yongci/../Driver/tydef.h  \
  Source/Yongci/../Yongci/DeviceParameter.h  \
  Source/Yongci/DeviceParameter.h 

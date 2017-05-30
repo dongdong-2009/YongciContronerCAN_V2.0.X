@@ -18,7 +18,7 @@
 #include "../Header.h"
 #include "DeviceParameter.h"
 
-uint32 g_kairuValue = 0;    //165返回值
+uint32 volatile g_kairuValue = 0;    //165返回值
 
 #define DELAY_MS    20
 
@@ -61,14 +61,14 @@ uint32 g_kairuValue = 0;    //165返回值
 
 #define STATE_FEN_CONTINOUS        0xAA55
 
-#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT | YUAN_AND_WORK())   //机构1合闸条件
-#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT | YUAN_AND_WORK())    //机构1分闸条件
+#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT)   //机构1合闸条件
+#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT)    //机构1分闸条件
 
-#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT | YUAN_AND_WORK())   //机构2合闸条件
-#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT | YUAN_AND_WORK())    //机构2分闸条件
+#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT)   //机构2合闸条件
+#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT)    //机构2分闸条件
 
-#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT | YUAN_AND_WORK())   //机构3合闸条件
-#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT | YUAN_AND_WORK())    //机构3分闸条件
+#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT)   //机构3合闸条件
+#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT)    //机构3分闸条件
 
 //远方\本地控制检测
 #define YUAN_BEN_CONDITION()    ((g_kairuValue & YUAN_INPUT) == YUAN_INPUT)
@@ -95,22 +95,22 @@ uint32 g_kairuValue = 0;    //165返回值
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((g_kairuValue & COIL1_HEZHA()) == COIL1_HEZHA())
+#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | YUAN_AND_WORK())) == COIL1_HEZHA())
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((g_kairuValue & COIL1_FENZHA()) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL1_FENZHA() | YUAN_AND_WORK())) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((g_kairuValue & COIL2_HEZHA()) == COIL2_HEZHA())
+#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | YUAN_AND_WORK())) == COIL2_HEZHA())
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((g_kairuValue & COIL2_FENZHA()) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL2_FENZHA() | YUAN_AND_WORK())) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 //本地的机构3合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((g_kairuValue & COIL3_HEZHA()) == COIL3_HEZHA())
+#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | YUAN_AND_WORK())) == COIL3_HEZHA())
 //本地的机构3分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((g_kairuValue & COIL3_FENZHA()) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL3_FENZHA() | YUAN_AND_WORK())) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 
 /**
@@ -159,7 +159,6 @@ uint32 g_kairuValue = 0;    //165返回值
 #define KEY_COUNT_DOWN 30
 uint8 g_timeCount[22] = {0};
 uint8 g_lockflag[22] = {0}; 
-uint8 _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
 
 
 /**

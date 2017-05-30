@@ -42,6 +42,8 @@ void SendFrame(uint8* pFrame, uint8 len);
 void SetOverTime(uint16 delayTime);
 uint8 CheckIsOverTime(void);
 
+extern boolean volatile ReciveErrorFlag;
+
 #ifdef	__cplusplus
 }
 #endif

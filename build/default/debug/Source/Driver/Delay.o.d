@@ -19,8 +19,8 @@ Source/Driver/../SerialPort/Action.h  \
  Source/Driver/../SerialPort/../Driver/tydef.h  \
  Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/Driver/../SerialPort/RtuFrame.h  \
-Source/Driver/../Yongci/yongci.h  \
- Source/Driver/../Yongci/../Driver/tydef.h  \
  Source/Driver/../Yongci/SwtichCondition.h  \
+ Source/Driver/../Yongci/../Driver/tydef.h  \
+ Source/Driver/../Yongci/yongci.h  \
  Source/Driver/../Yongci/DeviceParameter.h  \
 Source/Driver/Delay.h 

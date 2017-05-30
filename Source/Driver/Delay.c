@@ -17,7 +17,6 @@
 
 uint32 g_MsTicks = 0;
 
-SysTimeStamp g_SysTimeStamp;
 /**
  * 判断时间是否超时
  *
@@ -80,9 +79,4 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
     IFS0bits.T2IF = 0;
     g_MsTicks++;                        /* increment counter necessary in Delay() */  
-    ClrWdt();  
-    g_SysTimeStamp.ScanTime++;
-    g_SysTimeStamp.SendDataTime++;
-    ClrWdt();
-    g_SysTimeStamp.GetTempTime ++;
 }

@@ -21,7 +21,7 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/SerialPort/../SerialPort/RtuFrame.h  \
- Source/SerialPort/../Yongci/yongci.h  \
- Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Yongci/SwtichCondition.h  \
+ Source/SerialPort/../Yongci/../Driver/tydef.h  \
+ Source/SerialPort/../Yongci/yongci.h  \
  Source/SerialPort/../Yongci/DeviceParameter.h 

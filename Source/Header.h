@@ -27,14 +27,13 @@
 
 #include "SerialPort/Action.h"
 #include "SerialPort/RtuFrame.h"
-#include "Yongci/yongci.h"
 #include "Yongci/SwtichCondition.h"
+#include "Yongci/yongci.h"
 #include "Yongci/DeviceParameter.h"
 
-#define MAIN_ADDRESS    0xF0
 #define LOCAL_ADDRESS   0xA2 //双路调试控制板子地址
 
-#define LOCAL_CAP_MODULUS   0.127773597592213f
+#define LOCAL_CAP_MODULUS   0.125732421875f
 
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
@@ -44,8 +43,9 @@
 #ifdef	SMALL_CHOSE
     #define ADCS()  {ADCSSL = 0x000F;}  //ADC扫描通道数,AN0--AN3全部扫描
     #define ADPC()  {ADPCFG = 0xFFF0;}  //AN0--AN3
-    #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS *  * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
+    #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
+    #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
 
 #elif BIG_CHOSE
     #define ADCS()  {ADCSSL = 0x0007;}  //ADC扫描通道数，扫描AN0--AN2
@@ -53,8 +53,27 @@
 //在不使用第三个控制器时，使其变量值始终为0，方便函数GetCapVolatageState（）的移植，以及状态更新
     #define VOLTAGE_CAP3()    {g_SystemVoltageParameter.voltageCap3 = 225;} 
     #define CAP3_STATE  0x00    //用于判断其是否被激活
+    #define NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可
+#endif
+//**************************************
+
+//选择使用何种通信方式 判断开启何种中断
+//**************************************
+//#define USE_RS485 0xB2
+#define USE_CAN 0xB1
+#ifdef  USE_CAN
+    #define ON_INT()  {ON_CAN_INT();}
+    #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+    #define CAN_OR_RS485    TRUE
+
+#elif   USE_RS485
+    #define ON_INT()  {ON_UART_INT();}
+    #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+    #define CAN_OR_RS485    FALSE
+
 #endif
 //**************************************
 
 #define Reset() {__asm__ volatile ("RESET");}
+
 #endif

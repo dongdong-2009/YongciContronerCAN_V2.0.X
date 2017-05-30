@@ -14,7 +14,6 @@
 #include "../SerialPort/RtuFrame.h"
 #include  "../Header.h"
 
-extern boolean volatile ReciveErrorFlag;
 
 /**************************************************
  *函数名： InitUART2()

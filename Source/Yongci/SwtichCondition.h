@@ -19,14 +19,10 @@
 extern "C" {
 #endif
 
-#define SWITCH_ONE  0   //第一个动作的机构
-#define SWITCH_TWO  1   //第二个动作的机构
-#define SWITCH_THREE  2 //第三个动作的机构
     
 void SwitchScan(void);
 uint8 CheckIOState(void);
 void DsplaySwitchState(void);   //显示相应的状态
-
 
 
 

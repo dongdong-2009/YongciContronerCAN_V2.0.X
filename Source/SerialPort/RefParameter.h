@@ -90,9 +90,9 @@ typedef struct FenHeZhaDelayTime
 	uint8 hezhaTime1;   //合闸时间1 (ms) 
 	uint8 hezhaTime2;   //合闸时间2 (ms) 
 	uint8 hezhaTime3;   //合闸时间3 (ms) 
-    uint8 fenzhaTime1;  //分闸时间1 （ms）
-    uint8 fenzhaTime2;  //分闸时间2 （ms）
-    uint8 fenzhaTime3;  //分闸时间3 （ms）
+    uint8 fenzhaTime1;  //分闸时间1 (ms)
+    uint8 fenzhaTime2;  //分闸时间2 (ms)
+    uint8 fenzhaTime3;  //分闸时间3 (ms)
 }WaitTime;
 
 /**
@@ -174,6 +174,9 @@ typedef struct TagConfigData
     void (*fGetValue)(PointUint8*, struct TagConfigData* );
 }ConfigData;
 
+/**
+ * 分合闸次数
+ */
 typedef struct TagActionCount
 {
     uint16 hezhaCount1;     //合闸次数1
@@ -184,7 +187,9 @@ typedef struct TagActionCount
     uint16 fenzhaCount3;    //分闸次数3
 }ActionCount;
 
-
+/**
+ * 系统状态量
+ */
 typedef struct TagSystemState
 {
     uint8 heFenState1;   //处于合位还是分为
@@ -205,7 +210,7 @@ extern SystemVoltageParameter g_SystemVoltageParameter; //系统电压
 extern LimitValue g_SystemLimit;
 extern ActionCount g_ActionCount;   //分合闸计数
 extern SystemState g_SystemState;   //系统状态量
-extern WaitTime g_DelayTime;    //分合闸时间
+extern WaitTime g_DelayTime;        //分合闸时间
 extern SystemCalibrationCoefficient g_SystemCalibrationCoefficient; //系统参数校准
 
 extern uint16 _PERSISTENT g_SyncReadyWaitTime;  //同步预制等待时间

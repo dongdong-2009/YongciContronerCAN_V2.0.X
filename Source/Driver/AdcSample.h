@@ -23,7 +23,6 @@ extern "C" {
 
 void AdcInit(void);
 void SoftSampleOnce(void);
-#define  NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可
 
 
 
