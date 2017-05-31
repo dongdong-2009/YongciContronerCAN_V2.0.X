@@ -17,6 +17,8 @@
 
 uint32 g_MsTicks = 0;
 
+SysTimeStamp g_SysTimeStamp;    //状态时间
+
 /**
  * 判断时间是否超时
  *

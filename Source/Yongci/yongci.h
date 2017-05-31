@@ -126,8 +126,9 @@ void FENZHA_Action(uint8 index,uint16 time);
 void TongBuHeZha(void);
 void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
 
-extern  frameRtu sendFrame, recvFrame;
+extern frameRtu sendFrame, recvFrame;
 extern uint8 _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
+
 
 #ifdef	__cplusplus
 }

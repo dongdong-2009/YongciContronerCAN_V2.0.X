@@ -15,7 +15,7 @@
 
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
 #define SCAN_TIME   2           //按键扫描间隔时间
-#define GET_TEMP_TIME   10      //获取温度数据时间 cn * CHANG_LED_TIME (ms)
+#define GET_TEMP_TIME   20      //获取温度数据时间 cn * CHANG_LED_TIME (ms)
 #define CHANG_LED_TIME   500    //改变LED灯闪烁时间 (ms)
 
 frameRtu sendFrame, recvFrame;
@@ -24,7 +24,6 @@ uint8 _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复�
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
-SysTimeStamp g_SysTimeStamp;    //状态时间
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -157,7 +156,7 @@ void YongciMainTask(void)
 {
 //    uint8 result = 0;
     uint8 state = TURN_ON;
-    uint8 cn = 0;
+    uint8 cn = GET_TEMP_TIME;
     while(0xFFFF) //主循环
     {
         ClrWdt();
@@ -172,6 +171,10 @@ void YongciMainTask(void)
             ClrWdt();
             g_SetSwitchState[0].SwitchOff(g_SetSwitchState);
         }
+        else    //防止持续合闸或者分闸
+        {
+            RESET_CURRENT_A();
+        }
         
         //机构2合闸、分闸刷新
         if((g_SetSwitchState[1].Order == HE_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
@@ -183,6 +186,10 @@ void YongciMainTask(void)
         {
             ClrWdt();
             g_SetSwitchState[1].SwitchOff(g_SetSwitchState + 1);
+        }
+        else    //防止持续合闸或者分闸
+        {
+            RESET_CURRENT_B();
         }
         
         if(CAP3_STATE)
@@ -197,6 +204,10 @@ void YongciMainTask(void)
             {
                 ClrWdt();
                 g_SetSwitchState[2].SwitchOff(g_SetSwitchState + 2);
+            }
+            else    //防止持续合闸或者分闸
+            {
+                RESET_CURRENT_C();
             }
         }
         
@@ -287,7 +298,7 @@ void YongciMainTask(void)
                 state = ~state;
                 cn++;
                 //获取温度数据
-                if(cn == GET_TEMP_TIME)
+                if(cn >= GET_TEMP_TIME)
                 {
                     ClrWdt();
                     cn = 0;
