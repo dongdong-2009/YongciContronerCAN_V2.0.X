@@ -94,12 +94,12 @@ inline void ConfigCANOneMaskFilterRX1(EIDBits* pRm1, EIDBits* pRf2)
 /********************************************
 *函数名： InitCANOne()
 *形参：EIDBits* pRm——屏蔽寄存器设置，EIDBits* pRf——滤波寄存器设置
-*返回值：uint16 初始化成功返回0xAA 失败返回0
+*返回值：uint16_t 初始化成功返回0xAA 失败返回0
 *功能：初始化系统中的 CAN1 模块
 **********************************************/
-uint16 InitCANOne(EIDBits* pRm, EIDBits* pRf)
+uint16_t InitCANOne(EIDBits* pRm, EIDBits* pRf)
 {
-    uint16 i = 0, state = 0;
+    uint16_t i = 0, state = 0;
     
     ClrWdt();
     ///Interrupt Section of CAN Peripheral 中断配置
@@ -133,9 +133,9 @@ uint16 InitCANOne(EIDBits* pRm, EIDBits* pRf)
     }
     return state;     
 }
-uint16 InitStandardCAN(uint16 id, uint16 mask)
+uint16_t InitStandardCAN(uint16_t id, uint16_t mask)
 {
-    uint16 i = 0, state = 0;
+    uint16_t i = 0, state = 0;
     id = 0;
     mask = 0;
     
@@ -220,9 +220,9 @@ inline void ConfigEIDTX0(EIDBits* pEID)
 *返回值：uint8 ——发送数据长度 0错误 
 *功能： 将待发送数据装入TXB0 发送寄存器
 **********************************************/
-uint8 ConfigDataTXB0(uint8 len, CANFrame* pframe)
+uint8_t ConfigDataTXB0(uint8_t len, CANFrame* pframe)
 {
-    uint8 i = 0, j = 0;
+    uint8_t i = 0, j = 0;
     if (len > 0 && len <= 8)
     {
         ClrWdt();
@@ -264,13 +264,13 @@ uint8 ConfigDataTXB0(uint8 len, CANFrame* pframe)
 }
   /********************************************
 *函数名：ConfigDataTXB1()
-*形参：uint8 len 待处理数据长度 ，CANFrame* pframe 帧数据
-*返回值：uint8 ——发送数据长度 0 错误
+*形参：uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
+*返回值：uint8_t ——发送数据长度 0 错误
 *功能： 将待发送数据装入TXB1 发送寄存器
 **********************************************/
-uint8 ConfigDataTXB1(uint8 len, CANFrame* pframe)
+uint8_t ConfigDataTXB1(uint8_t len, CANFrame* pframe)
 {
-    uint8 i = 0, j = 0;
+    uint8_t i = 0, j = 0;
     if (len > 0 && len <= 8)
     {
         C2TX1DLCbits.DLC = len ;
@@ -312,13 +312,13 @@ uint8 ConfigDataTXB1(uint8 len, CANFrame* pframe)
   
 /********************************************
 *函数名：ConfigDataTXB2()
-*形参：uint8 len 待处理数据长度 ，CANFrame* pframe 帧数据
-*返回值：uint8 ——发送数据长度 0错误
+*形参：uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
+*返回值：uint8_t ——发送数据长度 0错误
 *功能： 将待发送数据装入TXB2 发送寄存器
 **********************************************/
-uint8 ConfigDataTXB2(uint8 len, CANFrame* pframe)
+uint8_t ConfigDataTXB2(uint8_t len, CANFrame* pframe)
 {
-    uint8 i = 0, j = 0;
+    uint8_t i = 0, j = 0;
     if (len > 0 && len <= 8)
     {
         ClrWdt();
@@ -360,11 +360,11 @@ uint8 ConfigDataTXB2(uint8 len, CANFrame* pframe)
 
 /********************************************
 *函数名：CANOneSendByTX0()
-*形参：: uint16* pID  11bitID标识, uint8 * pbuff 缓冲数据, uint8 len 数据长度
-*返回值：uint8 —— 发送数据总长度 0--数据出错
+*形参：: uint16_t* pID  11bitID标识, uint8_t * pbuff 缓冲数据, uint8_t len 数据长度
+*返回值：uint8_t —— 发送数据总长度 0--数据出错
 *功能： 通过TX0发送带有CRC16的帧数据
 **********************************************/
-uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
+uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
 {  
     if ((len <= 8) && (len > 0))
     {
@@ -390,56 +390,56 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
             }
             case 2:
             {
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];            
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];            
                 ClrWdt();     
                 break;
             }
             case 3:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];       
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];       
                 C2TX0B2 =   pbuff[2];                 
                 break;
             }
             case 4:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
-                C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];   
+                C2TX0B2 =   (((uint16_t)pbuff[3]) << 8)  | pbuff[2];
                 break;
             } 
             case 5:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
-                C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];   
+                C2TX0B2 =   (((uint16_t)pbuff[3]) << 8)  | pbuff[2];
                 C2TX0B3 =   pbuff[4]; 
                 break;
             }
             case 6:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
-                C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
-                C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];   
+                C2TX0B2 =   (((uint16_t)pbuff[3]) << 8)  | pbuff[2];
+                C2TX0B3 =   (((uint16_t)pbuff[5]) << 8)  | pbuff[4];
                 break;
             } 
             case 7:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
-                C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
-                C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];   
+                C2TX0B2 =   (((uint16_t)pbuff[3]) << 8)  | pbuff[2];
+                C2TX0B3 =   (((uint16_t)pbuff[5]) << 8)  | pbuff[4];
                 C2TX0B4 =   pbuff[6]; 
                 break;
             }
             case 8:
             {
                 ClrWdt();
-                C2TX0B1 =   (((uint16)pbuff[1]) << 8)  | pbuff[0];   
-                C2TX0B2 =   (((uint16)pbuff[3]) << 8)  | pbuff[2];
-                C2TX0B3 =   (((uint16)pbuff[5]) << 8)  | pbuff[4];
-                C2TX0B4 =   (((uint16)pbuff[7]) << 8)  | pbuff[6];
+                C2TX0B1 =   (((uint16_t)pbuff[1]) << 8)  | pbuff[0];   
+                C2TX0B2 =   (((uint16_t)pbuff[3]) << 8)  | pbuff[2];
+                C2TX0B3 =   (((uint16_t)pbuff[5]) << 8)  | pbuff[4];
+                C2TX0B4 =   (((uint16_t)pbuff[7]) << 8)  | pbuff[6];
                 break;
             }    
         }
@@ -457,9 +457,9 @@ uint8 CANSendData(uint16 id, uint8 * pbuff, uint8 len)
 *返回值：uint8 —— 接收数据长度 0--数据出错
 *功能： 读取帧数据 
 **************************************************************/
-uint8 ReadRx0Frame(CANFrame* pframe)
+uint8_t ReadRx0Frame(CANFrame* pframe)
 {
-    uint8 len = 0, i = 0, j = 0;
+    uint8_t len = 0, i = 0, j = 0;
 
     if ((C2RX0CONbits.RXFUL == 1) && (C2RX0CONbits.RXRTRRO == 0) ) //包含一个有效报文 且不是远程帧
     {
@@ -509,14 +509,14 @@ inline void GetReciveRX0EID(EIDBits* pEID)
 //Interrupt Section for CAN1
 //-----------------------------------------------------------------------------
 CANFrame Rframe;
-uint8 rlen = 0;
+uint8_t rlen = 0;
 EIDBits rEID;
  
 void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 {    
     ClrWdt();
-    uint8 rxErrorCount = C2EC & 0x00FF;
-    uint8 txErrorCount = (C2EC & 0xFF00) >> 8;
+    uint8_t rxErrorCount = C2EC & 0x00FF;
+    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
     
     ClrWdt();
     IFS2bits.C2IF = 0;         //Clear interrupt flag
@@ -537,8 +537,8 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
     {   
         ClrWdt();
         C2INTFbits.RX0IF = 0; 	//If the Interrupt is due to Receive0 of CAN1 Clear the Interrupt
-        uint16 id = C2RX0SIDbits.SID;
-        uint8 len = C2RX0DLCbits.DLC;
+        uint16_t id = C2RX0SIDbits.SID;
+        uint8_t len = C2RX0DLCbits.DLC;
         ClrWdt();
         ReadRx0Frame(&Rframe);
         ClrWdt();
@@ -567,9 +567,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //禁止错误中断，以允许其他程序的正常运行
 //        UpdateIndicateState(ON_ERROR_LED, TURN_ON);     //开启错误指示灯
-//        UpdateIndicateState(ON_ERROR_RELAY, TURN_ON);   //开启错误指示灯
-//        UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启通信错误错误指示灯
-        IEC2bits.C2IE = 0;  //不在允许CAN中断
     }
     
     if(C2INTFbits.ERRIF == 1)
@@ -596,7 +593,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
             ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
 //            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
-            //C2INTEbits.ERRIE = 0;  //禁止错误中断
         }
 
         /*发送错误中断处理*/
@@ -610,7 +606,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
             ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
 //            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
-            //C2INTEbits.ERRIE = 0;  //禁止错误中断
         }
         C2INTFbits.ERRIF = 0;
     }

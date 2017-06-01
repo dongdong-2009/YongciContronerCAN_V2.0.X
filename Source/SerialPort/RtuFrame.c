@@ -24,27 +24,27 @@
 
 //#include <stdlib.h>
 //入队错误标志位 TRUE未满 正常入队 FALSE 无法入队
-boolean volatile ReciveErrorFlag = TRUE; 
+uint8_t volatile ReciveErrorFlag = TRUE; 
 
 #define FRAME_QUENE_LEN 64 
-uint8  volatile ReciveBufferLen = 0; //未处理接收数据长度
-uint8  volatile  ReciveBuffer[FRAME_QUENE_LEN] = {0}; //临时存放串口接收数据
-uint8  FifoHead = 0;
-uint8  FifoEnd =0;
-uint8  DealStep = 0;
+uint8_t  volatile ReciveBufferLen = 0; //未处理接收数据长度
+uint8_t  volatile  ReciveBuffer[FRAME_QUENE_LEN] = {0}; //临时存放串口接收数据
+uint8_t  FifoHead = 0;
+uint8_t  FifoEnd =0;
+uint8_t  DealStep = 0;
 
 //帧数据放置区域
 #define FRAME_DATA_LEN 64
-uint8  volatile FrameData[FRAME_DATA_LEN] = {0};
+uint8_t  volatile FrameData[FRAME_DATA_LEN] = {0};
 
-uint8 RtuFrame[16] = {0};
-uint8 completeFlag = 0;
+uint8_t RtuFrame[16] = {0};
+uint8_t completeFlag = 0;
 
-uint8 LocalAddress =  LOCAL_ADDRESS;
+uint8_t LocalAddress =  LOCAL_ADDRESS;
 
-uint8 ReciveIndex = 0;  //接收索引 指向待存帧位置
+uint8_t ReciveIndex = 0;  //接收索引 指向待存帧位置
 
-uint8  volatile SendFrameData[SEND_FRAME_LEN] = {0};
+uint8_t volatile SendFrameData[SEND_FRAME_LEN] = {0};
 
 /**************************************************
  *函数名： ReciveFrameDataInit()
@@ -68,10 +68,10 @@ void  ReciveFrameDataInit(void)
 /**************************************************
  *函数名： FrameQueneIn()
  *功能：  帧队列入队
- *形参：入队数据 uint8 * pData
+ *形参：入队数据 uint8_t * pData
  *返回值：如果队列为满，则返回FALSE，否则为TURE
 ****************************************************/
-boolean FrameQueneIn(uint8 recivData)
+uint8_t FrameQueneIn(uint8_t recivData)
 {
     //队列未满
     if (ReciveBufferLen < FRAME_QUENE_LEN)
@@ -90,7 +90,7 @@ boolean FrameQueneIn(uint8 recivData)
  * 形参：出队数据 uint8* pData
  * 返回值：如果为队列空则返回FALSE，否则为TURE
 ****************************************************/
-boolean FrameQueneOut(uint8* pData)
+uint8_t FrameQueneOut(uint8_t* pData)
 {
     //队列是否为空
     OFF_UART_INT();//防止接收读取冲突 应配对使用
@@ -114,7 +114,7 @@ boolean FrameQueneOut(uint8* pData)
  *形参：
  *返回值：
 ****************************************************/
-uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
+uint8_t ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
 {
     ClrWdt(); 
     RX_TX_MODE = RX_MODE; //刷新接收模式使能
@@ -136,7 +136,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
             //判断地址
             case 0:
             {
-                uint8 data = 0;
+                uint8_t data = 0;
                 ClrWdt();
                 pReciveFrame->completeFlag = FALSE;
                 FrameQueneOut(&data);
@@ -153,7 +153,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
             case 1:
             {
                 ClrWdt();
-                uint8 data = 0;
+                uint8_t data = 0;
                 FrameQueneOut(&data);
                 pReciveFrame->funcode = data;
                 DealStep = 2;
@@ -163,7 +163,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
             case 2:
             {
                 ClrWdt();
-                uint8 data = 0;
+                uint8_t data = 0;
                 FrameQueneOut(&data);
                 pReciveFrame->datalen = data;
                 DealStep = 3;
@@ -177,7 +177,7 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
                 //应加计时防止此处长时间接收不到
                 //接收缓冲数据应大于等于数据长度
                 //转存数据
-                FrameQueneOut((uint8*)&FrameData[ReciveIndex++]);// ReciveIndex++; //接收数据则索引加一
+                FrameQueneOut((uint8_t*)&FrameData[ReciveIndex++]);// ReciveIndex++; //接收数据则索引加一
 
                 if (ReciveIndex > FRAME_DATA_LEN)
                 {
@@ -187,22 +187,22 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
                     //接收帧长度过长丢弃
                 }
                 ClrWdt();
-                uint8 len = pReciveFrame->datalen;
+                uint8_t len = pReciveFrame->datalen;
                 if (ReciveIndex >= len + 5)
                 {
                     FrameData[0] = pReciveFrame->address;
                     FrameData[1] = pReciveFrame->funcode;
                     FrameData[2] = len;
                     ClrWdt(); //两个ms不知是否够运算
-                    uint16 crc =  CRC16((uint8* )FrameData, len + 3);
+                    uint16_t crc =  CRC16((uint8_t* )FrameData, len + 3);
                     ClrWdt();
-                    uint8  crcL = FrameData[len + 3];
-                    uint8  crcH = FrameData[len + 4];
+                    uint8_t crcL = FrameData[len + 3];
+                    uint8_t crcH = FrameData[len + 4];
                     ClrWdt();
                     //若校验吻合,则执行下一步动作
-                    if (crc == ((uint16)crcH<<8  | crcL))
+                    if (crc == ((uint16_t)crcH<<8  | crcL))
                     {
-                        pReciveFrame->pData = (uint8*)FrameData;
+                        pReciveFrame->pData = (uint8_t*)FrameData;
                         pReciveFrame->completeFlag = TRUE;
                     }
                     ClrWdt();            
@@ -225,18 +225,18 @@ uint8 ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame)
 /**************************************************
  *函数名：  GenRTUFrame()
  *功能：  生成通信帧
- *形参： 目的地址 uint8 addr
- *       功能代号 uint8 funcode
- *       数据数组  uint8 sendData[]
- *       数据长度  uint8 datalen
- *       生成的帧指针 uint8* pRtuFrame
- *       帧总长度 uint8 *plen
+ *形参： 目的地址 uint8_t addr
+ *       功能代号 uint8_t funcode
+ *       数据数组  uint8_t sendData[]
+ *       数据长度  uint8_t datalen
+ *       生成的帧指针 uint8_t* pRtuFrame
+ *       帧总长度 uint8_t *plen
  *返回值：void
 ****************************************************/
-void  GenRTUFrame(uint8 addr, uint8 funcode,
-             uint8 sendData[], uint8 datalen, uint8* pRtuFrame, uint8 *plen)
+void  GenRTUFrame(uint8_t addr, uint8_t funcode,
+             uint8_t sendData[], uint8_t datalen, uint8_t* pRtuFrame, uint8_t *plen)
 {
-    uint8 len = 1 + 1 +  + 1 + datalen + 2;
+    uint8_t len = 1 + 1 +  + 1 + datalen + 2;
     *plen = len;
 
     pRtuFrame[0] = addr;
@@ -250,17 +250,17 @@ void  GenRTUFrame(uint8 addr, uint8 funcode,
         pRtuFrame[i + 3] = sendData[i];
     }
     ClrWdt();
-    uint16 crc =  CRC16(pRtuFrame, len - 2);
-    pRtuFrame[len - 2] = (uint8)(crc & 0xFF);
-    pRtuFrame[len - 1] = (uint8)(crc & 0xFF00 >> 8);
+    uint16_t crc =  CRC16(pRtuFrame, len - 2);
+    pRtuFrame[len - 2] = (uint8_t)(crc & 0xFF);
+    pRtuFrame[len - 1] = (uint8_t)(crc & 0xFF00 >> 8);
     ClrWdt();
     completeFlag = 0;
 }
 
 
-void SendFrame(uint8* pFrame, uint8 len)
+void SendFrame(uint8_t* pFrame, uint8_t len)
 {
-    uint8 i = 0;
+    uint8_t i = 0;
     RX_TX_MODE = TX_MODE;
     ClrWdt();
     __delay_us(500);//200
@@ -280,12 +280,11 @@ void SendFrame(uint8* pFrame, uint8 len)
  * <p>Discription: [设置超时时间]</p>
  * @param delayTime 超时时间参数
  */
-void SetOverTime(uint16 delayTime)
+void SetOverTime(uint16_t delayTime)
 {
     g_SysTimeStamp.StarTime = g_MsTicks;
     g_SysTimeStamp.delayTime = delayTime;
     ClrWdt();
-    IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime);
 }
 
 /**
@@ -295,7 +294,7 @@ void SetOverTime(uint16 delayTime)
  * @param delayTime 超时时间参数
  * @return 如果超时则返回FALSE，否则返回TRUE
  */
-uint8 CheckIsOverTime(void)
+uint8_t CheckIsOverTime(void)
 {
     if(IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
     {

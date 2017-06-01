@@ -26,10 +26,10 @@
  *返回值：void
  *功能：  按地址写入一个word
 ****************************************************/
-inline void WriteWord_EEPROM( _prog_addressT addr, uint16* data)
+inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
 {
    //应禁止中断
-    uint8 cn = 0;
+    uint8_t cn = 0;
     ClrWdt();
     __builtin_disi(0x3FFF); 
     _erase_eedata(addr, _EE_WORD); /* erase the dat[] array */ 
@@ -71,7 +71,7 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16* data)
  *返回值：void
  *功能：  按地址读取一个word
 ****************************************************/
-inline void ReadWord_EEPROM( _prog_addressT addr, uint16* data)
+inline void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data)
 {
     ClrWdt();
     __builtin_disi(0x3FFF); 
@@ -83,10 +83,10 @@ inline void ReadWord_EEPROM( _prog_addressT addr, uint16* data)
  * @param id  配置号
  * @param data 指向数据的指针
  */
-void ReadEEPROM(uint8 id,PointUint8* pPoint)
+void ReadEEPROM(uint8_t id,PointUint8* pPoint)
 {    
-    uint16 readData = 0;
-    uint8 i = 0;
+    uint16_t readData = 0;
+    uint8_t i = 0;
     ClrWdt();
     _prog_addressT address;
     address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
@@ -106,10 +106,10 @@ void ReadEEPROM(uint8 id,PointUint8* pPoint)
  * @param id  配置号
  * @param data 指向数据的指针
  */
-void WriteEEPROM(uint8 id,PointUint8* pPoint)
+void WriteEEPROM(uint8_t id,PointUint8* pPoint)
 {
-    uint16 data[2] = {0,0};
-    uint8 i = 0;
+    uint16_t data[2] = {0,0};
+    uint8_t i = 0;
     ClrWdt();
     _prog_addressT address;
     address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
@@ -128,7 +128,7 @@ void WriteEEPROM(uint8 id,PointUint8* pPoint)
  * 写累加和到EEPROM中
  * @param writeData 所需写的数据
  */
-void WriteAccumulateSum_EEPROM(uint16* writeData)
+void WriteAccumulateSum_EEPROM(uint16_t* writeData)
 {
     OFF_CAN_INT();  //不允许CAN中断
     ClrWdt();
@@ -142,7 +142,7 @@ void WriteAccumulateSum_EEPROM(uint16* writeData)
  * 读累加和
  * @param writeData 所需读取的数据
  */
-void ReadAccumulateSum(uint16* readData)
+void ReadAccumulateSum(uint16_t* readData)
 {
     _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
     ClrWdt();
@@ -154,7 +154,7 @@ void ReadAccumulateSum(uint16* readData)
  * 写入分合闸次数
  * @param writeData 所需读取的数据
  */
-void WriteFenzhaCount(_prog_addressT addr , uint16* eedata)
+void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata)
 {
     ReadWord_EEPROM(addr , eedata);
     

@@ -18,7 +18,7 @@ extern "C" {
 
 #include "../Driver/tydef.h"
 
-uint16 CRC16(uint8 *puchMsg, uint8 usDataLen);
+uint16_t CRC16(uint8_t *puchMsg, uint8_t usDataLen);
 
 #ifdef	__cplusplus
 }

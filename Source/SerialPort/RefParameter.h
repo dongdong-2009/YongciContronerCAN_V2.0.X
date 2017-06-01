@@ -78,8 +78,8 @@ extern "C" {
     
 typedef struct TagPointUint8
 {
-    uint8* pData; //数据指针
-    uint8 len; //指向数据长度
+    uint8_t* pData; //数据指针
+    uint8_t len; //指向数据长度
 }PointUint8;
 
 /**
@@ -87,12 +87,12 @@ typedef struct TagPointUint8
  */
 typedef struct FenHeZhaDelayTime
 {
-	uint8 hezhaTime1;   //合闸时间1 (ms) 
-	uint8 hezhaTime2;   //合闸时间2 (ms) 
-	uint8 hezhaTime3;   //合闸时间3 (ms) 
-    uint8 fenzhaTime1;  //分闸时间1 (ms)
-    uint8 fenzhaTime2;  //分闸时间2 (ms)
-    uint8 fenzhaTime3;  //分闸时间3 (ms)
+	uint8_t hezhaTime1;   //合闸时间1 (ms) 
+	uint8_t hezhaTime2;   //合闸时间2 (ms) 
+	uint8_t hezhaTime3;   //合闸时间3 (ms) 
+    uint8_t fenzhaTime1;  //分闸时间1 (ms)
+    uint8_t fenzhaTime2;  //分闸时间2 (ms)
+    uint8_t fenzhaTime3;  //分闸时间3 (ms)
 }WaitTime;
 
 /**
@@ -100,9 +100,9 @@ typedef struct FenHeZhaDelayTime
  */
 typedef struct TagSystemCalibrationCoefficient
 {
-	float capVoltageCoefficient1;   //默认用于电容1电压校准系数
-	float capVoltageCoefficient2;   //默认用于电容2电压校准系数
-	float capVoltageCoefficient3;   //默认用于电容3电压校准系数
+	float32_t capVoltageCoefficient1;   //默认用于电容1电压校准系数
+	float32_t capVoltageCoefficient2;   //默认用于电容2电压校准系数
+	float32_t capVoltageCoefficient3;   //默认用于电容3电压校准系数
 
 }SystemCalibrationCoefficient;
 
@@ -111,13 +111,13 @@ typedef struct TagSystemCalibrationCoefficient
  */
 typedef struct TagSystemVoltageParameter
 {
-	float voltageCap1;  //用于电容电压1
-	float voltageCap2;  //用于电容电压2
-	float voltageCap3;  //用于电容电压3
+	float32_t voltageCap1;  //用于电容电压1
+	float32_t voltageCap2;  //用于电容电压2
+	float32_t voltageCap3;  //用于电容电压3
 
-	float workVoltage; //工作电压
+	float32_t workVoltage; //工作电压
     
-    float temp; //温度
+    float32_t temp; //温度
 
 }SystemVoltageParameter;
 
@@ -126,8 +126,8 @@ typedef struct TagSystemVoltageParameter
  */
 typedef struct TagUpDownValue
 {
-	float upper;//上限
-	float down;//下限
+	float32_t upper;//上限
+	float32_t down;//下限
 
 }UpDownValue;
 
@@ -154,11 +154,11 @@ typedef struct TagLimitValue
  */
 typedef struct TagSyncCommand
 {
-	uint8 commandByte[8]; //命令字节数组
-	uint8 configbyte; //配置字
-	uint16 actionRadA; //A   设定弧度归一化值r = M/65536 *2*PI
-	uint16 actionRadB; //B
-	uint16 actionRadC; //C
+	uint8_t commandByte[8]; //命令字节数组
+	uint8_t configbyte; //配置字
+	uint16_t actionRadA; //A   设定弧度归一化值r = M/65536 *2*PI
+	uint16_t actionRadB; //B
+	uint16_t actionRadC; //C
 }SyncCommand;
 
 
@@ -167,9 +167,9 @@ typedef struct TagSyncCommand
  */
 typedef struct TagConfigData
 {
-    uint8 ID;       //ID号
+    uint8_t ID;       //ID号
     void* pData;    //指向数据
-    uint8 type;     //类型
+    uint8_t type;     //类型
     void (*fSetValue)(PointUint8*, struct TagConfigData* );
     void (*fGetValue)(PointUint8*, struct TagConfigData* );
 }ConfigData;
@@ -179,12 +179,12 @@ typedef struct TagConfigData
  */
 typedef struct TagActionCount
 {
-    uint16 hezhaCount1;     //合闸次数1
-    uint16 fenzhaCount1;    //分闸次数1
-    uint16 hezhaCount2;     //合闸次数2
-    uint16 fenzhaCount2;    //分闸次数2
-    uint16 hezhaCount3;     //合闸次数3
-    uint16 fenzhaCount3;    //分闸次数3
+    uint16_t hezhaCount1;     //合闸次数1
+    uint16_t fenzhaCount1;    //分闸次数1
+    uint16_t hezhaCount2;     //合闸次数2
+    uint16_t fenzhaCount2;    //分闸次数2
+    uint16_t hezhaCount3;     //合闸次数3
+    uint16_t fenzhaCount3;    //分闸次数3
 }ActionCount;
 
 /**
@@ -192,13 +192,13 @@ typedef struct TagActionCount
  */
 typedef struct TagSystemState
 {
-    uint8 heFenState1;   //处于合位还是分为
-    uint8 heFenState2;   //处于合位还是分为
-    uint8 heFenState3;   //处于合位还是分为
-    uint8 yuanBenState; //远方或者就地
-    uint8 workMode;     //工作模式
-    uint8 warning;      //告警
-    uint8 MacID;        //MAC地址
+    uint8_t heFenState1;   //处于合位还是分为
+    uint8_t heFenState2;   //处于合位还是分为
+    uint8_t heFenState3;   //处于合位还是分为
+    uint8_t yuanBenState; //远方或者就地
+    uint8_t workMode;     //工作模式
+    uint8_t warning;      //告警
+    uint8_t MacID;        //MAC地址
     
 }SystemState;
 
@@ -213,14 +213,14 @@ extern SystemState g_SystemState;   //系统状态量
 extern WaitTime g_DelayTime;        //分合闸时间
 extern SystemCalibrationCoefficient g_SystemCalibrationCoefficient; //系统参数校准
 
-extern uint16 _PERSISTENT g_SyncReadyWaitTime;  //同步预制等待时间
-extern uint16 _PERSISTENT g_RemoteWaitTime;     //遥控预制等待时间
+extern uint16_t _PERSISTENT g_SyncReadyWaitTime;  //同步预制等待时间
+extern uint16_t _PERSISTENT g_RemoteWaitTime;     //遥控预制等待时间
 
-uint8 SetParamValue(uint8 id,PointUint8* pPoint);
-uint8 ReadParamValue(uint8 id,PointUint8* pPoint);
+uint8_t SetParamValue(uint8_t id,PointUint8* pPoint);
+uint8_t ReadParamValue(uint8_t id,PointUint8* pPoint);
 void RefParameterInit(void);
 void WriteAccumulateSum(void);
-uint8 AccumulateSumVerify(void);
+uint8_t AccumulateSumVerify(void);
 
 #ifdef	__cplusplus
 }

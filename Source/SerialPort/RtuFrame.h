@@ -22,27 +22,27 @@ extern "C" {
 
 typedef struct
 {
-    uint8 address; //地址
-    uint8 funcode; //功能代码
-    uint8 datalen; //数据长度
-    uint8* pData; //指向发送数据指针
-    boolean completeFlag;
+    uint8_t address; //地址
+    uint8_t funcode; //功能代码
+    uint8_t datalen; //数据长度
+    uint8_t* pData; //指向发送数据指针
+    uint8_t completeFlag;
 } frameRtu;
 
-boolean FrameQueneIn(uint8 recivData);
-boolean FrameQueneOut(uint8* pData);
+uint8_t FrameQueneIn(uint8_t recivData);
+uint8_t FrameQueneOut(uint8_t* pData);
 void  ReciveFrameDataInit(void);
 unsigned char ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame);
 
-void  GenRTUFrame(uint8 addr, uint8 funcode,
-                        uint8 sendData[], uint8 datalen, uint8* pRtuFrame, uint8 *plen);
+void  GenRTUFrame(uint8_t addr, uint8_t funcode,
+                        uint8_t sendData[], uint8_t datalen, uint8_t* pRtuFrame, uint8_t *plen);
 
-void SendFrame(uint8* pFrame, uint8 len);
+void SendFrame(uint8_t* pFrame, uint8_t len);
 
-void SetOverTime(uint16 delayTime);
-uint8 CheckIsOverTime(void);
+void SetOverTime(uint16_t delayTime);
+uint8_t CheckIsOverTime(void);
 
-extern boolean volatile ReciveErrorFlag;
+extern uint8_t volatile ReciveErrorFlag;
 
 #ifdef	__cplusplus
 }

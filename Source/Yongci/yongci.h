@@ -96,13 +96,13 @@ extern "C" {
   */
 typedef struct SynchroSwitchConfig
 {
-	uint8   State;	//当前的状态
-	uint16  Order;	//分合闸命令
-    uint16  LastOrder;  //上一次执行的指令
-	uint16  SwitchOnTime;   //合闸动作时间
-	uint16  SwitchOffTime;	//分闸动作时间
-	uint16  OffestTime;	//偏移时间
-	uint32  SysTime;	//当前的系统时间
+	uint8_t   State;	//当前的状态
+	uint16_t  Order;	//分合闸命令
+    uint16_t  LastOrder;  //上一次执行的指令
+	uint16_t  SwitchOnTime;   //合闸动作时间
+	uint16_t  SwitchOffTime;	//分闸动作时间
+	uint16_t  OffestTime;	//偏移时间
+	uint32_t  SysTime;	//当前的系统时间
 	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
 	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
@@ -112,22 +112,22 @@ typedef struct SynchroSwitchConfig
  */
 typedef struct SystemIndexConfig
 {
-    uint8 indexLoop;
-    uint8 onTime;
-    uint16 offestTime;
+    uint8_t indexLoop;
+    uint8_t onTime;
+    uint16_t offestTime;
     void (*GetTime)(struct SystemIndexConfig* );
 }IndexConfig;
 
 void YongciMainTask(void);
 void YongciFirstInit(void);
 
-void HEZHA_Action(uint8 index,uint16 time);
-void FENZHA_Action(uint8 index,uint16 time);
+void HEZHA_Action(uint8_t index,uint16_t time);
+void FENZHA_Action(uint8_t index,uint16_t time);
 void TongBuHeZha(void);
 void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
 
 extern frameRtu sendFrame, recvFrame;
-extern uint8 _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
+extern uint8_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 
 
 #ifdef	__cplusplus

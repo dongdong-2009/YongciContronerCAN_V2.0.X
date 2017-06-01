@@ -23,7 +23,7 @@
 ****************************************************/
 void InitUART1(unsigned int baud)
 {
-    float value = 0;
+    float32_t value = 0;
     // This is an EXAMPLE, so brutal typing goes into explaining all bit sets
 
     // The HPC16 board has a DB9 connector wired to UART2, so we will
@@ -40,7 +40,7 @@ void InitUART1(unsigned int baud)
     U1MODEbits.STSEL = 0;	// Bit0 One Stop Bit
 
     ClrWdt();
-    value = (float)FCY /(float)(16*baud) - 1; //波特率 = FCY/(16 * (BRG + 1))
+    value = (float32_t)FCY /(float32_t)(16*baud) - 1; //波特率 = FCY/(16 * (BRG + 1))
     U1BRG = 25;	//25-9600
     
     U1STAbits.UTXBRK = 0;	//Bit11 Disabled

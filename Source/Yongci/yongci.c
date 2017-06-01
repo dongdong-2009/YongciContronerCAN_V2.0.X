@@ -15,11 +15,11 @@
 
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
 #define SCAN_TIME   2           //按键扫描间隔时间
-#define GET_TEMP_TIME   20      //获取温度数据时间 cn * CHANG_LED_TIME (ms)
+#define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
 #define CHANG_LED_TIME   500    //改变LED灯闪烁时间 (ms)
 
 frameRtu sendFrame, recvFrame;
-uint8 _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
+uint8_t _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
 
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
@@ -115,7 +115,7 @@ void TongBuHeZha(void)
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
-void HEZHA_Action(uint8 index,uint16 time)
+void HEZHA_Action(uint8_t index,uint16_t time)
 {
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
@@ -134,7 +134,7 @@ void HEZHA_Action(uint8 index,uint16 time)
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
-void FENZHA_Action(uint8 index,uint16 time)
+void FENZHA_Action(uint8_t index,uint16_t time)
 {
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
@@ -154,9 +154,8 @@ void FENZHA_Action(uint8 index,uint16 time)
 ****************************************************/
 void YongciMainTask(void)
 {
-//    uint8 result = 0;
-    uint8 state = TURN_ON;
-    uint8 cn = GET_TEMP_TIME;
+//    uint8_t result = 0;
+    uint8_t state = TURN_ON;
     while(0xFFFF) //主循环
     {
         ClrWdt();
@@ -241,7 +240,7 @@ void YongciMainTask(void)
             g_SetSwitchState[1].State = IDLE_ORDER;
             g_SetSwitchState[2].State = IDLE_ORDER;
             
-            if(g_GetState.SuddenFlag == TRUE)
+            if(g_SuddenState.SuddenFlag == TRUE)
             {
                 ClrWdt();
                 //更新机构的状态显示
@@ -281,29 +280,27 @@ void YongciMainTask(void)
                 continue;
             }
             
-            if((g_MsTicks - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_GetState.SuddenFlag == TRUE))
+            if((g_MsTicks - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
             {
                 ClrWdt();
                 UpdataState();
-                g_GetState.SuddenFlag = FALSE;  //Clear
+                g_SuddenState.SuddenFlag = FALSE;  //Clear
                 g_SysTimeStamp.SendDataTime = g_MsTicks;
             }
             ClrWdt();
             //运行指示灯
-            if(g_MsTicks - g_SysTimeStamp.GetTempTime >= CHANG_LED_TIME)
+            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= CHANG_LED_TIME)
             {
                 UpdateLEDIndicateState(RUN_LED,state);
+                state = ~state;
+                g_SysTimeStamp.ChangeLedTime = g_MsTicks;
+            }
+            //获取温度数据
+            if(g_MsTicks - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
+            {
                 g_SysTimeStamp.GetTempTime = g_MsTicks;
                 ClrWdt();
-                state = ~state;
-                cn++;
-                //获取温度数据
-                if(cn >= GET_TEMP_TIME)
-                {
-                    ClrWdt();
-                    cn = 0;
-                    g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
-                }
+                g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
             }
         }
     }
@@ -317,7 +314,7 @@ void YongciMainTask(void)
 ****************************************************/
 void YongciFirstInit(void)
 {
-    uint8 index = 0;
+    uint8_t index = 0;
     ClrWdt();
     
     //IGBT引脚
@@ -350,16 +347,16 @@ void YongciFirstInit(void)
     g_Order = IDLE_ORDER;   //初始化
 //****************************************
 //突发状态量更新
-    g_GetState.CapState1 = 0;
-    g_GetState.CapState2 = 0;
-    g_GetState.CapState3 = 0;
-    g_GetState.ExecuteOrder1 = 0;
-    g_GetState.ExecuteOrder2 = 0;
-    g_GetState.ExecuteOrder3 = 0;
-    g_GetState.SuddenFlag = FALSE;
-    g_GetState.SwitchState1 = 0;
-    g_GetState.SwitchState2 = 0;
-    g_GetState.SwitchState3 = 0;
+    g_SuddenState.CapState1 = 0;
+    g_SuddenState.CapState2 = 0;
+    g_SuddenState.CapState3 = 0;
+    g_SuddenState.ExecuteOrder1 = 0;
+    g_SuddenState.ExecuteOrder2 = 0;
+    g_SuddenState.ExecuteOrder3 = 0;
+    g_SuddenState.SuddenFlag = FALSE;
+    g_SuddenState.SwitchState1 = 0;
+    g_SuddenState.SwitchState2 = 0;
+    g_SuddenState.SwitchState3 = 0;
     ClrWdt();
 //****************************************
     
@@ -380,9 +377,10 @@ void YongciFirstInit(void)
     ClrWdt();
     InitSetSwitchState();
     
-    g_SysTimeStamp.GetTempTime = g_MsTicks; //对于时间状态量的初始化
-    g_SysTimeStamp.ScanTime = g_MsTicks;    //对于时间状态量的初始化
-    g_SysTimeStamp.SendDataTime = g_MsTicks;//对于时间状态量的初始化
+    g_SysTimeStamp.ChangeLedTime = g_MsTicks;   //对于时间状态量的初始化
+    g_SysTimeStamp.GetTempTime = g_MsTicks;     //对于时间状态量的初始化
+    g_SysTimeStamp.ScanTime = g_MsTicks;        //对于时间状态量的初始化
+    g_SysTimeStamp.SendDataTime = g_MsTicks;    //对于时间状态量的初始化
 }  
 
 /**
@@ -392,7 +390,7 @@ void YongciFirstInit(void)
  */
 void InitSetSwitchState(void)
 {
-	uint8 index = 0;
+	uint8_t index = 0;
 
 	g_SetSwitchState[index].State = IDLE_ORDER;	//默认为空闲状态
 	g_SetSwitchState[index].Order = IDLE_ORDER; //默认未执行
@@ -586,10 +584,10 @@ void GetSwitchOnTime(IndexConfig* pIndex)
  */
 void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame)
 {
-    uint16 highTime = 0;
-    uint16 lowTime = 0;
+    uint16_t highTime = 0;
+    uint16_t lowTime = 0;
 
-	uint8 len = pSendFrame->len;
+	uint8_t len = pSendFrame->len;
 
 	switch (len)
 	{

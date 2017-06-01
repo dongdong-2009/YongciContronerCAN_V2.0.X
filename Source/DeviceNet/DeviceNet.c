@@ -1231,7 +1231,7 @@ void DeviceMonitorPluse(void)
 * 形  参: uint16* pID  11bitID标识, uint8 * pbuff 缓冲数据, uint8 len 数据长度
 * 返回值:      BYTE  0-信息未进行处理  1-信息进行处理	
 ********************************************************************************/
-BOOL DeviceNetReciveCenter(uint16* pID, uint8 * pbuff, uint8 len)
+BOOL DeviceNetReciveCenter(WORD* pID, BYTE * pbuff, BYTE len)
 {   
     BYTE i= 0;
     //判断是否为仅限组2---可以在滤波器设置屏蔽
@@ -1301,7 +1301,6 @@ void StartOverTimer()
     g_SysTimeStamp.StarTime = g_MsTicks;
     g_SysTimeStamp.delayTime = 1000;
     ClrWdt();
-    IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime);
 }
 /*******************************************************************************
 * 函数名:	BOOL IsTimeRemain()----根据具体平台需要重新

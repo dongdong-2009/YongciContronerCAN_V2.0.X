@@ -13,9 +13,7 @@
 #include "../Header.h"
 #include "Delay.h"
 
-#define UINT32_MAX  0xFFFFFFFF
-
-uint32 g_MsTicks = 0;
+uint32_t g_MsTicks = 0;
 
 SysTimeStamp g_SysTimeStamp;    //状态时间
 
@@ -29,7 +27,7 @@ SysTimeStamp g_SysTimeStamp;    //状态时间
  *
  * @bref   比较时间是否达到设定值，对溢出进行超时判断
  */
-inline uint8 IsOverTime(uint32 startTime, uint32 delayTime)
+inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 {
     if (UINT32_MAX - delayTime < startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
@@ -61,9 +59,9 @@ inline uint8 IsOverTime(uint32 startTime, uint32 delayTime)
  * <p>Discription: [delays number of tick Systicks ]</p>
  * @param ms 延时时间ms
  */
-inline void Delay_ms(uint32 dlyTicks)
+inline void Delay_ms(uint32_t dlyTicks)
 {
-    uint32 curTicks;
+    uint32_t curTicks;
     curTicks = g_MsTicks;
     ClrWdt();
     while ((g_MsTicks - curTicks) < dlyTicks)

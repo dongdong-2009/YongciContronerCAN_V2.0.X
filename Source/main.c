@@ -60,7 +60,7 @@
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
-#pragma config BODENV = BORV_27         // Brown Out Voltage (2.7V)
+#pragma config BODENV = BORV_42         // Brown Out Voltage (4.2V) 
 #pragma config BOREN = PBOR_ON          // PBOR Enable (Enabled)
 #pragma config MCLRE = MCLR_EN          // Master Clear Enable (Enabled)
 
@@ -95,7 +95,14 @@
 
 int main()
 {
-    uint16 cn = 0;
+    uint16_t cn = 0;
+    
+    //延时3s判断启动
+    while(cn++ < 4000)
+    {
+        __delay_ms(1);
+        ClrWdt();
+    }
     
     InitDeviceIO(); //IO初始化 首先禁止中断
     AdcInit(); //ADC采样初始化
@@ -147,13 +154,6 @@ int main()
     }
     
     GetCapVolatageState();  //获取电容电压状态
-    
-    //延时3s判断启动
-    while(cn++ <3000)
-    {
-        __delay_ms(1);
-        ClrWdt();
-    }    
     
     while(TRUE)
     {

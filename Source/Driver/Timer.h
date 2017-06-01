@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-void SetTimer2(unsigned  int ms);
+void SetTimer2(unsigned int ms);
 void StartTimer2(void);
 void StopTimer2(void);
 

@@ -48,13 +48,13 @@
 #define IP595_B_MR     	 LATGbits.LATG14
 #define IP595_B_MR_DIR   TRISGbits.TRISG14
 
-void HC595BSendData(uint16 SendVal);
-void HC595SendData(uint16 SendVal);
-void UpdateRelayIndicateState(uint16 port, uint8 state);
+void HC595BSendData(uint16_t SendVal);
+void HC595SendData(uint16_t SendVal);
+void UpdateRelayIndicateState(uint16_t port, uint8_t state);
 
 //输出状态LED1-LED6 Relay1 Relay7
-uint16 g_LEDOutState = 0xFFFF;
-uint16 g_RelayOutState = 0;
+uint16_t g_LEDOutState = 0xFFFF;
+uint16_t g_RelayOutState = 0;
 /**
  * 
  * <p>Function name: [InitDeviceIO]</p>
@@ -140,9 +140,9 @@ void InitDeviceIO(void)
  * <p>Discription: [595控制LED灯函数]</p>
  * @param SendVal
  */
-void HC595BSendData(uint16 SendVal)
+void HC595BSendData(uint16_t SendVal)
 {  
-    uint8 i;
+    uint8_t i;
     for(i=0;i<16;i++) 
     {
         ClrWdt();
@@ -174,9 +174,9 @@ void HC595BSendData(uint16 SendVal)
  * <p>Discription: [595控制继电器函数]</p>
  * @param SendVal
  */
-void HC595SendData(uint16 SendVal)
+void HC595SendData(uint16_t SendVal)
 { 
-    uint8 i;
+    uint8_t i;
     for(i = 0;i < 16;i++) 
     {
         ClrWdt();
@@ -287,7 +287,7 @@ inline void TurnOffInt2(void)
  * @param port 从LED,Relay宏定义中选择
  * @param state 开启/关闭 TURN_ON/TURN_OFF
  */
-void UpdateLEDIndicateState(uint16 port, uint8 state)
+void UpdateLEDIndicateState(uint16_t port, uint8_t state)
 {
     //开启状态
     if (state == TURN_ON)
@@ -311,7 +311,7 @@ void UpdateLEDIndicateState(uint16 port, uint8 state)
  * @param port 从LED,Relay宏定义中选择
  * @param state 开启/关闭 TURN_ON/TURN_OFF
  */
-void UpdateRelayIndicateState(uint16 port, uint8 state)
+void UpdateRelayIndicateState(uint16_t port, uint8_t state)
 {
     //开启状态
     if (state == TURN_ON)
@@ -336,7 +336,7 @@ void UpdateRelayIndicateState(uint16 port, uint8 state)
  * @param ledPort   LED灯的位
  * @param state 状态，TURN_ON \ TURN_OFF
  */
-void UpdateIndicateState(uint16 relayPort,uint16 ledPort,uint8 state)
+void UpdateIndicateState(uint16_t relayPort,uint16_t ledPort,uint8_t state)
 {
     ClrWdt();
     UpdateRelayIndicateState(relayPort,state);

@@ -76,7 +76,7 @@ extern "C" {
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
 
-float DS18B20GetTemperature(void);
+float32_t DS18B20GetTemperature(void);
 
 #ifdef	__cplusplus
 }

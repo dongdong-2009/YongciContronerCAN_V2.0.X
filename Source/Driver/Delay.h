@@ -76,19 +76,23 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
 #include "tydef.h"
 
-void Delay_ms(uint32 ms);
-uint8 IsOverTime(uint32 startTime, uint32 delayTime);
+void Delay_ms(uint32_t ms);
+uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime);
 
 typedef struct SysTime
 {
-    uint32 StarTime;    //超时判断起始时间
-    uint32 delayTime;
-    uint32 GetTempTime; //获取温度时间
-    uint32 SendDataTime;//循环发送数据时间
-    uint32 ScanTime;    //按键扫描间隔时间
+    //仅用于通信超时判断
+    uint32_t StarTime;    //超时判断起始时间
+    uint32_t delayTime;   
+    
+    //系统运行时需要的时间值
+    uint32_t GetTempTime;   //记录上一次获取温度值的时间
+    uint32_t SendDataTime;  //记录上一次上传数据的时间
+    uint32_t ScanTime;      //记录上一次按键扫描的时间
+    uint32_t ChangeLedTime; //记录上一次改变指示灯的时间
 }SysTimeStamp;
 
-extern uint32 g_MsTicks;
+extern uint32_t g_MsTicks;
 extern SysTimeStamp g_SysTimeStamp;    //状态时间
 
 

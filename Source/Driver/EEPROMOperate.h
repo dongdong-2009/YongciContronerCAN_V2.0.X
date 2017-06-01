@@ -76,14 +76,14 @@ extern "C" {
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
 
-void WriteWord_EEPROM( _prog_addressT addr, uint16* data);
-void ReadWord_EEPROM( _prog_addressT addr, uint16* data);
+void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data);
+void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data);
 
-void WriteEEPROM(uint8 id,PointUint8* pPoint);
-void ReadEEPROM(uint8 id,PointUint8* pPoint);
-void WriteAccumulateSum_EEPROM(uint16* writeData);
-void ReadAccumulateSum(uint16* readData);
-void WriteFenzhaCount(_prog_addressT addr , uint16* eedata);
+void WriteEEPROM(uint8_t id,PointUint8* pPoint);
+void ReadEEPROM(uint8_t id,PointUint8* pPoint);
+void WriteAccumulateSum_EEPROM(uint16_t* writeData);
+void ReadAccumulateSum(uint16_t* readData);
+void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata);
 
 #ifdef	__cplusplus
 }

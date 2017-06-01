@@ -14,7 +14,7 @@
 #include "Timer.h"
 
 //Timer2 周期计数
-uint16 g_TPR2Count = 0;
+uint16_t g_TPR2Count = 0;
 
 /**
  * 
@@ -38,7 +38,7 @@ void Init_Timer1( unsigned int  ms)
     IFS0bits.T1IF = 0;
     
     TMR1 = 0;
-    PR1 = (unsigned int)((float)FCY/1000.00/64.0*(float)ms)-1;
+    PR1 = (unsigned int)((float32_t)FCY/1000.00/64.0*(float32_t)ms)-1;
     ClrWdt();
 } 
 /**
@@ -73,7 +73,7 @@ inline  void ResetTimer1(void)
  * <p>Discription: [TIMER2 定时器设置 —— 用于通讯超时检测]</p>
  * @param ms 定时器周期
  */
-void SetTimer2(uint16 ms)
+void SetTimer2(uint16_t ms)
 {
     ClrWdt();
     IPC1bits.T2IP = 1;  //最低的优先级
@@ -86,7 +86,7 @@ void SetTimer2(uint16 ms)
     IEC0bits.T2IE = 0;
     TMR2 = 0;
     
-    PR2 = (unsigned int)((float)FCY/1000.00/256.0*(float)ms)-1;
+    PR2 = (unsigned int)((float32_t)FCY/1000.00/256.0*(float32_t)ms)-1;
     ClrWdt();
     g_TPR2Count = PR2;
     T2CONbits.TON = 0;

@@ -27,7 +27,7 @@ extern "C" {
 //获取电压
 void GetCapVoltage(void);
 //获取电压状态
-uint16 GetCapVolatageState(void);
+uint16_t GetCapVolatageState(void);
 void CheckVoltage(void);
 
 #ifdef	__cplusplus

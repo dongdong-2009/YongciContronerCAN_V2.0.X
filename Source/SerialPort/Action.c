@@ -41,16 +41,16 @@
 #define SHORT_TIME   160 //40us
 
 
-void SendAckMesssage(uint8 fun);
-void SendErrorFrame(uint8 receiveID,uint8 errorID);
+void SendAckMesssage(uint8_t fun);
+void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 void GetLoopSwitch(struct DefFrameData* pReciveFrame);
 
-extern uint8 volatile SendFrameData[SEND_FRAME_LEN];
+extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 
 //分合状态指令 单片机在看门狗复位的情况下不会改变该值
-_PERSISTENT uint16 ReceiveStateFlag;  
+_PERSISTENT uint16_t ReceiveStateFlag;  
 
-GetState g_GetState;    //需要上传的机构状态值
+SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 
 /**************************************************
  *函数名： SendAckMesssage()
@@ -58,13 +58,13 @@ GetState g_GetState;    //需要上传的机构状态值
  *形参：  Uint16 fun 功能代码地址
  *返回值：void
 ****************************************************/
-inline void SendAckMesssage(uint8 fun)
+inline void SendAckMesssage(uint8_t fun)
 {
-    uint16 len = 0;
+    uint16_t len = 0;
     ClrWdt();
-    GenRTUFrame(LOCAL_ADDRESS, ACK, &fun, 1, (uint8*)SendFrameData, (uint8 *)&len);
+    GenRTUFrame(LOCAL_ADDRESS, ACK, &fun, 1, (uint8_t*)SendFrameData, (uint8_t *)&len);
     ClrWdt();
-    SendFrame((uint8*)SendFrameData, len);
+    SendFrame((uint8_t*)SendFrameData, len);
     ClrWdt();
 }
 /**************************************************
@@ -170,13 +170,13 @@ void ExecuteFunctioncode(frameRtu* pRtu)
  */
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
-    uint8 i = 1;    
-    uint8 id = pReciveFrame->pBuffer[0];
-    uint8 error = 0;    //错误
-    uint8 idIndex = 1;  //索引，读取属性值时可用到
+    uint8_t i = 1;    
+    uint8_t id = pReciveFrame->pBuffer[0];
+    uint8_t error = 0;    //错误
+    uint8_t idIndex = 1;  //索引，读取属性值时可用到
     
     ClrWdt();
-    uint8 Data[8] = {0,0,0,0,0,0,0,0};
+    uint8_t Data[8] = {0,0,0,0,0,0,0,0};
     PointUint8 Point;
     Point.pData = Data;
     Point.len = 8;
@@ -578,9 +578,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
  * @param receiveID 主站发送的ID号
  * @param errorID   错误代码
  */
-void SendErrorFrame(uint8 receiveID,uint8 errorID)
+void SendErrorFrame(uint8_t receiveID,uint8_t errorID)
 {
-    uint8 data[8] = {0,0,0,0,0,0,0,0};
+    uint8_t data[8] = {0,0,0,0,0,0,0,0};
     struct DefFrameData pSendFrame;
     
     pSendFrame.pBuffer = data;
@@ -603,7 +603,7 @@ void SendErrorFrame(uint8 receiveID,uint8 errorID)
  */
 void UpdataState(void)
 {
-    uint8 Data[8] = {0,0,0,0,0,0,0,0};
+    uint8_t Data[8] = {0,0,0,0,0,0,0,0};
 
     struct DefFrameData pSendFrame;
 
@@ -614,9 +614,9 @@ void UpdataState(void)
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
 	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
 
-	pSendFrame.pBuffer[1] = g_GetState.SwitchState1 | g_GetState.SwitchState2 | g_GetState.SwitchState3;	
-	pSendFrame.pBuffer[2] = g_GetState.ExecuteOrder1 | g_GetState.ExecuteOrder2 | g_GetState.ExecuteOrder3;	
-	pSendFrame.pBuffer[3] = g_GetState.CapState1 | g_GetState.CapState2 | g_GetState.CapState3;	
+	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState1 | g_SuddenState.SwitchState2 | g_SuddenState.SwitchState3;	
+	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder1 | g_SuddenState.ExecuteOrder2 | g_SuddenState.ExecuteOrder3;	
+	pSendFrame.pBuffer[3] = g_SuddenState.CapState1 | g_SuddenState.CapState2 | g_SuddenState.CapState3;	
     
 	if(!g_SystemState.warning)
 	{
@@ -632,6 +632,11 @@ void UpdataState(void)
 
     pSendFrame.len = 6;   //数据帧长度
     SendData(&pSendFrame);
+    
+    ClrWdt();
+    g_SuddenState.ExecuteOrder1 = 0;
+    g_SuddenState.ExecuteOrder2 = 0;
+    g_SuddenState.ExecuteOrder3 = 0;
 }
 
 /**
@@ -640,10 +645,10 @@ void UpdataState(void)
  */
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
-    uint8 i = 0;
-    uint8 j = 0;
-    uint8 validCount = 0;
-    uint8 idleCount = 0;
+    uint8_t i = 0;
+    uint8_t j = 0;
+    uint8_t validCount = 0;
+    uint8_t idleCount = 0;
     
     IFS1bits.INT2IF = 0;
     OFF_INT();
@@ -745,8 +750,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
  */
 void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 {
-	uint8 orderID = pReciveFrame->pBuffer[0];
-	uint8 loop = pReciveFrame->pBuffer[1];
+	uint8_t orderID = pReciveFrame->pBuffer[0];
+	uint8_t loop = pReciveFrame->pBuffer[1];
     
     if(orderID == 1)
 	{
@@ -756,7 +761,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 	{
 		ReceiveStateFlag = FEN_ORDER;   //分闸命令
 	}
-
+//回路数的格式商定
 	switch (loop)
 	{
 		case 1:

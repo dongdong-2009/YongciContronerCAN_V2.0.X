@@ -18,7 +18,7 @@
 #include "../Header.h"
 #include "DeviceParameter.h"
 
-uint32 volatile g_kairuValue = 0;    //165返回值
+uint32_t volatile g_kairuValue = 0;    //165返回值
 
 #define DELAY_MS    20
 
@@ -157,8 +157,8 @@ uint32 volatile g_kairuValue = 0;    //165返回值
 
 
 #define KEY_COUNT_DOWN 30
-uint8 g_timeCount[22] = {0};
-uint8 g_lockflag[22] = {0}; 
+uint8_t g_timeCount[22] = {0};
+uint8_t g_lockflag[22] = {0}; 
 
 
 /**
@@ -167,7 +167,7 @@ uint8 g_lockflag[22] = {0};
  * <p>Discription: [检测IO状态，并更新状态显示]</p>
  * @return 接收到分合闸命令返回0xFF,否则返回0
  */
-uint8 CheckIOState(void)
+uint8_t CheckIOState(void)
 {
     ClrWdt();     
     switch (g_Order)
@@ -180,9 +180,9 @@ uint8 CheckIOState(void)
             {
                 TongBuHeZha();
                 ClrWdt();
-                g_GetState.ExecuteOrder1 = 0x01;
-                g_GetState.ExecuteOrder2 = 0x04;
-                g_GetState.ExecuteOrder3 = 0x10;
+                g_SuddenState.ExecuteOrder1 = 0x01;
+                g_SuddenState.ExecuteOrder2 = 0x04;
+                g_SuddenState.ExecuteOrder3 = 0x10;
                 return 0xff;
             }
             else
@@ -203,9 +203,9 @@ uint8 CheckIOState(void)
                     FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 }
                 ClrWdt();
-                g_GetState.ExecuteOrder1 = 0x02;
-                g_GetState.ExecuteOrder2 = 0x08;
-                g_GetState.ExecuteOrder3 = 0x20;
+                g_SuddenState.ExecuteOrder1 = 0x02;
+                g_SuddenState.ExecuteOrder2 = 0x08;
+                g_SuddenState.ExecuteOrder3 = 0x20;
                 return 0xff;
             }
             else
@@ -220,7 +220,7 @@ uint8 CheckIOState(void)
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
                 HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
-                g_GetState.ExecuteOrder1 = 0x02;
+                g_SuddenState.ExecuteOrder1 = 0x02;
             }
             return 0xff;
         }
@@ -230,7 +230,7 @@ uint8 CheckIOState(void)
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
                 FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
-                g_GetState.ExecuteOrder1 = 0x01;
+                g_SuddenState.ExecuteOrder1 = 0x01;
             }
             return 0xff;
         }
@@ -241,7 +241,7 @@ uint8 CheckIOState(void)
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
                 HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
-                g_GetState.ExecuteOrder2 = 0x08;
+                g_SuddenState.ExecuteOrder2 = 0x08;
             }
             return 0xff;
         }
@@ -251,7 +251,7 @@ uint8 CheckIOState(void)
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
                 FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                g_GetState.ExecuteOrder2 = 0x04;
+                g_SuddenState.ExecuteOrder2 = 0x04;
             }
             return 0xff;
         }
@@ -262,7 +262,7 @@ uint8 CheckIOState(void)
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
                 HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
-                g_GetState.ExecuteOrder3 = 0x20;
+                g_SuddenState.ExecuteOrder3 = 0x20;
             }            
             return 0xff;
         }
@@ -272,7 +272,7 @@ uint8 CheckIOState(void)
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
                 FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
-                g_GetState.ExecuteOrder3 = 0x10;
+                g_SuddenState.ExecuteOrder3 = 0x10;
             }            
             return 0xff;
         }
@@ -291,7 +291,7 @@ uint8 CheckIOState(void)
 void DsplaySwitchState(void)
 {    
     ClrWdt();
-    if(g_GetState.Cap1Error == CAP1_ERROR || 
+    if(g_SuddenState.Cap1Error == CAP1_ERROR || 
        g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //机构1错误
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
@@ -307,7 +307,7 @@ void DsplaySwitchState(void)
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
     }
     
-    if(g_GetState.Cap2Error == CAP2_ERROR || 
+    if(g_SuddenState.Cap2Error == CAP2_ERROR || 
        g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //机构2错误
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
@@ -325,7 +325,7 @@ void DsplaySwitchState(void)
     
     if(CAP3_STATE)
     {
-        if(g_GetState.Cap3Error == CAP3_ERROR || 
+        if(g_SuddenState.Cap3Error == CAP3_ERROR || 
            g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //机构3错误
         {
             UpdateIndicateState(ERROR3_RELAY,ERROR2_LED,TURN_ON);
@@ -640,8 +640,8 @@ void SwitchScan(void)
             g_lockflag[8] = 1;
             g_timeCount[8] = 0;
             g_SystemState.heFenState1 = CHECK_1_HE_STATE;  
-            g_GetState.SwitchState1 = 0x02; //0b10
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState1 = 0x02; //0b10
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!HEWEI1_CONDITION())
@@ -664,8 +664,8 @@ void SwitchScan(void)
             g_lockflag[9] = 1;
             g_timeCount[9] = 0;
             g_SystemState.heFenState1 = CHECK_1_FEN_STATE;  
-            g_GetState.SwitchState1 = 0x01; //0b01
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState1 = 0x01; //0b01
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!FENWEI1_CONDITION())
@@ -688,8 +688,8 @@ void SwitchScan(void)
             g_lockflag[10] = 1;
             g_timeCount[10] = 0;
             g_SystemState.heFenState2 = CHECK_2_HE_STATE;  
-            g_GetState.SwitchState2 = 0x08; //0b010
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState2 = 0x08; //0b010
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!HEWEI2_CONDITION())
@@ -712,8 +712,8 @@ void SwitchScan(void)
             g_lockflag[11] = 1;
             g_timeCount[11] = 0;
             g_SystemState.heFenState2 = CHECK_2_FEN_STATE;  
-            g_GetState.SwitchState2 = 0x04; //0b001
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState2 = 0x04; //0b001
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!FENWEI2_CONDITION())
@@ -737,8 +737,8 @@ void SwitchScan(void)
                 g_lockflag[12] = 1;
                 g_timeCount[12] = 0;
                 g_SystemState.heFenState3 = CHECK_3_HE_STATE;  
-                g_GetState.SwitchState3 = 0x20; //0b10                
-                g_GetState.SuddenFlag = TRUE;
+                g_SuddenState.SwitchState3 = 0x20; //0b10                
+                g_SuddenState.SuddenFlag = TRUE;
             }
         }
         else if(!HEWEI3_CONDITION())
@@ -761,8 +761,8 @@ void SwitchScan(void)
                 g_lockflag[13] = 1;
                 g_timeCount[13] = 0;
                 g_SystemState.heFenState3 = CHECK_3_FEN_STATE;      
-                g_GetState.SwitchState3 = 0x10; //0b01
-                g_GetState.SuddenFlag = TRUE;
+                g_SuddenState.SwitchState3 = 0x10; //0b01
+                g_SuddenState.SuddenFlag = TRUE;
             }
         }
         else if(!FENWEI3_CONDITION())
@@ -787,8 +787,8 @@ void SwitchScan(void)
             g_lockflag[14] = 1;
             g_timeCount[14] = 0;
             g_SystemState.heFenState1 = CHECK_ERROR1_STATE;     //合分位同时存在            
-            g_GetState.SwitchState1 = 0x03;
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState1 = 0x03;
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!ERROR1_CONDITION())
@@ -811,8 +811,8 @@ void SwitchScan(void)
             g_lockflag[15] = 1;
             g_timeCount[15] = 0;
             g_SystemState.heFenState2 = CHECK_ERROR2_STATE;     //合分位同时存在
-            g_GetState.SwitchState2 = 0x0C;
-            g_GetState.SuddenFlag = TRUE;
+            g_SuddenState.SwitchState2 = 0x0C;
+            g_SuddenState.SuddenFlag = TRUE;
         }
     }
     else if(!ERROR2_CONDITION())
@@ -837,8 +837,8 @@ void SwitchScan(void)
                 g_lockflag[16] = 1;
                 g_timeCount[16] = 0;
                 g_SystemState.heFenState3 = CHECK_ERROR3_STATE;     //合分位同时存在
-                g_GetState.SwitchState3 = 0x30;
-                g_GetState.SuddenFlag = TRUE;
+                g_SuddenState.SwitchState3 = 0x30;
+                g_SuddenState.SuddenFlag = TRUE;
             }
         }
         else if(!ERROR3_CONDITION())

@@ -53,15 +53,15 @@ SystemState g_SystemState;
 /**
  *同步预制等待时间,单位ms
  */
-uint16 _PERSISTENT g_SyncReadyWaitTime;
+uint16_t _PERSISTENT g_SyncReadyWaitTime;
 /**
  * 遥控预制等待时间
  */
-uint16 _PERSISTENT g_RemoteWaitTime;   
+uint16_t _PERSISTENT g_RemoteWaitTime;   
 /**
  * 本地系统时钟
  */
-uint8 g_LocalMac;
+uint8_t g_LocalMac;
 
 /**
  * 默认同步命令
@@ -83,7 +83,7 @@ ConfigData g_ReadOnlyParameterCollect[READONLY_PARAMETER_LEN]; //参数合集--�
 /**
  * 
  */
-uint8 g_data[8] = {0,0,0,0,0,0,0,0};
+uint8_t g_data[8] = {0,0,0,0,0,0,0,0};
 PointUint8 g_pointData;
 /**
  * 设置参数
@@ -92,9 +92,9 @@ PointUint8 g_pointData;
  *
  * @return 错误代码 0-没有错误 非0-有错误
  */
-uint8 SetParamValue(uint8 id,PointUint8* pPoint)
+uint8_t SetParamValue(uint8_t id,PointUint8* pPoint)
 {    
-	for(uint8 i = 0; i < PARAMETER_LEN; i++)
+	for(uint8_t i = 0; i < PARAMETER_LEN; i++)
 	{
 		ClrWdt();
 		if(g_SetParameterCollect[i].ID == id)
@@ -134,11 +134,11 @@ uint8 SetParamValue(uint8 id,PointUint8* pPoint)
  *
  * @return 错误代码 0-没有错误 非0-有错误
  */
-uint8 ReadParamValue(uint8 id,PointUint8* pPoint)
+uint8_t ReadParamValue(uint8_t id,PointUint8* pPoint)
 {
 	if (id < READONLY_START_ID) //小于只读ID，可为配置参数类型
 	{
-		for(uint8 i = 0; i < PARAMETER_LEN; i++)
+		for(uint8_t i = 0; i < PARAMETER_LEN; i++)
 		{
 			ClrWdt();
 			if(g_SetParameterCollect[i].ID == id)
@@ -159,7 +159,7 @@ uint8 ReadParamValue(uint8 id,PointUint8* pPoint)
 	}
 	else
 	{
-		for(uint8 i = 0; i < READONLY_PARAMETER_LEN; i++)
+		for(uint8_t i = 0; i < READONLY_PARAMETER_LEN; i++)
 		{
 			ClrWdt();
 			if(g_ReadOnlyParameterCollect[i].ID == id)
@@ -184,7 +184,7 @@ uint8 ReadParamValue(uint8 id,PointUint8* pPoint)
  */
 void InitSetParameterCollect(void)
 {
-	uint8 index = 0, id = SET_START_ID;
+	uint8_t index = 0, id = SET_START_ID;
     //uint16 -- 电容电压、工作电压上下限
 	g_SetParameterCollect[index].ID = id++;
 	g_SetParameterCollect[index].pData = &g_SystemLimit.capVoltage1.upper;  //电容电压1上限
@@ -376,7 +376,7 @@ void InitSetParameterCollect(void)
  */
 void InitReadonlyParameterCollect(void)
 {
-	uint8 index = 0, id = READONLY_START_ID;
+	uint8_t index = 0, id = READONLY_START_ID;
 	ClrWdt();
     //uint16 -- 电容电压、工作电压
 	g_ReadOnlyParameterCollect[index].ID = id++;
@@ -510,8 +510,8 @@ void InitReadonlyParameterCollect(void)
  */
 void RefParameterInit(void)
 {
-    uint8 error = 0;
-    uint32 kairuValue = 0;
+    uint8_t error = 0;
+    uint32_t kairuValue = 0;
     
     g_pointData.pData = g_data;
     g_pointData.len = 8;
@@ -612,12 +612,12 @@ void SetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 	if (pPoint->len >= 2)
 	{
 		//Todo: 更具ID选择保留有效位数
-		float ration = 0.01f;
-		uint16 data = pPoint->pData[1];
+		float32_t ration = 0.01f;
+		uint16_t data = pPoint->pData[1];
 		data =  (data << 8) | pPoint->pData[0];
 		ClrWdt();
-		float result = (float)data * ration;
-		*(float*)pConfig->pData = result;
+		float32_t result = (float32_t)data * ration;
+		*(float32_t*)pConfig->pData = result;
 		ClrWdt();
 		pPoint->len = 2;
 	}
@@ -643,11 +643,11 @@ void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 {
 	if (pPoint->len >= 2)
 	{
-        float ration = 100.0f;
-        uint16 result = (uint16)(*(float*)pConfig->pData * ration);
-		pPoint->pData[0] = (uint8)(result & 0x00FF);
+        float32_t ration = 100.0f;
+        uint16_t result = (uint16_t)(*(float*)pConfig->pData * ration);
+		pPoint->pData[0] = (uint8_t)(result & 0x00FF);
 		ClrWdt();
-		pPoint->pData[1] = (uint8)(result >> 8);
+		pPoint->pData[1] = (uint8_t)(result >> 8);
 		pPoint->len = 2;
 	}
 	else
@@ -673,10 +673,10 @@ void SetValueUint16(PointUint8* pPoint, ConfigData* pConfig)
 	if (pPoint->len >= 2)
 	{
 		pPoint->len = 2;
-		uint16 data = pPoint->pData[1];
+		uint16_t data = pPoint->pData[1];
 		ClrWdt();
 		data = (data<<8) | pPoint->pData[0];
-		*(uint16*)pConfig->pData = data;
+		*(uint16_t*)pConfig->pData = data;
 	}
 	else
 	{
@@ -700,10 +700,10 @@ void GetValueUint16(PointUint8* pPoint, ConfigData* pConfig)
 {
 	if (pPoint->len >= 2)
 	{
-        uint16 data = *(uint16*)pConfig->pData;
-        pPoint->pData[0] = (uint8)(data & 0x00FF);
+        uint16_t data = *(uint16_t*)pConfig->pData;
+        pPoint->pData[0] = (uint8_t)(data & 0x00FF);
 		ClrWdt();
-        pPoint->pData[1] = (uint8)(data >> 8);
+        pPoint->pData[1] = (uint8_t)(data >> 8);
 		pPoint->len = 2;
 	}
 	else
@@ -728,7 +728,7 @@ void SetValueUint8(PointUint8* pPoint, ConfigData* pConfig)
 {
 	if (pPoint->len >= 1)
 	{
-		*(uint8*)pConfig->pData = pPoint->pData[0];
+		*(uint8_t*)pConfig->pData = pPoint->pData[0];
 		ClrWdt();
         pPoint->len = 1;
 	}
@@ -754,7 +754,7 @@ void GetValueUint8(PointUint8* pPoint, ConfigData* pConfig)
 {
 	if (pPoint->len >= 1)
 	{
-        pPoint->pData[0] =  *(uint8*)pConfig->pData;
+        pPoint->pData[0] =  *(uint8_t*)pConfig->pData;
 		ClrWdt();
         pPoint->len = 1;
 	}
@@ -771,10 +771,10 @@ void GetValueUint8(PointUint8* pPoint, ConfigData* pConfig)
  */
 void WriteAccumulateSum(void)
 {
-    uint8 i = 0;
-    uint8 id = 1;    
-    uint8 len = 0;
-    uint16 totalSum = 0;
+    uint8_t i = 0;
+    uint8_t id = 1;    
+    uint8_t len = 0;
+    uint16_t totalSum = 0;
     for(i = 0;i < PARAMETER_LEN;i++)
     {
 		ClrWdt();
@@ -786,7 +786,7 @@ void WriteAccumulateSum(void)
             g_pointData.len = len;
             ReadEEPROM(id, &g_pointData);
 			ClrWdt();
-            for(uint8 j = 0;j < g_pointData.len;j++)
+            for(uint8_t j = 0;j < g_pointData.len;j++)
             {
 				ClrWdt();
                 totalSum += g_pointData.pData[j];
@@ -802,13 +802,13 @@ void WriteAccumulateSum(void)
  * @param pPoint
  * @return 如果累加和相等则返回0，如果不相等在返回0xFF，即错误
  */
-uint8 AccumulateSumVerify(void)
+uint8_t AccumulateSumVerify(void)
 {
-    uint8 i = 0;
-    uint8 id = 1;
-    uint8 len = 0;
-    uint16 readAddData = 0;
-    uint16 addData = 0;
+    uint8_t i = 0;
+    uint8_t id = 1;
+    uint8_t len = 0;
+    uint16_t readAddData = 0;
+    uint16_t addData = 0;
     
     for(id = 1;id < PARAMETER_LEN;id++)
     {

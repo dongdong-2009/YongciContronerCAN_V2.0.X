@@ -13,14 +13,14 @@
 #include "../Header.h"
 
 
-uint8  DS18B20ReadBit(void);    //读一位
+uint8_t DS18B20ReadBit(void);    //读一位
 void DS18B20Reset(void);
-uint8 DS18B20ReadByte(void);
-void DS18B20WriteByte(uint8 dat);
+uint8_t DS18B20ReadByte(void);
+void DS18B20WriteByte(uint8_t dat);
 void DS18B20TempChange();
 
-uint8 flag = 0; //DS18B20 复位成功标志
-uint16 TemperateValue = 0;
+uint8_t flag = 0; //DS18B20 复位成功标志
+uint16_t TemperateValue = 0;
 
 /***************************************** 
 *时序：初始化时序、读时序、写时序。
@@ -84,9 +84,9 @@ void DS18B20Reset(void)
  *返回值：返回读取bit
  *功能：读/写时间隙:DS1820 的数据读写是通过时间隙处理位和命令字来确认信息交换。
  ************************************************/
-uint8 DS18B20ReadBit(void)    //读一位
+uint8_t DS18B20ReadBit(void)    //读一位
 {
-    uint8 dat;
+    uint8_t dat;
     //单片机（微处理器）将总线拉低
     TERM0_DIR = 0;
     TERM0_OUT = 0;
@@ -116,10 +116,10 @@ uint8 DS18B20ReadBit(void)    //读一位
  *返回值：返回读取字节
  *功能：  读取一个字节
  ****************************************************/
-uint8 DS18B20ReadByte(void) //读一字节
+uint8_t DS18B20ReadByte(void) //读一字节
 {
     ClrWdt();
-	uint8 value = 0,i = 0,j = 0;
+	uint8_t value = 0,i = 0,j = 0;
 	value=0;           
 	for(i=0; i<8; i++)
     {
@@ -137,11 +137,11 @@ uint8 DS18B20ReadByte(void) //读一字节
  *返回值：void
  *功能：  向温度传感器写一个字节
 ****************************************************/
-void DS18B20WriteByte(uint8 dat) //写一个字节
+void DS18B20WriteByte(uint8_t dat) //写一个字节
 {
     ClrWdt();
-    uint8 i = 0;
-    uint8 onebit = 0;
+    uint8_t i = 0;
+    uint8_t onebit = 0;
     for(i=1; i<=8; i++) 
     {
         ClrWdt();
@@ -205,10 +205,10 @@ void DS18B20TempChange()
  *返回值：void
  *功能：  获取温度值
 ****************************************************/
-float DS18B20GetTemperature(void)
+float32_t DS18B20GetTemperature(void)
 {
-    float wendu;
-    uint8 a,b;
+    float32_t wendu;
+    uint8_t a,b;
     DS18B20TempChange();
     DS18B20Reset(); 		//初始化z
     if(!flag)

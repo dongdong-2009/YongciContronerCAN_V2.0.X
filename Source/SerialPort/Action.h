@@ -37,23 +37,23 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-typedef struct GetSwitchState
+typedef struct SaveSystemSuddenState
 {
-	uint8 SwitchState1;		//开关状态
-	uint8 SwitchState2;		//开关状态
-	uint8 SwitchState3;		//开关状态
-	uint8 ExecuteOrder1;	//开关执行的命令
-	uint8 ExecuteOrder2;	//开关执行的命令
-	uint8 ExecuteOrder3;	//开关执行的命令
-	uint8 CapState1;		//电容状态
-	uint8 CapState2;		//电容状态
-	uint8 CapState3;		//电容状态
-	uint8 SuddenFlag;		//更新状态
+	uint8_t SwitchState1;		//开关状态
+	uint8_t SwitchState2;		//开关状态
+	uint8_t SwitchState3;		//开关状态
+	uint8_t ExecuteOrder1;	//开关执行的命令
+	uint8_t ExecuteOrder2;	//开关执行的命令
+	uint8_t ExecuteOrder3;	//开关执行的命令
+	uint8_t CapState1;		//电容状态
+	uint8_t CapState2;		//电容状态
+	uint8_t CapState3;		//电容状态
+	uint8_t SuddenFlag;		//更新状态
     
-    uint8 Cap1Error;    //电容电压错误
-    uint8 Cap2Error;    //电容电压错误
-    uint8 Cap3Error;    //电容电压错误
-}GetState;
+    uint8_t Cap1Error;    //电容电压错误
+    uint8_t Cap2Error;    //电容电压错误
+    uint8_t Cap3Error;    //电容电压错误
+}SystemSuddenState;
 
 
 void ExecuteFunctioncode(frameRtu* pRtu);
@@ -61,9 +61,9 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
 
-extern _PERSISTENT uint16 ReceiveStateFlag;
+extern _PERSISTENT uint16_t ReceiveStateFlag;
 
-extern GetState g_GetState;    //需要上传的机构状态值
+extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 
 #ifdef	__cplusplus
 }
