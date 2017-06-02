@@ -16,14 +16,14 @@
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
 #define SCAN_TIME   2           //按键扫描间隔时间
 #define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
-#define CHANG_LED_TIME   500    //改变LED灯闪烁时间 (ms)
 
 frameRtu sendFrame, recvFrame;
-uint8_t _PERSISTENT g_Order;  //需要执行的命令，且在单片机发生复位后不会改变
+uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
+uint32_t _PERSISTENT changeLedTime; //改变LED灯闪烁时间 (ms)
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -156,6 +156,7 @@ void YongciMainTask(void)
 {
 //    uint8_t result = 0;
     uint8_t state = TURN_ON;
+    uint8_t cn = 0;
     while(0xFFFF) //主循环
     {
         ClrWdt();
@@ -289,10 +290,19 @@ void YongciMainTask(void)
             }
             ClrWdt();
             //运行指示灯
-            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= CHANG_LED_TIME)
+            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= changeLedTime)
             {
                 UpdateLEDIndicateState(RUN_LED,state);
                 state = ~state;
+                if(changeLedTime == 1500)   //CAN总线关闭错误处理
+                {
+                    cn++;
+                    if(cn >= 3) //1500*4ms
+                    {
+                        InitStandardCAN(0, 0);      //初始化CAN模块
+                        changeLedTime = 500;   //运行指示灯闪烁间隔为500ms
+                    }
+                }
                 g_SysTimeStamp.ChangeLedTime = g_MsTicks;
             }
             //获取温度数据
@@ -381,6 +391,8 @@ void YongciFirstInit(void)
     g_SysTimeStamp.GetTempTime = g_MsTicks;     //对于时间状态量的初始化
     g_SysTimeStamp.ScanTime = g_MsTicks;        //对于时间状态量的初始化
     g_SysTimeStamp.SendDataTime = g_MsTicks;    //对于时间状态量的初始化
+    
+    changeLedTime = 500;    //初始化值为500ms
 }  
 
 /**

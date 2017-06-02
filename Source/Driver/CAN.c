@@ -555,18 +555,17 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         C2INTEbits.ERRIE = 1;   //开启错误中断
         IEC2bits.C2IE = 1;      //允许CAN中断
         ClrWdt();
-//        UpdateIndicateState(ON_COM_ERROR_LED, TURN_OFF); //开启错误指示灯
     }
     
     /*总线关闭错误中断处理*/
-    if((C2INTFbits.TXBO) && (C2INTFbits.ERRIF))
+    if(C2INTFbits.TXBO && C2INTFbits.ERRIF)
     {
         ClrWdt();
         //总线关断，需要报错，但是此时可以退出中断服务程序，但是不会改变TXBO位
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
-        C2INTEbits.ERRIE = 0;   //禁止错误中断，以允许其他程序的正常运行
-//        UpdateIndicateState(ON_ERROR_LED, TURN_ON);     //开启错误指示灯
+        changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
+        return;
     }
     
     if(C2INTFbits.ERRIF == 1)
@@ -575,7 +574,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         if(C2INTFbits.RX0OVR)
         {
             ClrWdt();
-            C2INTFbits.RX0OVR = 0;  //清除接收缓冲器1溢出中断
+            C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
         }
         else if(C2INTFbits.RX1OVR)
         {
@@ -592,7 +591,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         {
             ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
-//            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
         }
 
         /*发送错误中断处理*/
@@ -605,9 +603,9 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         {
             ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
-//            UpdateIndicateState(ON_COM_ERROR_LED, TURN_ON); //开启错误指示灯
         }
         C2INTFbits.ERRIF = 0;
+        return;
     }
 }
 
