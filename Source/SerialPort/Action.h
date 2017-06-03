@@ -60,8 +60,10 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
+void CheckOrder(uint8_t lastOrder);
 
-extern _PERSISTENT uint16_t ReceiveStateFlag;
+extern _PERSISTENT uint16_t g_ReceiveStateFlag;
+extern _PERSISTENT uint16_t g_lastReceiveOrder;
 
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 

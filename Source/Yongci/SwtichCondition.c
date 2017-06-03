@@ -78,7 +78,7 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 
 #ifdef SMALL_CHOSE
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     ((g_kairuValue & ~DIANXIAN_INPUT)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     ((g_kairuValue)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
@@ -86,7 +86,7 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 
 #elif	BIG_CHOSE
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     ((g_kairuValue & ~DIANXIAN_INPUT) == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
@@ -95,22 +95,22 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | YUAN_AND_WORK())) == COIL1_HEZHA())
+#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA())
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((g_kairuValue & (COIL1_FENZHA() | YUAN_AND_WORK())) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | YUAN_AND_WORK())) == COIL2_HEZHA())
+#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA())
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((g_kairuValue & (COIL2_FENZHA() | YUAN_AND_WORK())) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
-//本地的机构3合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | YUAN_AND_WORK())) == COIL3_HEZHA())
-//本地的机构3分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
+//本地的机构3合闸条件：分位2 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
+#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA())
+//本地的机构3分闸条件：合位2 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((g_kairuValue & (COIL3_FENZHA() | YUAN_AND_WORK())) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 
 /**
@@ -426,7 +426,8 @@ void DsplaySwitchState(void)
     {
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_OFF);
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_OFF);
-    }
+    }    
+    changeLedTime = 500;
     
 }
 /**

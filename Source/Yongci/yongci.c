@@ -157,6 +157,9 @@ void YongciMainTask(void)
 //    uint8_t result = 0;
     uint8_t state = TURN_ON;
     uint8_t cn = 0;
+    uint8_t lastOrder = IDLE_ORDER;
+    uint32_t checkOrder = g_MsTicks;
+    uint32_t checkOrderDelay = UINT32_MAX;
     while(0xFFFF) //主循环
     {
         ClrWdt();
@@ -213,14 +216,26 @@ void YongciMainTask(void)
         
         //机构空闲状态刷新
         if((g_SetSwitchState[0].Order == IDLE_ORDER) && (g_SetSwitchState[1].Order == IDLE_ORDER) && 
-           (g_SetSwitchState[2].Order == IDLE_ORDER))
+           CHECK_ORDER3())
         {
             ClrWdt();
             if((g_SetSwitchState[0].LastOrder != IDLE_ORDER) || 
                 (g_SetSwitchState[1].LastOrder != IDLE_ORDER) || 
-                (g_SetSwitchState[2].LastOrder != IDLE_ORDER))
+                CHECK_LAST_ORDER3())
             {
+                checkOrderDelay = 400;
+                //此处开启计时功能，延时大约在200ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
+                checkOrder = g_MsTicks;
+            }
+            
+            //拒动错误检测
+            if(g_MsTicks - checkOrder >= checkOrderDelay)
+            {
+                CheckOrder(lastOrder);
+                checkOrderDelay = UINT32_MAX;
+                lastOrder = IDLE_ORDER;
+                g_lastReceiveOrder = IDLE_ORDER;
             }
             ClrWdt();
             
@@ -241,12 +256,7 @@ void YongciMainTask(void)
             g_SetSwitchState[1].State = IDLE_ORDER;
             g_SetSwitchState[2].State = IDLE_ORDER;
             
-            if(g_SuddenState.SuddenFlag == TRUE)
-            {
-                ClrWdt();
-                //更新机构的状态显示
-                DsplaySwitchState();    
-            }
+               
             //判断远方与就地的延时消抖
                 ClrWdt();   
                 //远方控制时允许通信
@@ -277,6 +287,7 @@ void YongciMainTask(void)
             }
             if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
             {
+                lastOrder = g_Order;
                 g_Order = IDLE_ORDER;    //将命令清零
                 continue;
             }
@@ -285,6 +296,11 @@ void YongciMainTask(void)
             {
                 ClrWdt();
                 UpdataState();
+                if(g_SuddenState.SuddenFlag)
+                {
+                    //更新机构的状态显示
+                    DsplaySwitchState(); 
+                }
                 g_SuddenState.SuddenFlag = FALSE;  //Clear
                 g_SysTimeStamp.SendDataTime = g_MsTicks;
             }
@@ -363,7 +379,7 @@ void YongciFirstInit(void)
     g_SuddenState.ExecuteOrder1 = 0;
     g_SuddenState.ExecuteOrder2 = 0;
     g_SuddenState.ExecuteOrder3 = 0;
-    g_SuddenState.SuddenFlag = FALSE;
+    g_SuddenState.SuddenFlag = TRUE;
     g_SuddenState.SwitchState1 = 0;
     g_SuddenState.SwitchState2 = 0;
     g_SuddenState.SwitchState3 = 0;
@@ -371,19 +387,24 @@ void YongciFirstInit(void)
 //****************************************
     
     //默认状态下的同步合闸顺序
+    index = 0;
     g_Index[index].indexLoop = 0;
     g_Index[index].GetTime = GetSwitchOnTime;
+    g_Index[index].GetTime(g_Index + index);
     index++;
     
     g_Index[index].indexLoop = 1;
     g_Index[index].GetTime = GetSwitchOnTime;
+    g_Index[index].GetTime(g_Index + index);
     index++;
 
     g_Index[index].indexLoop = 2;
     g_Index[index].GetTime = GetSwitchOnTime;
+    g_Index[index].GetTime(g_Index + index);
     index++;
     
-    ReceiveStateFlag = IDLE_ORDER;  //初始化通信所需的命令状态
+    g_ReceiveStateFlag = IDLE_ORDER;  //初始化通信所需的命令状态
+    g_lastReceiveOrder = IDLE_ORDER;
     ClrWdt();
     InitSetSwitchState();
     

@@ -528,11 +528,42 @@ void RefParameterInit(void)
     {
         ReadWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
         ReadWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
+        if(g_ActionCount.fenzhaCount3 == 0xFFFF)
+        {
+            g_ActionCount.fenzhaCount3 = 0;
+            WriteWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
+        }
+        if(g_ActionCount.hezhaCount3 == 0xFFFF)
+        {
+            g_ActionCount.hezhaCount3 = 0;
+            WriteWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
+        }
     }
     else
     {
         g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
         g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
+    }
+    
+    if(g_ActionCount.hezhaCount1 == 0xFFFF)
+    {
+        g_ActionCount.hezhaCount1 = 0;
+        WriteWord_EEPROM(JG1_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount1);
+    }
+    if(g_ActionCount.hezhaCount2 == 0xFFFF)
+    {
+        g_ActionCount.hezhaCount2 = 0;
+        WriteWord_EEPROM(JG2_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount2);
+    }
+    if(g_ActionCount.fenzhaCount1 == 0xFFFF)
+    {
+        g_ActionCount.fenzhaCount1 = 0;
+        WriteWord_EEPROM(JG1_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount1);
+    }
+    if(g_ActionCount.fenzhaCount2 == 0xFFFF)
+    {
+        g_ActionCount.fenzhaCount2 = 0;
+        WriteWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
     }
     
     //系统电容电压初始化
@@ -565,24 +596,6 @@ void RefParameterInit(void)
     g_SystemState.workMode = WORK_STATE;    //工作模式，默认值
     g_SystemState.warning = 0x00;           //默认无警告
     
-    //系统参数上下限
-    g_SystemLimit.workVoltage.upper = 3.4f;
-    g_SystemLimit.workVoltage.down =  2.1f;
-	ClrWdt();
-    
-    g_SystemLimit.capVoltage1.upper = 2.1f;
-    g_SystemLimit.capVoltage2.upper = 2.1f;
-    g_SystemLimit.capVoltage2.upper = 2.1f;
-    
-    g_SystemLimit.capVoltage1.down = 2.1f;
-    g_SystemLimit.capVoltage2.down = 2.1f;
-    g_SystemLimit.capVoltage2.down = 2.1f;
-    
-    //同步预制等待时间
-    g_SyncReadyWaitTime = 3000;
-    g_RemoteWaitTime = 3000;
-    g_LocalMac = 0x0D;
-    
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
 	ClrWdt();
@@ -590,9 +603,36 @@ void RefParameterInit(void)
     error = AccumulateSumVerify();  //累加和校验    
     if(error)
     {
-        UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
-		while(1);	//定值验证错误触发看门狗复位
-        //调试时使用错误指示灯熄灭，表示产生了错误
+        changeLedTime = 100;
+        //系统参数上下限
+        g_SystemLimit.workVoltage.upper = 6.0f;
+        g_SystemLimit.workVoltage.down =  2.7f;
+        ClrWdt();
+
+        g_SystemLimit.capVoltage1.upper = 240.0f;
+        g_SystemLimit.capVoltage2.upper = 241.0f;
+        g_SystemLimit.capVoltage2.upper = 242.0f;
+
+        g_SystemLimit.capVoltage1.down = 180.0f;
+        g_SystemLimit.capVoltage2.down = 181.1f;
+        g_SystemLimit.capVoltage2.down = 182.0f;
+        
+        g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1.03;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1.03;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient3 = 1.03;
+        
+        g_DelayTime.hezhaTime1 = 50;
+        g_DelayTime.hezhaTime2 = 50;
+        g_DelayTime.hezhaTime3 = 50;
+        
+        g_DelayTime.fenzhaTime1 = 30;
+        g_DelayTime.fenzhaTime2 = 30;
+        g_DelayTime.fenzhaTime3 = 30;
+        
+        //同步预制等待时间
+        g_SyncReadyWaitTime = 3000;
+        g_RemoteWaitTime = 3000;
+        g_LocalMac = 0x0D;
     }    
 }
 

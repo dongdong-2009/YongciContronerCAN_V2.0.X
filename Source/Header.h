@@ -46,6 +46,11 @@
     #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
+    #define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
+    #define CHECK_HEZHA_STATE3()    (g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+    #define CHECK_FENZHA_STATE3()   (g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+    #define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
+    #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
 
 #elif BIG_CHOSE
     #define ADCS()  {ADCSSL = 0x0007;}  //ADC扫描通道数，扫描AN0--AN2
@@ -54,6 +59,11 @@
     #define VOLTAGE_CAP3()    {g_SystemVoltageParameter.voltageCap3 = 225;} 
     #define CAP3_STATE  0x00    //用于判断其是否被激活
     #define NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可
+    #define CHECK_HEZHA_STATE3()    (0x00)
+    #define CHECK_FENZHA_STATE3()   (0x00)
+    #define CHECK_ORDER3()          (0xFF)
+    #define CHECK_LAST_ORDER3()     (0x00)
+    #define CHECK_VOLTAGE_CAP3()    (0xFF)
 #endif
 //**************************************
 

@@ -33,6 +33,7 @@
 #define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
 #define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
 #define HEFEN_STATE_ERROR 0x0A      //合、分位错误
+#define REFUSE_ERROR 0x0B       //拒动错误
 
 #define TONGBU_HEZHA    0x5555
 
@@ -48,7 +49,10 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame);
 extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 
 //分合状态指令 单片机在看门狗复位的情况下不会改变该值
-_PERSISTENT uint16_t ReceiveStateFlag;  
+_PERSISTENT uint16_t g_ReceiveStateFlag;  
+
+//接收到的上一条命令
+_PERSISTENT uint16_t g_lastReceiveOrder;  
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 
@@ -210,18 +214,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     {
         case 1: //合闸预制
         {
-            if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-                    (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-                    (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
+            if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
                 return;
             }
-            if(ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
+            if((pReciveFrame->pBuffer[1] < 1) || (pReciveFrame->pBuffer[1] > 7))    //回路数错误
+            {
+                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+            }
+            if(g_ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
             {                
                 GetLoopSwitch(pReciveFrame);
-                if(ReceiveStateFlag != IDLE_ORDER)
+                if(g_ReceiveStateFlag != IDLE_ORDER)
                 {
                     SendData(pSendFrame);
                 }
@@ -229,14 +235,16 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             else
             {
                 ClrWdt();
+                g_ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
             }
             break;
         }
         case 2: //合闸执行
         {
-            if(ReceiveStateFlag == HE_ORDER)
+            if(g_ReceiveStateFlag == HE_ORDER)
             {
+                g_ReceiveStateFlag = IDLE_ORDER;  //空闲命令
                 if(CheckIsOverTime())
                 {
                     ClrWdt();               
@@ -261,26 +269,36 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                         }
                         case 0x05:
                         {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                                HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         case 0x06:
                         {
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                                HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         case 0x07:
                         {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                                HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                                HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         default :
                         {
                             SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                            return;
                             break;
                         }
                     }
@@ -297,23 +315,24 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
-            ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             break;
         }
         case 3: //分闸预制
         {
-            if((g_SystemState.heFenState1 != CHECK_1_HE_STATE) || 
-                    (g_SystemState.heFenState2 != CHECK_2_HE_STATE) || 
-                    (g_SystemState.heFenState3 != CHECK_3_HE_STATE))
+            if(g_SystemState.yuanBenState == BEN_STATE) //本地控制不能执行远方操作错误
             {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
                 return;
             }
-            if(ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次合闸
+            if((pReciveFrame->pBuffer[1] < 1) || (pReciveFrame->pBuffer[1] > 7))    //回路数错误
+            {
+                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                return;
+            }
+            if(g_ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次合闸
             {
                 GetLoopSwitch(pReciveFrame);
-                if(ReceiveStateFlag != IDLE_ORDER)
+                if(g_ReceiveStateFlag != IDLE_ORDER)
                 {
                     SendData(pSendFrame);
                 }
@@ -321,17 +340,19 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             else
             {
                 ClrWdt();
+                g_ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
             }
             break;
         }
         case 4: //分闸执行
         {
-            if(ReceiveStateFlag == FEN_ORDER)
+            if(g_ReceiveStateFlag == FEN_ORDER)
             {
                 if(CheckIsOverTime())
                 {
                     ClrWdt();               
+                    g_ReceiveStateFlag = IDLE_ORDER;  //空闲命令
                     switch(pReciveFrame->pBuffer[1])
                     {
                         case 0x01:
@@ -353,26 +374,36 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                         }
                         case 0x05:
                         {
-                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                                FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         case 0x06:
                         {
-                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                                FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         case 0x07:
                         {
-                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            if(CAP3_STATE)
+                            {
+                                FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
+                                FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
+                                FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
+                            }
                             break;
                         }
                         default :
                         {
                             SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                            return;
                             break;
                         }
                     }
@@ -389,7 +420,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
             }
-            ReceiveStateFlag = IDLE_ORDER;  //空闲命令
             break;
         }        
         case 5: //同步合闸预制
@@ -456,26 +486,21 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     return;
                 }
             }
-            if(ReceiveStateFlag == IDLE_ORDER)
+            if(g_ReceiveStateFlag == IDLE_ORDER)
             {                
                 ClrWdt();
                 SendData(pSendFrame);
                 GetOffestTime(pReciveFrame , pSendFrame);
                 TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
                 SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-                ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+                g_ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
             }
             else
             {
                 TurnOffInt2();
-                ReceiveStateFlag = IDLE_ORDER;
+                g_ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
             }                
-            break;
-        }
-        case 6: //同步分闸预制
-        {
-            ClrWdt();
             break;
         }
         case 0x10:  //顺序参数设置
@@ -652,7 +677,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     
     IFS1bits.INT2IF = 0;
     OFF_INT();
-    if(ReceiveStateFlag != TONGBU_HEZHA)
+    if(g_ReceiveStateFlag != TONGBU_HEZHA)
     {
         ON_INT();
         return;
@@ -662,7 +687,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
         ON_INT();
         TurnOffInt2();
         SendErrorFrame(0x05,OVER_TIME_ERROR);   //超时错误
-        ReceiveStateFlag = IDLE_ORDER;
+        g_ReceiveStateFlag = IDLE_ORDER;
         return;
     }
     //第一次的高电平持续时间判断
@@ -737,7 +762,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     {
         TurnOffInt2();
         ON_INT();
-        ReceiveStateFlag = IDLE_ORDER;
+        g_lastReceiveOrder = CHECK_Z_HE_ORDER;
+        g_ReceiveStateFlag = IDLE_ORDER;
         TongBuHeZha();
     }
 }
@@ -755,11 +781,11 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
     
     if(orderID == 1)
 	{
-		ReceiveStateFlag = HE_ORDER;    //合闸命令
+		g_ReceiveStateFlag = HE_ORDER;    //合闸命令
 	}	
 	else if(orderID == 3)
 	{
-		ReceiveStateFlag = FEN_ORDER;   //分闸命令
+		g_ReceiveStateFlag = FEN_ORDER;   //分闸命令
 	}
 //回路数的格式商定
 	switch (loop)
@@ -769,11 +795,31 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 			if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
 			{
                 ClrWdt();
+                if(g_ReceiveStateFlag == HE_ORDER)
+                {                    
+                    if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_1_HE_ORDER;
+                }
+                else if(g_ReceiveStateFlag == FEN_ORDER)
+                {   
+                    if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_1_FEN_ORDER;
+                }
                 SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                 return;
 			}
@@ -784,11 +830,31 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 			if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
 			{
                 ClrWdt();
+                if(g_ReceiveStateFlag == HE_ORDER)
+                {                    
+                    if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_2_HE_ORDER;
+                }
+                else if(g_ReceiveStateFlag == FEN_ORDER)
+                {
+                    if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_2_FEN_ORDER;
+                }
                 SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                 return;
 			}
@@ -801,18 +867,38 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 				if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
 				{
                 	ClrWdt();
+                    if(g_ReceiveStateFlag == HE_ORDER)
+                    {                    
+                        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_3_HE_ORDER;
+                    }
+                    else if(g_ReceiveStateFlag == FEN_ORDER)
+                    {
+                        if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_3_FEN_ORDER;
+                    }
                 	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 				}
 				else
 				{
-					ReceiveStateFlag = IDLE_ORDER;
+					g_ReceiveStateFlag = IDLE_ORDER;
 					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     return;
 				}
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
@@ -824,11 +910,33 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		       (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 			{
                 ClrWdt();
+                if(g_ReceiveStateFlag == HE_ORDER)
+                {                          
+                    if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
+                       g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_Z_HE_ORDER;
+                }
+                else if(g_ReceiveStateFlag == FEN_ORDER)
+                {              
+                    if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
+                       g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                    {
+                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                        g_ReceiveStateFlag = IDLE_ORDER;
+                        return;
+                    }
+                    g_lastReceiveOrder = CHECK_Z_FEN_ORDER;
+                }
                 SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                 return;
 			}
@@ -842,18 +950,40 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 				{
                 	ClrWdt();
+                    if(g_ReceiveStateFlag == HE_ORDER)
+                    {                           
+                        if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
+                           g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_HE_ORDER;
+                    }
+                    else if(g_ReceiveStateFlag == FEN_ORDER)
+                    {
+                        if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
+                           g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_FEN_ORDER;
+                    }
                 	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 				}
 				else
 				{
-					ReceiveStateFlag = IDLE_ORDER;
+					g_ReceiveStateFlag = IDLE_ORDER;
 					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     return;
 				}
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
@@ -867,18 +997,40 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
 				{
                 	ClrWdt();
+                    if(g_ReceiveStateFlag == HE_ORDER)
+                    {                           
+                        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE && 
+                           g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_HE_ORDER;
+                    }
+                    else if(g_ReceiveStateFlag == FEN_ORDER)
+                    {
+                        if(g_SystemState.heFenState3 != CHECK_3_HE_STATE && 
+                           g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_FEN_ORDER;
+                    }
                 	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
 				}
 				else
 				{
-					ReceiveStateFlag = IDLE_ORDER;
+					g_ReceiveStateFlag = IDLE_ORDER;
 					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     return;
 				}
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
@@ -893,18 +1045,42 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 				{
                 	ClrWdt();
+                    if(g_ReceiveStateFlag == HE_ORDER)
+                    {                           
+                        if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
+                           g_SystemState.heFenState2 != CHECK_2_FEN_STATE && 
+                           g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_HE_ORDER;
+                    }
+                    else if(g_ReceiveStateFlag == FEN_ORDER)
+                    {
+                        if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
+                           g_SystemState.heFenState2 != CHECK_2_HE_STATE && 
+                           g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                        {
+                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
+                            g_ReceiveStateFlag = IDLE_ORDER;
+                            return;
+                        }
+                        g_lastReceiveOrder = CHECK_Z_FEN_ORDER;
+                    }
                 	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
 				}
 				else
 				{
-					ReceiveStateFlag = IDLE_ORDER;
+					g_ReceiveStateFlag = IDLE_ORDER;
 					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
                     return;
 				}
 			}
 			else
 			{
-				ReceiveStateFlag = IDLE_ORDER;
+				g_ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
@@ -912,13 +1088,121 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		}
 		default:
 		{
-			ReceiveStateFlag = IDLE_ORDER;
+			g_ReceiveStateFlag = IDLE_ORDER;
 			SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
 			break;
 		}
 	}
 }
 
-
+/**
+ * 
+ * <p>Function name: [CheckOrder]</p>
+ * <p>Discription: [检测命令是否正确执行]</p>
+ * @param lastOrder 上一次执行的命令
+ */
+void CheckOrder(uint8_t lastOrder)
+{
+    if(lastOrder == IDLE_ORDER && g_lastReceiveOrder != IDLE_ORDER)
+    {
+        lastOrder = g_lastReceiveOrder;
+    }
+    switch(lastOrder)
+    {
+        case CHECK_Z_HE_ORDER:
+        {
+            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE || 
+               g_SystemState.heFenState2 != CHECK_2_HE_STATE || 
+               CHECK_HEZHA_STATE3())
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState1 = CHECK_ERROR1_STATE;
+                g_SystemState.heFenState2 = CHECK_ERROR2_STATE;
+                g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_Z_FEN_ORDER:
+        {
+            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE || 
+               g_SystemState.heFenState2 != CHECK_2_FEN_STATE || 
+               CHECK_FENZHA_STATE3())
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState1 = CHECK_ERROR1_STATE;
+                g_SystemState.heFenState2 = CHECK_ERROR2_STATE;
+                g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_1_HE_ORDER:
+        {
+            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState1 = CHECK_ERROR1_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_1_FEN_ORDER:
+        {
+            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState1 = CHECK_ERROR1_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_2_HE_ORDER:
+        {
+            if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState2 = CHECK_ERROR2_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_2_FEN_ORDER:
+        {
+            if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState2 = CHECK_ERROR2_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_3_HE_ORDER:
+        {
+            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        case CHECK_3_FEN_ORDER:
+        {
+            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+            {
+                SendErrorFrame(0x9A , REFUSE_ERROR);
+                g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
+                changeLedTime = 100;
+            }
+            break;
+        }
+        default:
+        {
+            return;
+        }
+    }
+    g_SuddenState.SuddenFlag = TRUE;  //发送突发错误
+}
 
 

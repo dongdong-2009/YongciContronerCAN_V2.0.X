@@ -366,6 +366,7 @@ uint8_t ConfigDataTXB2(uint8_t len, CANFrame* pframe)
 **********************************************/
 uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
 {  
+    uint8_t cn = 0;
     if ((len <= 8) && (len > 0))
     {
         ClrWdt();
@@ -446,7 +447,28 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
         ClrWdt();
         C2TX0CONbits.TXREQ = 1;         //请求发送
         //超时10ms看门狗复位
-        while(C2TX0CONbits.TXREQ);      //发送完成后该标志位会被自动清零
+        while(C2TX0CONbits.TXREQ)      //发送完成后该标志位会被自动清零
+        {
+            while(C2TX0CONbits.TXREQ)
+            {
+                __delay_ms(1);
+                cn++;
+                if(cn > 5)
+                {
+                    if(C2TX0CONbits.TXERR || C2TX0CONbits.TXLARB)  //发送时发生总线错误或者在发送过程中失去仲裁
+                    {
+                        C2CTRLbits.ABAT = 1;   //终止报文发送
+                        C2TX0CONbits.TXREQ = 0;
+                        while(!C2TX0CONbits.TXABT)
+                        {
+                            C2CTRLbits.ABAT = 1;
+                            C2TX0CONbits.TXREQ = 0;
+                        }
+                        return 0;
+                    }
+                }
+            }            
+        }
     }
     return 0;
 }
@@ -564,6 +586,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         //总线关断，需要报错，但是此时可以退出中断服务程序，但是不会改变TXBO位
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
+        C2INTEbits.ERRIE = 0;   //关闭错误中断
         changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
