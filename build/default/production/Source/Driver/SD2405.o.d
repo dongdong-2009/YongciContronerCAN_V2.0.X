@@ -1,5 +1,5 @@
-build/default/debug/Source/Driver/CAN.o:  \
-Source/Driver/CAN.c  \
+build/default/production/Source/Driver/SD2405.o:  \
+Source/Driver/SD2405.c  \
  Source/Driver/../Header.h  \
 Source/Driver/../Driver/tydef.h  \
  Source/Driver/../Driver/AdcSample.h  \
@@ -25,6 +25,5 @@ Source/Driver/../SerialPort/Action.h  \
  Source/Driver/../Yongci/../Driver/tydef.h  \
  Source/Driver/../Yongci/yongci.h  \
  Source/Driver/../Yongci/DeviceParameter.h  \
-Source/Driver/CAN.h  \
- Source/Driver/../DeviceNet/DeviceNet.h  \
- Source/Driver/../SerialPort/RefParameter.h 
+Source/Driver/ImitationIIC.h  \
+ Source/Driver/SD2405.h 

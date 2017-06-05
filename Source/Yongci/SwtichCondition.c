@@ -95,22 +95,28 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA())
+#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA() &&  \
+                                 (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((g_kairuValue & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+ (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA())
+#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA() &&  \
+                                 (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((g_kairuValue & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+ (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
 
 //本地的机构3合闸条件：分位2 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA())
+#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA() &&  \
+                                 (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
 //本地的机构3分闸条件：合位2 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((g_kairuValue & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0)
+((g_kairuValue & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+ (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
 
 
 /**
@@ -187,6 +193,7 @@ uint8_t CheckIOState(void)
             }
             else
             {
+                g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
         }
@@ -210,6 +217,7 @@ uint8_t CheckIOState(void)
             }
             else
             {
+                g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
         }
@@ -222,6 +230,10 @@ uint8_t CheckIOState(void)
                 HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x02;
             }
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+            }
             return 0xff;
         }
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
@@ -231,6 +243,10 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x01;
+            }
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
             }
             return 0xff;
         }
@@ -243,6 +259,10 @@ uint8_t CheckIOState(void)
                 HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x08;
             }
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+            }
             return 0xff;
         }
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
@@ -252,6 +272,10 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x04;
+            }
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
             }
             return 0xff;
         }
@@ -263,7 +287,11 @@ uint8_t CheckIOState(void)
             {
                 HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x20;
-            }            
+            }       
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+            }     
             return 0xff;
         }
         case CHECK_3_FEN_ORDER: //收到机构3分闸命令
@@ -273,7 +301,11 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x10;
-            }            
+            }       
+            else
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+            }     
             return 0xff;
         }
         default:

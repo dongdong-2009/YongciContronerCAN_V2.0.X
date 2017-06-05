@@ -14,6 +14,8 @@ Source/SerialPort/../Driver/Timer.h  \
  Source/SerialPort/../Driver/CAN.h  \
 Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Driver/Delay.h  \
+ Source/SerialPort/../Driver/ImitationIIC.h  \
+ Source/SerialPort/../Driver/SD2405.h  \
  Source/SerialPort/../SerialPort/Action.h  \
  Source/SerialPort/../SerialPort/RtuFrame.h  \
  Source/SerialPort/../SerialPort/../Driver/tydef.h  \

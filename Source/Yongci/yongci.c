@@ -158,7 +158,7 @@ void YongciMainTask(void)
     uint8_t state = TURN_ON;
     uint8_t cn = 0;
     uint8_t lastOrder = IDLE_ORDER;
-    uint32_t checkOrder = g_MsTicks;
+    uint32_t checkOrderTime = g_MsTicks;
     uint32_t checkOrderDelay = UINT32_MAX;
     while(0xFFFF) //主循环
     {
@@ -226,14 +226,15 @@ void YongciMainTask(void)
                 checkOrderDelay = 400;
                 //此处开启计时功能，延时大约在200ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
-                checkOrder = g_MsTicks;
+                checkOrderTime = g_MsTicks;
+                ReadCapDropVoltage(lastOrder);  //读取电容跌落电压
             }
             
             //拒动错误检测
-            if(g_MsTicks - checkOrder >= checkOrderDelay)
+            if(g_MsTicks - checkOrderTime >= checkOrderDelay)
             {
-                CheckOrder(lastOrder);
-                checkOrderDelay = UINT32_MAX;
+                CheckOrder(lastOrder);  //检测命令是否执行
+                checkOrderDelay = UINT32_MAX;   //未收到命令不会执行上面那个函数
                 lastOrder = IDLE_ORDER;
                 g_lastReceiveOrder = IDLE_ORDER;
             }
@@ -295,7 +296,7 @@ void YongciMainTask(void)
             if((g_MsTicks - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
             {
                 ClrWdt();
-                UpdataState();
+                UpdataState();  //更新状态
                 if(g_SuddenState.SuddenFlag)
                 {
                     //更新机构的状态显示

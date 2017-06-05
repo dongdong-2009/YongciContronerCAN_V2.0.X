@@ -129,6 +129,9 @@ void InitDeviceIO(void)
     RESET_CURRENT_C();
     ClrWdt();
     
+    SCL_DIR = 0;
+    SCL = 1;
+            
     InitInt2(); //初始化外部中断
 
     ClrWdt();

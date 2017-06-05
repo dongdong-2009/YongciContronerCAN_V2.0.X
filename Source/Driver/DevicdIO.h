@@ -101,16 +101,13 @@
 #define TERM0_OUT   LATGbits.LATG9
 #define TERM0_DIR   TRISGbits.TRISG9
 
-#define ACTIVE_STATE  1 //激活
+//IIC总线
+#define SDA_DIR TRISDbits.TRISD6
+#define SDA_OUT LATDbits.LATD6
+#define SDA_IN  PORTDbits.RD6
 
-//合分位状态检测
-//按钮输入标志位
-#define HE_STATE    0x3E
-#define FEN_STATE   0x3D
-#define HE_WEI_STATE    0x3B
-#define FEN_WEI_STATE   0x37
-#define HE_YUAN_STATE   0x2F
-#define FEN_YUAN_STATE  0x1F
+#define SCL_DIR TRISDbits.TRISD5
+#define SCL LATDbits.LATD5
 
 //*********************************************
 #define RELAY1_OPEN     0x4000 

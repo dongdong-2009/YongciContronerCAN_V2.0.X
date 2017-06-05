@@ -13,12 +13,12 @@
 #include "../Driver/AdcSample.h"
 #include "DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
-/********************************************
-*函数名：  GetCapVoltage()
-*形参：void
-*返回值：uint16--电容电压ADC值
-*功能：软件启动转换，获取ADC值.
-**********************************************/
+
+/**
+ * 
+ * <p>Function name: [GetCapVoltage]</p>
+ * <p>Discription: [软件启动转换，获取ADC值.]</p>
+ */
 void GetCapVoltage(void)
 {
     SoftSampleOnce();
@@ -30,12 +30,12 @@ void GetCapVoltage(void)
     ClrWdt();
 }
 
-/********************************************
-*函数名：  GetCapVolatageState()
-*形参：void
-*返回值：uint16_t --电压状态，大于最小值为0xAAAA
-*功能：获取电压状态.
-**********************************************/
+/**
+ * 
+ * <p>Function name: [GetCapVolatageState]</p>
+ * <p>Discription: [获取电压状态]</p>
+ * @return 电压状态，大于最小值为0xAAAA
+ */
 uint16_t GetCapVolatageState(void)
 {
     GetCapVoltage();
@@ -171,6 +171,61 @@ void CheckVoltage(void)
             ClrWdt();
             UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);  
             g_SuddenState.CapState3 = 0x10;    //0b01 
+        }
+    }
+}
+
+/**
+ * 
+ * <p>Function name: [ReadCapDropVoltage]</p>
+ * <p>Discription: [读取在执行合闸或者分闸后电容电压的变化]</p>
+ * @param lastOrder 上一次执行的命令
+ */
+void ReadCapDropVoltage(uint8_t lastOrder)
+{
+    if(lastOrder == IDLE_ORDER && g_lastReceiveOrder != IDLE_ORDER)
+    {
+        lastOrder = g_lastReceiveOrder;
+    }    
+    switch(lastOrder)
+    {
+        case CHECK_Z_FEN_ORDER:
+        case CHECK_Z_HE_ORDER:
+        {
+            SoftSampleOnce();
+            ClrWdt();
+            g_SystemVoltageParameter.capDropVoltage1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
+            g_SystemVoltageParameter.capDropVoltage2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
+            CAP3_DROP_VOLTAGE();
+            break;
+        }
+        case CHECK_1_FEN_ORDER:
+        case CHECK_1_HE_ORDER:
+        {
+            SoftSampleOnce();
+            ClrWdt();
+            g_SystemVoltageParameter.capDropVoltage1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
+            break;
+        }
+        case CHECK_2_FEN_ORDER:
+        case CHECK_2_HE_ORDER:
+        {
+            SoftSampleOnce();
+            ClrWdt();
+            g_SystemVoltageParameter.capDropVoltage2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
+            break;
+        }
+        case CHECK_3_FEN_ORDER:
+        case CHECK_3_HE_ORDER:
+        {
+            SoftSampleOnce();
+            ClrWdt();
+            CAP3_DROP_VOLTAGE();
+            break;
+        }
+        default:
+        {
+            return;
         }
     }
 }

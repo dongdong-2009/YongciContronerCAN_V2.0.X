@@ -55,8 +55,8 @@
 // FWDT 10ms
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)    
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
-#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -105,6 +105,9 @@ int main()
     }
     
     InitDeviceIO(); //IO初始化 首先禁止中断
+    
+    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
+    
     AdcInit(); //ADC采样初始化
     ClrWdt();
 
@@ -132,9 +135,14 @@ int main()
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); //21cys
 
-    cn = 0;
+    while(1)
+    {
+        SD2405_Init();
+        GetTime();
+        Delay_ms(500);
+    }
     
-    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
+    cn = 0;
     
     if(CAN_OR_RS485)
     {

@@ -71,8 +71,8 @@ SyncCommand g_SyncCommand;
 /**
  * 内部所需的宏定义，主要包括ID号初始值、参数列表长度
  */
-#define PARAMETER_LEN 30  //设置参数列表
-#define READONLY_PARAMETER_LEN 20  //只读参数列表
+#define PARAMETER_LEN 27  //设置参数列表
+#define READONLY_PARAMETER_LEN 21  //只读参数列表
 #define SET_START_ID 0x01   //设置参数ID号开始值
 #define READONLY_START_ID 0x41  //只读参数ID号开始值
 /**
@@ -357,12 +357,12 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
-//	g_SetParameterCollect[index].ID = id++;
-//	g_SetParameterCollect[index].pData = &g_LocalMac;   //系统时钟
-//	g_SetParameterCollect[index].type = 0x10;
-//	g_SetParameterCollect[index].fSetValue = SetValueUint8;
-//	g_SetParameterCollect[index].fGetValue = GetValueUint8;
-//	index++;
+	g_SetParameterCollect[index].ID = id++;
+	g_SetParameterCollect[index].pData = &g_LocalMac;   //系统时钟
+	g_SetParameterCollect[index].type = 0x10;
+	g_SetParameterCollect[index].fSetValue = SetValueUint8;
+	g_SetParameterCollect[index].fGetValue = GetValueUint8;
+	index++;
 
 	if (PARAMETER_LEN < index)
 	{
@@ -496,6 +496,24 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].type = 0x10;
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint8;
+	index++;
+	g_ReadOnlyParameterCollect[index].ID = id++;
+	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.capDropVoltage1;    //电容1跌落电压
+	g_ReadOnlyParameterCollect[index].type = 0x22;
+	g_ReadOnlyParameterCollect[index].fSetValue = 0;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
+	index++;
+	g_ReadOnlyParameterCollect[index].ID = id++;
+	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.capDropVoltage2;    //电容2跌落电压
+	g_ReadOnlyParameterCollect[index].type = 0x22;
+	g_ReadOnlyParameterCollect[index].fSetValue = 0;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
+	index++;
+	g_ReadOnlyParameterCollect[index].ID = id++;
+	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.capDropVoltage3;    //电容3跌落电压
+	g_ReadOnlyParameterCollect[index].type = 0x22;
+	g_ReadOnlyParameterCollect[index].fSetValue = 0;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
     
 	if (READONLY_PARAMETER_LEN < index)

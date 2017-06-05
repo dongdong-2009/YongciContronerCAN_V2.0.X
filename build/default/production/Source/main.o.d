@@ -14,6 +14,8 @@ Source/Driver/../SerialPort/RefParameter.h  \
 Source/Driver/CAN.h  \
  Source/Driver/InitTemp.h  \
 Source/Driver/Delay.h  \
+ Source/Driver/ImitationIIC.h  \
+Source/Driver/SD2405.h  \
  Source/SerialPort/Action.h  \
 Source/SerialPort/RtuFrame.h  \
  Source/SerialPort/../Driver/tydef.h  \

@@ -22,6 +22,9 @@
       <itemPath>Source/Driver/EEPROMOperate.h</itemPath>
       <itemPath>Source/Driver/InitTemp.h</itemPath>
       <itemPath>Source/Driver/Delay.h</itemPath>
+      <itemPath>ImitationIIC.h</itemPath>
+      <itemPath>Source/Driver/ImitationIIC.h</itemPath>
+      <itemPath>Source/Driver/SD2405.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -43,6 +46,9 @@
         <itemPath>Source/Driver/EEPROMOperate.c</itemPath>
         <itemPath>Source/Driver/InitTemp.c</itemPath>
         <itemPath>Source/Driver/Delay.c</itemPath>
+        <itemPath>ImitationIIC.c</itemPath>
+        <itemPath>Source/Driver/ImitationIIC.c</itemPath>
+        <itemPath>Source/Driver/SD2405.c</itemPath>
       </logicalFolder>
       <logicalFolder name="SerialPort" displayName="SerialPort" projectFiles="true">
         <itemPath>Source/SerialPort/Action.c</itemPath>
@@ -267,7 +273,6 @@
         <property key="UART 1" value="true"/>
         <property key="UART 2" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>

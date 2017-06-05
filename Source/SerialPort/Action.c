@@ -17,9 +17,11 @@
 /**
  * @description: 以下为错误代码，返回的错误标号等
  */
-#define ERROR_REPLY_ID  0x14
-#define ERROR_EXTEND_ID 0xAA
-#define ERROR_DATA_LEN  4
+//*************************************************************************
+#define ERROR_REPLY_ID  0x14    //错误帧ID
+#define ERROR_EXTEND_ID 0xAA    //错误附加码
+#define ERROR_DATA_LEN  4       //错误数据帧长度
+
 /**
  * @description: 错误代码
  */
@@ -35,12 +37,9 @@
 #define HEFEN_STATE_ERROR 0x0A      //合、分位错误
 #define REFUSE_ERROR 0x0B       //拒动错误
 
+//*************************************************************************
+
 #define TONGBU_HEZHA    0x5555
-
-#define FIRST_TIME   200 //50us
-#define SECEND_TIME  200 //50us
-#define SHORT_TIME   160 //40us
-
 
 void SendAckMesssage(uint8_t fun);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
@@ -473,7 +472,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             else
             {
                 //只有两个回路需要控制
-                if((pReciveFrame->pBuffer[1] == 0x01) || (pReciveFrame->pBuffer[1] == 0x04)) 
+                if((pReciveFrame->pBuffer[1] == 0x01) || (pReciveFrame->pBuffer[1] == 0x04))  //机构1先合、或者机构2先合
                 {
                     ClrWdt();
                     pSendFrame->pBuffer[3] = pReciveFrame->pBuffer[2];
@@ -482,7 +481,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 }
                 else
                 {
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
                     return;
                 }
             }
@@ -500,7 +499,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 TurnOffInt2();
                 g_ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
-            }                
+            }
             break;
         }
         case 0x10:  //顺序参数设置
@@ -772,7 +771,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
  * 
  * <p>Function name: [GetLoopSwitch]</p>
  * <p>Discription: [获取需要动作的回路开关]</p>
- * @param pReciveFrame 接收的数据结构
+ * @param pReciveFrame 接收的数据
  */
 void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 {
@@ -787,7 +786,6 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 	{
 		g_ReceiveStateFlag = FEN_ORDER;   //分闸命令
 	}
-//回路数的格式商定
 	switch (loop)
 	{
 		case 1:
@@ -1179,7 +1177,7 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_3_HE_ORDER:
         {
-            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE && CAP3_STATE)
             {
                 SendErrorFrame(0x9A , REFUSE_ERROR);
                 g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
@@ -1189,7 +1187,7 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_3_FEN_ORDER:
         {
-            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE && CAP3_STATE)
             {
                 SendErrorFrame(0x9A , REFUSE_ERROR);
                 g_SystemState.heFenState3 = CHECK_ERROR3_STATE;
