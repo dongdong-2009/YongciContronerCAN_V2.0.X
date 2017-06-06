@@ -20,12 +20,13 @@
 #define EEPROM_OFFSET_ADDRESS 0x04      //EEPROM偏移地址
 #define ACCUMULATE_SUM_ADDRESS 0x7FFFFC   //累加和EEPROM地址
 
-/**************************************************
- *函数名：WriteAWord()
- *形参： _prog_addressT addr, uint16* data
- *返回值：void
- *功能：  按地址写入一个word
-****************************************************/
+/**
+ * 
+ * <p>Function name: [WriteWord_EEPROM]</p>
+ * <p>Discription: [按地址写入一个word]</p>
+ * @param addr  EEPROM地址
+ * @param data  读取的数据
+ */
 inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
 {
    //应禁止中断
@@ -65,12 +66,13 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
     __builtin_disi(0);      
 }
 
-/**************************************************
- *函数名：WriteAWord()
- *形参： _prog_addressT addr, uint16* data
- *返回值：void
- *功能：  按地址读取一个word
-****************************************************/
+/**
+ * 
+ * <p>Function name: [ReadWord_EEPROM]</p>
+ * <p>Discription: [按地址读取一个word]</p>
+ * @param addr  EEPROM地址
+ * @param data  读取的数据
+ */
 inline void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data)
 {
     ClrWdt();
@@ -78,8 +80,11 @@ inline void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data)
     _memcpy_p2d16(data, addr, _EE_WORD );
     __builtin_disi(0); 
 }
+
 /**
- * 读取EEPROM
+ * 
+ * <p>Function name: [ReadEEPROM]</p>
+ * <p>Discription: [读取EEPROM中的定值]</p>
  * @param id  配置号
  * @param data 指向数据的指针
  */
@@ -102,7 +107,9 @@ void ReadEEPROM(uint8_t id,PointUint8* pPoint)
     }
 }
 /**
- * 写入EEPROM
+ * 
+ * <p>Function name: [WriteEEPROM]</p>
+ * <p>Discription: [将定值写入EEPROM]</p>
  * @param id  配置号
  * @param data 指向数据的指针
  */
@@ -125,7 +132,9 @@ void WriteEEPROM(uint8_t id,PointUint8* pPoint)
     }
 }
 /**
- * 写累加和到EEPROM中
+ * 
+ * <p>Function name: [WriteAccumulateSum_EEPROM]</p>
+ * <p>Discription: [写累加和到EEPROM中]</p>
  * @param writeData 所需写的数据
  */
 void WriteAccumulateSum_EEPROM(uint16_t* writeData)
@@ -139,7 +148,9 @@ void WriteAccumulateSum_EEPROM(uint16_t* writeData)
 }
 
 /**
- * 读累加和
+ * 
+ * <p>Function name: [ReadAccumulateSum]</p>
+ * <p>Discription: [读累加和]</p>
  * @param writeData 所需读取的数据
  */
 void ReadAccumulateSum(uint16_t* readData)
@@ -151,7 +162,9 @@ void ReadAccumulateSum(uint16_t* readData)
 
 
 /**
- * 写入分合闸次数
+ * 
+ * <p>Function name: [WriteFenzhaCount]</p>
+ * <p>Discription: [写入分合闸次数]</p>
  * @param writeData 所需读取的数据
  */
 void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata)

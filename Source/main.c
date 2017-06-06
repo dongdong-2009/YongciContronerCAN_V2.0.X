@@ -43,24 +43,22 @@
 *作者:
 *完成时间:
 ************************************************************/
-
 // DSPIC30F6012A Configuration Bit Settings
 
 // 'C' source line config statements
 
 // FOSC
 #pragma config FOSFPR = XT_PLL4         // Oscillator (XT w/PLL 4x)
-#pragma config FCKSMEN = CSW_FSCM_OFF   // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
+#pragma config FCKSMEN = CSW_ON_FSCM_OFF// Clock Switching and Monitor (Sw Enabled, Mon Disabled)
 
-// FWDT 10ms
-#pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)    
+// FWDT
+#pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
 #pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
-//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
-#pragma config BODENV = BORV_42         // Brown Out Voltage (4.2V) 
+#pragma config BODENV = BORV_42         // Brown Out Voltage (4.2V)
 #pragma config BOREN = PBOR_ON          // PBOR Enable (Enabled)
 #pragma config MCLRE = MCLR_EN          // Master Clear Enable (Enabled)
 
@@ -97,12 +95,12 @@ int main()
 {
     uint16_t cn = 0;
     
-    //延时3s判断启动
-    while(cn++ < 4000)
-    {
-        __delay_ms(1);
-        ClrWdt();
-    }
+    //延时4s判断启动
+//    while(cn++ < 4000)
+//    {
+//        __delay_ms(1);
+//        ClrWdt();
+//    }
     
     InitDeviceIO(); //IO初始化 首先禁止中断
     
@@ -135,11 +133,13 @@ int main()
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); //21cys
 
+    SD2405_Init();  //时钟芯片初始化
+       
+    ClrWdt();
+    
     while(1)
     {
-        SD2405_Init();
         GetTime();
-        Delay_ms(500);
     }
     
     cn = 0;

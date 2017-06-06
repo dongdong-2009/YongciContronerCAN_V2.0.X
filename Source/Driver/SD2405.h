@@ -67,13 +67,35 @@
 extern "C" {
 #endif /* __cplusplus */
     
+    
+//*********************************************************
+/******SD2405配置位地址*******/
 #define SD2405_ADDR 0x64    //从机地址0110 0100
 #define WRTC1_ADDR  0x10    //中断允许地址
 #define WRTC2_ADDR  0x0F    //写允许位地址
 #define ARST_ADDR   0x11    //自动复位地址
 #define FLAG_ADDR   0x14    //标志位地址
+//*********************************************************
 
+//*********************************************************
+/******SD2405时间位地址*******/
+#define SEC_ADDR        0x00
+#define MIN_ADDR        0x01
+#define HOUR_ADDR       0x02
+#define WEEKDAY_ADDR    0x03
+#define DAY_ADDR        0x04
+#define MOUTH_ADDR      0x05
+#define YEAR_ADDR       0x06
+//*********************************************************
+    
+    
+//*********************************************************
+//标志位
+    
 #define FLAG    0xAA
+#define TWELVE_SYSTEM_ON    0x00
+#define TWELVE_SYSTEM_OFF   0x80
+//*********************************************************
     
 typedef struct TagCalibrationTime
 {
@@ -83,14 +105,16 @@ typedef struct TagCalibrationTime
     uint8_t day;
     uint8_t weekday;
     uint8_t mouth;
-    uint8_t year;
+    uint16_t year;
 }CheckTime;
 
 void SD2405_Init(void);
 void GetTime(void);
+void SetTime(CheckTime* time , uint8_t twelveOn);
 
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
+extern CheckTime g_CheckTime;  //校验用时间
 
 #ifdef	__cplusplus
 }

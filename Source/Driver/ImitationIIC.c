@@ -49,14 +49,14 @@ void IIC_Start(void)
  */
 void IIC_Stop(void)
 {
-    SCL = 0;
     SDA_DIR = 0;    //SDA线为输出模式
+    SCL = 0;
     SDA_OUT = 0;    //STOP:when CLK is high DATA change form low to high
-    __delay_us(2);
+    __delay_us(4);
     SCL = 1;
-    __delay_us(2);
+    __delay_us(4);
     SDA_OUT = 1;    //发送I2C总线结束信号
-    __delay_us(2);
+    __delay_us(4);
 }
 
 /**
@@ -78,9 +78,9 @@ uint8_t IIC_Wait_Ack(void)
 	while(SDA_IN == 1)
 	{
 		errorTime++;
-		if(errorTime > 2250)
+		if(errorTime > 3000)
 		{
-			IIC_Stop();
+            IIC_Stop();
 			return 0xFF;
 		}
 	}
@@ -142,13 +142,14 @@ void IIC_SendByte(uint8_t byte)
         {
             SDA_OUT = 0;
         }
-        __delay_us(2);  //对byte5767这三个延时都是必须的
+        __delay_us(20);  //对byte5767这三个延时都是必须的
         SCL = 1;
-        __delay_us(2);
+        __delay_us(20);
 		SCL = 0;	
-        __delay_us(2);
+        __delay_us(20);
         byte <<= 1;
     }
+    __delay_ms(5);
 }
 
 /**
@@ -173,8 +174,7 @@ uint8_t IIC_ReadByte(uint8_t ack)
         {
             data++;
         }
-        __delay_us(2);
-        ClrWdt();
+        __delay_us(1);
     }
     if(!ack)
     {
@@ -202,13 +202,22 @@ void IIC_WriteByte(uint8_t memoryAddr , uint8_t data)
     IIC_Start();    //产生一个启动信号
     
     IIC_SendByte(deviceID); //发送从机地址+写操作    
-    IIC_Wait_Ack(); //等待应答
+    if(IIC_Wait_Ack()) //等待应答
+    {
+        return;
+    }
     
     IIC_SendByte(memoryAddr);   //发送数据写入地址
-    IIC_Wait_Ack(); //等待应答
+    if(IIC_Wait_Ack()) //等待应答
+    {
+        return;
+    }
     
     IIC_SendByte(data); //发送数据
-    IIC_Wait_Ack(); //等待应答
+    if(IIC_Wait_Ack()) //等待应答
+    {
+        return;
+    }
     
     IIC_Stop(); //产生一个停止条件
     ClrWdt();
@@ -239,31 +248,39 @@ void I2CMasterWrite(uint8_t memoryaddr , uint8_t* data , uint8_t writelen)
  * <p>Function name: [IIC_MasterReadByte]</p>
  * <p>Discription: [I2C读一个字节]</p>
  * @param memoryAddr    要读取的数据缓冲区地址
- * @return 读取到的数据
+ * @return 读取到的数据 如果返回值为0xFF则无应答
  */
-uint8_t IIC_MasterReadByte(uint8_t memoryAddr)
+void IIC_MasterReadByte(uint8_t memoryAddr , uint8_t* data)
 {
-    uint8_t data = 0;
     uint8_t readOperate = SD2405_ADDR | RD_BIT;     //从机地址+读操作
     uint8_t writeOperate = SD2405_ADDR | WD_BIT;    //从机地址+写操作
     
     IIC_Start();    //产生一个启动信号
     
     IIC_SendByte(writeOperate); //发送写指令
-    IIC_Wait_Ack(); //等待应答
+    Delay_ms(20);
+    if(IIC_Wait_Ack())
+    {
+        return;
+    }
     
     IIC_SendByte(memoryAddr);   //发送要读取的缓冲区地址
-    IIC_Wait_Ack(); //等待应答
+    Delay_ms(50);
+    if(IIC_Wait_Ack())
+    {
+        return;
+    }
     
     IIC_Start();    //产生一个启动信号
-    IIC_SendByte(readOperate);   //发送读指令
-    IIC_Wait_Ack(); //等待应答
+    IIC_SendByte(readOperate);   //发送读指令    
+    if(IIC_Wait_Ack())
+    {
+        return;
+    }
     
-    data = IIC_ReadByte(memoryAddr);  //读取数据
+    *data = IIC_ReadByte(1);  //读取数据    
     IIC_Stop(); //产生一个停止条件
-    
-    return data;  
-    
+    Delay_ms(50);    
 }
 
 /**
@@ -279,7 +296,7 @@ void I2CMasterRead(uint8_t memoryaddr , uint8_t* Rxdata , uint8_t readlen)
     uint8_t i;
 	for ( i = 0; i < readlen; i++ )		
 	{
-		Rxdata[i] = IIC_MasterReadByte(memoryaddr);	
+		IIC_MasterReadByte(memoryaddr , &Rxdata[i]);	
 		memoryaddr ++;
 	}
 }

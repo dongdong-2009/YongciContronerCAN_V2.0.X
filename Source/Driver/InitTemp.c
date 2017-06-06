@@ -247,7 +247,9 @@ float32_t DS18B20GetTemperature(void)
     TemperateValue = TemperateValue | a;		 //"|",与，有1便是“1”，temp 有十六位，高八位是b的位，这步的作用是把a赋给temp的低八位，所以现在temp 就是温度，但是没是这默认为正的温度没有负的温度
     ClrWdt();
     wendu = TemperateValue * 0.0625;     //获取温度
+    
     //temp = wendu*10+0.5;	  //对温度的4舍5入操作	乘以10，是因为要tempj unsingned int 的没有小数部分，要有小数部分就必先乘以10，再除以10
+    
     b >>= 4;
     if(b == 0x0F)
     {

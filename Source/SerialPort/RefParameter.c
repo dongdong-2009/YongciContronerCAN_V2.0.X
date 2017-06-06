@@ -18,6 +18,7 @@
  */
 void SetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig);
 void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig);
+void GetValueFloatInt16(PointUint8* pPoint, ConfigData* pConfig);
 void GetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint8(PointUint8* pPoint, ConfigData* pConfig);
@@ -406,9 +407,9 @@ void InitReadonlyParameterCollect(void)
 	index++;
 	g_ReadOnlyParameterCollect[index].ID = id++;
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.temp;   //温度
-	g_ReadOnlyParameterCollect[index].type = 0x22;
+	g_ReadOnlyParameterCollect[index].type = 0x22;  
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
-	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatInt16;
 	index++;
 	ClrWdt();
     //uint16 -- 合分闸计数
@@ -715,6 +716,30 @@ void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 	}
 }
 
+/**
+ * 
+ * <p>Function name: [GetValueFloatInt16]</p>
+ * <p>Discription: [获取参数，温度值]</p>
+ * @param pPoint    指向数据数组
+ * @param pConfig   指向当前配置数据
+ */
+void GetValueFloatInt16(PointUint8* pPoint, ConfigData* pConfig)
+{
+    if (pPoint->len >= 2)
+	{
+        float32_t ration = 100.0f;
+        int16_t result = (int16_t)(*(float*)pConfig->pData * ration);
+		pPoint->pData[0] = (uint8_t)(result & 0x00FF);
+		ClrWdt();
+		pPoint->pData[1] = (uint8_t)(result >> 8);
+		pPoint->len = 2;
+	}
+	else
+	{
+		ClrWdt();
+		pPoint->len = 0; //置为0，以示意错误
+	}
+}
 /**
  * 设置值，针对2字节[0,65535]
  * 适用于电压采样延时,传输延时，合闸时间，同步预制等待时间，

@@ -73,7 +73,7 @@ extern "C" {
     
 
 void IIC_WriteByte(uint8_t memoryAddr , uint8_t data);
-uint8_t IIC_MasterReadByte(uint8_t memoryAddr);
+void IIC_MasterReadByte(uint8_t memoryAddr , uint8_t* data);
 
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
