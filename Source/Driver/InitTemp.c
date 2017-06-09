@@ -239,7 +239,7 @@ float32_t DS18B20GetTemperature(void)
 
 
     a = DS18B20ReadByte();		  //读取温度 第一个字节	这两个是连续的字节，且是bit0 与bit1,即它会在初始化前都是安顺序读取，
-    b = DS18B20ReadByte();		 //读取第二个字节
+    b = DS18B20ReadByte();		 //读取第二个字节 高8位
 
 
     TemperateValue = b;		   

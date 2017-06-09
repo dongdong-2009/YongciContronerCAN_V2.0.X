@@ -45,7 +45,7 @@
 #ifdef	SMALL_CHOSE
     #define ADCS()  {ADCSSL = 0x000F;}  //ADC扫描通道数,AN0--AN3全部扫描
     #define ADPC()  {ADPCFG = 0xFFF0;}  //AN0--AN3
-    #define VOLTAGE_CAP3    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
+    #define VOLTAGE_CAP3()    {g_SystemVoltageParameter.voltageCap3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}
     #define CAP3_DROP_VOLTAGE() {g_SystemVoltageParameter.capDropVoltage3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}    
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可

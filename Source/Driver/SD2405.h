@@ -92,7 +92,7 @@ extern "C" {
 //*********************************************************
 //标志位
     
-#define FLAG    0xAA
+#define FLAG    0x88
 #define TWELVE_SYSTEM_ON    0x00
 #define TWELVE_SYSTEM_OFF   0x80
 //*********************************************************
@@ -111,6 +111,7 @@ typedef struct TagCalibrationTime
 void SD2405_Init(void);
 void GetTime(void);
 void SetTime(CheckTime* time , uint8_t twelveOn);
+void I2CMasterRead(uint8_t* Rxdata , uint8_t readlen);
 
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 

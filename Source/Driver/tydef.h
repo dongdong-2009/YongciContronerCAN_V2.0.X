@@ -28,6 +28,12 @@ typedef struct TagPointUint8
     uint8_t len; //指向数据长度
 }PointUint8;
 
+typedef union TagPointFloat
+{
+    float32_t fdata;
+    uint8_t uData[4];
+}PointFloat;
+
 
 #endif
 

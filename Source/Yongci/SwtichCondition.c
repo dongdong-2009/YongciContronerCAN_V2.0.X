@@ -82,7 +82,7 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
-(g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0))
+(g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0)
 
 #elif	BIG_CHOSE
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
@@ -360,7 +360,7 @@ void DsplaySwitchState(void)
         if(g_SuddenState.Cap3Error == CAP3_ERROR || 
            g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //机构3错误
         {
-            UpdateIndicateState(ERROR3_RELAY,ERROR2_LED,TURN_ON);
+            UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
             ClrWdt();
             g_SystemState.warning = CHECK_ERROR3_STATE;
         }
@@ -414,11 +414,7 @@ void DsplaySwitchState(void)
         ClrWdt();
     }
     
-    if(!CAP3_STATE)
-    {
-        g_SystemState.heFenState3 = g_SystemState.heFenState2 + 2;
-    }
-    else
+    if(CAP3_STATE)
     {
         //机构3的分合位检测    
         ClrWdt();
@@ -435,6 +431,10 @@ void DsplaySwitchState(void)
             UpdateIndicateState(FENWEI3_RELAY,FENWEI3_LED,TURN_OFF);
             ClrWdt();
         }    
+    }
+    else
+    {        
+        g_SystemState.heFenState3 = g_SystemState.heFenState2 + 2;
     }
     
     //总的分合位检测    

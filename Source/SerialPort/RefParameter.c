@@ -18,7 +18,8 @@
  */
 void SetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig);
 void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig);
-void GetValueFloatInt16(PointUint8* pPoint, ConfigData* pConfig);
+void GetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
+void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 void GetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint8(PointUint8* pPoint, ConfigData* pConfig);
@@ -115,7 +116,6 @@ uint8_t SetParamValue(uint8_t id,PointUint8* pPoint)
             ClrWdt();
             g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
             
-//            WriteAccumulateSum();  //写入累加和
             ClrWdt();
 			if (pPoint->len == 0)
 			{
@@ -409,7 +409,7 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].pData = &g_SystemVoltageParameter.temp;   //温度
 	g_ReadOnlyParameterCollect[index].type = 0x22;  
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
-	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatInt16;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatInt32;
 	index++;
 	ClrWdt();
     //uint16 -- 合分闸计数
@@ -716,23 +716,27 @@ void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 	}
 }
 
+
 /**
  * 
  * <p>Function name: [GetValueFloatInt16]</p>
- * <p>Discription: [获取参数，温度值]</p>
+ * <p>Discription: [获取参数，带符号]</p>
  * @param pPoint    指向数据数组
  * @param pConfig   指向当前配置数据
  */
-void GetValueFloatInt16(PointUint8* pPoint, ConfigData* pConfig)
+void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig)
 {
+    PointFloat data;
+    uint8_t i = 0;
     if (pPoint->len >= 2)
 	{
-        float32_t ration = 100.0f;
-        int16_t result = (int16_t)(*(float*)pConfig->pData * ration);
-		pPoint->pData[0] = (uint8_t)(result & 0x00FF);
-		ClrWdt();
-		pPoint->pData[1] = (uint8_t)(result >> 8);
-		pPoint->len = 2;
+        for(i = 0;i < 4;i++)
+        {
+            data.uData[i] = pPoint->pData[i];
+        }
+        
+        *(float*)pConfig->pData = data.fdata;
+		pPoint->len = 4;
 	}
 	else
 	{
@@ -740,6 +744,35 @@ void GetValueFloatInt16(PointUint8* pPoint, ConfigData* pConfig)
 		pPoint->len = 0; //置为0，以示意错误
 	}
 }
+
+/**
+ * 
+ * <p>Function name: [GetValueFloatInt16]</p>
+ * <p>Discription: [获取参数，带符号]</p>
+ * @param pPoint    指向数据数组
+ * @param pConfig   指向当前配置数据
+ */
+void GetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig)
+{
+    PointFloat data;
+    uint8_t i = 0;
+    if (pPoint->len >= 2)
+	{
+        data.fdata = *(float*)pConfig->pData;
+        for(i = 0;i < 4;i++)
+        {
+            pPoint->pData[i] = data.uData[i];
+            ClrWdt();
+        }
+		pPoint->len = 4;
+	}
+	else
+	{
+		ClrWdt();
+		pPoint->len = 0; //置为0，以示意错误
+	}
+}
+
 /**
  * 设置值，针对2字节[0,65535]
  * 适用于电压采样延时,传输延时，合闸时间，同步预制等待时间，

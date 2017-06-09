@@ -16,7 +16,6 @@
 #include "ImitationIIC.h"
 #include "SD2405.h"
 
-
 uint8_t turnTime(uint8_t time);
         
 uint16_t g_Time[5] = {0};
@@ -40,6 +39,7 @@ void SD2405_Init(void)
     uint8_t wrtc2 = 0x84;   //WRTC2,3置1
     uint8_t arst = 0x80;    //ARST 置1
     uint8_t flag = FLAG;
+    uint8_t fig = 0;
 //***********************************************************
 //    IIC_WriteByte(0x10 , 0xA9);//WRTC1置1,写允许，报警模式中断选择，选择为频率中断 VBAT模式选择 频率中断允许0x10101001
 //    IIC_WriteByte(0x0F , 0x84);//WRTC2,3置1
@@ -52,6 +52,14 @@ void SD2405_Init(void)
     IIC_WriteByte(FLAG_ADDR , flag); //写标志位
     ClrWdt();
     
+    IIC_MasterReadByte(FLAG_ADDR , &fig);
+    ClrWdt();
+    if(fig != FLAG)
+    {
+        ClrWdt();
+        IIC_WriteByte(FLAG_ADDR , FLAG); //写标志位
+        return;
+    }
     //**************************************
     //时钟芯片初始化时间 2017-06-06 17:10:20 星期二
     g_CheckTime.year = 2017;    //2017年
@@ -149,17 +157,9 @@ uint8_t turnTime(uint8_t time)
  */
 void GetTime(void)
 {
-    uint8_t fig = 0;
     uint8_t year = g_CheckTime.year - 2000;
-    
-    IIC_MasterReadByte(FLAG_ADDR , &fig);
-    ClrWdt();
-    if(fig != FLAG)
-    {
-        ClrWdt();
-        IIC_WriteByte(FLAG_ADDR , FLAG); //写标志位
-        return;
-    }
+    uint8_t data[8] = {0};
+    OFF_INT();
     
     IIC_MasterReadByte(SEC_ADDR , &g_CheckTime.sec);
     IIC_MasterReadByte(MIN_ADDR , &g_CheckTime.min);
@@ -178,6 +178,11 @@ void GetTime(void)
     g_CheckTime.day = turnTime(g_CheckTime.day);
     g_CheckTime.mouth = turnTime(g_CheckTime.mouth);
 	g_CheckTime.year =  turnTime(year) + 2000;
+    I2CMasterRead(data,7);
+    ON_INT();
+    ClrWdt();
+    ClrWdt();
+    ClrWdt();
 }
 
 /**
@@ -192,7 +197,6 @@ void SetTime(CheckTime* time , uint8_t twelveOn)
     uint8_t sec = Decimal_to_BCD(time->sec);
     uint8_t min = Decimal_to_BCD(time->min);
     uint8_t hour = Decimal_to_BCD(time->hour) | twelveOn;
-    uint8_t weekday = Decimal_to_BCD(time->weekday);
     uint8_t day = Decimal_to_BCD(time->day);
     uint8_t mouth = Decimal_to_BCD(time->mouth);
     uint8_t year = Decimal_to_BCD(time->year);
@@ -202,12 +206,9 @@ void SetTime(CheckTime* time , uint8_t twelveOn)
     IIC_WriteByte(MIN_ADDR , min);
     ClrWdt();
     IIC_WriteByte(HOUR_ADDR , hour);
-    IIC_WriteByte(WEEKDAY_ADDR , weekday);
     IIC_WriteByte(DAY_ADDR , day);
     IIC_WriteByte(MOUTH_ADDR , mouth);
     IIC_WriteByte(YEAR_ADDR , year);
-    ClrWdt();
-    ClrWdt();
     ClrWdt();
 }
          

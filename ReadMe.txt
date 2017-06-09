@@ -167,3 +167,14 @@
 解决IIC总线读取时钟芯片出错问题
 在时钟芯片内部写入标志位0xAA
 修改EEPROM注释
+
+2017/06/06(修改人：张东旭)
+增加两段函数，分别是
+void GetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
+void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
+作用是将带符号的浮点数转换为4字节整数传输，与将接收到的四字节整数转换为浮点数
+增加一个联合，“PointFloat”作用是方便转换带符号的浮点数
+
+
+
+
