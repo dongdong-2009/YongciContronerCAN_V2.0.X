@@ -244,22 +244,22 @@
 //Binary Input
 //*************************
 #define KR1_H  0x00000001   //Work or Debug
-#define KR2_H  0x00000002   //Reserve
+#define KR2_H  0x00000002   //ON 1
 #define KR3_H  0x00000004   //FarAway or Local
-#define KR4_H  0x00000008   //ON 1
+#define KR4_H  0x00000008   //OFF 1
 
 #define KR5_H  0x00000010   //Live Shows
-#define KR6_H  0x00000020   //OFF 1
+#define KR6_H  0x00000020   //ON 2
 #define KR7_H  0x00000040   //ON Order 1
-#define KR8_H  0x00000080   //ON 2
+#define KR8_H  0x00000080   //OFF 2
 
 #define KR9_H  0x00000100   //OFF Order 1
-#define KR10_H 0x00000200   //OFF 2
+#define KR10_H 0x00000200   //ON 3
 #define KR11_H 0x00000400   //ON Order 2
-#define KR12_H 0x00000800   //ON 3
+#define KR12_H 0x00000800   //OFF 3
 
 #define KR13_H 0x00001000   //OFF Order 2
-#define KR14_H 0x00002000   //OFF 3
+#define KR14_H 0x00002000   //Reserve
 #define KR15_H 0x00004000   //ON Order 3
 #define KR16_H 0x00008000   //Reserve
 
@@ -300,14 +300,14 @@
 #define Z_FENZHA_INPUT KR21_H
 
 //合位、分位1、2、3的输入
-#define HEWEI1_INPUT  KR4_H
-#define FENWEI1_INPUT KR6_H
+#define HEWEI1_INPUT  KR2_H
+#define FENWEI1_INPUT KR4_H
 
-#define HEWEI2_INPUT  KR8_H
-#define FENWEI2_INPUT KR10_H
+#define HEWEI2_INPUT  KR6_H
+#define FENWEI2_INPUT KR8_H
 
-#define HEWEI3_INPUT  KR12_H
-#define FENWEI3_INPUT KR14_H
+#define HEWEI3_INPUT  KR10_H
+#define FENWEI3_INPUT KR12_H
 
 //******************************************
 

@@ -283,7 +283,7 @@ void SendFrame(uint8_t* pFrame, uint8_t len)
 void SetOverTime(uint16_t delayTime)
 {
     g_SysTimeStamp.StarTime = g_MsTicks;
-    g_SysTimeStamp.delayTime = delayTime;
+    g_SysTimeStamp.delayTime = delayTime + 1;
     ClrWdt();
 }
 

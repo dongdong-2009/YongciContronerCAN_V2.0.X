@@ -55,6 +55,12 @@ typedef struct SaveSystemSuddenState
     uint8_t Cap3Error;    //电容电压错误
 }SystemSuddenState;
 
+typedef struct RemoteControl
+{
+    uint16_t ReceiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
+    uint16_t lastReceiveOrder;  //接收到的上一条命令
+    uint8_t  overTimeFlage;
+}RemoteControlState;
 
 void ExecuteFunctioncode(frameRtu* pRtu);
 
@@ -62,9 +68,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 void UpdataState(void);
 void CheckOrder(uint8_t lastOrder);
 
-extern _PERSISTENT uint16_t g_ReceiveStateFlag;
-extern _PERSISTENT uint16_t g_lastReceiveOrder;
-
+extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 
 #ifdef	__cplusplus

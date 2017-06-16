@@ -183,9 +183,9 @@ void CheckVoltage(void)
  */
 void ReadCapDropVoltage(uint8_t lastOrder)
 {
-    if(lastOrder == IDLE_ORDER && g_lastReceiveOrder != IDLE_ORDER)
+    if(lastOrder == IDLE_ORDER && g_RemoteControlState.lastReceiveOrder != IDLE_ORDER)
     {
-        lastOrder = g_lastReceiveOrder;
+        lastOrder = g_RemoteControlState.lastReceiveOrder;
     }    
     switch(lastOrder)
     {

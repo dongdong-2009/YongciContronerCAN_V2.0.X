@@ -236,7 +236,7 @@ void YongciMainTask(void)
                 CheckOrder(lastOrder);  //检测命令是否执行
                 checkOrderDelay = UINT32_MAX;   //未收到命令不会执行上面那个函数
                 lastOrder = IDLE_ORDER;
-                g_lastReceiveOrder = IDLE_ORDER;
+                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
             }
             ClrWdt();
             
@@ -330,6 +330,16 @@ void YongciMainTask(void)
                 g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
             }
         }
+
+        //超时检测复位
+        if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
+        {
+            if(!CheckIsOverTime())
+            {
+                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+                g_RemoteControlState.overTimeFlage = TRUE;  //超时
+            }
+        }
     }
 }
 
@@ -404,8 +414,6 @@ void YongciFirstInit(void)
     g_Index[index].GetTime(g_Index + index);
     index++;
     
-    g_ReceiveStateFlag = IDLE_ORDER;  //初始化通信所需的命令状态
-    g_lastReceiveOrder = IDLE_ORDER;
     ClrWdt();
     InitSetSwitchState();
     
@@ -415,6 +423,11 @@ void YongciFirstInit(void)
     g_SysTimeStamp.SendDataTime = g_MsTicks;    //对于时间状态量的初始化
     
     changeLedTime = 500;    //初始化值为500ms
+    
+    //远方控制标识位初始化
+    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+    g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
+    g_RemoteControlState.overTimeFlage = FALSE;
 }  
 
 /**
@@ -637,6 +650,7 @@ void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSen
             g_Index[1].offestTime = (highTime << 8) | lowTime;
             g_Index[1].offestTime = g_Index[1].offestTime / 2;  //单片机计时时间为2us
             
+            ClrWdt();
 			g_Index[0].GetTime(g_Index);
 			g_Index[1].GetTime(g_Index + 1);
             
@@ -649,6 +663,7 @@ void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSen
                 g_Index[2].offestTime = (highTime << 8) | lowTime;
                 g_Index[2].offestTime = g_Index[2].offestTime / 2;  //单片机计时时间为2us
                 
+                ClrWdt();
                 g_Index[2].GetTime(g_Index + 2);
             }
             break;	

@@ -162,7 +162,7 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 //***************************************************************************************************
 
 
-#define KEY_COUNT_DOWN 30
+#define KEY_COUNT_DOWN 15   // *2ms
 uint8_t g_timeCount[22] = {0};
 uint8_t g_lockflag[22] = {0}; 
 

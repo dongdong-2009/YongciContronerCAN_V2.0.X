@@ -453,14 +453,17 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
             {
                 __delay_ms(1);
                 cn++;
+                ClrWdt();
                 if(cn > 5)
                 {
+                    ClrWdt();
                     if(C2TX0CONbits.TXERR || C2TX0CONbits.TXLARB)  //发送时发生总线错误或者在发送过程中失去仲裁
                     {
                         C2CTRLbits.ABAT = 1;   //终止报文发送
                         C2TX0CONbits.TXREQ = 0;
                         while(!C2TX0CONbits.TXABT)
                         {
+                            ClrWdt();
                             C2CTRLbits.ABAT = 1;
                             C2TX0CONbits.TXREQ = 0;
                         }
