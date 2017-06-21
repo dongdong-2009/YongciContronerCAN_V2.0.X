@@ -16,7 +16,7 @@
  * EEPROM地址
  */
 #define EEPROM_STAR_ADDRESS 0x7FF100    //EEPROM起始地址
-#define EEPROM_END_ADDRESS  0x7FFFF0    //EEPROM结束地址
+#define EEPROM_END_ADDRESS  0x7FFFFE    //EEPROM结束地址
 #define EEPROM_OFFSET_ADDRESS 0x04      //EEPROM偏移地址
 #define ACCUMULATE_SUM_ADDRESS 0x7FFFFC   //累加和EEPROM地址
 
@@ -160,7 +160,6 @@ void ReadAccumulateSum(uint16_t* readData)
     ReadWord_EEPROM(address,readData);    
 }
 
-
 /**
  * 
  * <p>Function name: [WriteFenzhaCount]</p>
@@ -179,3 +178,5 @@ void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata)
     WriteWord_EEPROM(addr , eedata);
     ON_INT();
 }
+
+

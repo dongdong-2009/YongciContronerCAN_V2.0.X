@@ -76,6 +76,18 @@ extern "C" {
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
 
+//存储合闸、分闸次数的EEPROM地址
+//*********************************************
+#define JG1_HE_COUNT_ADDRESS  0x007FF002
+#define JG1_FEN_COUNT_ADDRESS 0x007FF004
+    
+#define JG2_HE_COUNT_ADDRESS  0x007FF006
+#define JG2_FEN_COUNT_ADDRESS 0x007FF008
+    
+#define JG3_HE_COUNT_ADDRESS  0x007FF00A
+#define JG3_FEN_COUNT_ADDRESS 0x007FF00C
+//*********************************************
+    
 void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data);
 void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data);
 

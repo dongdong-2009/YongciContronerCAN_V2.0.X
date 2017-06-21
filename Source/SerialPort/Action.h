@@ -33,6 +33,33 @@
 #define ACK  0xFA
 //*****************************************************
 
+//同步合闸命令
+#define TONGBU_HEZHA    0x5555
+
+/**
+ * @description: 以下为错误代码，返回的错误标号等
+ */
+//*************************************************************************
+#define ERROR_REPLY_ID  0x14    //错误帧ID
+#define ERROR_EXTEND_ID 0xAA    //错误附加码
+#define ERROR_DATA_LEN  4       //错误数据帧长度
+
+/**
+ * @description: 错误代码
+ */
+#define ID_ERROR     0x01       //ID号错误
+#define DATA_LEN_ERROR   0x02   //数据长度错误
+#define LOOP_ERROR   0x03       //回路数错误
+#define SET_VALUE_ERROR   0x04  //设置值错误
+#define WORK_MODE_ERROR   0x05  //在处于就地控制时使用了远方控制
+#define OVER_TIME_ERROR   0x06  //预制超时错误
+#define NOT_PERFABRICATE_ERROR  0x07        //没有预制就先执行的错误
+#define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
+#define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
+#define HEFEN_STATE_ERROR 0x0A      //合、分位错误
+#define REFUSE_ERROR 0x0B       //拒动错误
+
+//*************************************************************************
 
 #ifdef	__cplusplus
 extern "C" {
@@ -59,7 +86,8 @@ typedef struct RemoteControl
 {
     uint16_t ReceiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
     uint16_t lastReceiveOrder;  //接收到的上一条命令
-    uint8_t  overTimeFlage;
+    uint8_t  overTimeFlage;     //超时标识位
+    uint8_t  orderId;   //执行的命令
 }RemoteControlState;
 
 void ExecuteFunctioncode(frameRtu* pRtu);
@@ -67,6 +95,8 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
 void CheckOrder(uint8_t lastOrder);
+void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
+void SendMessage(uint16_t data);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值

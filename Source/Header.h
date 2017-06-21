@@ -78,12 +78,14 @@
 #ifdef  USE_CAN
     #define ON_INT()  {ON_CAN_INT();}
     #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
-    #define CAN_OR_RS485    TRUE
+    #define APPLY_CAN    TRUE
+    #define APPLY_485    FALSE
 
 #elif   USE_RS485
     #define ON_INT()  {ON_UART_INT();}
     #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
-    #define CAN_OR_RS485    FALSE
+    #define APPLY_CAN    FALSE
+    #define APPLY_485    TRUE
 
 #endif
 //**************************************

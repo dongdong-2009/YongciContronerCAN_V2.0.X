@@ -54,7 +54,6 @@
 // FWDT
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 #pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
 
 // FBORPOR
@@ -104,43 +103,46 @@ int main()
     }
     
     InitDeviceIO(); //IO初始化 首先禁止中断
-    
-    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
+//    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
     
     AdcInit(); //ADC采样初始化
     ClrWdt();
 
-    ClrWdt(); 
-    UsartInit(); //串口初始化 9600bps 785cycs 上
+    //是用485通信
+    if(APPLY_485 == TRUE)
+    {
+        ClrWdt(); 
+        UsartInit(); //串口初始化 9600bps 785cycs 上
 
-    ClrWdt(); 
+        ClrWdt(); 
 
-    RX_TX_MODE = TX_MODE; //串口发送    
-    __delay_us(20);
-    
-    UsartSend(0xAA);
-    UsartSend(0x55);
-    UsartSend(0x0A);
+        RX_TX_MODE = TX_MODE; //串口发送    
+        __delay_us(20);
 
-    RX_TX_MODE = RX_MODE;
-    ClrWdt(); //204cys 
+        UsartSend(0xAA);
+        UsartSend(0x55);
+        UsartSend(0x0A);
+
+        RX_TX_MODE = RX_MODE;
+        ClrWdt(); //204cys 
+        ReciveFrameDataInit();              //接收帧初始化
+        ClrWdt(); //452cycs
+    }
     
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
     Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
     
     StartTimer2();  //开启系统时钟
-    ClrWdt(); //452cycs
-    ReciveFrameDataInit();              //接收帧初始化
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); //21cys
 
-    SD2405_Init();  //时钟芯片初始化
+//    SD2405_Init();  //时钟芯片初始化
     
     ClrWdt();
         
     cn = 0;
     
-    if(CAN_OR_RS485)
+    if(APPLY_CAN == TRUE)
     {
         OFF_UART_INT(); //485通信不开启
         
@@ -155,13 +157,12 @@ int main()
     
     GetCapVolatageState();  //获取电容电压状态
     
-    YongciFirstInit();  //永磁合闸参数初始化
+    YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys
     
-//    while(0xFF)
-//    {
-//        GetTime();
-//    }
+    //测试完成后需要更改回原来的位置
+    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
+    
     while(TRUE)
     {
         ClrWdt();

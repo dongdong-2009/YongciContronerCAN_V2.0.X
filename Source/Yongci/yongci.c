@@ -154,7 +154,6 @@ void FENZHA_Action(uint8_t index,uint16_t time)
 ****************************************************/
 void YongciMainTask(void)
 {
-//    uint8_t result = 0;
     uint8_t state = TURN_ON;
     uint8_t cn = 0;
     uint8_t lastOrder = IDLE_ORDER;
@@ -223,20 +222,21 @@ void YongciMainTask(void)
                 (g_SetSwitchState[1].LastOrder != IDLE_ORDER) || 
                 CHECK_LAST_ORDER3())
             {
-                checkOrderDelay = 400;
-                //此处开启计时功能，延时大约在200ms内判断是否正确执行功能，不是的话返回错误
+                checkOrderDelay = 800;
+                //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
-                checkOrderTime = g_MsTicks;
                 ReadCapDropVoltage(lastOrder);  //读取电容跌落电压
+                checkOrderTime = g_MsTicks;
             }
             
             //拒动错误检测
             if(g_MsTicks - checkOrderTime >= checkOrderDelay)
             {
                 CheckOrder(lastOrder);  //检测命令是否执行
-                checkOrderDelay = UINT32_MAX;   //未收到命令不会执行上面那个函数
-                lastOrder = IDLE_ORDER;
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
+                checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
+                checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
+                lastOrder = IDLE_ORDER;     //上一次执行的命令清空
+                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
             }
             ClrWdt();
             
@@ -314,7 +314,7 @@ void YongciMainTask(void)
                 if(changeLedTime == 1500)   //CAN总线关闭错误处理
                 {
                     cn++;
-                    if(cn >= 3) //1500*4ms
+                    if(cn >= 10) //1500*4ms
                     {
                         InitStandardCAN(0, 0);      //初始化CAN模块
                         changeLedTime = 500;   //运行指示灯闪烁间隔为500ms
@@ -332,12 +332,21 @@ void YongciMainTask(void)
         }
 
         //超时检测复位
-        if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
+        if((g_RemoteControlState.overTimeFlage == TRUE) && 
+           (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER))  //判断是否需要超时检测
         {
             if(!CheckIsOverTime())
             {
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                g_RemoteControlState.overTimeFlage = TRUE;  //超时
+                if((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) && 
+                   (g_RemoteControlState.orderId == 0x05))   //判断是否是同步合闸命令
+                {
+                    ON_INT();
+                    TurnOffInt2();
+                    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+                }
+                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
+                g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
+                SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
             }
         }
     }
@@ -480,6 +489,13 @@ void InitSetSwitchState(void)
 
 //各个机构的合闸函数
 //*************************************
+
+/**
+ * 
+ * <p>Function name: [SwitchOnFirstPhase]</p>
+ * <p>Discription: [第一相合闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOnFirstPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
@@ -498,6 +514,12 @@ void SwitchOnFirstPhase(SwitchConfig* pConfig)
 	}
 }
 
+/**
+ * 
+ * <p>Function name: [SwitchOnSecondPhase]</p>
+ * <p>Discription: [第二相合闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOnSecondPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
@@ -516,7 +538,12 @@ void SwitchOnSecondPhase(SwitchConfig* pConfig)
 	}
 }
 
-
+/**
+ * 
+ * <p>Function name: [SwitchOnThirdPhase]</p>
+ * <p>Discription: [第三相合闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOnThirdPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
@@ -540,6 +567,12 @@ void SwitchOnThirdPhase(SwitchConfig* pConfig)
 
 //各个机构的分闸函数
 //*************************************
+/**
+ * 
+ * <p>Function name: [SwitchOffFirstPhase]</p>
+ * <p>Discription: [第一相分闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOffFirstPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
@@ -558,6 +591,12 @@ void SwitchOffFirstPhase(SwitchConfig* pConfig)
 	}
 }
 
+/**
+ * 
+ * <p>Function name: [SwitchOffSecondPhase]</p>
+ * <p>Discription: [第二相分闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOffSecondPhase(SwitchConfig* pConfig)
 {
 	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
@@ -576,7 +615,12 @@ void SwitchOffSecondPhase(SwitchConfig* pConfig)
 	}
 }
 
-
+/**
+ * 
+ * <p>Function name: [SwitchOffThirdPhase]</p>
+ * <p>Discription: [第三相分闸]</p>
+ * @param pConfig 执行该函数功能的指针
+ */
 void SwitchOffThirdPhase(SwitchConfig* pConfig)
 {
     if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令

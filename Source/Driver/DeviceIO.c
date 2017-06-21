@@ -314,8 +314,15 @@ void UpdateLEDIndicateState(uint16_t port, uint8_t state)
  * @param port 从LED,Relay宏定义中选择
  * @param state 开启/关闭 TURN_ON/TURN_OFF
  */
+uint16_t g_lastState = 0;   //继电器上一次执行的状态值
 void UpdateRelayIndicateState(uint16_t port, uint8_t state)
 {
+    if(g_lastState != g_RelayOutState)
+    {
+        g_lastState = g_RelayOutState;    //赋值
+        //将lastState发送出去
+        SendMessage(g_lastState);   //发送继电器数据状态
+    }
     //开启状态
     if (state == TURN_ON)
     {

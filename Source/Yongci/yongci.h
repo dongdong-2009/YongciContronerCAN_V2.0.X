@@ -75,18 +75,6 @@ extern "C" {
 #define CHECK_3_HE_STATE  0x38  //机构3合闸状态
 #define CHECK_3_FEN_STATE 0x39  //机构3分闸状态
     
-//存储合闸、分闸次数的EEPROM地址
-//*********************************************
-#define JG1_HE_COUNT_ADDRESS  0x007FF002
-#define JG1_FEN_COUNT_ADDRESS 0x007FF004
-    
-#define JG2_HE_COUNT_ADDRESS  0x007FF006
-#define JG2_FEN_COUNT_ADDRESS 0x007FF008
-    
-#define JG3_HE_COUNT_ADDRESS  0x007FF00A
-#define JG3_FEN_COUNT_ADDRESS 0x007FF00C
-//*********************************************
-    
 #define SWITCH_ONE  0   //第一个动作的机构
 #define SWITCH_TWO  1   //第二个动作的机构
 #define SWITCH_THREE 2  //第三个动作的机构

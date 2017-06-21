@@ -183,10 +183,11 @@ void CheckVoltage(void)
  */
 void ReadCapDropVoltage(uint8_t lastOrder)
 {
-    if(lastOrder == IDLE_ORDER && g_RemoteControlState.lastReceiveOrder != IDLE_ORDER)
+    //远方与就地命令的转换
+    if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))  //远端遥控与就地遥控
     {
         lastOrder = g_RemoteControlState.lastReceiveOrder;
-    }    
+    }
     switch(lastOrder)
     {
         case CHECK_Z_FEN_ORDER:
@@ -218,9 +219,12 @@ void ReadCapDropVoltage(uint8_t lastOrder)
         case CHECK_3_FEN_ORDER:
         case CHECK_3_HE_ORDER:
         {
-            SoftSampleOnce();
-            ClrWdt();
-            CAP3_DROP_VOLTAGE();
+            if(CAP3_STATE)
+            {
+                SoftSampleOnce();
+                ClrWdt();
+                CAP3_DROP_VOLTAGE();
+            }
             break;
         }
         default:
