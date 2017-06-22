@@ -389,7 +389,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             //分合位错误
             if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
                (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-               CHECK_FENZHA_STATE3())
+               (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
                 return;
@@ -1105,10 +1105,14 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState1 != CHECK_1_HE_STATE || 
                g_SystemState.heFenState2 != CHECK_2_HE_STATE || 
-               CHECK_HEZHA_STATE3())
+               g_SystemState.heFenState3 != CHECK_3_HE_STATE)
             {
                 SendErrorFrame(CHECK_Z_HE_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1116,10 +1120,14 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE || 
                g_SystemState.heFenState2 != CHECK_2_FEN_STATE || 
-               CHECK_FENZHA_STATE3())
+               g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
             {
                 SendErrorFrame(CHECK_Z_FEN_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1128,7 +1136,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
             {
                 SendErrorFrame(CHECK_1_HE_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1137,7 +1149,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
             {
                 SendErrorFrame(CHECK_1_FEN_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1146,7 +1162,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
             {
                 SendErrorFrame(CHECK_2_HE_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1155,7 +1175,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
             {
                 SendErrorFrame(CHECK_2_FEN_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1164,7 +1188,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState3 != CHECK_3_HE_STATE && CAP3_STATE)
             {
                 SendErrorFrame(CHECK_3_HE_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }
@@ -1173,7 +1201,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE && CAP3_STATE)
             {
                 SendErrorFrame(CHECK_3_FEN_ORDER , REFUSE_ERROR);
-                changeLedTime = 100;
+                g_changeLedTime = 100;
+            }
+            else
+            {
+                g_changeLedTime = 500;
             }
             break;
         }

@@ -23,7 +23,7 @@ uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生�
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
-uint32_t _PERSISTENT changeLedTime; //改变LED灯闪烁时间 (ms)
+uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -307,17 +307,17 @@ void YongciMainTask(void)
             }
             ClrWdt();
             //运行指示灯
-            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= changeLedTime)
+            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
             {
                 UpdateLEDIndicateState(RUN_LED,state);
                 state = ~state;
-                if(changeLedTime == 1500)   //CAN总线关闭错误处理
+                if(g_changeLedTime == 1500)   //CAN总线关闭错误处理
                 {
                     cn++;
                     if(cn >= 10) //1500*4ms
                     {
                         InitStandardCAN(0, 0);      //初始化CAN模块
-                        changeLedTime = 500;   //运行指示灯闪烁间隔为500ms
+                        g_changeLedTime = 500;   //运行指示灯闪烁间隔为500ms
                     }
                 }
                 g_SysTimeStamp.ChangeLedTime = g_MsTicks;
@@ -431,7 +431,7 @@ void YongciFirstInit(void)
     g_SysTimeStamp.ScanTime = g_MsTicks;        //对于时间状态量的初始化
     g_SysTimeStamp.SendDataTime = g_MsTicks;    //对于时间状态量的初始化
     
-    changeLedTime = 500;    //初始化值为500ms
+    g_changeLedTime = 500;    //初始化值为500ms
     
     //远方控制标识位初始化
     g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;

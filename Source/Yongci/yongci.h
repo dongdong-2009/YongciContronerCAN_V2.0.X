@@ -116,7 +116,7 @@ void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSen
 
 extern frameRtu sendFrame, recvFrame;
 extern uint8_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
-extern uint32_t _PERSISTENT changeLedTime; //改变LED灯闪烁时间 (ms)
+extern uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
 
 #ifdef	__cplusplus
 }

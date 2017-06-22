@@ -162,7 +162,7 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 //***************************************************************************************************
 
 
-#define KEY_COUNT_DOWN 25   // *2ms
+#define KEY_COUNT_DOWN 30   // *2ms
 uint8_t g_timeCount[22] = {0};
 uint8_t g_lockflag[22] = {0}; 
 
@@ -474,8 +474,6 @@ void DsplaySwitchState(void)
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_OFF);
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_OFF);
     }    
-    changeLedTime = 500;
-    
 }
 /**
  * 
@@ -498,15 +496,11 @@ void SwitchScan(void)
                 ClrWdt();
                 g_lockflag[0] = 1;
                 g_timeCount[0] = 0;
-                if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-                   (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-                   CHECK_FENZHA_STATE3())
+                if((g_SystemState.heFenState1 == CHECK_1_FEN_STATE) || 
+                   (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) || 
+                   (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
                 {
                     g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
-                }
-                else
-                {
-                    return;
                 }
             }
         }
@@ -530,15 +524,11 @@ void SwitchScan(void)
                 ClrWdt();
                 g_lockflag[1] = 1;
                 g_timeCount[1] = 0;
-                if((g_SystemState.heFenState1 != CHECK_1_HE_STATE) || 
-                   (g_SystemState.heFenState2 != CHECK_2_HE_STATE) || 
-                   CHECK_HEZHA_STATE3())
+                if((g_SystemState.heFenState1 == CHECK_1_HE_STATE) || 
+                   (g_SystemState.heFenState2 == CHECK_2_HE_STATE) || 
+                   (g_SystemState.heFenState3 == CHECK_3_HE_STATE) )
                 {
                     g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
-                }
-                else
-                {
-                    return;
                 }
             }
         }
@@ -562,13 +552,9 @@ void SwitchScan(void)
                 ClrWdt();
                 g_lockflag[2] = 1;
                 g_timeCount[2] = 0;
-                if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+                if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE)
                 {
                     g_Order = CHECK_1_HE_ORDER;     //机构1合闸命令
-                }
-                else
-                {
-                    return;
                 }
             }
         }
@@ -593,13 +579,9 @@ void SwitchScan(void)
                 ClrWdt();
                 g_lockflag[3] = 1;
                 g_timeCount[3] = 0;
-                if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+                if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)
                 {
                     g_Order = CHECK_1_FEN_ORDER;     //机构1分闸命令
-                }
-                else
-                {
-                    return;
                 }
             }
         }
@@ -624,13 +606,9 @@ void SwitchScan(void)
                 ClrWdt();
                 g_lockflag[4] = 1;
                 g_timeCount[4] = 0;
-                if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE)
                 {
                     g_Order = CHECK_2_HE_ORDER;     //机构2合闸命令
-                }
-                else
-                {
-                    return;
                 }
             }
         }
@@ -654,14 +632,10 @@ void SwitchScan(void)
             {
                 g_lockflag[5] = 1;
                 g_timeCount[5] = 0;
-                if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)
                 {
                     g_Order = CHECK_2_FEN_ORDER;     //机构2分闸命令
-                }
-                else
-                {
-                    return;
-                }                
+                }          
             }
         }
         else if(!FENZHA2_CONDITION())
@@ -686,14 +660,10 @@ void SwitchScan(void)
                     ClrWdt();
                     g_lockflag[6] = 1;
                     g_timeCount[6] = 0;
-                    if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                    if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE)
                     {
                         g_Order = CHECK_3_HE_ORDER;     //机构3合闸命令
-                    }
-                    else
-                    {
-                        return;
-                    }                    
+                    }                
                 }
             }
             else if(!HEZHA3_CONDITION())
@@ -716,13 +686,9 @@ void SwitchScan(void)
                 {
                     g_lockflag[7] = 1;
                     g_timeCount[7] = 0;
-                    if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                    if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)
                     {
                         g_Order = CHECK_3_FEN_ORDER;     //机构3分闸命令
-                    }
-                    else
-                    {
-                        return;
                     }
                 }
             }

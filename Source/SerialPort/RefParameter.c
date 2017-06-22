@@ -622,7 +622,7 @@ void RefParameterInit(void)
     error = AccumulateSumVerify();  //累加和校验    
     if(error)
     {
-        changeLedTime = 100;
+        g_changeLedTime = 100;
         //系统参数上下限
         g_SystemLimit.workVoltage.upper = 6.0f;
         g_SystemLimit.workVoltage.down =  2.7f;

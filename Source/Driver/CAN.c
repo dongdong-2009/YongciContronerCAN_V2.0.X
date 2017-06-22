@@ -590,7 +590,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //关闭错误中断
-        changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
+        g_changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
     
