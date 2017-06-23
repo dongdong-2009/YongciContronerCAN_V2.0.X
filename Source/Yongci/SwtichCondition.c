@@ -184,6 +184,10 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState()))
             {
+                if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+                {
+                    return 0xff;
+                }
                 TongBuHeZha();
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x01;
@@ -483,7 +487,7 @@ void DsplaySwitchState(void)
 void SwitchScan(void)
 {
     g_kairuValue = ReHC74165();
-    if(g_SystemState.yuanBenState == BEN_STATE)
+    if(g_lockUp == OFF_LOCK)
     {
         ClrWdt();
         //同时合闸信号检测
@@ -501,6 +505,7 @@ void SwitchScan(void)
                    (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
                 {
                     g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
+                    OnLock();   //上锁
                 }
             }
         }
@@ -529,6 +534,7 @@ void SwitchScan(void)
                    (g_SystemState.heFenState3 == CHECK_3_HE_STATE) )
                 {
                     g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
+                    OnLock();   //上锁
                 }
             }
         }
@@ -555,6 +561,7 @@ void SwitchScan(void)
                 if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE)
                 {
                     g_Order = CHECK_1_HE_ORDER;     //机构1合闸命令
+                    OnLock();   //上锁
                 }
             }
         }
@@ -582,6 +589,7 @@ void SwitchScan(void)
                 if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)
                 {
                     g_Order = CHECK_1_FEN_ORDER;     //机构1分闸命令
+                    OnLock();   //上锁
                 }
             }
         }
@@ -609,6 +617,7 @@ void SwitchScan(void)
                 if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE)
                 {
                     g_Order = CHECK_2_HE_ORDER;     //机构2合闸命令
+                    OnLock();   //上锁
                 }
             }
         }
@@ -635,6 +644,7 @@ void SwitchScan(void)
                 if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)
                 {
                     g_Order = CHECK_2_FEN_ORDER;     //机构2分闸命令
+                    OnLock();   //上锁
                 }          
             }
         }
@@ -663,6 +673,7 @@ void SwitchScan(void)
                     if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE)
                     {
                         g_Order = CHECK_3_HE_ORDER;     //机构3合闸命令
+                        OnLock();   //上锁
                     }                
                 }
             }
@@ -689,6 +700,7 @@ void SwitchScan(void)
                     if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)
                     {
                         g_Order = CHECK_3_FEN_ORDER;     //机构3分闸命令
+                        OnLock();   //上锁
                     }
                 }
             }

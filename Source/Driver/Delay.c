@@ -32,7 +32,7 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
     if (UINT32_MAX - delayTime < startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
         ClrWdt();
-        if( g_MsTicks < startTime)//先判断是否小于startTime
+        if(g_MsTicks < startTime)//先判断是否小于startTime
         {
             ClrWdt();
             if (g_MsTicks >= (delayTime + startTime))
@@ -55,6 +55,19 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 
 /**
  * 
+ * <p>Function name: [OverflowDetection]</p>
+ * <p>Discription: [检查系统计数是否会溢出]</p>
+ */
+inline void OverflowDetection(uint32_t delayTime)
+{
+    if(UINT32_MAX - g_SysTimeStamp.TickTime <= delayTime) //需要延时等待的时间是否会使系统时钟计数溢出
+    {
+        g_SysTimeStamp.TickTime = 0;  //会溢出则先进行清零
+    }
+}
+
+/**
+ * 
  * <p>Function name: [Delay_ms]</p>
  * <p>Discription: [delays number of tick Systicks ]</p>
  * @param ms 延时时间ms
@@ -62,9 +75,10 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 inline void Delay_ms(uint32_t dlyTicks)
 {
     uint32_t curTicks;
-    curTicks = g_MsTicks;
+    OverflowDetection(dlyTicks);    //溢出检测
+    curTicks = g_SysTimeStamp.TickTime;
     ClrWdt();
-    while ((g_MsTicks - curTicks) < dlyTicks)
+    while ((g_SysTimeStamp.TickTime - curTicks) < dlyTicks)
     {
         ClrWdt();
     }
@@ -78,5 +92,6 @@ inline void Delay_ms(uint32_t dlyTicks)
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
     IFS0bits.T2IF = 0;
-    g_MsTicks++;                        /* increment counter necessary in Delay() */  
+    g_MsTicks ++;                        /* increment counter necessary in Delay() */  
+    g_SysTimeStamp.TickTime ++;
 }

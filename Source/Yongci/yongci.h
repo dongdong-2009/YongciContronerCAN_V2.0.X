@@ -79,6 +79,9 @@ extern "C" {
 #define SWITCH_TWO  1   //第二个动作的机构
 #define SWITCH_THREE 2  //第三个动作的机构
 
+#define ON_LOCK     0xAA55    
+#define OFF_LOCK    0x0000
+
  /**
   * 分合闸控制
   */
@@ -90,7 +93,7 @@ typedef struct SynchroSwitchConfig
 	uint16_t  SwitchOnTime;   //合闸动作时间
 	uint16_t  SwitchOffTime;	//分闸动作时间
 	uint16_t  OffestTime;	//偏移时间
-	uint32_t  SysTime;	//当前的系统时间
+	uint32_t  SysTime;      //当前的系统时间
 	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
 	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
@@ -113,10 +116,14 @@ void HEZHA_Action(uint8_t index,uint16_t time);
 void FENZHA_Action(uint8_t index,uint16_t time);
 void TongBuHeZha(void);
 void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
+void OnLock(void);
+void OffLock(void);
 
 extern frameRtu sendFrame, recvFrame;
 extern uint8_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 extern uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
+extern uint16_t _PERSISTENT g_lockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
+
 
 #ifdef	__cplusplus
 }

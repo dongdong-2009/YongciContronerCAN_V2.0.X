@@ -24,6 +24,7 @@ SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
 uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
+uint16_t _PERSISTENT g_lockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -80,11 +81,33 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 
 /**
  * 
+ * <p>Function name: [OnLock]</p>
+ * <p>Discription: [上锁]</p>
+ */
+inline void OnLock(void)
+{
+    g_lockUp = ON_LOCK;    //上锁
+    g_lockUp = ON_LOCK;    //上锁
+}
+
+/**
+ * 
+ * <p>Function name: [OffLock]</p>
+ * <p>Discription: [解锁状态]</p>
+ */
+inline void OffLock(void)
+{
+    g_lockUp = OFF_LOCK;    //解锁
+    g_lockUp = OFF_LOCK;    //解锁
+}
+/**
+ * 
  * <p>Function name: [TongBuHeZha]</p>
  * <p>Discription: [对机构执行同步合闸操作]</p>
  */
 void TongBuHeZha(void)
 {
+    OFF_INT();
 	g_SetSwitchState[g_Index[1].indexLoop].State = REDAY_STATE;
     g_SetSwitchState[g_Index[1].indexLoop].Order = IDLE_ORDER;
 	g_SetSwitchState[g_Index[1].indexLoop].SwitchOnTime = g_Index[1].onTime;
@@ -117,6 +140,11 @@ void TongBuHeZha(void)
  */
 void HEZHA_Action(uint8_t index,uint16_t time)
 {
+    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    {
+        return;
+    }
+    OFF_INT();
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = HE_ORDER;
@@ -136,6 +164,11 @@ void HEZHA_Action(uint8_t index,uint16_t time)
  */
 void FENZHA_Action(uint8_t index,uint16_t time)
 {
+    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行分闸
+    {
+        return;
+    }
+    OFF_INT();
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = FEN_ORDER;
@@ -166,11 +199,13 @@ void YongciMainTask(void)
         if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
         {
             ClrWdt();
+            OFF_INT();
             g_SetSwitchState[0].SwitchOn(g_SetSwitchState);
         }
         else if((g_SetSwitchState[0].Order == FEN_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
         {
             ClrWdt();
+            OFF_INT();
             g_SetSwitchState[0].SwitchOff(g_SetSwitchState);
         }
         else    //防止持续合闸或者分闸
@@ -182,11 +217,13 @@ void YongciMainTask(void)
         if((g_SetSwitchState[1].Order == HE_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
         {
             ClrWdt();
+            OFF_INT();
             g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
         }
         else if((g_SetSwitchState[1].Order == FEN_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
         {
             ClrWdt();
+            OFF_INT();
             g_SetSwitchState[1].SwitchOff(g_SetSwitchState + 1);
         }
         else    //防止持续合闸或者分闸
@@ -200,11 +237,13 @@ void YongciMainTask(void)
             if((g_SetSwitchState[2].Order == HE_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
             {
                 ClrWdt();
+                OFF_INT();
                 g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
             }
             else if((g_SetSwitchState[2].Order == FEN_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
             {
                 ClrWdt();
+                OFF_INT();
                 g_SetSwitchState[2].SwitchOff(g_SetSwitchState + 2);
             }
             else    //防止持续合闸或者分闸
@@ -222,21 +261,23 @@ void YongciMainTask(void)
                 (g_SetSwitchState[1].LastOrder != IDLE_ORDER) || 
                 CHECK_LAST_ORDER3())
             {
-                checkOrderDelay = 800;
+                ON_INT();
+                checkOrderDelay = 500;
                 //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
                 ReadCapDropVoltage(lastOrder);  //读取电容跌落电压
-                checkOrderTime = g_MsTicks;
+                checkOrderTime = g_SysTimeStamp.TickTime;
             }
             
             //拒动错误检测
-            if(g_MsTicks - checkOrderTime >= checkOrderDelay)
+            if(g_SysTimeStamp.TickTime - checkOrderTime >= checkOrderDelay)
             {
                 CheckOrder(lastOrder);  //检测命令是否执行
                 checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
                 checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
                 lastOrder = IDLE_ORDER;     //上一次执行的命令清空
                 g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
+                OffLock();  //解锁
             }
             ClrWdt();
             
@@ -280,11 +321,11 @@ void YongciMainTask(void)
             //检测是否欠电压， 并更新显示
             CheckVoltage();       
             
-            if(g_MsTicks - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
+            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
             {
                 SwitchScan();   //执行按键扫描程序
                 ClrWdt();
-                g_SysTimeStamp.ScanTime = g_MsTicks;
+                g_SysTimeStamp.ScanTime = g_SysTimeStamp.TickTime;
             }
             if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
             {
@@ -293,21 +334,18 @@ void YongciMainTask(void)
                 continue;
             }
             
-            if((g_MsTicks - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
+            if((g_SysTimeStamp.TickTime - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
             {
                 ClrWdt();
-                UpdataState();  //更新状态
-                if(g_SuddenState.SuddenFlag)
-                {
-                    //更新机构的状态显示
-                    DsplaySwitchState(); 
-                }
+                UpdataState();  //更新状态                
+                DsplaySwitchState();    //更新机构的状态显示
                 g_SuddenState.SuddenFlag = FALSE;  //Clear
-                g_SysTimeStamp.SendDataTime = g_MsTicks;
+                OverflowDetection(SEND_TIME);   //增加溢出判断
+                g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
             }
             ClrWdt();
             //运行指示灯
-            if(g_MsTicks - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
+            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
             {
                 UpdateLEDIndicateState(RUN_LED,state);
                 state = ~state;
@@ -320,33 +358,37 @@ void YongciMainTask(void)
                         g_changeLedTime = 500;   //运行指示灯闪烁间隔为500ms
                     }
                 }
-                g_SysTimeStamp.ChangeLedTime = g_MsTicks;
+                g_SysTimeStamp.ChangeLedTime = g_SysTimeStamp.TickTime;
             }
+            
             //获取温度数据
-            if(g_MsTicks - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
+            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
             {
-                g_SysTimeStamp.GetTempTime = g_MsTicks;
+                g_SysTimeStamp.GetTempTime = g_SysTimeStamp.TickTime;
                 ClrWdt();
                 g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
             }
-        }
-
-        //超时检测复位
-        if((g_RemoteControlState.overTimeFlage == TRUE) && 
-           (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER))  //判断是否需要超时检测
-        {
-            if(!CheckIsOverTime())
+            
+            //超时检测复位
+            if((g_RemoteControlState.overTimeFlage == TRUE) && 
+               (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
+               (g_RemoteControlState.orderId <= 5) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
             {
-                if((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) && 
-                   (g_RemoteControlState.orderId == 0x05))   //判断是否是同步合闸命令
+                if(!CheckIsOverTime())
                 {
-                    ON_INT();
-                    TurnOffInt2();
-                    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+                    if((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) && 
+                       (g_RemoteControlState.orderId == 0x05))   //判断是否是同步合闸命令
+                    {
+                        ON_INT();
+                        TurnOffInt2();
+                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+                    }
+                    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
+                    g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
+                    SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
+                    g_RemoteControlState.orderId = 0;   //Clear
+                    OffLock();  //解锁
                 }
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
-                g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
-                SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
             }
         }
     }
@@ -362,6 +404,8 @@ void YongciFirstInit(void)
 {
     uint8_t index = 0;
     ClrWdt();
+    
+    g_lockUp = OFF_LOCK;    //处于解锁状态
     
     //IGBT引脚
     //A
@@ -437,6 +481,8 @@ void YongciFirstInit(void)
     g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
     g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
     g_RemoteControlState.overTimeFlage = FALSE;
+    
+    OffLock();  //解锁，可以检测
 }  
 
 /**

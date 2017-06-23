@@ -77,6 +77,10 @@ void ExecuteFunctioncode(frameRtu* pRtu)
             {
                 if(g_SystemState.workMode == WORK_STATE)
                 {
+                    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+                    {
+                        return;
+                    }
                     TongBuHeZha();
                     ClrWdt();
                     return ;
@@ -196,6 +200,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
             {                
                 GetLoopSwitch(pReciveFrame);
+                OnLock();   //上锁
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
                     SendData(pSendFrame);
@@ -267,6 +272,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     default :
                     {
                         SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                        OffLock();  //解锁
                         return;
                         break;
                     }
@@ -295,9 +301,10 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
             }
-            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次合闸
+            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次分闸
             {
                 GetLoopSwitch(pReciveFrame);
+                OnLock();   //上锁
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
                     SendData(pSendFrame);
@@ -308,6 +315,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 ClrWdt();
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
                 SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
+                OffLock();  //解锁
             }
             break;
         }
@@ -368,6 +376,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     default :
                     {
                         SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                        OffLock();  //解锁
                         return;
                         break;
                     }
@@ -379,6 +388,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+                OffLock();  //解锁
             }
             break;
         }        
