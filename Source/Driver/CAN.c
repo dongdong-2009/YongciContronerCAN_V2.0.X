@@ -595,8 +595,10 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         return;
     }
     
+    UpdateLEDIndicateState(HEWEI3_LED,TURN_ON);    //测试
     if(C2INTFbits.ERRIF == 1)
     {
+        UpdateLEDIndicateState(CAP3_LED,TURN_ON);    //测试
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {

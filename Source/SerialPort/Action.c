@@ -21,7 +21,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame);
 extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
-SystemSuddenState g_SuddenState;    //需要上传的机构状态值
+SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
 
 /**************************************************
  *函数名： SendAckMesssage()
@@ -1118,11 +1118,11 @@ void CheckOrder(uint8_t lastOrder)
                g_SystemState.heFenState3 != CHECK_3_HE_STATE)
             {
                 SendErrorFrame(CHECK_Z_HE_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = Z_HE_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1133,11 +1133,11 @@ void CheckOrder(uint8_t lastOrder)
                g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
             {
                 SendErrorFrame(CHECK_Z_FEN_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = Z_FEN_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1146,11 +1146,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
             {
                 SendErrorFrame(CHECK_1_HE_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU1_HE_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1159,11 +1159,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
             {
                 SendErrorFrame(CHECK_1_FEN_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU1_FEN_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1172,11 +1172,11 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
             {
                 SendErrorFrame(CHECK_2_HE_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU2_HE_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1185,37 +1185,45 @@ void CheckOrder(uint8_t lastOrder)
             if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
             {
                 SendErrorFrame(CHECK_2_FEN_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU2_FEN_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
         case CHECK_3_HE_ORDER:
         {
-            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE && CAP3_STATE)
+            if(CAP3_STATE == 0x00)
+            {
+                return;
+            }
+            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
             {
                 SendErrorFrame(CHECK_3_HE_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
         case CHECK_3_FEN_ORDER:
         {
-            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE && CAP3_STATE)
+            if(CAP3_STATE == 0x00)
+            {
+                return;
+            }
+            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
             {
                 SendErrorFrame(CHECK_3_FEN_ORDER , REFUSE_ERROR);
-                g_changeLedTime = 100;
+                g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
             }
             else
             {
-                g_changeLedTime = 500;
+                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
             }
             break;
         }
@@ -1223,6 +1231,14 @@ void CheckOrder(uint8_t lastOrder)
         {
             return;
         }
+    }
+    if(g_SuddenState.RefuseAction != FALSE)
+    {
+        g_changeLedTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+    }
+    else
+    {
+        g_changeLedTime = 500;  //正常状态下指示灯闪烁的间隔
     }
     g_SuddenState.SuddenFlag = TRUE;  //发送突发错误
 }

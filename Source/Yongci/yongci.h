@@ -75,6 +75,20 @@ extern "C" {
 #define CHECK_3_HE_STATE  0x38  //机构3合闸状态
 #define CHECK_3_FEN_STATE 0x39  //机构3分闸状态
     
+//************************************************
+//拒动错误值
+#define Z_HE_ERROR      0xB2    //总合拒动错误
+#define Z_FEN_ERROR     0xB3    //总分拒动错误
+#define JIGOU1_HE_ERROR     0xB4  //机构1合位错误
+#define JIGOU1_FEN_ERROR    0xB5  //机构1分位错误
+    
+#define JIGOU2_HE_ERROR     0xB6  //机构2合位错误
+#define JIGOU2_FEN_ERROR    0xB7  //机构2分位错误
+    
+#define JIGOU3_HE_ERROR     0xB8  //机构3合位错误
+#define JIGOU3_FEN_ERROR    0xB9  //机构3分位错误
+//************************************************
+    
 #define SWITCH_ONE  0   //第一个动作的机构
 #define SWITCH_TWO  1   //第二个动作的机构
 #define SWITCH_THREE 2  //第三个动作的机构

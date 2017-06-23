@@ -16,6 +16,7 @@
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
 #define SCAN_TIME   2           //按键扫描间隔时间
 #define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
+#define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
 
 frameRtu sendFrame, recvFrame;
 uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
@@ -107,7 +108,21 @@ inline void OffLock(void)
  */
 void TongBuHeZha(void)
 {
-    OFF_INT();
+    //不允许多次执行相同/不同的操作
+    if((g_SetSwitchState[0].State != IDLE_ORDER) || (g_SetSwitchState[0].Order != IDLE_ORDER) || 
+       (g_SetSwitchState[0].LastOrder != IDLE_ORDER))
+    {
+        g_Order = IDLE_ORDER;    //将命令清零
+        return ;
+    }
+    //不允许多次执行相同/不同的操作
+    if((g_SetSwitchState[1].State != IDLE_ORDER) || (g_SetSwitchState[1].Order != IDLE_ORDER) || 
+       (g_SetSwitchState[1].LastOrder != IDLE_ORDER))
+    {
+        g_Order = IDLE_ORDER;    //将命令清零
+        return ;
+    }
+    OFF_INT();  //关闭通信中断
 	g_SetSwitchState[g_Index[1].indexLoop].State = REDAY_STATE;
     g_SetSwitchState[g_Index[1].indexLoop].Order = IDLE_ORDER;
 	g_SetSwitchState[g_Index[1].indexLoop].SwitchOnTime = g_Index[1].onTime;
@@ -116,6 +131,13 @@ void TongBuHeZha(void)
     
     if(CAP3_STATE)
     {
+        //不允许多次执行相同/不同的操作
+        if((g_SetSwitchState[2].State != IDLE_ORDER) || (g_SetSwitchState[2].Order != IDLE_ORDER) || 
+           (g_SetSwitchState[2].LastOrder != IDLE_ORDER))
+        {
+            g_Order = IDLE_ORDER;    //将命令清零
+            return ;
+        }
         g_SetSwitchState[g_Index[2].indexLoop].State = REDAY_STATE;
         g_SetSwitchState[g_Index[2].indexLoop].Order = IDLE_ORDER;
         g_SetSwitchState[g_Index[2].indexLoop].SwitchOnTime = g_Index[2].onTime;
@@ -144,7 +166,14 @@ void HEZHA_Action(uint8_t index,uint16_t time)
     {
         return;
     }
-    OFF_INT();
+    //不允许多次执行相同/不同的操作
+    if((g_SetSwitchState[index].State != IDLE_ORDER) || (g_SetSwitchState[index].Order != IDLE_ORDER) || 
+       (g_SetSwitchState[index].LastOrder != IDLE_ORDER))
+    {
+        g_Order = IDLE_ORDER;    //将命令清零
+        return ;
+    }
+    OFF_INT();  //关闭通信中断
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = HE_ORDER;
@@ -168,7 +197,14 @@ void FENZHA_Action(uint8_t index,uint16_t time)
     {
         return;
     }
-    OFF_INT();
+    //不允许多次执行相同/不同的操作
+    if((g_SetSwitchState[index].State != IDLE_ORDER) || (g_SetSwitchState[index].Order != IDLE_ORDER) || 
+       (g_SetSwitchState[index].LastOrder != IDLE_ORDER))
+    {
+        g_Order = IDLE_ORDER;    //将命令清零
+        return ;
+    }
+    OFF_INT();  //关闭通信中断
     ClrWdt();
     g_SetSwitchState[index].State = RUN_STATE;
     g_SetSwitchState[index].Order = FEN_ORDER;
@@ -199,13 +235,13 @@ void YongciMainTask(void)
         if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
         {
             ClrWdt();
-            OFF_INT();
+            OFF_INT();  //刷新关闭通信中断
             g_SetSwitchState[0].SwitchOn(g_SetSwitchState);
         }
         else if((g_SetSwitchState[0].Order == FEN_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
         {
             ClrWdt();
-            OFF_INT();
+            OFF_INT();  //刷新关闭通信中断
             g_SetSwitchState[0].SwitchOff(g_SetSwitchState);
         }
         else    //防止持续合闸或者分闸
@@ -217,13 +253,13 @@ void YongciMainTask(void)
         if((g_SetSwitchState[1].Order == HE_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
         {
             ClrWdt();
-            OFF_INT();
+            OFF_INT();  //刷新关闭通信中断
             g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
         }
         else if((g_SetSwitchState[1].Order == FEN_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
         {
             ClrWdt();
-            OFF_INT();
+            OFF_INT();  //刷新关闭通信中断
             g_SetSwitchState[1].SwitchOff(g_SetSwitchState + 1);
         }
         else    //防止持续合闸或者分闸
@@ -237,13 +273,13 @@ void YongciMainTask(void)
             if((g_SetSwitchState[2].Order == HE_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
             {
                 ClrWdt();
-                OFF_INT();
+                OFF_INT();  //刷新关闭通信中断
                 g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
             }
             else if((g_SetSwitchState[2].Order == FEN_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
             {
                 ClrWdt();
-                OFF_INT();
+                OFF_INT();  //刷新关闭通信中断
                 g_SetSwitchState[2].SwitchOff(g_SetSwitchState + 2);
             }
             else    //防止持续合闸或者分闸
@@ -262,11 +298,15 @@ void YongciMainTask(void)
                 CHECK_LAST_ORDER3())
             {
                 ON_INT();
-                checkOrderDelay = 500;
+                checkOrderDelay = REFUSE_ACTION;
                 //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
                 ReadCapDropVoltage(lastOrder);  //读取电容跌落电压
                 checkOrderTime = g_SysTimeStamp.TickTime;
+                //Clear Flag
+                g_SetSwitchState[0].LastOrder = IDLE_ORDER;
+                g_SetSwitchState[1].LastOrder = IDLE_ORDER;
+                g_SetSwitchState[2].LastOrder = IDLE_ORDER;
             }
             
             //拒动错误检测
@@ -288,8 +328,6 @@ void YongciMainTask(void)
             RESET_CURRENT_A();
             RESET_CURRENT_B();
             RESET_CURRENT_C();
-
-            //注意更新计数函数的位置，防止在执行远方操作时将通信中断全部关闭
             
             g_SetSwitchState[0].Order = IDLE_ORDER; //清零
             g_SetSwitchState[1].Order = IDLE_ORDER;
@@ -339,6 +377,9 @@ void YongciMainTask(void)
                 ClrWdt();
                 UpdataState();  //更新状态                
                 DsplaySwitchState();    //更新机构的状态显示
+                UpdateLEDIndicateState(FENWEI3_LED,TURN_OFF);    //测试
+                UpdateLEDIndicateState(HEWEI3_LED,TURN_OFF);    //测试
+                UpdateLEDIndicateState(CAP3_LED,TURN_OFF);    //测试
                 g_SuddenState.SuddenFlag = FALSE;  //Clear
                 OverflowDetection(SEND_TIME);   //增加溢出判断
                 g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
@@ -435,21 +476,6 @@ void YongciFirstInit(void)
     ClrWdt();
     
     g_Order = IDLE_ORDER;   //初始化
-//****************************************
-//突发状态量更新
-    g_SuddenState.CapState1 = 0;
-    g_SuddenState.CapState2 = 0;
-    g_SuddenState.CapState3 = 0;
-    g_SuddenState.ExecuteOrder1 = 0;
-    g_SuddenState.ExecuteOrder2 = 0;
-    g_SuddenState.ExecuteOrder3 = 0;
-    g_SuddenState.SuddenFlag = TRUE;
-    g_SuddenState.SwitchState1 = 0;
-    g_SuddenState.SwitchState2 = 0;
-    g_SuddenState.SwitchState3 = 0;
-    ClrWdt();
-//****************************************
-    
     //默认状态下的同步合闸顺序
     index = 0;
     g_Index[index].indexLoop = 0;
@@ -483,6 +509,23 @@ void YongciFirstInit(void)
     g_RemoteControlState.overTimeFlage = FALSE;
     
     OffLock();  //解锁，可以检测
+    
+    //****************************************
+    //突发状态量更新初始化
+    g_SuddenState.CapState1 = 0;
+    g_SuddenState.CapState2 = 0;
+    g_SuddenState.CapState3 = 0;
+    g_SuddenState.ExecuteOrder1 = 0;
+    g_SuddenState.ExecuteOrder2 = 0;
+    g_SuddenState.ExecuteOrder3 = 0;
+    ClrWdt();
+    g_SuddenState.SuddenFlag = TRUE;
+    g_SuddenState.SwitchState1 = 0;
+    g_SuddenState.SwitchState2 = 0;
+    g_SuddenState.SwitchState3 = 0;
+    g_SuddenState.RefuseAction = FALSE;
+    //****************************************
+    
 }  
 
 /**

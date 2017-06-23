@@ -64,6 +64,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    
 typedef struct SaveSystemSuddenState
 {
 	uint8_t SwitchState1;		//开关状态
@@ -77,9 +78,11 @@ typedef struct SaveSystemSuddenState
 	uint8_t CapState3;		//电容状态
 	uint8_t SuddenFlag;		//更新状态
     
-    uint8_t Cap1Error;    //电容电压错误
-    uint8_t Cap2Error;    //电容电压错误
-    uint8_t Cap3Error;    //电容电压错误
+    uint8_t Cap1Error;    //电容电压状态
+    uint8_t Cap2Error;    //电容电压状态
+    uint8_t Cap3Error;    //电容电压状态
+    
+    uint8_t RefuseAction;   //拒动状态
 }SystemSuddenState;
 
 typedef struct RemoteControl

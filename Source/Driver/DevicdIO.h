@@ -228,13 +228,13 @@
 #define ERROR2_LED  LED5_ON //故障指示灯1
 #define ERROR3_LED  LED4_ON //故障指示灯1
 
-#define HEWEI1_LED  LED9_ON //机构1合位指示灯
-#define HEWEI2_LED  LED8_ON //机构2合位指示灯
-#define HEWEI3_LED  LED7_ON //机构3合位指示灯
+#define HEWEI1_LED  LED12_ON    //机构1合位指示灯
+#define HEWEI2_LED  LED11_ON    //机构2合位指示灯
+#define HEWEI3_LED  LED10_ON    //机构3合位指示灯
 
-#define FENWEI1_LED  LED12_ON   //机构1分位指示灯
-#define FENWEI2_LED  LED11_ON   //机构2分位指示灯
-#define FENWEI3_LED  LED10_ON   //机构3分位指示灯
+#define FENWEI1_LED  LED9_ON    //机构1分位指示灯
+#define FENWEI2_LED  LED8_ON    //机构2分位指示灯
+#define FENWEI3_LED  LED7_ON    //机构3分位指示灯
 
 #define Z_HEWEI_LED  LED14_ON   //总的合位指示灯
 #define Z_FENWEI_LED LED15_ON   //总的分位指示灯

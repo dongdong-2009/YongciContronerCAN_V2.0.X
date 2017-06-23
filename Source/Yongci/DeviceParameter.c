@@ -14,6 +14,7 @@
 #include "DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
 
+#define MARGIN_VALUE    10
 /**
  * 
  * <p>Function name: [GetCapVoltage]</p>
@@ -91,7 +92,7 @@ void CheckVoltage(void)
         UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);     
         g_SuddenState.CapState1 = 0x02;    //0b10
     }
-    else if((g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down - 2) && 
+    else if((g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down - MARGIN_VALUE) && 
             (g_SuddenState.CapState1 != 0x01)) //低电压
     {
         ClrWdt();
@@ -127,7 +128,7 @@ void CheckVoltage(void)
         UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);      
         g_SuddenState.CapState2 = 0x08;    //0b10 
     }
-    else if((g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down - 2) && 
+    else if((g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down - MARGIN_VALUE) && 
             (g_SuddenState.CapState2 != 0x04)) //低电压
     {
         ClrWdt();
@@ -165,7 +166,7 @@ void CheckVoltage(void)
             UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);   
             g_SuddenState.CapState3 = 0x20;    //0b10      
         }
-        else if((g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down - 2) && 
+        else if((g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down - MARGIN_VALUE) && 
                 (g_SuddenState.CapState3 != 0x10)) //低电压
         {
             ClrWdt();

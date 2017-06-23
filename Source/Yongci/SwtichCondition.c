@@ -186,6 +186,7 @@ uint8_t CheckIOState(void)
             {
                 if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
                 {
+                    g_Order = IDLE_ORDER;    //将命令清零
                     return 0xff;
                 }
                 TongBuHeZha();
@@ -204,6 +205,11 @@ uint8_t CheckIOState(void)
         case CHECK_Z_FEN_ORDER: //收到分闸命令
         {
             ClrWdt();
+            if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+                return 0xff;
+            }
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
             {
                 ClrWdt();
@@ -402,28 +408,43 @@ void DsplaySwitchState(void)
     g_SystemState.warning = NO_ERROR;
     
     //以上既不是故障 也不是 合分闸命令情况下 检测合分状态，检测合分位时不考虑过多的因素
-    //机构1的分合位检测    
+    //机构1的分合位指示
     ClrWdt();
     if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE) //分闸状态
     {
         UpdateIndicateState(FENWEI1_RELAY,FENWEI1_LED,TURN_ON);
         UpdateIndicateState(HEWEI1_RELAY,HEWEI1_LED,TURN_OFF);
         ClrWdt();
+        if(g_SuddenState.RefuseAction == JIGOU1_FEN_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
     }
     else if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)  //合闸状态
     {
         UpdateIndicateState(HEWEI1_RELAY,HEWEI1_LED,TURN_ON);
         UpdateIndicateState(FENWEI1_RELAY,FENWEI1_LED,TURN_OFF);
         ClrWdt();
+        if(g_SuddenState.RefuseAction == JIGOU1_HE_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
     }
     
-    //机构2的分合位检测    
+    //机构2的分合位指示
     ClrWdt();
     if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE) //分闸状态
     {
         UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_ON);
         UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_OFF);
         ClrWdt();
+        if(g_SuddenState.RefuseAction == JIGOU2_FEN_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
         
     }    
     else if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)   //合闸状态
@@ -431,17 +452,27 @@ void DsplaySwitchState(void)
         UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_ON);
         UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_OFF);
         ClrWdt();
+        if(g_SuddenState.RefuseAction == JIGOU2_HE_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
     }
     
     if(CAP3_STATE)
     {
-        //机构3的分合位检测    
+        //机构3的分合位指示    
         ClrWdt();
         if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE) //分闸状态
         {
             UpdateIndicateState(FENWEI3_RELAY,FENWEI3_LED,TURN_ON);
             UpdateIndicateState(HEWEI3_RELAY,HEWEI3_LED,TURN_OFF);
             ClrWdt();
+            if(g_SuddenState.RefuseAction == JIGOU3_FEN_ERROR)
+            {
+                g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+                g_SuddenState.RefuseAction = FALSE; //Clear
+            }
 
         }    
         else if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)   //合闸状态
@@ -449,6 +480,11 @@ void DsplaySwitchState(void)
             UpdateIndicateState(HEWEI3_RELAY,HEWEI3_LED,TURN_ON);
             UpdateIndicateState(FENWEI3_RELAY,FENWEI3_LED,TURN_OFF);
             ClrWdt();
+            if(g_SuddenState.RefuseAction == JIGOU3_HE_ERROR)
+            {
+                g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+                g_SuddenState.RefuseAction = FALSE; //Clear
+            }
         }    
     }
     else
@@ -465,6 +501,12 @@ void DsplaySwitchState(void)
         //合位指示灯亮 
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_ON);
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_OFF);
+        ClrWdt();
+        if(g_SuddenState.RefuseAction == Z_HE_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
     }
     else if((g_SystemState.heFenState2 == CHECK_2_HE_STATE)&&(g_SystemState.heFenState1 == CHECK_1_HE_STATE) && 
        (g_SystemState.heFenState3 == CHECK_3_HE_STATE)) //合闸状态
@@ -472,6 +514,12 @@ void DsplaySwitchState(void)
         //分位指示灯亮 
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_ON);
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_OFF);
+        ClrWdt();
+        if(g_SuddenState.RefuseAction == Z_FEN_ERROR)
+        {
+            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_SuddenState.RefuseAction = FALSE; //Clear
+        }
     }
     else
     {
