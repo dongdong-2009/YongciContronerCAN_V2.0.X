@@ -25,7 +25,8 @@ IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
 uint32_t _PERSISTENT g_changeLedTime;   //改变LED灯闪烁时间 (ms)
 uint16_t _PERSISTENT g_lockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
-uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
+uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
+uint16_t g_lastRunOrder = IDLE_ORDER;
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -225,7 +226,6 @@ void YongciMainTask(void)
 {
     uint8_t state = TURN_ON;
     uint8_t cn = 0;
-    uint8_t lastOrder = IDLE_ORDER;
     uint32_t checkOrderTime = g_MsTicks;
     uint32_t checkOrderDelay = UINT32_MAX;
     while(0xFFFF) //主循环
@@ -298,10 +298,13 @@ void YongciMainTask(void)
                 CHECK_LAST_ORDER3())
             {
                 ON_INT();
+                ClrWdt();
+                ClrWdt();
+                ClrWdt();
                 checkOrderDelay = REFUSE_ACTION;
                 //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
                 UpdateCount();//更新计数
-                ReadCapDropVoltage(lastOrder);  //读取电容跌落电压
+                ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
                 checkOrderTime = g_SysTimeStamp.TickTime;
                 //Clear Flag
                 g_SetSwitchState[0].LastOrder = IDLE_ORDER;
@@ -312,10 +315,10 @@ void YongciMainTask(void)
             //拒动错误检测
             if(g_SysTimeStamp.TickTime - checkOrderTime >= checkOrderDelay)
             {
-                CheckOrder(lastOrder);  //检测命令是否执行
+                CheckOrder(g_lastRunOrder);  //检测命令是否执行
                 checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
                 checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
-                lastOrder = IDLE_ORDER;     //上一次执行的命令清空
+                g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
                 g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
                 OffLock();  //解锁
             }
@@ -339,8 +342,9 @@ void YongciMainTask(void)
                
             //判断远方与就地的延时消抖
                 ClrWdt();   
-                //远方控制时允许通信
-                //暂时不要485通信，所以需要屏蔽
+            //远方控制时允许通信
+                
+            //暂时不要485通信，所以需要屏蔽
 //                /***************************************************************************
 //                //空闲状态下，处理通讯程序
 //                result = ReciveBufferDataDealing(&sendFrame, &recvFrame);//返回剩余长度
@@ -367,7 +371,7 @@ void YongciMainTask(void)
             }
             if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
             {
-                lastOrder = g_Order;
+                g_lastRunOrder = g_Order;
                 g_Order = IDLE_ORDER;    //将命令清零
                 continue;
             }
@@ -430,6 +434,10 @@ void YongciMainTask(void)
                     g_RemoteControlState.orderId = 0;   //Clear
                     g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
                     OffLock();  //解锁
+                }
+                else
+                {
+                    g_RemoteControlState.overTimeFlage = TRUE;  //Updata
                 }
             }
             if(g_RemoteControlState.SetFixedValue == TRUE)
@@ -539,6 +547,8 @@ void YongciFirstInit(void)
     g_qSendFrame.pBuffer = data;
     g_qSendFrame.complteFlag = 0xFF;
     g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    
+    g_lastRunOrder = IDLE_ORDER;
 }  
 
 /**

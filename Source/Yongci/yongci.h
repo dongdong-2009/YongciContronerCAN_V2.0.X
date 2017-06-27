@@ -54,17 +54,17 @@ extern "C" {
     
 #define NO_ERROR    0x00
     
-#define CHECK_Z_HE_ORDER  0x22  //执行同时合闸动作
-#define CHECK_Z_FEN_ORDER 0x23  //执行同时分闸动作
+#define CHECK_Z_HE_ORDER  0xAA22  //执行同时合闸动作
+#define CHECK_Z_FEN_ORDER 0xAA23  //执行同时分闸动作
     
-#define CHECK_1_HE_ORDER  0x24  //执行机构1合闸动作
-#define CHECK_1_FEN_ORDER 0x25  //执行机构1分闸动作
+#define CHECK_1_HE_ORDER  0xAA24  //执行机构1合闸动作
+#define CHECK_1_FEN_ORDER 0xAA25  //执行机构1分闸动作
     
-#define CHECK_2_HE_ORDER  0x26  //执行机构2合闸动作
-#define CHECK_2_FEN_ORDER 0x27  //执行机构2分闸动作
+#define CHECK_2_HE_ORDER  0xAA26  //执行机构2合闸动作
+#define CHECK_2_FEN_ORDER 0xAA27  //执行机构2分闸动作
     
-#define CHECK_3_HE_ORDER  0x28  //执行机构3合闸动作
-#define CHECK_3_FEN_ORDER 0x29  //执行机构3分闸动作
+#define CHECK_3_HE_ORDER  0xAA28  //执行机构3合闸动作
+#define CHECK_3_FEN_ORDER 0xAA29  //执行机构3分闸动作
 
 #define CHECK_1_HE_STATE  0x34  //机构1合闸状态
 #define CHECK_1_FEN_STATE 0x35  //机构1分闸状态
@@ -134,7 +134,7 @@ void OnLock(void);
 void OffLock(void);
 
 extern frameRtu sendFrame, recvFrame;
-extern uint8_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
+extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 extern uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
 extern uint16_t _PERSISTENT g_lockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 

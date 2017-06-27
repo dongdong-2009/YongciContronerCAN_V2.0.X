@@ -182,7 +182,7 @@ void CheckVoltage(void)
  * <p>Discription: [读取在执行合闸或者分闸后电容电压的变化]</p>
  * @param lastOrder 上一次执行的命令
  */
-void ReadCapDropVoltage(uint8_t lastOrder)
+void ReadCapDropVoltage(uint16_t lastOrder)
 {
     //远方与就地命令的转换
     if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))  //远端遥控与就地遥控

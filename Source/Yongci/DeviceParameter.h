@@ -29,7 +29,7 @@ void GetCapVoltage(void);
 //获取电压状态
 uint16_t GetCapVolatageState(void);
 void CheckVoltage(void);
-void ReadCapDropVoltage(uint8_t lastOrder);
+void ReadCapDropVoltage(uint16_t lastOrder);
 
 #ifdef	__cplusplus
 }

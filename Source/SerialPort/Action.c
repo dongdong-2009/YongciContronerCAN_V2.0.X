@@ -190,7 +190,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     {
         case 1: //合闸预制
         {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
@@ -207,6 +206,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
                     OnLock();   //上锁
+                    g_RemoteControlState.overTimeFlage = TRUE;  //预制成功后才会开启超时检测
                     SendData(pSendFrame);
                 }
             }
@@ -295,7 +295,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 3: //分闸预制
         {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
             if(g_SystemState.yuanBenState == BEN_STATE) //本地控制不能执行远方操作错误
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
@@ -312,6 +311,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
                     OnLock();   //上锁
+                    g_RemoteControlState.overTimeFlage = TRUE;  //预制成功后才会开启超时检测
                     SendData(pSendFrame);
                 }
             }
@@ -401,7 +401,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }        
         case 5: //同步合闸预制
         {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
             g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             //分合位错误
             if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
@@ -482,6 +481,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 ClrWdt();
                 SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
                 g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+                g_RemoteControlState.overTimeFlage = TRUE;  //预制成功后才会开启超时检测
                 TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
             }
             else
@@ -686,7 +686,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     IFS1bits.INT2IF = 0;
     OFF_INT();
     //*************************************************************************************
-    //一下判断防止误触发
+    //以下判断防止误触发
     if(g_RemoteControlState.ReceiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
     {
         ON_INT();
@@ -701,7 +701,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     }
     //*************************************************************************************
     //第一次的高电平持续时间判断
-    for(i = 0;i < 20;i++)
+    for(i = 0;i < 21;i++)
     {
         if(RXD1_LASER == 1)
         {
@@ -770,12 +770,12 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     }
     if(RXD1_LASER || (validCount > 10))
     {
-        TurnOffInt2();
-        ON_INT();
-        g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
+        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
         g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
         TongBuHeZha();
+        ON_INT();
+        TurnOffInt2();
     }
 }
 
@@ -1111,17 +1111,21 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
  * <p>Discription: [检测命令是否正确执行]</p>
  * @param lastOrder 上一次执行的命令
  */
-void CheckOrder(uint8_t lastOrder)
+void CheckOrder(uint16_t lastOrder)
 {
     //远方与就地命令的转换
     if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))
     {
         lastOrder = g_RemoteControlState.lastReceiveOrder;        
         g_qSendFrame.complteFlag = TRUE;
-        SendData(&g_qSendFrame); //发送执行反馈指令
+        if(lastOrder != TONGBU_HEZHA)
+        {
+            SendData(&g_qSendFrame); //发送执行反馈指令
+        }        
     }
     switch(lastOrder)
     {
+        case TONGBU_HEZHA:
         case CHECK_Z_HE_ORDER:
         {
             if(g_SystemState.heFenState1 != CHECK_1_HE_STATE || 

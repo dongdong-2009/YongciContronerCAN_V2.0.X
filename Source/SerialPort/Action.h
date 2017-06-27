@@ -98,7 +98,7 @@ void ExecuteFunctioncode(frameRtu* pRtu);
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
-void CheckOrder(uint8_t lastOrder);
+void CheckOrder(uint16_t lastOrder);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 void SendMessage(uint16_t data);
 

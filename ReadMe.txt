@@ -200,4 +200,5 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 3.修改了拒动错误的ID号传递，在按键命令中增加了ID号的赋值，为了拒动错误时可以上传ID号
 4.解决累加和计算错误的问题，不是EEPROM写不进去，而是在计算累加和是错误
 
-
+2017/06/27(修改人：张东旭)
+精简DeviceNet中的部分函数
