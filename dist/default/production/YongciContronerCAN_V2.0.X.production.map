@@ -959,75 +959,75 @@ userdata
 .comment
  *(.comment)
 
-.debug_info       0x000000      0x1030d
+.debug_info       0x000000      0x10302
  *(.debug_info)
- .debug_info      0x000000        0xdbb build/default/production/Source/DeviceNet/DeviceNet.o
- .debug_info      0x000dbb        0xd2e build/default/production/Source/Driver/AdcSample.o
- .debug_info      0x001ae9       0x2d29 build/default/production/Source/Driver/CAN.o
- .debug_info      0x004812       0x16e8 build/default/production/Source/Driver/DeviceIO.o
- .debug_info      0x005efa       0x12d9 build/default/production/Source/Driver/Timer.o
- .debug_info      0x0071d3        0xc2d build/default/production/Source/Driver/Usart.o
- .debug_info      0x007e00        0x2a2 build/default/production/Source/Driver/traps.o
- .debug_info      0x0080a2        0x7f6 build/default/production/Source/Driver/EEPROMOperate.o
- .debug_info      0x008898        0x6a5 build/default/production/Source/Driver/InitTemp.o
- .debug_info      0x008f3d        0x48e build/default/production/Source/Driver/Delay.o
- .debug_info      0x0093cb        0x781 build/default/production/Source/Driver/ImitationIIC.o
- .debug_info      0x009b4c        0x71f build/default/production/Source/Driver/SD2405.o
- .debug_info      0x00a26b       0x12f6 build/default/production/Source/SerialPort/Action.o
- .debug_info      0x00b561        0x225 build/default/production/Source/SerialPort/CRC16.o
- .debug_info      0x00b786        0xa0d build/default/production/Source/SerialPort/RtuFrame.o
- .debug_info      0x00c193        0xfea build/default/production/Source/SerialPort/RefParameter.o
- .debug_info      0x00d17d        0x7ed build/default/production/Source/Yongci/DeviceParameter.o
- .debug_info      0x00d96a        0x8e5 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_info      0x00e24f       0x1b23 build/default/production/Source/Yongci/yongci.o
- .debug_info      0x00fd72        0x59b build/default/production/Source/main.o
+ .debug_info      0x000000        0xdb0 build/default/production/Source/DeviceNet/DeviceNet.o
+ .debug_info      0x000db0        0xd2e build/default/production/Source/Driver/AdcSample.o
+ .debug_info      0x001ade       0x2d29 build/default/production/Source/Driver/CAN.o
+ .debug_info      0x004807       0x16e8 build/default/production/Source/Driver/DeviceIO.o
+ .debug_info      0x005eef       0x12d9 build/default/production/Source/Driver/Timer.o
+ .debug_info      0x0071c8        0xc2d build/default/production/Source/Driver/Usart.o
+ .debug_info      0x007df5        0x2a2 build/default/production/Source/Driver/traps.o
+ .debug_info      0x008097        0x7f6 build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_info      0x00888d        0x6a5 build/default/production/Source/Driver/InitTemp.o
+ .debug_info      0x008f32        0x48e build/default/production/Source/Driver/Delay.o
+ .debug_info      0x0093c0        0x781 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_info      0x009b41        0x71f build/default/production/Source/Driver/SD2405.o
+ .debug_info      0x00a260       0x12f6 build/default/production/Source/SerialPort/Action.o
+ .debug_info      0x00b556        0x225 build/default/production/Source/SerialPort/CRC16.o
+ .debug_info      0x00b77b        0xa0d build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_info      0x00c188        0xfea build/default/production/Source/SerialPort/RefParameter.o
+ .debug_info      0x00d172        0x7ed build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_info      0x00d95f        0x8e5 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_info      0x00e244       0x1b23 build/default/production/Source/Yongci/yongci.o
+ .debug_info      0x00fd67        0x59b build/default/production/Source/main.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000       0x18d5
+.debug_abbrev     0x000000       0x191f
  *(.debug_abbrev)
- .debug_abbrev    0x000000        0x1b1 build/default/production/Source/DeviceNet/DeviceNet.o
- .debug_abbrev    0x0001b1         0xb8 build/default/production/Source/Driver/AdcSample.o
- .debug_abbrev    0x000269        0x22b build/default/production/Source/Driver/CAN.o
- .debug_abbrev    0x000494        0x170 build/default/production/Source/Driver/DeviceIO.o
- .debug_abbrev    0x000604        0x122 build/default/production/Source/Driver/Timer.o
- .debug_abbrev    0x000726        0x11e build/default/production/Source/Driver/Usart.o
- .debug_abbrev    0x000844         0x7d build/default/production/Source/Driver/traps.o
- .debug_abbrev    0x0008c1        0x12b build/default/production/Source/Driver/EEPROMOperate.o
- .debug_abbrev    0x0009ec        0x12f build/default/production/Source/Driver/InitTemp.o
- .debug_abbrev    0x000b1b        0x136 build/default/production/Source/Driver/Delay.o
- .debug_abbrev    0x000c51        0x143 build/default/production/Source/Driver/ImitationIIC.o
- .debug_abbrev    0x000d94        0x12f build/default/production/Source/Driver/SD2405.o
- .debug_abbrev    0x000ec3        0x18c build/default/production/Source/SerialPort/Action.o
- .debug_abbrev    0x00104f         0xa7 build/default/production/Source/SerialPort/CRC16.o
- .debug_abbrev    0x0010f6        0x1e0 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_abbrev    0x0012d6        0x1aa build/default/production/Source/SerialPort/RefParameter.o
- .debug_abbrev    0x001480         0xd4 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_abbrev    0x001554         0xd1 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_abbrev    0x001625        0x1d0 build/default/production/Source/Yongci/yongci.o
- .debug_abbrev    0x0017f5         0xe0 build/default/production/Source/main.o
+ .debug_abbrev    0x000000        0x1fb build/default/production/Source/DeviceNet/DeviceNet.o
+ .debug_abbrev    0x0001fb         0xb8 build/default/production/Source/Driver/AdcSample.o
+ .debug_abbrev    0x0002b3        0x22b build/default/production/Source/Driver/CAN.o
+ .debug_abbrev    0x0004de        0x170 build/default/production/Source/Driver/DeviceIO.o
+ .debug_abbrev    0x00064e        0x122 build/default/production/Source/Driver/Timer.o
+ .debug_abbrev    0x000770        0x11e build/default/production/Source/Driver/Usart.o
+ .debug_abbrev    0x00088e         0x7d build/default/production/Source/Driver/traps.o
+ .debug_abbrev    0x00090b        0x12b build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_abbrev    0x000a36        0x12f build/default/production/Source/Driver/InitTemp.o
+ .debug_abbrev    0x000b65        0x136 build/default/production/Source/Driver/Delay.o
+ .debug_abbrev    0x000c9b        0x143 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_abbrev    0x000dde        0x12f build/default/production/Source/Driver/SD2405.o
+ .debug_abbrev    0x000f0d        0x18c build/default/production/Source/SerialPort/Action.o
+ .debug_abbrev    0x001099         0xa7 build/default/production/Source/SerialPort/CRC16.o
+ .debug_abbrev    0x001140        0x1e0 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_abbrev    0x001320        0x1aa build/default/production/Source/SerialPort/RefParameter.o
+ .debug_abbrev    0x0014ca         0xd4 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_abbrev    0x00159e         0xd1 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_abbrev    0x00166f        0x1d0 build/default/production/Source/Yongci/yongci.o
+ .debug_abbrev    0x00183f         0xe0 build/default/production/Source/main.o
 
-.debug_line       0x000000       0x2404
+.debug_line       0x000000       0x2403
  *(.debug_line)
- .debug_line      0x000000        0x23b build/default/production/Source/DeviceNet/DeviceNet.o
- .debug_line      0x00023b         0xc9 build/default/production/Source/Driver/AdcSample.o
- .debug_line      0x000304        0x298 build/default/production/Source/Driver/CAN.o
- .debug_line      0x00059c        0x17d build/default/production/Source/Driver/DeviceIO.o
- .debug_line      0x000719        0x11a build/default/production/Source/Driver/Timer.o
- .debug_line      0x000833        0x137 build/default/production/Source/Driver/Usart.o
- .debug_line      0x00096a         0xb8 build/default/production/Source/Driver/traps.o
- .debug_line      0x000a22        0x195 build/default/production/Source/Driver/EEPROMOperate.o
- .debug_line      0x000bb7        0x13e build/default/production/Source/Driver/InitTemp.o
- .debug_line      0x000cf5         0xef build/default/production/Source/Driver/Delay.o
- .debug_line      0x000de4        0x162 build/default/production/Source/Driver/ImitationIIC.o
- .debug_line      0x000f46        0x145 build/default/production/Source/Driver/SD2405.o
- .debug_line      0x00108b        0x45e build/default/production/Source/SerialPort/Action.o
- .debug_line      0x0014e9         0x79 build/default/production/Source/SerialPort/CRC16.o
- .debug_line      0x001562        0x186 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_line      0x0016e8        0x375 build/default/production/Source/SerialPort/RefParameter.o
- .debug_line      0x001a5d        0x1b7 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_line      0x001c14        0x320 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_line      0x001f34        0x3ba build/default/production/Source/Yongci/yongci.o
- .debug_line      0x0022ee        0x116 build/default/production/Source/main.o
+ .debug_line      0x000000        0x23a build/default/production/Source/DeviceNet/DeviceNet.o
+ .debug_line      0x00023a         0xc9 build/default/production/Source/Driver/AdcSample.o
+ .debug_line      0x000303        0x298 build/default/production/Source/Driver/CAN.o
+ .debug_line      0x00059b        0x17d build/default/production/Source/Driver/DeviceIO.o
+ .debug_line      0x000718        0x11a build/default/production/Source/Driver/Timer.o
+ .debug_line      0x000832        0x137 build/default/production/Source/Driver/Usart.o
+ .debug_line      0x000969         0xb8 build/default/production/Source/Driver/traps.o
+ .debug_line      0x000a21        0x195 build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_line      0x000bb6        0x13e build/default/production/Source/Driver/InitTemp.o
+ .debug_line      0x000cf4         0xef build/default/production/Source/Driver/Delay.o
+ .debug_line      0x000de3        0x162 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_line      0x000f45        0x145 build/default/production/Source/Driver/SD2405.o
+ .debug_line      0x00108a        0x45e build/default/production/Source/SerialPort/Action.o
+ .debug_line      0x0014e8         0x79 build/default/production/Source/SerialPort/CRC16.o
+ .debug_line      0x001561        0x186 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_line      0x0016e7        0x375 build/default/production/Source/SerialPort/RefParameter.o
+ .debug_line      0x001a5c        0x1b7 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_line      0x001c13        0x320 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_line      0x001f33        0x3ba build/default/production/Source/Yongci/yongci.o
+ .debug_line      0x0022ed        0x116 build/default/production/Source/main.o
 
 .debug_frame      0x000000       0x1342
  *(.debug_frame)
