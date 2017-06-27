@@ -108,10 +108,10 @@ uint8_t SetParamValue(uint8_t id,PointUint8* pPoint)
 				return 0xF1;
 			}
             
-            g_pointData.len = pPoint->len;
-            WriteEEPROM(id , pPoint);   //写EEPROM           
-            ClrWdt();
-            ReadEEPROM(id , &g_pointData);      //读取EEPROM
+//            g_pointData.len = pPoint->len;
+//            WriteEEPROM(id , pPoint);   //写EEPROM           
+//            ClrWdt();
+//            ReadEEPROM(id , &g_pointData);      //读取EEPROM
             //添加判断读取出来的数据是否与变换之后的一致性
             ClrWdt();
             g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
@@ -364,12 +364,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
-
-	if (PARAMETER_LEN < index)
-	{
-		ClrWdt();
-		while(1);	//数据长度不正确则触发看门狗复位
-	}
+    
 }
 
 /**
@@ -636,9 +631,9 @@ void RefParameterInit(void)
         g_SystemLimit.capVoltage2.down = 181.1f;
         g_SystemLimit.capVoltage2.down = 182.0f;
         
-        g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1.03;
-        g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1.03;
-        g_SystemCalibrationCoefficient.capVoltageCoefficient3 = 1.03;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient3 = 1;
         
         g_DelayTime.hezhaTime1 = 50;
         g_DelayTime.hezhaTime2 = 50;
@@ -889,17 +884,23 @@ void WriteAccumulateSum(void)
 {
     uint8_t i = 0;
     uint8_t id = 1;    
-    uint8_t len = 0;
     uint16_t totalSum = 0;
-    for(i = 0;i < PARAMETER_LEN;i++)
+    for(id = 1;id <= PARAMETER_LEN ;id++)
     {
+        i = id - 1;
 		ClrWdt();
-        id = i + 1;
+        
         if(g_SetParameterCollect[i].ID == id)
-        {			
+        {		
+            g_pointData.len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
 			ClrWdt();	
-            len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
-            g_pointData.len = len;
+            g_SetParameterCollect[i].fGetValue(&g_pointData, g_SetParameterCollect + i);
+            if(g_pointData.len == 0)
+            {
+                continue;   //立即进行下一次循环
+            }
+            WriteEEPROM(id , &g_pointData);   //写EEPROM          
+            
             ReadEEPROM(id, &g_pointData);
 			ClrWdt();
             for(uint8_t j = 0;j < g_pointData.len;j++)
@@ -926,7 +927,7 @@ uint8_t AccumulateSumVerify(void)
     uint16_t readAddData = 0;
     uint16_t addData = 0;
     
-    for(id = 1;id < PARAMETER_LEN;id++)
+    for(id = 1;id <= PARAMETER_LEN;id++)
     {
 		ClrWdt();
         i = id - 1;

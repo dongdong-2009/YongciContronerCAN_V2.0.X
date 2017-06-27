@@ -22,6 +22,7 @@ extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
+struct DefFrameData g_qSendFrame;   //CAN数据帧
 
 /**************************************************
  *函数名： SendAckMesssage()
@@ -160,7 +161,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
      * 发送数据帧赋值
      */
     pSendFrame->ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    g_qSendFrame.ID = pSendFrame->ID;    //ID号传递
     pSendFrame->pBuffer[0] = id | 0x80;
+    g_qSendFrame.pBuffer[0] = pSendFrame->pBuffer[0];   //数据传递
     ClrWdt();
 
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
@@ -177,16 +180,17 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 		{
             ClrWdt();
 			pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
+            g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
 		}
 		pSendFrame->len = pReciveFrame->len;
-	}  
+        g_qSendFrame.len = pSendFrame->len; //数据长度传递
+	}
     
     switch(id)
     {
         case 1: //合闸预制
         {
             g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
@@ -200,9 +204,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
             {                
                 GetLoopSwitch(pReciveFrame);
-                OnLock();   //上锁
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
+                    OnLock();   //上锁
                     SendData(pSendFrame);
                 }
             }
@@ -216,6 +220,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 2: //合闸执行
         {
+            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if((g_RemoteControlState.ReceiveStateFlag == HE_ORDER) && 
                 (g_RemoteControlState.overTimeFlage == TRUE))
             {
@@ -272,25 +277,25 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     default :
                     {
                         SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
                         OffLock();  //解锁
                         return;
                         break;
                     }
                 }
-                SendData(pSendFrame);
             }
             else
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
             }
             break;
         }
         case 3: //分闸预制
         {
             g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if(g_SystemState.yuanBenState == BEN_STATE) //本地控制不能执行远方操作错误
             {
                 SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
@@ -304,9 +309,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次分闸
             {
                 GetLoopSwitch(pReciveFrame);
-                OnLock();   //上锁
                 if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
                 {
+                    OnLock();   //上锁
                     SendData(pSendFrame);
                 }
             }
@@ -321,6 +326,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 4: //分闸执行
         {
+            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if((g_RemoteControlState.ReceiveStateFlag == FEN_ORDER) && 
                 (g_RemoteControlState.overTimeFlage == TRUE))
             {
@@ -375,19 +381,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     }
                     default :
                     {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
+                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
                         OffLock();  //解锁
+                        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
                         return;
                         break;
                     }
                 }
-                SendData(pSendFrame);
             }
             else
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
                 OffLock();  //解锁
             }
             break;
@@ -459,6 +466,13 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     return;
                 }
             }
+            //返回的数据帧赋值传递
+            for(uint8_t i = 0;i < pSendFrame->len;i++)
+            {
+                g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
+                ClrWdt();
+            }
+            
             if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)
             {                
                 ClrWdt();
@@ -506,12 +520,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             pSendFrame->len = Point.len + 2;
             ClrWdt();
             SendData(pSendFrame);
-            
-            if(pSendFrame->complteFlag == 0)    //当数据发送完毕后进行写累加和
-            {
-                ClrWdt();
-                WriteAccumulateSum();  //写入累加和
-            }
+            g_RemoteControlState.SetFixedValue = TRUE;  //设置定值成功
             
             break;
         }
@@ -804,7 +813,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                         g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
                         return;
                     }
-                    g_RemoteControlState.ReceiveStateFlag = CHECK_1_HE_ORDER;
+                    g_RemoteControlState.lastReceiveOrder = CHECK_1_HE_ORDER;
                 }
                 else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
                 {   
@@ -814,7 +823,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                         g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
                         return;
                     }
-                    g_RemoteControlState.ReceiveStateFlag = CHECK_1_FEN_ORDER;
+                    g_RemoteControlState.lastReceiveOrder = CHECK_1_FEN_ORDER;
                 }
                 SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
 			}
@@ -1105,9 +1114,11 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 void CheckOrder(uint8_t lastOrder)
 {
     //远方与就地命令的转换
-    if(lastOrder == IDLE_ORDER && g_RemoteControlState.lastReceiveOrder != IDLE_ORDER)
+    if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))
     {
-        lastOrder = g_RemoteControlState.lastReceiveOrder;
+        lastOrder = g_RemoteControlState.lastReceiveOrder;        
+        g_qSendFrame.complteFlag = TRUE;
+        SendData(&g_qSendFrame); //发送执行反馈指令
     }
     switch(lastOrder)
     {
@@ -1117,7 +1128,7 @@ void CheckOrder(uint8_t lastOrder)
                g_SystemState.heFenState2 != CHECK_2_HE_STATE || 
                g_SystemState.heFenState3 != CHECK_3_HE_STATE)
             {
-                SendErrorFrame(CHECK_Z_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_HE_ERROR;  //发生拒动
             }
             else
@@ -1132,7 +1143,7 @@ void CheckOrder(uint8_t lastOrder)
                g_SystemState.heFenState2 != CHECK_2_FEN_STATE || 
                g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
             {
-                SendErrorFrame(CHECK_Z_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_FEN_ERROR;  //发生拒动
             }
             else
@@ -1145,7 +1156,7 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
             {
-                SendErrorFrame(CHECK_1_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_HE_ERROR;  //发生拒动
             }
             else
@@ -1158,7 +1169,7 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
             {
-                SendErrorFrame(CHECK_1_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_FEN_ERROR;  //发生拒动
             }
             else
@@ -1171,7 +1182,7 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
             {
-                SendErrorFrame(CHECK_2_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_HE_ERROR;  //发生拒动
             }
             else
@@ -1184,7 +1195,7 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
             {
-                SendErrorFrame(CHECK_2_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_FEN_ERROR;  //发生拒动
             }
             else
@@ -1197,11 +1208,11 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(CAP3_STATE == 0x00)
             {
-                return;
+                break;
             }
             if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
             {
-                SendErrorFrame(CHECK_3_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
             }
             else
@@ -1214,11 +1225,11 @@ void CheckOrder(uint8_t lastOrder)
         {
             if(CAP3_STATE == 0x00)
             {
-                return;
+                break;
             }
             if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
             {
-                SendErrorFrame(CHECK_3_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
             }
             else
@@ -1229,7 +1240,7 @@ void CheckOrder(uint8_t lastOrder)
         }
         default:
         {
-            return;
+            break;
         }
     }
     if(g_SuddenState.RefuseAction != FALSE)

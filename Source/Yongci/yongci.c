@@ -19,13 +19,13 @@
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
 
 frameRtu sendFrame, recvFrame;
-uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 
 SwitchConfig g_SetSwitchState[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
-uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
-uint16_t _PERSISTENT g_lockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
+uint32_t _PERSISTENT g_changeLedTime;   //改变LED灯闪烁时间 (ms)
+uint16_t _PERSISTENT g_lockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
+uint8_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -428,9 +428,16 @@ void YongciMainTask(void)
                     g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
                     SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
                     g_RemoteControlState.orderId = 0;   //Clear
+                    g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
                     OffLock();  //解锁
                 }
             }
+            if(g_RemoteControlState.SetFixedValue == TRUE)
+            {
+                WriteAccumulateSum();  //写入累加和
+                g_RemoteControlState.SetFixedValue = FALSE;
+            }
+            
         }
     }
 }
@@ -444,6 +451,7 @@ void YongciMainTask(void)
 void YongciFirstInit(void)
 {
     uint8_t index = 0;
+    uint8_t data[8] = {0,0,0,0,0,0,0,0};
     ClrWdt();
     
     g_lockUp = OFF_LOCK;    //处于解锁状态
@@ -507,7 +515,8 @@ void YongciFirstInit(void)
     g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
     g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
     g_RemoteControlState.overTimeFlage = FALSE;
-    
+    g_RemoteControlState.orderId = 0x00;    //Clear
+    g_RemoteControlState.SetFixedValue = FALSE;    //Clear
     OffLock();  //解锁，可以检测
     
     //****************************************
@@ -526,6 +535,10 @@ void YongciFirstInit(void)
     g_SuddenState.RefuseAction = FALSE;
     //****************************************
     
+    //数据帧初始化
+    g_qSendFrame.pBuffer = data;
+    g_qSendFrame.complteFlag = 0xFF;
+    g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
 }  
 
 /**
