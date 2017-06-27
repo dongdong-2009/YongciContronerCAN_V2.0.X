@@ -582,13 +582,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         ClrWdt();
     }
     
-    if((rxErrorCount > 200) || (txErrorCount > 200))
-    {
-        while(1)
-        {
-            UpdateLEDIndicateState(FENWEI3_LED,TURN_ON);    //测试
-        }
-    }
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {

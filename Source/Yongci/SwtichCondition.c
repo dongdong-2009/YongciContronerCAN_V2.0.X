@@ -187,20 +187,19 @@ uint8_t CheckIOState(void)
                 if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
                 {
                     g_Order = IDLE_ORDER;    //将命令清零
-                    return 0xFF;
+                    return 0xff;
                 }
                 TongBuHeZha();
-                g_RemoteControlState.orderId = 0x05;    //拒动错误ID号
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x01;
                 g_SuddenState.ExecuteOrder2 = 0x04;
                 g_SuddenState.ExecuteOrder3 = 0x10;
-                return 0xFF;
+                return 0xff;
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
+                return 0;
             }
         }
         case CHECK_Z_FEN_ORDER: //收到分闸命令
@@ -209,7 +208,7 @@ uint8_t CheckIOState(void)
             if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
+                return 0xff;
             }
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
             {
@@ -220,17 +219,16 @@ uint8_t CheckIOState(void)
                 {
                     FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 }
-                g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x02;
                 g_SuddenState.ExecuteOrder2 = 0x08;
                 g_SuddenState.ExecuteOrder3 = 0x20;
-                return 0xFF;
+                return 0xff;
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
+                return 0;
             }
         }
         
@@ -241,14 +239,12 @@ uint8_t CheckIOState(void)
             {
                 HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x02;
-                g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }
-            return 0xFF;
+            return 0xff;
         }
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
         {
@@ -257,14 +253,12 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x01;
-                g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }
-            return 0xFF;
+            return 0xff;
         }
         
         case CHECK_2_HE_ORDER: //收到机构2合闸命令
@@ -274,14 +268,12 @@ uint8_t CheckIOState(void)
             {
                 HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x08;
-                g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }
-            return 0xFF;
+            return 0xff;
         }
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
         {
@@ -290,14 +282,12 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x04;
-                g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }
-            return 0xFF;
+            return 0xff;
         }
         
         case CHECK_3_HE_ORDER: //收到机构3合闸命令
@@ -307,14 +297,12 @@ uint8_t CheckIOState(void)
             {
                 HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x20;
-                g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }       
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }     
-            return 0xFF;
+            return 0xff;
         }
         case CHECK_3_FEN_ORDER: //收到机构3分闸命令
         {
@@ -323,14 +311,12 @@ uint8_t CheckIOState(void)
             {
                 FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x10;
-                g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }       
             else
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
             }     
-            return 0xFF;
+            return 0xff;
         }
         default:
         {
