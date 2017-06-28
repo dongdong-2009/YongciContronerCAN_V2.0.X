@@ -234,6 +234,7 @@ extern void InitDeviceNet();
 //////////////供其他模块调用的变量/////////////////
 extern struct DefDeviceNetObj  DeviceNetObj;
 extern struct DefIdentifierObject   IdentifierObj;
+extern struct DefConnectionObj  StatusChangedConnedctionObj;//状态改变响应
 extern struct DefConnectionObj  VisibleConnectionObj;
 extern struct DefConnectionObj CycleInquireConnedctionObj;
 extern BYTE  send_buf[10];

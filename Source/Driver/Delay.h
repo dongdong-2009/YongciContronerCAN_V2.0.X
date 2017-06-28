@@ -88,6 +88,7 @@ typedef struct SysTime
     uint32_t SendDataTime;  //记录上一次上传数据的时间
     uint32_t ScanTime;      //记录上一次按键扫描的时间
     uint32_t ChangeLedTime; //记录上一次改变指示灯的时间
+    uint32_t GetCapVolueTime;   //获取电容电压的时间间隔
 }SysTimeStamp;
 
 

@@ -15,6 +15,42 @@
 #include "../SerialPort/RefParameter.h"
 
 #define MARGIN_VALUE    10
+
+typedef struct
+{
+    float32_t a;
+    float32_t b;
+    float32_t c;
+    float32_t w;
+}AdcSum;
+
+typedef struct
+{
+    float32_t a;
+    float32_t b;
+    float32_t c;
+    float32_t w;
+}AdcMin;
+
+typedef struct
+{
+    float32_t a;
+    float32_t b;
+    float32_t c;
+    float32_t w;
+}AdcMax;
+
+typedef struct
+{
+    AdcSum Sum;
+    AdcMax Max;
+    AdcMin Min;
+    float32_t valueA;
+    float32_t valueB;
+    float32_t valueC;
+    float32_t valueW;
+}AdcFilter;
+
 /**
  * 
  * <p>Function name: [GetCapVoltage]</p>
@@ -22,12 +58,116 @@
  */
 void GetCapVoltage(void)
 {
+    uint8_t i = 0;
+    AdcFilter adcFilter;
+    /* Clear */
+    adcFilter.Sum.a = 0;
+    adcFilter.Sum.b = 0;
+    adcFilter.Sum.c = 0;
+    adcFilter.Sum.w = 0;
+    
     SoftSampleOnce();
-    ClrWdt();
-    g_SystemVoltageParameter.workVoltage = ADCBUF0 * ADC_MODULUS;
-    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
-    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
-    VOLTAGE_CAP3(); //电容3赋值函数
+    adcFilter.valueW = ADCBUF0 * ADC_MODULUS;
+    adcFilter.Max.w = adcFilter.valueW;
+    adcFilter.Min.w = adcFilter.valueW;
+    adcFilter.Sum.w += adcFilter.valueW;
+
+    adcFilter.valueA = ADCBUF1 * LOCAL_CAP_MODULUS;
+    adcFilter.Max.a = adcFilter.valueA;
+    adcFilter.Min.a = adcFilter.valueA;
+    adcFilter.Sum.a += adcFilter.valueA;
+
+    adcFilter.valueB = ADCBUF2 * LOCAL_CAP_MODULUS;
+    adcFilter.Max.b = adcFilter.valueB;
+    adcFilter.Min.b = adcFilter.valueB;
+    adcFilter.Sum.b += adcFilter.valueB;
+    if(CAP3_STATE)
+    {
+        adcFilter.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
+        adcFilter.Max.c = adcFilter.valueC;
+        adcFilter.Min.c = adcFilter.valueC;
+        adcFilter.Sum.c += adcFilter.valueC;
+    }
+    
+    for(i = 0;i < 5;i++)
+    {
+        SoftSampleOnce();
+        adcFilter.valueW = ADCBUF0 * ADC_MODULUS;
+        adcFilter.Sum.w += adcFilter.valueW;
+
+        adcFilter.valueA = ADCBUF1 * LOCAL_CAP_MODULUS;
+        adcFilter.Sum.a += adcFilter.valueA;
+
+        adcFilter.valueB = ADCBUF2 * LOCAL_CAP_MODULUS;
+        adcFilter.Sum.b += adcFilter.valueB;
+        if(CAP3_STATE)
+        {
+            adcFilter.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
+            adcFilter.Sum.c += adcFilter.valueC;
+        }
+        ClrWdt();
+        
+        /* get workvoltage min value*/
+        if(adcFilter.Min.w > adcFilter.valueW)
+        {
+            adcFilter.Min.w = adcFilter.valueW;
+        }
+        /* get capAvoltage min value*/
+        if(adcFilter.Min.w > adcFilter.valueW)
+        {
+            adcFilter.Min.w = adcFilter.valueW;
+        }
+        /* get capBvoltage min value*/
+        if(adcFilter.Min.w > adcFilter.valueW)
+        {
+            adcFilter.Min.w = adcFilter.valueW;
+        }
+        if(CAP3_STATE)
+        {
+            /* get capCvoltage min value*/
+            if(adcFilter.Min.w > adcFilter.valueW)
+            {
+                adcFilter.Min.w = adcFilter.valueW;
+            }
+        }
+        ClrWdt();
+        
+        /* get workvoltage max value*/
+        if(adcFilter.Max.w < adcFilter.valueW)
+        {
+            adcFilter.Max.w = adcFilter.valueW;
+        }
+        /* get capAvoltage max value*/
+        if(adcFilter.Max.a < adcFilter.valueA)
+        {
+            adcFilter.Max.a = adcFilter.valueA;
+        }
+        /* get capBvoltage max value*/
+        if(adcFilter.Max.b < adcFilter.valueB)
+        {
+            adcFilter.Max.b = adcFilter.valueB;
+        }
+        if(CAP3_STATE)
+        {
+            /* get capCvoltage max value*/
+            if(adcFilter.Max.c < adcFilter.valueC)
+            {
+                adcFilter.Max.c = adcFilter.valueC;
+            }
+        }
+        ClrWdt();
+    }
+    g_SystemVoltageParameter.workVoltage = (adcFilter.Sum.w - adcFilter.Max.w - adcFilter.Min.w) / 4;
+    g_SystemVoltageParameter.voltageCap1 = (adcFilter.Sum.a - adcFilter.Max.a - adcFilter.Min.a) / 4;
+    g_SystemVoltageParameter.voltageCap2 = (adcFilter.Sum.b - adcFilter.Max.b - adcFilter.Min.b) / 4;    
+    if(CAP3_STATE)
+    {
+        g_SystemVoltageParameter.voltageCap3 = (adcFilter.Sum.c - adcFilter.Max.c - adcFilter.Min.c) / 4;
+    }
+    else
+    {
+        g_SystemVoltageParameter.voltageCap3 = 225;
+    }
     ClrWdt();
 }
 

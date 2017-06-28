@@ -92,6 +92,8 @@ typedef struct RemoteControl
     uint8_t  overTimeFlage;     //超时标识位
     uint8_t  orderId;   //执行的命令
     uint8_t  SetFixedValue;     //设置定值指令
+    uint8_t  GetAllValueFalg;     //设置定值指令
+    uint8_t  GetOneValueFalg;     //设置定值指令
 }RemoteControlState;
 
 void ExecuteFunctioncode(frameRtu* pRtu);
@@ -101,10 +103,12 @@ void UpdataState(void);
 void CheckOrder(uint16_t lastOrder);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 void SendMessage(uint16_t data);
+void GetValue(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 extern struct DefFrameData g_qSendFrame;   //CAN数据帧
+extern PointUint8 g_pPoint;   
 
 
 #ifdef	__cplusplus

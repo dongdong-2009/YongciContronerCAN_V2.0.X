@@ -81,7 +81,7 @@ c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsf3.
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(feqltle.eo)
                               build/default/production/Source/Yongci/DeviceParameter.o (___ltsf2)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fgtge.eo)
-                              build/default/production/Source/SerialPort/Action.o (___gesf2)
+                              build/default/production/Source/Yongci/DeviceParameter.o (___gtsf2)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
                               build/default/production/Source/Driver/Timer.o (___fixunssfsi)
 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
@@ -136,14 +136,14 @@ Program Memory  [Origin = 0x100, Length = 0x17f00]
 
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
-.text                        0x100              0x12a0          0x1bf0  (7152)
-.const                      0x13a0               0x208           0x30c  (780)
-.text                       0x15a8              0x5cb8          0x8b14  (35604)
-.dinit                      0x7260                0x9c            0xea  (234)
-.text                       0x72fc               0x15e           0x20d  (525)
-.init.delay32               0x745a                0x1c            0x2a  (42)
+.text                        0x100              0x12cc          0x1c32  (7218)
+.const                      0x13cc               0x208           0x30c  (780)
+.text                       0x15d4              0x5ec4          0x8e26  (36390)
+.dinit                      0x7498                0x9c            0xea  (234)
+.text                       0x7534               0x14e           0x1f5  (501)
+.init.delay32               0x7682                0x1c            0x2a  (42)
 
-                 Total program memory used (bytes):         0xad31  (44337) 30%
+                 Total program memory used (bytes):         0xb06d  (45165) 30%
 
 
 Ivt Memory  [Origin = 0x4, Length = 0x7c]
@@ -178,18 +178,18 @@ section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
 .nbss                        0x800                   0            0x12  (18)
 .ndata                       0x812                   0            0x10  (16)
-.nbss                        0x822                   0            0x3a  (58)
-_0571C06059533d20            0x85c                   0             0x4  (4)
-.ndata                       0x860                   0             0x2  (2)
-.nbss                        0x862                   0             0x4  (4)
-.ndata                       0x866                   0             0x2  (2)
-_04E3800059532a9f            0x868                   0             0x2  (2)
-_04E3806059532a9f            0x86a                   0             0x2  (2)
-_0571C0C059533d20            0x86c                   0             0x2  (2)
-_0571C00059533d20            0x86e                   0             0x2  (2)
-.bss                         0x870                   0           0x506  (1286)
+.nbss                        0x822                   0            0x38  (56)
+_04E09180595373c9            0x85a                   0             0x4  (4)
+.ndata                       0x85e                   0             0x2  (2)
+.nbss                        0x860                   0             0x4  (4)
+.ndata                       0x864                   0             0x2  (2)
+_04D6F060595373c6            0x866                   0             0x2  (2)
+_04D6F0C0595373c6            0x868                   0             0x2  (2)
+_04E091E0595373c9            0x86a                   0             0x2  (2)
+_04E09120595373c9            0x86c                   0             0x2  (2)
+.bss                         0x86e                   0           0x514  (1300)
 
-                 Total data memory used (bytes):          0x576  (1398) 17%
+                 Total data memory used (bytes):          0x582  (1410) 17%
 
 
 Dynamic Memory Usage
@@ -197,9 +197,9 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                        0xd76                              0x1a8a  (6794)
+stack                        0xd82                              0x1a7e  (6782)
 
-                 Maximum dynamic memory (bytes):         0x1a8a  (6794)
+                 Maximum dynamic memory (bytes):         0x1a7e  (6782)
 
 
 External Symbols in Data Memory (by address):
@@ -218,127 +218,129 @@ External Symbols in Data Memory (by address):
                     0x082a                  _rlen
                     0x082c                  _rEID
                     0x0830                  _g_CheckTime
-                    0x0838                  _g_RemoteControlState
-                    0x0840                  _ReciveBufferLen
-                    0x0841                  _FifoHead
-                    0x0842                  _FifoEnd
-                    0x0843                  _DealStep
-                    0x0844                  _completeFlag
-                    0x0845                  _ReciveIndex
-                    0x0846                  _g_LocalMac
-                    0x0848                  _g_pointData
-                    0x084c                  _device_type
-                    0x0850                  _flag
-                    0x0852                  _TemperateValue
-                    0x0854                  _g_MsTicks
-                    0x0858                  _g_kairuValue
-                    0x085c                  _g_changeLedTime
-                    0x0860                  _g_LEDOutState
-                    0x0862                  _g_RelayOutState
-                    0x0864                  _g_TPR2Count
-                    0x0866                  _ReciveErrorFlag
-                    0x0867                  _LocalAddress
-                    0x0868                  _g_SyncReadyWaitTime
-                    0x086a                  _g_RemoteWaitTime
-                    0x086c                  _g_lockUp
-                    0x086e                  _g_Order
-                    0x0870                  _g_DelayTime
-                    0x0876                  _g_SystemVoltageParameter
-                    0x0896                  _g_SystemCalibrationCoefficient
-                    0x08a2                  _g_SystemLimit
-                    0x08f2                  _g_ActionCount
-                    0x08fe                  _g_SystemState
-                    0x0906                  _g_SyncCommand
-                    0x0916                  _g_SetParameterCollect
-                    0x0a24                  _g_ReadOnlyParameterCollect
-                    0x0af6                  _g_data
-                    0x0afe                  _CycleInquireConnedctionObj
-                    0x0b2e                  _StatusChangedConnedctionObj
-                    0x0b5e                  _VisibleConnectionObj
-                    0x0b8e                  _DeviceNetObj
-                    0x0b92                  _IdentifierObj
-                    0x0ba4                  _SendBufferData
-                    0x0bae                  _ReciveBufferData
-                    0x0bb8                  _DeviceNetReciveFrame
-                    0x0bc2                  _DeviceNetSendFrame
-                    0x0bcc                  _out_Data
-                    0x0bd4                  _ReciveBuffer
-                    0x0c14                  _FrameData
-                    0x0c54                  _RtuFrame
-                    0x0c64                  _SendFrameData
-                    0x0ca4                  _g_SetSwitchState
-                    0x0cf4                  _g_Index
-                    0x0d0c                  _g_timeCount
-                    0x0d22                  _g_lockflag
-                    0x0d38                  _g_SysTimeStamp
-                    0x0d54                  _g_SuddenState
-                    0x0d62                  _g_qSendFrame
-                    0x0d6c                  _g_Time
+                    0x0838                  _g_pPoint
+                    0x083e                  _ReciveBufferLen
+                    0x083f                  _FifoHead
+                    0x0840                  _FifoEnd
+                    0x0841                  _DealStep
+                    0x0842                  _completeFlag
+                    0x0843                  _ReciveIndex
+                    0x0844                  _g_LocalMac
+                    0x0846                  _g_pointData
+                    0x084a                  _device_type
+                    0x084e                  _flag
+                    0x0850                  _TemperateValue
+                    0x0852                  _g_MsTicks
+                    0x0856                  _g_kairuValue
+                    0x085a                  _g_changeLedTime
+                    0x085e                  _g_LEDOutState
+                    0x0860                  _g_RelayOutState
+                    0x0862                  _g_TPR2Count
+                    0x0864                  _ReciveErrorFlag
+                    0x0865                  _LocalAddress
+                    0x0866                  _g_SyncReadyWaitTime
+                    0x0868                  _g_RemoteWaitTime
+                    0x086a                  _g_lockUp
+                    0x086c                  _g_Order
+                    0x086e                  _g_DelayTime
+                    0x0874                  _g_SystemVoltageParameter
+                    0x0894                  _g_SystemCalibrationCoefficient
+                    0x08a0                  _g_SystemLimit
+                    0x08f0                  _g_ActionCount
+                    0x08fc                  _g_SystemState
+                    0x0904                  _g_SyncCommand
+                    0x0914                  _g_SetParameterCollect
+                    0x0a22                  _g_ReadOnlyParameterCollect
+                    0x0af4                  _g_data
+                    0x0afc                  _CycleInquireConnedctionObj
+                    0x0b2c                  _StatusChangedConnedctionObj
+                    0x0b5c                  _VisibleConnectionObj
+                    0x0b8c                  _DeviceNetObj
+                    0x0b90                  _IdentifierObj
+                    0x0ba2                  _SendBufferData
+                    0x0bac                  _ReciveBufferData
+                    0x0bb6                  _DeviceNetReciveFrame
+                    0x0bc0                  _DeviceNetSendFrame
+                    0x0bca                  _out_Data
+                    0x0bd2                  _ReciveBuffer
+                    0x0c12                  _FrameData
+                    0x0c52                  _RtuFrame
+                    0x0c62                  _SendFrameData
+                    0x0ca2                  _g_SetSwitchState
+                    0x0cf2                  _g_Index
+                    0x0d0a                  _g_timeCount
+                    0x0d20                  _g_lockflag
+                    0x0d36                  _g_RemoteControlState
+                    0x0d40                  _g_SuddenState
+                    0x0d4e                  _g_qSendFrame
+                    0x0d58                  _g_SysTimeStamp
+                    0x0d78                  _g_Time
 
 External Symbols in Data Memory (by name):
 
-                    0x0afe                  _CycleInquireConnedctionObj
-                    0x0843                  _DealStep
+                    0x0afc                  _CycleInquireConnedctionObj
+                    0x0841                  _DealStep
                     0x0820                  _DeviceNetClass
-                    0x0b8e                  _DeviceNetObj
-                    0x0bb8                  _DeviceNetReciveFrame
-                    0x0bc2                  _DeviceNetSendFrame
-                    0x0842                  _FifoEnd
-                    0x0841                  _FifoHead
-                    0x0c14                  _FrameData
-                    0x0b92                  _IdentifierObj
-                    0x0867                  _LocalAddress
-                    0x0bd4                  _ReciveBuffer
-                    0x0bae                  _ReciveBufferData
-                    0x0840                  _ReciveBufferLen
-                    0x0866                  _ReciveErrorFlag
-                    0x0845                  _ReciveIndex
+                    0x0b8c                  _DeviceNetObj
+                    0x0bb6                  _DeviceNetReciveFrame
+                    0x0bc0                  _DeviceNetSendFrame
+                    0x0840                  _FifoEnd
+                    0x083f                  _FifoHead
+                    0x0c12                  _FrameData
+                    0x0b90                  _IdentifierObj
+                    0x0865                  _LocalAddress
+                    0x0bd2                  _ReciveBuffer
+                    0x0bac                  _ReciveBufferData
+                    0x083e                  _ReciveBufferLen
+                    0x0864                  _ReciveErrorFlag
+                    0x0843                  _ReciveIndex
                     0x0822                  _Rframe
-                    0x0c54                  _RtuFrame
-                    0x0ba4                  _SendBufferData
-                    0x0c64                  _SendFrameData
-                    0x0b2e                  _StatusChangedConnedctionObj
-                    0x0852                  _TemperateValue
-                    0x0b5e                  _VisibleConnectionObj
-                    0x0844                  _completeFlag
-                    0x084c                  _device_type
-                    0x0850                  _flag
-                    0x08f2                  _g_ActionCount
+                    0x0c52                  _RtuFrame
+                    0x0ba2                  _SendBufferData
+                    0x0c62                  _SendFrameData
+                    0x0b2c                  _StatusChangedConnedctionObj
+                    0x0850                  _TemperateValue
+                    0x0b5c                  _VisibleConnectionObj
+                    0x0842                  _completeFlag
+                    0x084a                  _device_type
+                    0x084e                  _flag
+                    0x08f0                  _g_ActionCount
                     0x0830                  _g_CheckTime
-                    0x0870                  _g_DelayTime
-                    0x0cf4                  _g_Index
-                    0x0860                  _g_LEDOutState
-                    0x0846                  _g_LocalMac
-                    0x0854                  _g_MsTicks
-                    0x086e                  _g_Order
-                    0x0a24                  _g_ReadOnlyParameterCollect
-                    0x0862                  _g_RelayOutState
-                    0x0838                  _g_RemoteControlState
-                    0x086a                  _g_RemoteWaitTime
-                    0x0916                  _g_SetParameterCollect
-                    0x0ca4                  _g_SetSwitchState
-                    0x0d54                  _g_SuddenState
-                    0x0906                  _g_SyncCommand
-                    0x0868                  _g_SyncReadyWaitTime
-                    0x0d38                  _g_SysTimeStamp
-                    0x0896                  _g_SystemCalibrationCoefficient
-                    0x08a2                  _g_SystemLimit
-                    0x08fe                  _g_SystemState
-                    0x0876                  _g_SystemVoltageParameter
-                    0x0864                  _g_TPR2Count
-                    0x0d6c                  _g_Time
-                    0x085c                  _g_changeLedTime
-                    0x0af6                  _g_data
-                    0x0858                  _g_kairuValue
+                    0x086e                  _g_DelayTime
+                    0x0cf2                  _g_Index
+                    0x085e                  _g_LEDOutState
+                    0x0844                  _g_LocalMac
+                    0x0852                  _g_MsTicks
+                    0x086c                  _g_Order
+                    0x0a22                  _g_ReadOnlyParameterCollect
+                    0x0860                  _g_RelayOutState
+                    0x0d36                  _g_RemoteControlState
+                    0x0868                  _g_RemoteWaitTime
+                    0x0914                  _g_SetParameterCollect
+                    0x0ca2                  _g_SetSwitchState
+                    0x0d40                  _g_SuddenState
+                    0x0904                  _g_SyncCommand
+                    0x0866                  _g_SyncReadyWaitTime
+                    0x0d58                  _g_SysTimeStamp
+                    0x0894                  _g_SystemCalibrationCoefficient
+                    0x08a0                  _g_SystemLimit
+                    0x08fc                  _g_SystemState
+                    0x0874                  _g_SystemVoltageParameter
+                    0x0862                  _g_TPR2Count
+                    0x0d78                  _g_Time
+                    0x085a                  _g_changeLedTime
+                    0x0af4                  _g_data
+                    0x0856                  _g_kairuValue
                     0x0810                  _g_lastRunOrder
-                    0x086c                  _g_lockUp
-                    0x0d22                  _g_lockflag
-                    0x0848                  _g_pointData
-                    0x0d62                  _g_qSendFrame
-                    0x0d0c                  _g_timeCount
+                    0x086a                  _g_lockUp
+                    0x0d20                  _g_lockflag
+                    0x0838                  _g_pPoint
+                    0x0846                  _g_pointData
+                    0x0d4e                  _g_qSendFrame
+                    0x0d0a                  _g_timeCount
                     0x0816                  _major_ver
                     0x0817                  _minor_ver
-                    0x0bcc                  _out_Data
+                    0x0bca                  _out_Data
                     0x0814                  _product_code
                     0x081c                  _product_name
                     0x0812                  _providerID
@@ -352,8 +354,8 @@ External Symbols in Program Memory (by address):
 
                   0x000100                  __resetPRI
                   0x00013c                  __psv_init
-                  0x000152                  __data_init_standard
                   0x000152                  __data_init
+                  0x000152                  __data_init_standard
                   0x000200                  __OscillatorFail
                   0x000206                  __AddressError
                   0x00020c                  __StackError
@@ -369,368 +371,370 @@ External Symbols in Program Memory (by address):
                   0x000484                  _HEZHA_Action
                   0x00053e                  _FENZHA_Action
                   0x0005f8                  _YongciMainTask
-                  0x000902                  _YongciFirstInit
-                  0x000aac                  _InitSetSwitchState
-                  0x000c3c                  _SwitchOnFirstPhase
-                  0x000caa                  _SwitchOnSecondPhase
-                  0x000d18                  _SwitchOnThirdPhase
-                  0x000d86                  _SwitchOffFirstPhase
-                  0x000df4                  _SwitchOffSecondPhase
-                  0x000e62                  _SwitchOffThirdPhase
-                  0x000ed0                  _GetSwitchOnTime
-                  0x000f16                  _GetOffestTime
-                  0x000f90                  _UpdateCount
-                  0x000ff0                  __DefaultInterrupt
-                  0x000ff6                  __eedata_helper1
-                  0x001020                  __eedata_helper2
-                  0x001028                  __eedata_helper3
-                  0x001034                  __eedata_helper4
-                  0x001046                  __memcpy_helper
-                  0x00107c                  ___subsf3
-                  0x00107e                  ___addsf3
-                  0x001138                  ___divsf3
-                  0x0011bc                  ___ltsf2
-                  0x0011bc                  ___lesf2
-                  0x0011bc                  ___eqsf2
-                  0x0011c0                  ___gtsf2
-                  0x0011c0                  ___gesf2
-                  0x0011c4                  ___fixunssfsi
-                  0x0011fa                  ___floatunsisf
-                  0x0011fe                  __fpack
-                  0x00124a                  __funpack
-                  0x001274                  __funpack2
-                  0x001284                  __fPropagateNaN
-                  0x001296                  __fbopExit
-                  0x00129e                  __fbopReturnNaN
-                  0x0012a4                  ___mulsf3
-                  0x00130c                  __fcompare
-                  0x001342                  ___floatundisf
-                  0x0013a0                  _auchCRCHi
-                  0x0014a0                  _auchCRCLo
-                  0x0015a8                  _SetParamValue
-                  0x001632                  _ReadParamValue
-                  0x0016f8                  _InitSetParameterCollect
-                  0x001f58                  _InitReadonlyParameterCollect
-                  0x0025e8                  _RefParameterInit
-                  0x002778                  _SetValueFloatUint16
-                  0x0027d8                  _GetValueFloatUint16
-                  0x002828                  _SetValueFloatInt32
-                  0x00287a                  _GetValueFloatInt32
-                  0x0028cc                  _SetValueUint16
-                  0x002910                  _GetValueUint16
-                  0x002952                  _SetValueUint8
-                  0x002982                  _GetValueUint8
-                  0x0029b2                  _WriteAccumulateSum
-                  0x002a6c                  _AccumulateSumVerify
-                  0x002b28                  _CheckIOState
-                  0x002d1c                  _DsplaySwitchState
-                  0x002f7a                  _SwitchScan
-                  0x003b48                  _SendAckMesssage
-                  0x003b76                  _ExecuteFunctioncode
-                  0x003c9c                  _FrameServer
-                  0x004352                  _SendErrorFrame
-                  0x0043a2                  _SendMessage
-                  0x0043fa                  _UpdataState
-                  0x0044ae                  __INT2Interrupt
-                  0x004614                  _GetLoopSwitch
-                  0x0048a4                  _CheckOrder
-                  0x004a24                  _InitDeviceNet
-                  0x004aba                  _InitVisibleConnectionObj
-                  0x004b04                  _InitCycleInquireConnectionObj
-                  0x004b4c                  _InitStatusChangedConnectionObj
-                  0x004b94                  _CANFrameFilter
-                  0x004c14                  _ResponseMACID
-                  0x004ccc                  _CheckMACID
-                  0x004d4c                  _CheckAllocateCode
-                  0x004e62                  _CheckReleaseCode
-                  0x004fa2                  _UnconVisibleMsgService
-                  0x0053f8                  _DeviceMonitorPluse
-                  0x005400                  _DeviceNetReciveCenter
-                  0x005496                  _SendData
-                  0x0054b8                  _StartOverTimer
-                  0x0054d0                  _IsTimeRemain
-                  0x0054f2                  _ConfigCANOneBraud
-                  0x005532                  _ConfigCANOneMaskFilterRX0
-                  0x005572                  _ConfigCANOneMaskFilterRX1
-                  0x005608                  _InitCANOne
-                  0x005686                  _InitStandardCAN
-                  0x005750                  _ConfigDataTXB0
-                  0x00581e                  _ConfigDataTXB1
-                  0x0058f0                  _ConfigDataTXB2
-                  0x0059c2                  _CANSendData
-                  0x005c54                  _ReadRx0Frame
-                  0x005d06                  _GetReciveRX0EID
-                  0x005d66                  __C2Interrupt
-                  0x005eba                  _GetCapVoltage
-                  0x005f16                  _GetCapVolatageState
-                  0x005f62                  _CheckVoltage
-                  0x006164                  _ReadCapDropVoltage
-                  0x00622a                  _ReciveFrameDataInit
-                  0x006244                  _FrameQueneIn
-                  0x006280                  _FrameQueneOut
-                  0x0062c0                  _ReciveBufferDataDealing
-                  0x00640a                  _GenRTUFrame
-                  0x00649a                  _SendFrame
-                  0x0064d2                  _SetOverTime
-                  0x0064ec                  _CheckIsOverTime
-                  0x00650e                  _InitDeviceIO
-                  0x0065b8                  _HC595BSendData
-                  0x006606                  _HC595SendData
-                  0x006652                  _ReHC74165
-                  0x0066d4                  _InitInt2
-                  0x0066ec                  _TurnOnInt2
-                  0x0066f8                  _TurnOffInt2
-                  0x006704                  _UpdateLEDIndicateState
-                  0x006734                  _UpdateRelayIndicateState
-                  0x006764                  _UpdateIndicateState
-                  0x006782                  _SD2405_Init
-                  0x0067fe                  _BCD_to_Decimal
-                  0x006836                  _Decimal_to_BCD
-                  0x00686e                  _turnTime
-                  0x0068ac                  _GetTime
-                  0x006950                  _SetTime
-                  0x0069ba                  _WriteWord_EEPROM
-                  0x006a50                  _ReadWord_EEPROM
-                  0x006a6a                  _ReadEEPROM
-                  0x006ade                  _WriteEEPROM
-                  0x006b7a                  _WriteAccumulateSum_EEPROM
-                  0x006b94                  _ReadAccumulateSum
-                  0x006baa                  _WriteFenzhaCount
-                  0x006bd4                  _IIC_Start
-                  0x006bf0                  _IIC_Stop
-                  0x006c12                  _IIC_Wait_Ack
-                  0x006c4e                  _IIC_Ack
-                  0x006c6a                  _IIC_SendByte
-                  0x006cb6                  _IIC_ReadByte
-                  0x006cfe                  _IIC_WriteByte
-                  0x006d42                  _I2CMasterWrite
-                  0x006d7e                  _IIC_MasterReadByte
-                  0x006dae                  _I2CMasterRead
-                  0x006de2                  _DS18B20Reset
-                  0x006e26                  _DS18B20ReadBit
-                  0x006e54                  _DS18B20ReadByte
-                  0x006e98                  _DS18B20WriteByte
-                  0x006ef4                  _DS18B20TempChange
-                  0x006f0e                  _DS18B20GetTemperature
-                  0x006fa0                  _Init_Timer1
-                  0x006fe8                  _SetTimer2
-                  0x00702c                  _StartTimer2
-                  0x007040                  _StopTimer2
-                  0x00704c                  _Init_Timer3
-                  0x007076                  _StartTimer3
-                  0x00708a                  _ResetTimer3
-                  0x007098                  _Init_Timer4
-                  0x0070c2                  _InitUART1
-                  0x007128                  _InitPortsUART1
-                  0x007136                  _UsartInit
-                  0x007142                  _UsartSend
-                  0x007160                  _UsartRecive
-                  0x00716a                  __U1RXInterrupt
-                  0x007190                  __U1TXInterrupt
-                  0x007198                  _IsOverTime
-                  0x0071f2                  _OverflowDetection
-                  0x00720e                  _Delay_ms
-                  0x00723c                  __T2Interrupt
-                  0x0072fc                  _AdcInit
-                  0x007364                  _SoftSampleOnce
-                  0x007396                  _main
-                  0x007400                  _CRC16
-                  0x00745a                  ___delay32
+                  0x00092a                  _YongciFirstInit
+                  0x000ad8                  _InitSetSwitchState
+                  0x000c68                  _SwitchOnFirstPhase
+                  0x000cd6                  _SwitchOnSecondPhase
+                  0x000d44                  _SwitchOnThirdPhase
+                  0x000db2                  _SwitchOffFirstPhase
+                  0x000e20                  _SwitchOffSecondPhase
+                  0x000e8e                  _SwitchOffThirdPhase
+                  0x000efc                  _GetSwitchOnTime
+                  0x000f42                  _GetOffestTime
+                  0x000fbc                  _UpdateCount
+                  0x00101c                  __DefaultInterrupt
+                  0x001022                  __eedata_helper1
+                  0x00104c                  __eedata_helper2
+                  0x001054                  __eedata_helper3
+                  0x001060                  __eedata_helper4
+                  0x001072                  __memcpy_helper
+                  0x0010a8                  ___subsf3
+                  0x0010aa                  ___addsf3
+                  0x001164                  ___divsf3
+                  0x0011e8                  ___eqsf2
+                  0x0011e8                  ___ltsf2
+                  0x0011e8                  ___lesf2
+                  0x0011ec                  ___gtsf2
+                  0x0011ec                  ___gesf2
+                  0x0011f0                  ___fixunssfsi
+                  0x001226                  ___floatunsisf
+                  0x00122a                  __fpack
+                  0x001276                  __funpack
+                  0x0012a0                  __funpack2
+                  0x0012b0                  __fPropagateNaN
+                  0x0012c2                  __fbopExit
+                  0x0012ca                  __fbopReturnNaN
+                  0x0012d0                  ___mulsf3
+                  0x001338                  __fcompare
+                  0x00136e                  ___floatundisf
+                  0x0013cc                  _auchCRCHi
+                  0x0014cc                  _auchCRCLo
+                  0x0015d4                  _SetParamValue
+                  0x00165e                  _ReadParamValue
+                  0x001724                  _InitSetParameterCollect
+                  0x001f84                  _InitReadonlyParameterCollect
+                  0x00260a                  _RefParameterInit
+                  0x00279a                  _SetValueFloatUint16
+                  0x0027fa                  _GetValueFloatUint16
+                  0x00284a                  _SetValueFloatInt32
+                  0x00289c                  _GetValueFloatInt32
+                  0x0028ee                  _SetValueUint16
+                  0x002932                  _GetValueUint16
+                  0x002974                  _SetValueUint8
+                  0x0029a4                  _GetValueUint8
+                  0x0029d4                  _WriteAccumulateSum
+                  0x002a8e                  _AccumulateSumVerify
+                  0x002b4a                  _CheckIOState
+                  0x002d3e                  _DsplaySwitchState
+                  0x002f9c                  _SwitchScan
+                  0x003b6a                  _SendAckMesssage
+                  0x003b98                  _ExecuteFunctioncode
+                  0x003cbe                  _FrameServer
+                  0x0042cc                  _SendErrorFrame
+                  0x00431c                  _SendMessage
+                  0x004374                  _UpdataState
+                  0x004428                  __INT2Interrupt
+                  0x004588                  _GetLoopSwitch
+                  0x0047e0                  _CheckOrder
+                  0x00495c                  _GetValue
+                  0x004a10                  _InitDeviceNet
+                  0x004abe                  _InitVisibleConnectionObj
+                  0x004b08                  _InitCycleInquireConnectionObj
+                  0x004b50                  _InitStatusChangedConnectionObj
+                  0x004b98                  _CANFrameFilter
+                  0x004c18                  _ResponseMACID
+                  0x004cd0                  _CheckMACID
+                  0x004d50                  _CheckAllocateCode
+                  0x004e66                  _CheckReleaseCode
+                  0x004fa6                  _UnconVisibleMsgService
+                  0x0053fc                  _DeviceMonitorPluse
+                  0x005404                  _DeviceNetReciveCenter
+                  0x00549a                  _SendData
+                  0x0054bc                  _StartOverTimer
+                  0x0054d4                  _IsTimeRemain
+                  0x0054f6                  _ConfigCANOneBraud
+                  0x005536                  _ConfigCANOneMaskFilterRX0
+                  0x005576                  _ConfigCANOneMaskFilterRX1
+                  0x00560c                  _InitCANOne
+                  0x00568a                  _InitStandardCAN
+                  0x005754                  _ConfigDataTXB0
+                  0x005822                  _ConfigDataTXB1
+                  0x0058f4                  _ConfigDataTXB2
+                  0x0059c6                  _CANSendData
+                  0x005c58                  _ReadRx0Frame
+                  0x005d0a                  _GetReciveRX0EID
+                  0x005d6a                  __C2Interrupt
+                  0x005ebe                  _GetCapVoltage
+                  0x00613a                  _GetCapVolatageState
+                  0x006186                  _CheckVoltage
+                  0x006388                  _ReadCapDropVoltage
+                  0x00644a                  _ReciveFrameDataInit
+                  0x006464                  _FrameQueneIn
+                  0x0064a0                  _FrameQueneOut
+                  0x0064e0                  _ReciveBufferDataDealing
+                  0x00662a                  _GenRTUFrame
+                  0x0066ba                  _SendFrame
+                  0x0066f2                  _SetOverTime
+                  0x00670c                  _CheckIsOverTime
+                  0x00672e                  _InitDeviceIO
+                  0x0067d8                  _HC595BSendData
+                  0x006826                  _HC595SendData
+                  0x006872                  _ReHC74165
+                  0x0068f4                  _InitInt2
+                  0x00690c                  _TurnOnInt2
+                  0x006918                  _TurnOffInt2
+                  0x006924                  _UpdateLEDIndicateState
+                  0x006954                  _UpdateRelayIndicateState
+                  0x006984                  _UpdateIndicateState
+                  0x0069a2                  _SD2405_Init
+                  0x006a1e                  _BCD_to_Decimal
+                  0x006a56                  _Decimal_to_BCD
+                  0x006a8e                  _turnTime
+                  0x006acc                  _GetTime
+                  0x006b70                  _SetTime
+                  0x006bda                  _WriteWord_EEPROM
+                  0x006c70                  _ReadWord_EEPROM
+                  0x006c8a                  _ReadEEPROM
+                  0x006cfe                  _WriteEEPROM
+                  0x006d9a                  _WriteAccumulateSum_EEPROM
+                  0x006db4                  _ReadAccumulateSum
+                  0x006dca                  _WriteFenzhaCount
+                  0x006df4                  _IIC_Start
+                  0x006e10                  _IIC_Stop
+                  0x006e32                  _IIC_Wait_Ack
+                  0x006e6e                  _IIC_Ack
+                  0x006e8a                  _IIC_SendByte
+                  0x006ed6                  _IIC_ReadByte
+                  0x006f1e                  _IIC_WriteByte
+                  0x006f62                  _I2CMasterWrite
+                  0x006f9e                  _IIC_MasterReadByte
+                  0x006fce                  _I2CMasterRead
+                  0x007002                  _DS18B20Reset
+                  0x007046                  _DS18B20ReadBit
+                  0x007074                  _DS18B20ReadByte
+                  0x0070b8                  _DS18B20WriteByte
+                  0x007114                  _DS18B20TempChange
+                  0x00712e                  _DS18B20GetTemperature
+                  0x0071c0                  _Init_Timer1
+                  0x007208                  _SetTimer2
+                  0x00724c                  _StartTimer2
+                  0x007260                  _StopTimer2
+                  0x00726c                  _Init_Timer3
+                  0x007296                  _StartTimer3
+                  0x0072aa                  _ResetTimer3
+                  0x0072b8                  _Init_Timer4
+                  0x0072e2                  _InitUART1
+                  0x007348                  _InitPortsUART1
+                  0x007356                  _UsartInit
+                  0x007362                  _UsartSend
+                  0x007398                  _UsartRecive
+                  0x0073a2                  __U1RXInterrupt
+                  0x0073c8                  __U1TXInterrupt
+                  0x0073d0                  _IsOverTime
+                  0x00742a                  _OverflowDetection
+                  0x007446                  _Delay_ms
+                  0x007474                  __T2Interrupt
+                  0x007534                  _AdcInit
+                  0x00759c                  _SoftSampleOnce
+                  0x0075be                  _main
+                  0x007628                  _CRC16
+                  0x007682                  ___delay32
                   0xf80006                  __FBS.sec
                   0xf80008                  __FSS.sec
                   0xf8000a                  __FGS.sec
 
 External Symbols in Program Memory (by name):
 
-                  0x002a6c                  _AccumulateSumVerify
-                  0x0072fc                  _AdcInit
-                  0x0067fe                  _BCD_to_Decimal
-                  0x004b94                  _CANFrameFilter
-                  0x0059c2                  _CANSendData
-                  0x007400                  _CRC16
-                  0x004d4c                  _CheckAllocateCode
-                  0x002b28                  _CheckIOState
-                  0x0064ec                  _CheckIsOverTime
-                  0x004ccc                  _CheckMACID
-                  0x0048a4                  _CheckOrder
-                  0x004e62                  _CheckReleaseCode
-                  0x005f62                  _CheckVoltage
-                  0x0054f2                  _ConfigCANOneBraud
-                  0x005532                  _ConfigCANOneMaskFilterRX0
-                  0x005572                  _ConfigCANOneMaskFilterRX1
-                  0x005750                  _ConfigDataTXB0
-                  0x00581e                  _ConfigDataTXB1
-                  0x0058f0                  _ConfigDataTXB2
-                  0x006f0e                  _DS18B20GetTemperature
-                  0x006e26                  _DS18B20ReadBit
-                  0x006e54                  _DS18B20ReadByte
-                  0x006de2                  _DS18B20Reset
-                  0x006ef4                  _DS18B20TempChange
-                  0x006e98                  _DS18B20WriteByte
-                  0x006836                  _Decimal_to_BCD
-                  0x00720e                  _Delay_ms
-                  0x0053f8                  _DeviceMonitorPluse
-                  0x005400                  _DeviceNetReciveCenter
-                  0x002d1c                  _DsplaySwitchState
-                  0x003b76                  _ExecuteFunctioncode
+                  0x002a8e                  _AccumulateSumVerify
+                  0x007534                  _AdcInit
+                  0x006a1e                  _BCD_to_Decimal
+                  0x004b98                  _CANFrameFilter
+                  0x0059c6                  _CANSendData
+                  0x007628                  _CRC16
+                  0x004d50                  _CheckAllocateCode
+                  0x002b4a                  _CheckIOState
+                  0x00670c                  _CheckIsOverTime
+                  0x004cd0                  _CheckMACID
+                  0x0047e0                  _CheckOrder
+                  0x004e66                  _CheckReleaseCode
+                  0x006186                  _CheckVoltage
+                  0x0054f6                  _ConfigCANOneBraud
+                  0x005536                  _ConfigCANOneMaskFilterRX0
+                  0x005576                  _ConfigCANOneMaskFilterRX1
+                  0x005754                  _ConfigDataTXB0
+                  0x005822                  _ConfigDataTXB1
+                  0x0058f4                  _ConfigDataTXB2
+                  0x00712e                  _DS18B20GetTemperature
+                  0x007046                  _DS18B20ReadBit
+                  0x007074                  _DS18B20ReadByte
+                  0x007002                  _DS18B20Reset
+                  0x007114                  _DS18B20TempChange
+                  0x0070b8                  _DS18B20WriteByte
+                  0x006a56                  _Decimal_to_BCD
+                  0x007446                  _Delay_ms
+                  0x0053fc                  _DeviceMonitorPluse
+                  0x005404                  _DeviceNetReciveCenter
+                  0x002d3e                  _DsplaySwitchState
+                  0x003b98                  _ExecuteFunctioncode
                   0x00053e                  _FENZHA_Action
-                  0x006244                  _FrameQueneIn
-                  0x006280                  _FrameQueneOut
-                  0x003c9c                  _FrameServer
-                  0x00640a                  _GenRTUFrame
-                  0x005f16                  _GetCapVolatageState
-                  0x005eba                  _GetCapVoltage
-                  0x004614                  _GetLoopSwitch
-                  0x000f16                  _GetOffestTime
-                  0x005d06                  _GetReciveRX0EID
-                  0x000ed0                  _GetSwitchOnTime
-                  0x0068ac                  _GetTime
-                  0x00287a                  _GetValueFloatInt32
-                  0x0027d8                  _GetValueFloatUint16
-                  0x002910                  _GetValueUint16
-                  0x002982                  _GetValueUint8
-                  0x0065b8                  _HC595BSendData
-                  0x006606                  _HC595SendData
+                  0x006464                  _FrameQueneIn
+                  0x0064a0                  _FrameQueneOut
+                  0x003cbe                  _FrameServer
+                  0x00662a                  _GenRTUFrame
+                  0x00613a                  _GetCapVolatageState
+                  0x005ebe                  _GetCapVoltage
+                  0x004588                  _GetLoopSwitch
+                  0x000f42                  _GetOffestTime
+                  0x005d0a                  _GetReciveRX0EID
+                  0x000efc                  _GetSwitchOnTime
+                  0x006acc                  _GetTime
+                  0x00495c                  _GetValue
+                  0x00289c                  _GetValueFloatInt32
+                  0x0027fa                  _GetValueFloatUint16
+                  0x002932                  _GetValueUint16
+                  0x0029a4                  _GetValueUint8
+                  0x0067d8                  _HC595BSendData
+                  0x006826                  _HC595SendData
                   0x000484                  _HEZHA_Action
-                  0x006dae                  _I2CMasterRead
-                  0x006d42                  _I2CMasterWrite
-                  0x006c4e                  _IIC_Ack
-                  0x006d7e                  _IIC_MasterReadByte
-                  0x006cb6                  _IIC_ReadByte
-                  0x006c6a                  _IIC_SendByte
-                  0x006bd4                  _IIC_Start
-                  0x006bf0                  _IIC_Stop
-                  0x006c12                  _IIC_Wait_Ack
-                  0x006cfe                  _IIC_WriteByte
-                  0x005608                  _InitCANOne
-                  0x004b04                  _InitCycleInquireConnectionObj
-                  0x00650e                  _InitDeviceIO
-                  0x004a24                  _InitDeviceNet
-                  0x0066d4                  _InitInt2
-                  0x007128                  _InitPortsUART1
-                  0x001f58                  _InitReadonlyParameterCollect
-                  0x0016f8                  _InitSetParameterCollect
-                  0x000aac                  _InitSetSwitchState
-                  0x005686                  _InitStandardCAN
-                  0x004b4c                  _InitStatusChangedConnectionObj
-                  0x0070c2                  _InitUART1
-                  0x004aba                  _InitVisibleConnectionObj
-                  0x006fa0                  _Init_Timer1
-                  0x00704c                  _Init_Timer3
-                  0x007098                  _Init_Timer4
-                  0x007198                  _IsOverTime
-                  0x0054d0                  _IsTimeRemain
+                  0x006fce                  _I2CMasterRead
+                  0x006f62                  _I2CMasterWrite
+                  0x006e6e                  _IIC_Ack
+                  0x006f9e                  _IIC_MasterReadByte
+                  0x006ed6                  _IIC_ReadByte
+                  0x006e8a                  _IIC_SendByte
+                  0x006df4                  _IIC_Start
+                  0x006e10                  _IIC_Stop
+                  0x006e32                  _IIC_Wait_Ack
+                  0x006f1e                  _IIC_WriteByte
+                  0x00560c                  _InitCANOne
+                  0x004b08                  _InitCycleInquireConnectionObj
+                  0x00672e                  _InitDeviceIO
+                  0x004a10                  _InitDeviceNet
+                  0x0068f4                  _InitInt2
+                  0x007348                  _InitPortsUART1
+                  0x001f84                  _InitReadonlyParameterCollect
+                  0x001724                  _InitSetParameterCollect
+                  0x000ad8                  _InitSetSwitchState
+                  0x00568a                  _InitStandardCAN
+                  0x004b50                  _InitStatusChangedConnectionObj
+                  0x0072e2                  _InitUART1
+                  0x004abe                  _InitVisibleConnectionObj
+                  0x0071c0                  _Init_Timer1
+                  0x00726c                  _Init_Timer3
+                  0x0072b8                  _Init_Timer4
+                  0x0073d0                  _IsOverTime
+                  0x0054d4                  _IsTimeRemain
                   0x00036c                  _OffLock
                   0x00035e                  _OnLock
-                  0x0071f2                  _OverflowDetection
-                  0x006652                  _ReHC74165
-                  0x006b94                  _ReadAccumulateSum
-                  0x006164                  _ReadCapDropVoltage
-                  0x006a6a                  _ReadEEPROM
-                  0x001632                  _ReadParamValue
-                  0x005c54                  _ReadRx0Frame
-                  0x006a50                  _ReadWord_EEPROM
-                  0x0062c0                  _ReciveBufferDataDealing
-                  0x00622a                  _ReciveFrameDataInit
-                  0x0025e8                  _RefParameterInit
-                  0x00708a                  _ResetTimer3
-                  0x004c14                  _ResponseMACID
-                  0x006782                  _SD2405_Init
-                  0x003b48                  _SendAckMesssage
-                  0x005496                  _SendData
-                  0x004352                  _SendErrorFrame
-                  0x00649a                  _SendFrame
-                  0x0043a2                  _SendMessage
-                  0x0064d2                  _SetOverTime
-                  0x0015a8                  _SetParamValue
-                  0x006950                  _SetTime
-                  0x006fe8                  _SetTimer2
-                  0x002828                  _SetValueFloatInt32
-                  0x002778                  _SetValueFloatUint16
-                  0x0028cc                  _SetValueUint16
-                  0x002952                  _SetValueUint8
-                  0x007364                  _SoftSampleOnce
-                  0x0054b8                  _StartOverTimer
-                  0x00702c                  _StartTimer2
-                  0x007076                  _StartTimer3
-                  0x007040                  _StopTimer2
-                  0x000d86                  _SwitchOffFirstPhase
-                  0x000df4                  _SwitchOffSecondPhase
-                  0x000e62                  _SwitchOffThirdPhase
-                  0x000c3c                  _SwitchOnFirstPhase
-                  0x000caa                  _SwitchOnSecondPhase
-                  0x000d18                  _SwitchOnThirdPhase
-                  0x002f7a                  _SwitchScan
+                  0x00742a                  _OverflowDetection
+                  0x006872                  _ReHC74165
+                  0x006db4                  _ReadAccumulateSum
+                  0x006388                  _ReadCapDropVoltage
+                  0x006c8a                  _ReadEEPROM
+                  0x00165e                  _ReadParamValue
+                  0x005c58                  _ReadRx0Frame
+                  0x006c70                  _ReadWord_EEPROM
+                  0x0064e0                  _ReciveBufferDataDealing
+                  0x00644a                  _ReciveFrameDataInit
+                  0x00260a                  _RefParameterInit
+                  0x0072aa                  _ResetTimer3
+                  0x004c18                  _ResponseMACID
+                  0x0069a2                  _SD2405_Init
+                  0x003b6a                  _SendAckMesssage
+                  0x00549a                  _SendData
+                  0x0042cc                  _SendErrorFrame
+                  0x0066ba                  _SendFrame
+                  0x00431c                  _SendMessage
+                  0x0066f2                  _SetOverTime
+                  0x0015d4                  _SetParamValue
+                  0x006b70                  _SetTime
+                  0x007208                  _SetTimer2
+                  0x00284a                  _SetValueFloatInt32
+                  0x00279a                  _SetValueFloatUint16
+                  0x0028ee                  _SetValueUint16
+                  0x002974                  _SetValueUint8
+                  0x00759c                  _SoftSampleOnce
+                  0x0054bc                  _StartOverTimer
+                  0x00724c                  _StartTimer2
+                  0x007296                  _StartTimer3
+                  0x007260                  _StopTimer2
+                  0x000db2                  _SwitchOffFirstPhase
+                  0x000e20                  _SwitchOffSecondPhase
+                  0x000e8e                  _SwitchOffThirdPhase
+                  0x000c68                  _SwitchOnFirstPhase
+                  0x000cd6                  _SwitchOnSecondPhase
+                  0x000d44                  _SwitchOnThirdPhase
+                  0x002f9c                  _SwitchScan
                   0x000376                  _TongBuHeZha
-                  0x0066f8                  _TurnOffInt2
-                  0x0066ec                  _TurnOnInt2
-                  0x004fa2                  _UnconVisibleMsgService
-                  0x0043fa                  _UpdataState
-                  0x000f90                  _UpdateCount
-                  0x006764                  _UpdateIndicateState
-                  0x006704                  _UpdateLEDIndicateState
-                  0x006734                  _UpdateRelayIndicateState
-                  0x007136                  _UsartInit
-                  0x007160                  _UsartRecive
-                  0x007142                  _UsartSend
-                  0x0029b2                  _WriteAccumulateSum
-                  0x006b7a                  _WriteAccumulateSum_EEPROM
-                  0x006ade                  _WriteEEPROM
-                  0x006baa                  _WriteFenzhaCount
-                  0x0069ba                  _WriteWord_EEPROM
-                  0x000902                  _YongciFirstInit
+                  0x006918                  _TurnOffInt2
+                  0x00690c                  _TurnOnInt2
+                  0x004fa6                  _UnconVisibleMsgService
+                  0x004374                  _UpdataState
+                  0x000fbc                  _UpdateCount
+                  0x006984                  _UpdateIndicateState
+                  0x006924                  _UpdateLEDIndicateState
+                  0x006954                  _UpdateRelayIndicateState
+                  0x007356                  _UsartInit
+                  0x007398                  _UsartRecive
+                  0x007362                  _UsartSend
+                  0x0029d4                  _WriteAccumulateSum
+                  0x006d9a                  _WriteAccumulateSum_EEPROM
+                  0x006cfe                  _WriteEEPROM
+                  0x006dca                  _WriteFenzhaCount
+                  0x006bda                  _WriteWord_EEPROM
+                  0x00092a                  _YongciFirstInit
                   0x0005f8                  _YongciMainTask
                   0x000206                  __AddressError
                   0x00021e                  __AltAddressError
                   0x00022a                  __AltMathError
                   0x000218                  __AltOscillatorFail
                   0x000224                  __AltStackError
-                  0x005d66                  __C2Interrupt
-                  0x000ff0                  __DefaultInterrupt
+                  0x005d6a                  __C2Interrupt
+                  0x00101c                  __DefaultInterrupt
                   0xf80006                  __FBS.sec
                   0xf8000a                  __FGS.sec
                   0xf80008                  __FSS.sec
-                  0x0044ae                  __INT2Interrupt
+                  0x004428                  __INT2Interrupt
                   0x000212                  __MathError
                   0x000200                  __OscillatorFail
                   0x00020c                  __StackError
-                  0x00723c                  __T2Interrupt
+                  0x007474                  __T2Interrupt
                   0x000230                  __T3Interrupt
-                  0x00716a                  __U1RXInterrupt
-                  0x007190                  __U1TXInterrupt
-                  0x00107e                  ___addsf3
-                  0x00745a                  ___delay32
-                  0x001138                  ___divsf3
-                  0x0011bc                  ___eqsf2
-                  0x0011c4                  ___fixunssfsi
-                  0x001342                  ___floatundisf
-                  0x0011fa                  ___floatunsisf
-                  0x0011c0                  ___gesf2
-                  0x0011c0                  ___gtsf2
-                  0x0011bc                  ___lesf2
-                  0x0011bc                  ___ltsf2
-                  0x0012a4                  ___mulsf3
-                  0x00107c                  ___subsf3
+                  0x0073a2                  __U1RXInterrupt
+                  0x0073c8                  __U1TXInterrupt
+                  0x0010aa                  ___addsf3
+                  0x007682                  ___delay32
+                  0x001164                  ___divsf3
+                  0x0011e8                  ___eqsf2
+                  0x0011f0                  ___fixunssfsi
+                  0x00136e                  ___floatundisf
+                  0x001226                  ___floatunsisf
+                  0x0011ec                  ___gesf2
+                  0x0011ec                  ___gtsf2
+                  0x0011e8                  ___lesf2
+                  0x0011e8                  ___ltsf2
+                  0x0012d0                  ___mulsf3
+                  0x0010a8                  ___subsf3
                   0x000152                  __data_init
                   0x000152                  __data_init_standard
-                  0x000ff6                  __eedata_helper1
-                  0x001020                  __eedata_helper2
-                  0x001028                  __eedata_helper3
-                  0x001034                  __eedata_helper4
-                  0x001284                  __fPropagateNaN
-                  0x001296                  __fbopExit
-                  0x00129e                  __fbopReturnNaN
-                  0x00130c                  __fcompare
-                  0x0011fe                  __fpack
-                  0x00124a                  __funpack
-                  0x001274                  __funpack2
-                  0x001046                  __memcpy_helper
+                  0x001022                  __eedata_helper1
+                  0x00104c                  __eedata_helper2
+                  0x001054                  __eedata_helper3
+                  0x001060                  __eedata_helper4
+                  0x0012b0                  __fPropagateNaN
+                  0x0012c2                  __fbopExit
+                  0x0012ca                  __fbopReturnNaN
+                  0x001338                  __fcompare
+                  0x00122a                  __fpack
+                  0x001276                  __funpack
+                  0x0012a0                  __funpack2
+                  0x001072                  __memcpy_helper
                   0x00013c                  __psv_init
                   0x000100                  __resetPRI
-                  0x0013a0                  _auchCRCHi
-                  0x0014a0                  _auchCRCLo
-                  0x007396                  _main
-                  0x00686e                  _turnTime
+                  0x0013cc                  _auchCRCHi
+                  0x0014cc                  _auchCRCLo
+                  0x0075be                  _main
+                  0x006a8e                  _turnTime
 
 Memory Configuration
 
@@ -805,7 +809,7 @@ LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libfx-elf.a
                   0x000002          0x2 SHORT 0x0 ((ABSOLUTE (__reset) >> 0x10) & 0x7f)
                   0x000003          0x2 SHORT 0x0
 
-.text             0x000100       0x12a0
+.text             0x000100       0x12cc
  *(.init)
  .init            0x000100         0x4c c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
                   0x000100                  __resetPRI
@@ -827,7 +831,7 @@ LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libfx-elf.a
                   0x00021e                  __AltAddressError
                   0x000224                  __AltStackError
                   0x00022a                  __AltMathError
- .isr.text        0x000230        0xdc0 build/default/production/Source/Yongci/yongci.o
+ .isr.text        0x000230        0xdec build/default/production/Source/Yongci/yongci.o
                   0x000230                  __T3Interrupt
                   0x00035e                  _OnLock
                   0x00036c                  _OffLock
@@ -835,78 +839,78 @@ LOAD c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libfx-elf.a
                   0x000484                  _HEZHA_Action
                   0x00053e                  _FENZHA_Action
                   0x0005f8                  _YongciMainTask
-                  0x000902                  _YongciFirstInit
-                  0x000aac                  _InitSetSwitchState
-                  0x000c3c                  _SwitchOnFirstPhase
-                  0x000caa                  _SwitchOnSecondPhase
-                  0x000d18                  _SwitchOnThirdPhase
-                  0x000d86                  _SwitchOffFirstPhase
-                  0x000df4                  _SwitchOffSecondPhase
-                  0x000e62                  _SwitchOffThirdPhase
-                  0x000ed0                  _GetSwitchOnTime
-                  0x000f16                  _GetOffestTime
-                  0x000f90                  _UpdateCount
- .isr             0x000ff0          0x4 default_isr
-                  0x000ff0                  __DefaultInterrupt
+                  0x00092a                  _YongciFirstInit
+                  0x000ad8                  _InitSetSwitchState
+                  0x000c68                  _SwitchOnFirstPhase
+                  0x000cd6                  _SwitchOnSecondPhase
+                  0x000d44                  _SwitchOnThirdPhase
+                  0x000db2                  _SwitchOffFirstPhase
+                  0x000e20                  _SwitchOffSecondPhase
+                  0x000e8e                  _SwitchOffThirdPhase
+                  0x000efc                  _GetSwitchOnTime
+                  0x000f42                  _GetOffestTime
+                  0x000fbc                  _UpdateCount
+ .isr             0x00101c          0x4 default_isr
+                  0x00101c                  __DefaultInterrupt
  *(.libc)
  *(.libm)
  *(.libdsp)
  *(.lib*)
  .libpic30_crt_start_mode
-                  0x000ff4          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt_start_mode_normal.Leo)
-                  0x000ff4                  __crt_start_mode
-                  0x000ff4                  __crt_start_mode_normal
+                  0x001020          0x2 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt_start_mode_normal.Leo)
+                  0x001020                  __crt_start_mode
+                  0x001020                  __crt_start_mode_normal
  .libc.eedata_helper1234
-                  0x000ff6         0x50 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(eedata_helper.Leo)
-                  0x000ff6                  __eedata_helper1
-                  0x001020                  __eedata_helper2
-                  0x001028                  __eedata_helper3
-                  0x001034                  __eedata_helper4
+                  0x001022         0x50 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(eedata_helper.Leo)
+                  0x001022                  __eedata_helper1
+                  0x00104c                  __eedata_helper2
+                  0x001054                  __eedata_helper3
+                  0x001060                  __eedata_helper4
  .libc.memcpy_helper
-                  0x001046         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(memcpy_helper.Leo)
-                  0x001046                  __memcpy_helper
- .libm.subsf3     0x00107c         0xbc c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(addsf3.eo)
-                  0x00107c                  ___subsf3
-                  0x00107e                  ___addsf3
- .libm.divfs3     0x001138         0x84 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsf3.eo)
-                  0x001138                  ___divsf3
- .libm.eqsf2      0x0011bc          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(feqltle.eo)
-                  0x0011bc                  ___eqsf2
-                  0x0011bc                  ___ltsf2
-                  0x0011bc                  ___lesf2
- .libm.gtsf2      0x0011c0          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fgtge.eo)
-                  0x0011c0                  ___gesf2
-                  0x0011c0                  ___gtsf2
+                  0x001072         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(memcpy_helper.Leo)
+                  0x001072                  __memcpy_helper
+ .libm.subsf3     0x0010a8         0xbc c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(addsf3.eo)
+                  0x0010a8                  ___subsf3
+                  0x0010aa                  ___addsf3
+ .libm.divfs3     0x001164         0x84 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsf3.eo)
+                  0x001164                  ___divsf3
+ .libm.eqsf2      0x0011e8          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(feqltle.eo)
+                  0x0011e8                  ___eqsf2
+                  0x0011e8                  ___ltsf2
+                  0x0011e8                  ___lesf2
+ .libm.gtsf2      0x0011ec          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fgtge.eo)
+                  0x0011ec                  ___gesf2
+                  0x0011ec                  ___gtsf2
  .libm.fixunssfsi
-                  0x0011c4         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
-                  0x0011c4                  ___fixunssfsi
+                  0x0011f0         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
+                  0x0011f0                  ___fixunssfsi
  .libm.floatunsisf
-                  0x0011fa          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
-                  0x0011fa                  ___floatunsisf
- .libm.fpack      0x0011fe         0x4c c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fpack.eo)
-                  0x0011fe                  __fpack
- .libm.funpack    0x00124a         0x2a c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack.eo)
-                  0x00124a                  __funpack
+                  0x001226          0x4 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
+                  0x001226                  ___floatunsisf
+ .libm.fpack      0x00122a         0x4c c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fpack.eo)
+                  0x00122a                  __fpack
+ .libm.funpack    0x001276         0x2a c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack.eo)
+                  0x001276                  __funpack
  .libm.funpack2
-                  0x001274         0x10 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack2.eo)
-                  0x001274                  __funpack2
+                  0x0012a0         0x10 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack2.eo)
+                  0x0012a0                  __funpack2
  .libm.fPropagateNaN
-                  0x001284         0x12 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
-                  0x001284                  __fPropagateNaN
+                  0x0012b0         0x12 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
+                  0x0012b0                  __fPropagateNaN
  .libm.fbobExit
-                  0x001296          0x8 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
-                  0x001296                  __fbopExit
+                  0x0012c2          0x8 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
+                  0x0012c2                  __fbopExit
  .libm.fbopReturnNaN
-                  0x00129e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
-                  0x00129e                  __fbopReturnNaN
- .libm.mulsf3     0x0012a4         0x68 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsf3.eo)
-                  0x0012a4                  ___mulsf3
+                  0x0012ca          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
+                  0x0012ca                  __fbopReturnNaN
+ .libm.mulsf3     0x0012d0         0x68 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsf3.eo)
+                  0x0012d0                  ___mulsf3
  .libm.fcompare
-                  0x00130c         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fcompare.eo)
-                  0x00130c                  __fcompare
+                  0x001338         0x36 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fcompare.eo)
+                  0x001338                  __fcompare
  .libm.floatundisf
-                  0x001342         0x5e c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
-                  0x001342                  ___floatundisf
+                  0x00136e         0x5e c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
+                  0x00136e                  ___floatundisf
 
 usercode
  *(usercode)
@@ -959,77 +963,77 @@ userdata
 .comment
  *(.comment)
 
-.debug_info       0x000000      0x10412
+.debug_info       0x000000      0x10b6f
  *(.debug_info)
- .debug_info      0x000000        0xdb0 build/default/production/Source/DeviceNet/DeviceNet.o
- .debug_info      0x000db0        0xe23 build/default/production/Source/Driver/AdcSample.o
- .debug_info      0x001bd3       0x2d29 build/default/production/Source/Driver/CAN.o
- .debug_info      0x0048fc       0x16e8 build/default/production/Source/Driver/DeviceIO.o
- .debug_info      0x005fe4       0x12d9 build/default/production/Source/Driver/Timer.o
- .debug_info      0x0072bd        0xc2d build/default/production/Source/Driver/Usart.o
- .debug_info      0x007eea        0x2a2 build/default/production/Source/Driver/traps.o
- .debug_info      0x00818c        0x7f6 build/default/production/Source/Driver/EEPROMOperate.o
- .debug_info      0x008982        0x6a5 build/default/production/Source/Driver/InitTemp.o
- .debug_info      0x009027        0x48e build/default/production/Source/Driver/Delay.o
- .debug_info      0x0094b5        0x781 build/default/production/Source/Driver/ImitationIIC.o
- .debug_info      0x009c36        0x71f build/default/production/Source/Driver/SD2405.o
- .debug_info      0x00a355       0x1311 build/default/production/Source/SerialPort/Action.o
- .debug_info      0x00b666        0x225 build/default/production/Source/SerialPort/CRC16.o
- .debug_info      0x00b88b        0xa0d build/default/production/Source/SerialPort/RtuFrame.o
- .debug_info      0x00c298        0xfea build/default/production/Source/SerialPort/RefParameter.o
- .debug_info      0x00d282        0x7ed build/default/production/Source/Yongci/DeviceParameter.o
- .debug_info      0x00da6f        0x8e5 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_info      0x00e354       0x1b23 build/default/production/Source/Yongci/yongci.o
- .debug_info      0x00fe77        0x59b build/default/production/Source/main.o
+ .debug_info      0x000000        0xdd9 build/default/production/Source/DeviceNet/DeviceNet.o
+ .debug_info      0x000dd9        0xe3d build/default/production/Source/Driver/AdcSample.o
+ .debug_info      0x001c16       0x2d29 build/default/production/Source/Driver/CAN.o
+ .debug_info      0x00493f       0x16e8 build/default/production/Source/Driver/DeviceIO.o
+ .debug_info      0x006027       0x12d9 build/default/production/Source/Driver/Timer.o
+ .debug_info      0x007300        0xd37 build/default/production/Source/Driver/Usart.o
+ .debug_info      0x008037        0x2a2 build/default/production/Source/Driver/traps.o
+ .debug_info      0x0082d9        0x7f6 build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_info      0x008acf        0x6a5 build/default/production/Source/Driver/InitTemp.o
+ .debug_info      0x009174        0x4a8 build/default/production/Source/Driver/Delay.o
+ .debug_info      0x00961c        0x781 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_info      0x009d9d        0x71f build/default/production/Source/Driver/SD2405.o
+ .debug_info      0x00a4bc       0x139c build/default/production/Source/SerialPort/Action.o
+ .debug_info      0x00b858        0x225 build/default/production/Source/SerialPort/CRC16.o
+ .debug_info      0x00ba7d        0xa27 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_info      0x00c4a4        0xfea build/default/production/Source/SerialPort/RefParameter.o
+ .debug_info      0x00d48e        0x9c9 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_info      0x00de57        0x919 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_info      0x00e770       0x1e4a build/default/production/Source/Yongci/yongci.o
+ .debug_info      0x0105ba        0x5b5 build/default/production/Source/main.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000       0x198c
+.debug_abbrev     0x000000       0x19d2
  *(.debug_abbrev)
  .debug_abbrev    0x000000        0x1fb build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_abbrev    0x0001fb        0x11a build/default/production/Source/Driver/AdcSample.o
  .debug_abbrev    0x000315        0x22b build/default/production/Source/Driver/CAN.o
  .debug_abbrev    0x000540        0x170 build/default/production/Source/Driver/DeviceIO.o
  .debug_abbrev    0x0006b0        0x122 build/default/production/Source/Driver/Timer.o
- .debug_abbrev    0x0007d2        0x11e build/default/production/Source/Driver/Usart.o
- .debug_abbrev    0x0008f0         0x7d build/default/production/Source/Driver/traps.o
- .debug_abbrev    0x00096d        0x12b build/default/production/Source/Driver/EEPROMOperate.o
- .debug_abbrev    0x000a98        0x12f build/default/production/Source/Driver/InitTemp.o
- .debug_abbrev    0x000bc7        0x136 build/default/production/Source/Driver/Delay.o
- .debug_abbrev    0x000cfd        0x143 build/default/production/Source/Driver/ImitationIIC.o
- .debug_abbrev    0x000e40        0x12f build/default/production/Source/Driver/SD2405.o
- .debug_abbrev    0x000f6f        0x197 build/default/production/Source/SerialPort/Action.o
- .debug_abbrev    0x001106         0xa7 build/default/production/Source/SerialPort/CRC16.o
- .debug_abbrev    0x0011ad        0x1e0 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_abbrev    0x00138d        0x1aa build/default/production/Source/SerialPort/RefParameter.o
- .debug_abbrev    0x001537         0xd4 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_abbrev    0x00160b         0xd1 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_abbrev    0x0016dc        0x1d0 build/default/production/Source/Yongci/yongci.o
- .debug_abbrev    0x0018ac         0xe0 build/default/production/Source/main.o
+ .debug_abbrev    0x0007d2        0x13c build/default/production/Source/Driver/Usart.o
+ .debug_abbrev    0x00090e         0x7d build/default/production/Source/Driver/traps.o
+ .debug_abbrev    0x00098b        0x12b build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_abbrev    0x000ab6        0x12f build/default/production/Source/Driver/InitTemp.o
+ .debug_abbrev    0x000be5        0x136 build/default/production/Source/Driver/Delay.o
+ .debug_abbrev    0x000d1b        0x143 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_abbrev    0x000e5e        0x12f build/default/production/Source/Driver/SD2405.o
+ .debug_abbrev    0x000f8d        0x18c build/default/production/Source/SerialPort/Action.o
+ .debug_abbrev    0x001119         0xa7 build/default/production/Source/SerialPort/CRC16.o
+ .debug_abbrev    0x0011c0        0x1e0 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_abbrev    0x0013a0        0x1aa build/default/production/Source/SerialPort/RefParameter.o
+ .debug_abbrev    0x00154a        0x107 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_abbrev    0x001651         0xd1 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_abbrev    0x001722        0x1d0 build/default/production/Source/Yongci/yongci.o
+ .debug_abbrev    0x0018f2         0xe0 build/default/production/Source/main.o
 
-.debug_line       0x000000       0x2438
+.debug_line       0x000000       0x24b9
  *(.debug_line)
- .debug_line      0x000000        0x23a build/default/production/Source/DeviceNet/DeviceNet.o
- .debug_line      0x00023a         0xfc build/default/production/Source/Driver/AdcSample.o
- .debug_line      0x000336        0x298 build/default/production/Source/Driver/CAN.o
- .debug_line      0x0005ce        0x17d build/default/production/Source/Driver/DeviceIO.o
- .debug_line      0x00074b        0x11a build/default/production/Source/Driver/Timer.o
- .debug_line      0x000865        0x137 build/default/production/Source/Driver/Usart.o
- .debug_line      0x00099c         0xb8 build/default/production/Source/Driver/traps.o
- .debug_line      0x000a54        0x195 build/default/production/Source/Driver/EEPROMOperate.o
- .debug_line      0x000be9        0x13e build/default/production/Source/Driver/InitTemp.o
- .debug_line      0x000d27         0xef build/default/production/Source/Driver/Delay.o
- .debug_line      0x000e16        0x162 build/default/production/Source/Driver/ImitationIIC.o
- .debug_line      0x000f78        0x145 build/default/production/Source/Driver/SD2405.o
- .debug_line      0x0010bd        0x460 build/default/production/Source/SerialPort/Action.o
- .debug_line      0x00151d         0x79 build/default/production/Source/SerialPort/CRC16.o
- .debug_line      0x001596        0x186 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_line      0x00171c        0x375 build/default/production/Source/SerialPort/RefParameter.o
- .debug_line      0x001a91        0x1b7 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_line      0x001c48        0x320 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_line      0x001f68        0x3ba build/default/production/Source/Yongci/yongci.o
- .debug_line      0x002322        0x116 build/default/production/Source/main.o
+ .debug_line      0x000000        0x240 build/default/production/Source/DeviceNet/DeviceNet.o
+ .debug_line      0x000240         0xf8 build/default/production/Source/Driver/AdcSample.o
+ .debug_line      0x000338        0x298 build/default/production/Source/Driver/CAN.o
+ .debug_line      0x0005d0        0x17d build/default/production/Source/Driver/DeviceIO.o
+ .debug_line      0x00074d        0x11a build/default/production/Source/Driver/Timer.o
+ .debug_line      0x000867        0x15f build/default/production/Source/Driver/Usart.o
+ .debug_line      0x0009c6         0xb8 build/default/production/Source/Driver/traps.o
+ .debug_line      0x000a7e        0x195 build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_line      0x000c13        0x13e build/default/production/Source/Driver/InitTemp.o
+ .debug_line      0x000d51         0xef build/default/production/Source/Driver/Delay.o
+ .debug_line      0x000e40        0x162 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_line      0x000fa2        0x145 build/default/production/Source/Driver/SD2405.o
+ .debug_line      0x0010e7        0x46e build/default/production/Source/SerialPort/Action.o
+ .debug_line      0x001555         0x79 build/default/production/Source/SerialPort/CRC16.o
+ .debug_line      0x0015ce        0x186 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_line      0x001754        0x372 build/default/production/Source/SerialPort/RefParameter.o
+ .debug_line      0x001ac6        0x1fb build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_line      0x001cc1        0x320 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_line      0x001fe1        0x3c2 build/default/production/Source/Yongci/yongci.o
+ .debug_line      0x0023a3        0x116 build/default/production/Source/main.o
 
-.debug_frame      0x000000       0x1342
+.debug_frame      0x000000       0x1364
  *(.debug_frame)
  .debug_frame     0x000000        0x1d4 build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_frame     0x0001d4         0x4c build/default/production/Source/Driver/AdcSample.o
@@ -1043,37 +1047,37 @@ userdata
  .debug_frame     0x00094c         0x8c build/default/production/Source/Driver/Delay.o
  .debug_frame     0x0009d8        0x132 build/default/production/Source/Driver/ImitationIIC.o
  .debug_frame     0x000b0a         0xbc build/default/production/Source/Driver/SD2405.o
- .debug_frame     0x000bc6        0x13a build/default/production/Source/SerialPort/Action.o
- .debug_frame     0x000d00         0x30 build/default/production/Source/SerialPort/CRC16.o
- .debug_frame     0x000d30         0xf4 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_frame     0x000e24        0x1b8 build/default/production/Source/SerialPort/RefParameter.o
- .debug_frame     0x000fdc         0x92 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_frame     0x00106e         0x74 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_frame     0x0010e2        0x230 build/default/production/Source/Yongci/yongci.o
- .debug_frame     0x001312         0x30 build/default/production/Source/main.o
+ .debug_frame     0x000bc6        0x156 build/default/production/Source/SerialPort/Action.o
+ .debug_frame     0x000d1c         0x30 build/default/production/Source/SerialPort/CRC16.o
+ .debug_frame     0x000d4c         0xf4 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_frame     0x000e40        0x1b8 build/default/production/Source/SerialPort/RefParameter.o
+ .debug_frame     0x000ff8         0x98 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_frame     0x001090         0x74 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_frame     0x001104        0x230 build/default/production/Source/Yongci/yongci.o
+ .debug_frame     0x001334         0x30 build/default/production/Source/main.o
 
-.debug_str        0x000000        0xb4c
+.debug_str        0x000000        0xb89
  *(.debug_str)
  .debug_str       0x000000        0x147 build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_str       0x000147         0x62 build/default/production/Source/Driver/AdcSample.o
  .debug_str       0x0001a9        0x1dc build/default/production/Source/Driver/CAN.o
  .debug_str       0x000385         0xba build/default/production/Source/Driver/DeviceIO.o
  .debug_str       0x00043f         0x93 build/default/production/Source/Driver/Timer.o
- .debug_str       0x0004d2         0x54 build/default/production/Source/Driver/Usart.o
- .debug_str       0x000526          0xc build/default/production/Source/Driver/traps.o
- .debug_str       0x000532         0x2e build/default/production/Source/Driver/EEPROMOperate.o
- .debug_str       0x000560         0x2c build/default/production/Source/Driver/InitTemp.o
- .debug_str       0x00058c         0x2c build/default/production/Source/Driver/Delay.o
- .debug_str       0x0005b8         0x34 build/default/production/Source/Driver/ImitationIIC.o
- .debug_str       0x0005ec         0x1e build/default/production/Source/Driver/SD2405.o
- .debug_str       0x00060a        0x113 build/default/production/Source/SerialPort/Action.o
- .debug_str       0x00071d         0x14 build/default/production/Source/SerialPort/CRC16.o
- .debug_str       0x000731         0xa4 build/default/production/Source/SerialPort/RtuFrame.o
- .debug_str       0x0007d5        0x106 build/default/production/Source/SerialPort/RefParameter.o
- .debug_str       0x0008db         0x75 build/default/production/Source/Yongci/DeviceParameter.o
- .debug_str       0x000950         0xad build/default/production/Source/Yongci/SwtichCondition.o
- .debug_str       0x0009fd        0x124 build/default/production/Source/Yongci/yongci.o
- .debug_str       0x000b21         0x2b build/default/production/Source/main.o
+ .debug_str       0x0004d2         0x63 build/default/production/Source/Driver/Usart.o
+ .debug_str       0x000535          0xc build/default/production/Source/Driver/traps.o
+ .debug_str       0x000541         0x2e build/default/production/Source/Driver/EEPROMOperate.o
+ .debug_str       0x00056f         0x2c build/default/production/Source/Driver/InitTemp.o
+ .debug_str       0x00059b         0x2c build/default/production/Source/Driver/Delay.o
+ .debug_str       0x0005c7         0x34 build/default/production/Source/Driver/ImitationIIC.o
+ .debug_str       0x0005fb         0x1e build/default/production/Source/Driver/SD2405.o
+ .debug_str       0x000619        0x11c build/default/production/Source/SerialPort/Action.o
+ .debug_str       0x000735         0x14 build/default/production/Source/SerialPort/CRC16.o
+ .debug_str       0x000749         0xa4 build/default/production/Source/SerialPort/RtuFrame.o
+ .debug_str       0x0007ed        0x106 build/default/production/Source/SerialPort/RefParameter.o
+ .debug_str       0x0008f3         0x75 build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_str       0x000968         0xad build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_str       0x000a15        0x149 build/default/production/Source/Yongci/yongci.o
+ .debug_str       0x000b5e         0x2b build/default/production/Source/main.o
 
 .debug_loc
  *(.debug_loc)
@@ -1082,7 +1086,7 @@ userdata
  *(.debug_macinfo)
 
 .debug_pubnames
-                  0x000000       0x11db
+                  0x000000       0x11f5
  *(.debug_pubnames)
  .debug_pubnames
                   0x000000        0x2bf build/default/production/Source/DeviceNet/DeviceNet.o
@@ -1109,21 +1113,21 @@ userdata
  .debug_pubnames
                   0x000955         0x88 build/default/production/Source/Driver/SD2405.o
  .debug_pubnames
-                  0x0009dd         0xf1 build/default/production/Source/SerialPort/Action.o
+                  0x0009dd        0x10b build/default/production/Source/SerialPort/Action.o
  .debug_pubnames
-                  0x000ace         0x38 build/default/production/Source/SerialPort/CRC16.o
+                  0x000ae8         0x38 build/default/production/Source/SerialPort/CRC16.o
  .debug_pubnames
-                  0x000b06        0x169 build/default/production/Source/SerialPort/RtuFrame.o
+                  0x000b20        0x169 build/default/production/Source/SerialPort/RtuFrame.o
  .debug_pubnames
-                  0x000c6f        0x288 build/default/production/Source/SerialPort/RefParameter.o
+                  0x000c89        0x288 build/default/production/Source/SerialPort/RefParameter.o
  .debug_pubnames
-                  0x000ef7         0x64 build/default/production/Source/Yongci/DeviceParameter.o
+                  0x000f11         0x64 build/default/production/Source/Yongci/DeviceParameter.o
  .debug_pubnames
-                  0x000f5b         0x78 build/default/production/Source/Yongci/SwtichCondition.o
+                  0x000f75         0x78 build/default/production/Source/Yongci/SwtichCondition.o
  .debug_pubnames
-                  0x000fd3        0x1ed build/default/production/Source/Yongci/yongci.o
+                  0x000fed        0x1ed build/default/production/Source/Yongci/yongci.o
  .debug_pubnames
-                  0x0011c0         0x1b build/default/production/Source/main.o
+                  0x0011da         0x1b build/default/production/Source/main.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -2182,7 +2186,7 @@ LOAD default_isr
 LOAD data_init
 
 .debug_pubtypes
-                  0x0001e0       0x18b6
+                  0x0001e0       0x1958
  .debug_pubtypes
                   0x0001e0        0x100 build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_pubtypes
@@ -2194,114 +2198,114 @@ LOAD data_init
  .debug_pubtypes
                   0x0009e2        0x174 build/default/production/Source/Driver/Timer.o
  .debug_pubtypes
-                  0x000b56        0x101 build/default/production/Source/Driver/Usart.o
+                  0x000b56        0x12b build/default/production/Source/Driver/Usart.o
  .debug_pubtypes
-                  0x000c57         0x35 build/default/production/Source/Driver/traps.o
+                  0x000c81         0x35 build/default/production/Source/Driver/traps.o
  .debug_pubtypes
-                  0x000c8c         0xba build/default/production/Source/Driver/EEPROMOperate.o
+                  0x000cb6         0xba build/default/production/Source/Driver/EEPROMOperate.o
  .debug_pubtypes
-                  0x000d46         0x94 build/default/production/Source/Driver/InitTemp.o
+                  0x000d70         0x94 build/default/production/Source/Driver/InitTemp.o
  .debug_pubtypes
-                  0x000dda         0x65 build/default/production/Source/Driver/Delay.o
+                  0x000e04         0x65 build/default/production/Source/Driver/Delay.o
  .debug_pubtypes
-                  0x000e3f         0x93 build/default/production/Source/Driver/ImitationIIC.o
+                  0x000e69         0x93 build/default/production/Source/Driver/ImitationIIC.o
  .debug_pubtypes
-                  0x000ed2         0x8a build/default/production/Source/Driver/SD2405.o
+                  0x000efc         0x8a build/default/production/Source/Driver/SD2405.o
  .debug_pubtypes
-                  0x000f5c        0x247 build/default/production/Source/SerialPort/Action.o
+                  0x000f86        0x247 build/default/production/Source/SerialPort/Action.o
  .debug_pubtypes
-                  0x0011a3         0x2b build/default/production/Source/SerialPort/CRC16.o
+                  0x0011cd         0x2b build/default/production/Source/SerialPort/CRC16.o
  .debug_pubtypes
-                  0x0011ce         0x9c build/default/production/Source/SerialPort/RtuFrame.o
+                  0x0011f8         0x9c build/default/production/Source/SerialPort/RtuFrame.o
  .debug_pubtypes
-                  0x00126a        0x1f7 build/default/production/Source/SerialPort/RefParameter.o
+                  0x001294        0x1f7 build/default/production/Source/SerialPort/RefParameter.o
  .debug_pubtypes
-                  0x001461        0x154 build/default/production/Source/Yongci/DeviceParameter.o
+                  0x00148b        0x183 build/default/production/Source/Yongci/DeviceParameter.o
  .debug_pubtypes
-                  0x0015b5        0x162 build/default/production/Source/Yongci/SwtichCondition.o
+                  0x00160e        0x162 build/default/production/Source/Yongci/SwtichCondition.o
  .debug_pubtypes
-                  0x001717        0x2e3 build/default/production/Source/Yongci/yongci.o
+                  0x001770        0x32c build/default/production/Source/Yongci/yongci.o
  .debug_pubtypes
-                  0x0019fa         0x9c build/default/production/Source/main.o
+                  0x001a9c         0x9c build/default/production/Source/main.o
 
 __c30_signature
-                  0x001a96         0xe4
+                  0x001b38         0xe4
  __c30_signature
-                  0x001a96          0x6 build/default/production/Source/DeviceNet/DeviceNet.o
+                  0x001b38          0x6 build/default/production/Source/DeviceNet/DeviceNet.o
  __c30_signature
-                  0x001a9c          0x6 build/default/production/Source/Driver/AdcSample.o
+                  0x001b3e          0x6 build/default/production/Source/Driver/AdcSample.o
  __c30_signature
-                  0x001aa2          0x6 build/default/production/Source/Driver/CAN.o
+                  0x001b44          0x6 build/default/production/Source/Driver/CAN.o
  __c30_signature
-                  0x001aa8          0x6 build/default/production/Source/Driver/DeviceIO.o
+                  0x001b4a          0x6 build/default/production/Source/Driver/DeviceIO.o
  __c30_signature
-                  0x001aae          0x6 build/default/production/Source/Driver/Timer.o
+                  0x001b50          0x6 build/default/production/Source/Driver/Timer.o
  __c30_signature
-                  0x001ab4          0x6 build/default/production/Source/Driver/Usart.o
+                  0x001b56          0x6 build/default/production/Source/Driver/Usart.o
  __c30_signature
-                  0x001aba          0x6 build/default/production/Source/Driver/traps.o
+                  0x001b5c          0x6 build/default/production/Source/Driver/traps.o
  __c30_signature
-                  0x001ac0          0x6 build/default/production/Source/Driver/EEPROMOperate.o
+                  0x001b62          0x6 build/default/production/Source/Driver/EEPROMOperate.o
  __c30_signature
-                  0x001ac6          0x6 build/default/production/Source/Driver/InitTemp.o
+                  0x001b68          0x6 build/default/production/Source/Driver/InitTemp.o
  __c30_signature
-                  0x001acc          0x6 build/default/production/Source/Driver/Delay.o
+                  0x001b6e          0x6 build/default/production/Source/Driver/Delay.o
  __c30_signature
-                  0x001ad2          0x6 build/default/production/Source/Driver/ImitationIIC.o
+                  0x001b74          0x6 build/default/production/Source/Driver/ImitationIIC.o
  __c30_signature
-                  0x001ad8          0x6 build/default/production/Source/Driver/SD2405.o
+                  0x001b7a          0x6 build/default/production/Source/Driver/SD2405.o
  __c30_signature
-                  0x001ade          0x6 build/default/production/Source/SerialPort/Action.o
+                  0x001b80          0x6 build/default/production/Source/SerialPort/Action.o
  __c30_signature
-                  0x001ae4          0x6 build/default/production/Source/SerialPort/CRC16.o
+                  0x001b86          0x6 build/default/production/Source/SerialPort/CRC16.o
  __c30_signature
-                  0x001aea          0x6 build/default/production/Source/SerialPort/RtuFrame.o
+                  0x001b8c          0x6 build/default/production/Source/SerialPort/RtuFrame.o
  __c30_signature
-                  0x001af0          0x6 build/default/production/Source/SerialPort/RefParameter.o
+                  0x001b92          0x6 build/default/production/Source/SerialPort/RefParameter.o
  __c30_signature
-                  0x001af6          0x6 build/default/production/Source/Yongci/DeviceParameter.o
+                  0x001b98          0x6 build/default/production/Source/Yongci/DeviceParameter.o
  __c30_signature
-                  0x001afc          0x6 build/default/production/Source/Yongci/SwtichCondition.o
+                  0x001b9e          0x6 build/default/production/Source/Yongci/SwtichCondition.o
  __c30_signature
-                  0x001b02          0x6 build/default/production/Source/Yongci/yongci.o
+                  0x001ba4          0x6 build/default/production/Source/Yongci/yongci.o
  __c30_signature
-                  0x001b08          0x6 build/default/production/Source/main.o
+                  0x001baa          0x6 build/default/production/Source/main.o
  __c30_signature
-                  0x001b0e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
+                  0x001bb0          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
  __c30_signature
-                  0x001b14          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(data_init_standard.o)
+                  0x001bb6          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(data_init_standard.o)
  __c30_signature
-                  0x001b1a          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(eedata_helper.Leo)
+                  0x001bbc          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(eedata_helper.Leo)
  __c30_signature
-                  0x001b20          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(memcpy_helper.Leo)
+                  0x001bc2          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(memcpy_helper.Leo)
  __c30_signature
-                  0x001b26          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(delay32.Leo)
+                  0x001bc8          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(delay32.Leo)
  __c30_signature
-                  0x001b2c          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(addsf3.eo)
+                  0x001bce          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(addsf3.eo)
  __c30_signature
-                  0x001b32          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsf3.eo)
+                  0x001bd4          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(divsf3.eo)
  __c30_signature
-                  0x001b38          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(feqltle.eo)
+                  0x001bda          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(feqltle.eo)
  __c30_signature
-                  0x001b3e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fgtge.eo)
+                  0x001be0          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fgtge.eo)
  __c30_signature
-                  0x001b44          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
+                  0x001be6          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
  __c30_signature
-                  0x001b4a          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
+                  0x001bec          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
  __c30_signature
-                  0x001b50          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fpack.eo)
+                  0x001bf2          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fpack.eo)
  __c30_signature
-                  0x001b56          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack.eo)
+                  0x001bf8          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack.eo)
  __c30_signature
-                  0x001b5c          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack2.eo)
+                  0x001bfe          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(funpack2.eo)
  __c30_signature
-                  0x001b62          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
+                  0x001c04          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(futil.eo)
  __c30_signature
-                  0x001b68          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsf3.eo)
+                  0x001c0a          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(mulsf3.eo)
  __c30_signature
-                  0x001b6e          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fcompare.eo)
+                  0x001c10          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(fcompare.eo)
  __c30_signature
-                  0x001b74          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
+                  0x001c16          0x6 c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
 
 .nbss               0x0800         0x12
  .nbss              0x0800         0x12 build/default/production/Source/Yongci/yongci.o
@@ -2319,121 +2323,122 @@ __c30_signature
                     0x081c                  _product_name
                     0x0820                  _DeviceNetClass
 
-.nbss               0x0822         0x3a
+.nbss               0x0822         0x38
  .nbss              0x0822          0xe build/default/production/Source/Driver/CAN.o
                     0x0822                  _Rframe
                     0x082a                  _rlen
                     0x082c                  _rEID
  .nbss              0x0830          0x8 build/default/production/Source/Driver/SD2405.o
                     0x0830                  _g_CheckTime
- .nbss              0x0838          0x8 build/default/production/Source/SerialPort/Action.o
-                    0x0838                  _g_RemoteControlState
- .nbss              0x0840          0x6 build/default/production/Source/SerialPort/RtuFrame.o
-                    0x0840                  _ReciveBufferLen
-                    0x0841                  _FifoHead
-                    0x0842                  _FifoEnd
-                    0x0843                  _DealStep
-                    0x0844                  _completeFlag
-                    0x0845                  _ReciveIndex
- .nbss              0x0846          0x6 build/default/production/Source/SerialPort/RefParameter.o
-                    0x0846                  _g_LocalMac
-                    0x0848                  _g_pointData
- .nbss              0x084c          0x4 build/default/production/Source/DeviceNet/DeviceNet.o
-                    0x084c                  _device_type
- .nbss              0x0850          0x4 build/default/production/Source/Driver/InitTemp.o
-                    0x0850                  _flag
-                    0x0852                  _TemperateValue
- .nbss              0x0854          0x4 build/default/production/Source/Driver/Delay.o
-                    0x0854                  _g_MsTicks
- .nbss              0x0858          0x4 build/default/production/Source/Yongci/SwtichCondition.o
-                    0x0858                  _g_kairuValue
+ .nbss              0x0838          0x6 build/default/production/Source/SerialPort/Action.o
+                    0x0838                  _g_pPoint
+ .nbss              0x083e          0x6 build/default/production/Source/SerialPort/RtuFrame.o
+                    0x083e                  _ReciveBufferLen
+                    0x083f                  _FifoHead
+                    0x0840                  _FifoEnd
+                    0x0841                  _DealStep
+                    0x0842                  _completeFlag
+                    0x0843                  _ReciveIndex
+ .nbss              0x0844          0x6 build/default/production/Source/SerialPort/RefParameter.o
+                    0x0844                  _g_LocalMac
+                    0x0846                  _g_pointData
+ .nbss              0x084a          0x4 build/default/production/Source/DeviceNet/DeviceNet.o
+                    0x084a                  _device_type
+ .nbss              0x084e          0x4 build/default/production/Source/Driver/InitTemp.o
+                    0x084e                  _flag
+                    0x0850                  _TemperateValue
+ .nbss              0x0852          0x4 build/default/production/Source/Driver/Delay.o
+                    0x0852                  _g_MsTicks
+ .nbss              0x0856          0x4 build/default/production/Source/Yongci/SwtichCondition.o
+                    0x0856                  _g_kairuValue
 
-_0571C06059533d20
-                    0x085c          0x4
- _0571C06059533d20
-                    0x085c          0x4 build/default/production/Source/Yongci/yongci.o
-                    0x085c                  _g_changeLedTime
+_04E09180595373c9
+                    0x085a          0x4
+ _04E09180595373c9
+                    0x085a          0x4 build/default/production/Source/Yongci/yongci.o
+                    0x085a                  _g_changeLedTime
 
-.ndata              0x0860          0x2
- .ndata             0x0860          0x2 build/default/production/Source/Driver/DeviceIO.o
-                    0x0860                  _g_LEDOutState
+.ndata              0x085e          0x2
+ .ndata             0x085e          0x2 build/default/production/Source/Driver/DeviceIO.o
+                    0x085e                  _g_LEDOutState
 
-.nbss               0x0862          0x4
- .nbss              0x0862          0x2 build/default/production/Source/Driver/DeviceIO.o
-                    0x0862                  _g_RelayOutState
- .nbss              0x0864          0x2 build/default/production/Source/Driver/Timer.o
-                    0x0864                  _g_TPR2Count
+.nbss               0x0860          0x4
+ .nbss              0x0860          0x2 build/default/production/Source/Driver/DeviceIO.o
+                    0x0860                  _g_RelayOutState
+ .nbss              0x0862          0x2 build/default/production/Source/Driver/Timer.o
+                    0x0862                  _g_TPR2Count
 
-.ndata              0x0866          0x2
- .ndata             0x0866          0x2 build/default/production/Source/SerialPort/RtuFrame.o
-                    0x0866                  _ReciveErrorFlag
-                    0x0867                  _LocalAddress
+.ndata              0x0864          0x2
+ .ndata             0x0864          0x2 build/default/production/Source/SerialPort/RtuFrame.o
+                    0x0864                  _ReciveErrorFlag
+                    0x0865                  _LocalAddress
 
-_04E3800059532a9f
+_04D6F060595373c6
+                    0x0866          0x2
+ _04D6F060595373c6
+                    0x0866          0x2 build/default/production/Source/SerialPort/RefParameter.o
+                    0x0866                  _g_SyncReadyWaitTime
+
+_04D6F0C0595373c6
                     0x0868          0x2
- _04E3800059532a9f
+ _04D6F0C0595373c6
                     0x0868          0x2 build/default/production/Source/SerialPort/RefParameter.o
-                    0x0868                  _g_SyncReadyWaitTime
+                    0x0868                  _g_RemoteWaitTime
 
-_04E3806059532a9f
+_04E091E0595373c9
                     0x086a          0x2
- _04E3806059532a9f
-                    0x086a          0x2 build/default/production/Source/SerialPort/RefParameter.o
-                    0x086a                  _g_RemoteWaitTime
+ _04E091E0595373c9
+                    0x086a          0x2 build/default/production/Source/Yongci/yongci.o
+                    0x086a                  _g_lockUp
 
-_0571C0C059533d20
+_04E09120595373c9
                     0x086c          0x2
- _0571C0C059533d20
+ _04E09120595373c9
                     0x086c          0x2 build/default/production/Source/Yongci/yongci.o
-                    0x086c                  _g_lockUp
+                    0x086c                  _g_Order
 
-_0571C00059533d20
-                    0x086e          0x2
- _0571C00059533d20
-                    0x086e          0x2 build/default/production/Source/Yongci/yongci.o
-                    0x086e                  _g_Order
-
-.bss                0x0870        0x506
- .bss               0x0870        0x28e build/default/production/Source/SerialPort/RefParameter.o
-                    0x0870                  _g_DelayTime
-                    0x0876                  _g_SystemVoltageParameter
-                    0x0896                  _g_SystemCalibrationCoefficient
-                    0x08a2                  _g_SystemLimit
-                    0x08f2                  _g_ActionCount
-                    0x08fe                  _g_SystemState
-                    0x0906                  _g_SyncCommand
-                    0x0916                  _g_SetParameterCollect
-                    0x0a24                  _g_ReadOnlyParameterCollect
-                    0x0af6                  _g_data
- .bss               0x0afe         0xd6 build/default/production/Source/DeviceNet/DeviceNet.o
-                    0x0afe                  _CycleInquireConnedctionObj
-                    0x0b2e                  _StatusChangedConnedctionObj
-                    0x0b5e                  _VisibleConnectionObj
-                    0x0b8e                  _DeviceNetObj
-                    0x0b92                  _IdentifierObj
-                    0x0ba4                  _SendBufferData
-                    0x0bae                  _ReciveBufferData
-                    0x0bb8                  _DeviceNetReciveFrame
-                    0x0bc2                  _DeviceNetSendFrame
-                    0x0bcc                  _out_Data
- .bss               0x0bd4         0xd0 build/default/production/Source/SerialPort/RtuFrame.o
-                    0x0bd4                  _ReciveBuffer
-                    0x0c14                  _FrameData
-                    0x0c54                  _RtuFrame
-                    0x0c64                  _SendFrameData
- .bss               0x0ca4         0x68 build/default/production/Source/Yongci/yongci.o
-                    0x0ca4                  _g_SetSwitchState
-                    0x0cf4                  _g_Index
- .bss               0x0d0c         0x2c build/default/production/Source/Yongci/SwtichCondition.o
-                    0x0d0c                  _g_timeCount
-                    0x0d22                  _g_lockflag
- .bss               0x0d38         0x1c build/default/production/Source/Driver/Delay.o
-                    0x0d38                  _g_SysTimeStamp
- .bss               0x0d54         0x18 build/default/production/Source/SerialPort/Action.o
-                    0x0d54                  _g_SuddenState
-                    0x0d62                  _g_qSendFrame
- .bss               0x0d6c          0xa build/default/production/Source/Driver/SD2405.o
-                    0x0d6c                  _g_Time
+.bss                0x086e        0x514
+ .bss               0x086e        0x28e build/default/production/Source/SerialPort/RefParameter.o
+                    0x086e                  _g_DelayTime
+                    0x0874                  _g_SystemVoltageParameter
+                    0x0894                  _g_SystemCalibrationCoefficient
+                    0x08a0                  _g_SystemLimit
+                    0x08f0                  _g_ActionCount
+                    0x08fc                  _g_SystemState
+                    0x0904                  _g_SyncCommand
+                    0x0914                  _g_SetParameterCollect
+                    0x0a22                  _g_ReadOnlyParameterCollect
+                    0x0af4                  _g_data
+ .bss               0x0afc         0xd6 build/default/production/Source/DeviceNet/DeviceNet.o
+                    0x0afc                  _CycleInquireConnedctionObj
+                    0x0b2c                  _StatusChangedConnedctionObj
+                    0x0b5c                  _VisibleConnectionObj
+                    0x0b8c                  _DeviceNetObj
+                    0x0b90                  _IdentifierObj
+                    0x0ba2                  _SendBufferData
+                    0x0bac                  _ReciveBufferData
+                    0x0bb6                  _DeviceNetReciveFrame
+                    0x0bc0                  _DeviceNetSendFrame
+                    0x0bca                  _out_Data
+ .bss               0x0bd2         0xd0 build/default/production/Source/SerialPort/RtuFrame.o
+                    0x0bd2                  _ReciveBuffer
+                    0x0c12                  _FrameData
+                    0x0c52                  _RtuFrame
+                    0x0c62                  _SendFrameData
+ .bss               0x0ca2         0x68 build/default/production/Source/Yongci/yongci.o
+                    0x0ca2                  _g_SetSwitchState
+                    0x0cf2                  _g_Index
+ .bss               0x0d0a         0x2c build/default/production/Source/Yongci/SwtichCondition.o
+                    0x0d0a                  _g_timeCount
+                    0x0d20                  _g_lockflag
+ .bss               0x0d36         0x22 build/default/production/Source/SerialPort/Action.o
+                    0x0d36                  _g_RemoteControlState
+                    0x0d40                  _g_SuddenState
+                    0x0d4e                  _g_qSendFrame
+ .bss               0x0d58         0x20 build/default/production/Source/Driver/Delay.o
+                    0x0d58                  _g_SysTimeStamp
+ .bss               0x0d78          0xa build/default/production/Source/Driver/SD2405.o
+                    0x0d78                  _g_Time
 
 .ivt._C2Interrupt
                   0x000060          0x2
@@ -2519,165 +2524,166 @@ _0571C00059533d20
  .config_FCKSMEN
                   0xf80000          0x2 build/default/production/Source/main.o
 
-.const              0x93a0        0x208 load address 0x0013a0  
- .const             0x93a0        0x200 build/default/production/Source/SerialPort/CRC16.o
-                    0x93a0                  _auchCRCHi
-                    0x94a0                  _auchCRCLo
- .const             0x95a0          0x8 build/default/production/Source/DeviceNet/DeviceNet.o
+.const              0x93cc        0x208 load address 0x0013cc  
+ .const             0x93cc        0x200 build/default/production/Source/SerialPort/CRC16.o
+                    0x93cc                  _auchCRCHi
+                    0x94cc                  _auchCRCLo
+ .const             0x95cc          0x8 build/default/production/Source/DeviceNet/DeviceNet.o
 
-.text             0x0015a8       0x5cb8
- .text            0x0015a8       0x1580 build/default/production/Source/SerialPort/RefParameter.o
-                  0x0015a8                  _SetParamValue
-                  0x001632                  _ReadParamValue
-                  0x0016f8                  _InitSetParameterCollect
-                  0x001f58                  _InitReadonlyParameterCollect
-                  0x0025e8                  _RefParameterInit
-                  0x002778                  _SetValueFloatUint16
-                  0x0027d8                  _GetValueFloatUint16
-                  0x002828                  _SetValueFloatInt32
-                  0x00287a                  _GetValueFloatInt32
-                  0x0028cc                  _SetValueUint16
-                  0x002910                  _GetValueUint16
-                  0x002952                  _SetValueUint8
-                  0x002982                  _GetValueUint8
-                  0x0029b2                  _WriteAccumulateSum
-                  0x002a6c                  _AccumulateSumVerify
- .text            0x002b28       0x1020 build/default/production/Source/Yongci/SwtichCondition.o
-                  0x002b28                  _CheckIOState
-                  0x002d1c                  _DsplaySwitchState
-                  0x002f7a                  _SwitchScan
- .text            0x003b48        0xedc build/default/production/Source/SerialPort/Action.o
-                  0x003b48                  _SendAckMesssage
-                  0x003b76                  _ExecuteFunctioncode
-                  0x003c9c                  _FrameServer
-                  0x004352                  _SendErrorFrame
-                  0x0043a2                  _SendMessage
-                  0x0043fa                  _UpdataState
-                  0x0044ae                  __INT2Interrupt
-                  0x004614                  _GetLoopSwitch
-                  0x0048a4                  _CheckOrder
- .text            0x004a24        0xace build/default/production/Source/DeviceNet/DeviceNet.o
-                  0x004a24                  _InitDeviceNet
-                  0x004aba                  _InitVisibleConnectionObj
-                  0x004b04                  _InitCycleInquireConnectionObj
-                  0x004b4c                  _InitStatusChangedConnectionObj
-                  0x004b94                  _CANFrameFilter
-                  0x004c14                  _ResponseMACID
-                  0x004ccc                  _CheckMACID
-                  0x004d4c                  _CheckAllocateCode
-                  0x004e62                  _CheckReleaseCode
-                  0x004fa2                  _UnconVisibleMsgService
-                  0x0053f8                  _DeviceMonitorPluse
-                  0x005400                  _DeviceNetReciveCenter
-                  0x005496                  _SendData
-                  0x0054b8                  _StartOverTimer
-                  0x0054d0                  _IsTimeRemain
- .text            0x0054f2        0x9c8 build/default/production/Source/Driver/CAN.o
-                  0x0054f2                  _ConfigCANOneBraud
-                  0x005532                  _ConfigCANOneMaskFilterRX0
-                  0x005572                  _ConfigCANOneMaskFilterRX1
-                  0x005608                  _InitCANOne
-                  0x005686                  _InitStandardCAN
-                  0x005750                  _ConfigDataTXB0
-                  0x00581e                  _ConfigDataTXB1
-                  0x0058f0                  _ConfigDataTXB2
-                  0x0059c2                  _CANSendData
-                  0x005c54                  _ReadRx0Frame
-                  0x005d06                  _GetReciveRX0EID
-                  0x005d66                  __C2Interrupt
- .text            0x005eba        0x370 build/default/production/Source/Yongci/DeviceParameter.o
-                  0x005eba                  _GetCapVoltage
-                  0x005f16                  _GetCapVolatageState
-                  0x005f62                  _CheckVoltage
-                  0x006164                  _ReadCapDropVoltage
- .text            0x00622a        0x2e4 build/default/production/Source/SerialPort/RtuFrame.o
-                  0x00622a                  _ReciveFrameDataInit
-                  0x006244                  _FrameQueneIn
-                  0x006280                  _FrameQueneOut
-                  0x0062c0                  _ReciveBufferDataDealing
-                  0x00640a                  _GenRTUFrame
-                  0x00649a                  _SendFrame
-                  0x0064d2                  _SetOverTime
-                  0x0064ec                  _CheckIsOverTime
- .text            0x00650e        0x274 build/default/production/Source/Driver/DeviceIO.o
-                  0x00650e                  _InitDeviceIO
-                  0x0065b8                  _HC595BSendData
-                  0x006606                  _HC595SendData
-                  0x006652                  _ReHC74165
-                  0x0066d4                  _InitInt2
-                  0x0066ec                  _TurnOnInt2
-                  0x0066f8                  _TurnOffInt2
-                  0x006704                  _UpdateLEDIndicateState
-                  0x006734                  _UpdateRelayIndicateState
-                  0x006764                  _UpdateIndicateState
- .text            0x006782        0x238 build/default/production/Source/Driver/SD2405.o
-                  0x006782                  _SD2405_Init
-                  0x0067fe                  _BCD_to_Decimal
-                  0x006836                  _Decimal_to_BCD
-                  0x00686e                  _turnTime
-                  0x0068ac                  _GetTime
-                  0x006950                  _SetTime
- .text            0x0069ba        0x21a build/default/production/Source/Driver/EEPROMOperate.o
-                  0x0069ba                  _WriteWord_EEPROM
-                  0x006a50                  _ReadWord_EEPROM
-                  0x006a6a                  _ReadEEPROM
-                  0x006ade                  _WriteEEPROM
-                  0x006b7a                  _WriteAccumulateSum_EEPROM
-                  0x006b94                  _ReadAccumulateSum
-                  0x006baa                  _WriteFenzhaCount
- .text            0x006bd4        0x20e build/default/production/Source/Driver/ImitationIIC.o
-                  0x006bd4                  _IIC_Start
-                  0x006bf0                  _IIC_Stop
-                  0x006c12                  _IIC_Wait_Ack
-                  0x006c4e                  _IIC_Ack
-                  0x006c6a                  _IIC_SendByte
-                  0x006cb6                  _IIC_ReadByte
-                  0x006cfe                  _IIC_WriteByte
-                  0x006d42                  _I2CMasterWrite
-                  0x006d7e                  _IIC_MasterReadByte
-                  0x006dae                  _I2CMasterRead
- .text            0x006de2        0x1be build/default/production/Source/Driver/InitTemp.o
-                  0x006de2                  _DS18B20Reset
-                  0x006e26                  _DS18B20ReadBit
-                  0x006e54                  _DS18B20ReadByte
-                  0x006e98                  _DS18B20WriteByte
-                  0x006ef4                  _DS18B20TempChange
-                  0x006f0e                  _DS18B20GetTemperature
- .text            0x006fa0        0x122 build/default/production/Source/Driver/Timer.o
-                  0x006fa0                  _Init_Timer1
-                  0x006fe8                  _SetTimer2
-                  0x00702c                  _StartTimer2
-                  0x007040                  _StopTimer2
-                  0x00704c                  _Init_Timer3
-                  0x007076                  _StartTimer3
-                  0x00708a                  _ResetTimer3
-                  0x007098                  _Init_Timer4
- .text            0x0070c2         0xd6 build/default/production/Source/Driver/Usart.o
-                  0x0070c2                  _InitUART1
-                  0x007128                  _InitPortsUART1
-                  0x007136                  _UsartInit
-                  0x007142                  _UsartSend
-                  0x007160                  _UsartRecive
-                  0x00716a                  __U1RXInterrupt
-                  0x007190                  __U1TXInterrupt
- .text            0x007198         0xc8 build/default/production/Source/Driver/Delay.o
-                  0x007198                  _IsOverTime
-                  0x0071f2                  _OverflowDetection
-                  0x00720e                  _Delay_ms
-                  0x00723c                  __T2Interrupt
+.text             0x0015d4       0x5ec4
+ .text            0x0015d4       0x1576 build/default/production/Source/SerialPort/RefParameter.o
+                  0x0015d4                  _SetParamValue
+                  0x00165e                  _ReadParamValue
+                  0x001724                  _InitSetParameterCollect
+                  0x001f84                  _InitReadonlyParameterCollect
+                  0x00260a                  _RefParameterInit
+                  0x00279a                  _SetValueFloatUint16
+                  0x0027fa                  _GetValueFloatUint16
+                  0x00284a                  _SetValueFloatInt32
+                  0x00289c                  _GetValueFloatInt32
+                  0x0028ee                  _SetValueUint16
+                  0x002932                  _GetValueUint16
+                  0x002974                  _SetValueUint8
+                  0x0029a4                  _GetValueUint8
+                  0x0029d4                  _WriteAccumulateSum
+                  0x002a8e                  _AccumulateSumVerify
+ .text            0x002b4a       0x1020 build/default/production/Source/Yongci/SwtichCondition.o
+                  0x002b4a                  _CheckIOState
+                  0x002d3e                  _DsplaySwitchState
+                  0x002f9c                  _SwitchScan
+ .text            0x003b6a        0xea6 build/default/production/Source/SerialPort/Action.o
+                  0x003b6a                  _SendAckMesssage
+                  0x003b98                  _ExecuteFunctioncode
+                  0x003cbe                  _FrameServer
+                  0x0042cc                  _SendErrorFrame
+                  0x00431c                  _SendMessage
+                  0x004374                  _UpdataState
+                  0x004428                  __INT2Interrupt
+                  0x004588                  _GetLoopSwitch
+                  0x0047e0                  _CheckOrder
+                  0x00495c                  _GetValue
+ .text            0x004a10        0xae6 build/default/production/Source/DeviceNet/DeviceNet.o
+                  0x004a10                  _InitDeviceNet
+                  0x004abe                  _InitVisibleConnectionObj
+                  0x004b08                  _InitCycleInquireConnectionObj
+                  0x004b50                  _InitStatusChangedConnectionObj
+                  0x004b98                  _CANFrameFilter
+                  0x004c18                  _ResponseMACID
+                  0x004cd0                  _CheckMACID
+                  0x004d50                  _CheckAllocateCode
+                  0x004e66                  _CheckReleaseCode
+                  0x004fa6                  _UnconVisibleMsgService
+                  0x0053fc                  _DeviceMonitorPluse
+                  0x005404                  _DeviceNetReciveCenter
+                  0x00549a                  _SendData
+                  0x0054bc                  _StartOverTimer
+                  0x0054d4                  _IsTimeRemain
+ .text            0x0054f6        0x9c8 build/default/production/Source/Driver/CAN.o
+                  0x0054f6                  _ConfigCANOneBraud
+                  0x005536                  _ConfigCANOneMaskFilterRX0
+                  0x005576                  _ConfigCANOneMaskFilterRX1
+                  0x00560c                  _InitCANOne
+                  0x00568a                  _InitStandardCAN
+                  0x005754                  _ConfigDataTXB0
+                  0x005822                  _ConfigDataTXB1
+                  0x0058f4                  _ConfigDataTXB2
+                  0x0059c6                  _CANSendData
+                  0x005c58                  _ReadRx0Frame
+                  0x005d0a                  _GetReciveRX0EID
+                  0x005d6a                  __C2Interrupt
+ .text            0x005ebe        0x58c build/default/production/Source/Yongci/DeviceParameter.o
+                  0x005ebe                  _GetCapVoltage
+                  0x00613a                  _GetCapVolatageState
+                  0x006186                  _CheckVoltage
+                  0x006388                  _ReadCapDropVoltage
+ .text            0x00644a        0x2e4 build/default/production/Source/SerialPort/RtuFrame.o
+                  0x00644a                  _ReciveFrameDataInit
+                  0x006464                  _FrameQueneIn
+                  0x0064a0                  _FrameQueneOut
+                  0x0064e0                  _ReciveBufferDataDealing
+                  0x00662a                  _GenRTUFrame
+                  0x0066ba                  _SendFrame
+                  0x0066f2                  _SetOverTime
+                  0x00670c                  _CheckIsOverTime
+ .text            0x00672e        0x274 build/default/production/Source/Driver/DeviceIO.o
+                  0x00672e                  _InitDeviceIO
+                  0x0067d8                  _HC595BSendData
+                  0x006826                  _HC595SendData
+                  0x006872                  _ReHC74165
+                  0x0068f4                  _InitInt2
+                  0x00690c                  _TurnOnInt2
+                  0x006918                  _TurnOffInt2
+                  0x006924                  _UpdateLEDIndicateState
+                  0x006954                  _UpdateRelayIndicateState
+                  0x006984                  _UpdateIndicateState
+ .text            0x0069a2        0x238 build/default/production/Source/Driver/SD2405.o
+                  0x0069a2                  _SD2405_Init
+                  0x006a1e                  _BCD_to_Decimal
+                  0x006a56                  _Decimal_to_BCD
+                  0x006a8e                  _turnTime
+                  0x006acc                  _GetTime
+                  0x006b70                  _SetTime
+ .text            0x006bda        0x21a build/default/production/Source/Driver/EEPROMOperate.o
+                  0x006bda                  _WriteWord_EEPROM
+                  0x006c70                  _ReadWord_EEPROM
+                  0x006c8a                  _ReadEEPROM
+                  0x006cfe                  _WriteEEPROM
+                  0x006d9a                  _WriteAccumulateSum_EEPROM
+                  0x006db4                  _ReadAccumulateSum
+                  0x006dca                  _WriteFenzhaCount
+ .text            0x006df4        0x20e build/default/production/Source/Driver/ImitationIIC.o
+                  0x006df4                  _IIC_Start
+                  0x006e10                  _IIC_Stop
+                  0x006e32                  _IIC_Wait_Ack
+                  0x006e6e                  _IIC_Ack
+                  0x006e8a                  _IIC_SendByte
+                  0x006ed6                  _IIC_ReadByte
+                  0x006f1e                  _IIC_WriteByte
+                  0x006f62                  _I2CMasterWrite
+                  0x006f9e                  _IIC_MasterReadByte
+                  0x006fce                  _I2CMasterRead
+ .text            0x007002        0x1be build/default/production/Source/Driver/InitTemp.o
+                  0x007002                  _DS18B20Reset
+                  0x007046                  _DS18B20ReadBit
+                  0x007074                  _DS18B20ReadByte
+                  0x0070b8                  _DS18B20WriteByte
+                  0x007114                  _DS18B20TempChange
+                  0x00712e                  _DS18B20GetTemperature
+ .text            0x0071c0        0x122 build/default/production/Source/Driver/Timer.o
+                  0x0071c0                  _Init_Timer1
+                  0x007208                  _SetTimer2
+                  0x00724c                  _StartTimer2
+                  0x007260                  _StopTimer2
+                  0x00726c                  _Init_Timer3
+                  0x007296                  _StartTimer3
+                  0x0072aa                  _ResetTimer3
+                  0x0072b8                  _Init_Timer4
+ .text            0x0072e2         0xee build/default/production/Source/Driver/Usart.o
+                  0x0072e2                  _InitUART1
+                  0x007348                  _InitPortsUART1
+                  0x007356                  _UsartInit
+                  0x007362                  _UsartSend
+                  0x007398                  _UsartRecive
+                  0x0073a2                  __U1RXInterrupt
+                  0x0073c8                  __U1TXInterrupt
+ .text            0x0073d0         0xc8 build/default/production/Source/Driver/Delay.o
+                  0x0073d0                  _IsOverTime
+                  0x00742a                  _OverflowDetection
+                  0x007446                  _Delay_ms
+                  0x007474                  __T2Interrupt
 
-.dinit            0x007260         0x9c
- .dinit           0x007260         0x9c data_init
+.dinit            0x007498         0x9c
+ .dinit           0x007498         0x9c data_init
 
-.text             0x0072fc        0x15e
- .text            0x0072fc         0x9a build/default/production/Source/Driver/AdcSample.o
-                  0x0072fc                  _AdcInit
-                  0x007364                  _SoftSampleOnce
- .text            0x007396         0x6a build/default/production/Source/main.o
-                  0x007396                  _main
- .text            0x007400         0x5a build/default/production/Source/SerialPort/CRC16.o
-                  0x007400                  _CRC16
+.text             0x007534        0x14e
+ .text            0x007534         0x8a build/default/production/Source/Driver/AdcSample.o
+                  0x007534                  _AdcInit
+                  0x00759c                  _SoftSampleOnce
+ .text            0x0075be         0x6a build/default/production/Source/main.o
+                  0x0075be                  _main
+ .text            0x007628         0x5a build/default/production/Source/SerialPort/CRC16.o
+                  0x007628                  _CRC16
 
-.init.delay32     0x00745a         0x1c
- .init.delay32    0x00745a         0x1c c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(delay32.Leo)
-                  0x00745a                  ___delay32
+.init.delay32     0x007682         0x1c
+ .init.delay32    0x007682         0x1c c:/program files (x86)/microchip/xc16/v1.30/bin/bin/../../lib\liblega-pic30-elf.a(delay32.Leo)
+                  0x007682                  ___delay32

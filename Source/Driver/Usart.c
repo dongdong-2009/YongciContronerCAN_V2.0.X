@@ -86,12 +86,17 @@ void UsartInit(void)
 }
 void UsartSend(unsigned char abyte)
 {
+    uint32_t time = 0;
     RX_TX_MODE = TX_MODE;   //--鉴于光耦响应时间，须有一定的延时
     U1TXREG = abyte;
+    time = g_SysTimeStamp.TickTime;
     while(!U1STAbits.TRMT)
     {
         //此处需要添加超时复位
-        ClrWdt(); //2ms超时后,看门狗复位
+        if(IsOverTime(time,10))
+        {
+            Reset();    
+        }
     }
     
     RX_TX_MODE = RX_MODE;

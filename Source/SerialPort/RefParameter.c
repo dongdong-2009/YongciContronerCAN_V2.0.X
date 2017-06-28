@@ -512,11 +512,6 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
     
-	if (READONLY_PARAMETER_LEN < index)
-	{
-		ClrWdt();
-		while(1);	//数据长度不正确则触发看门狗复位
-	}
 }
 
 /**

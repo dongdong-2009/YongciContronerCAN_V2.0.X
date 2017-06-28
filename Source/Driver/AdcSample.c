@@ -79,11 +79,11 @@ void SoftSampleOnce(void)
     //若10ms不能完成则启动看门狗复位
     while(!IFS0bits.ADIF)
     {
-        if(IsOverTime(time , 10))
-        {
-            Reset();
-            return;
-        }
+//        if(IsOverTime(time , 10))
+//        {
+//            Reset();
+//            return;
+//        }
     }
     ClrWdt();
     IFS0bits.ADIF = 0;			// Clear the A/D interrupt flag bit

@@ -14,6 +14,7 @@
 #include "yongci.h"
 
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
+#define GET_CAP_TIME   200      //按键扫描间隔时间
 #define SCAN_TIME   2           //按键扫描间隔时间
 #define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
@@ -366,7 +367,12 @@ void YongciMainTask(void)
 //                ***************************************************************************/
             
             //检测是否欠电压， 并更新显示
-            CheckVoltage();       
+            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每200ms获取一次电容电压值
+            {
+                CheckVoltage();  
+                ClrWdt();
+                g_SysTimeStamp.GetCapVolueTime = g_SysTimeStamp.TickTime;
+            }  
             
             if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
             {
@@ -384,12 +390,17 @@ void YongciMainTask(void)
             if((g_SysTimeStamp.TickTime - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
             {
                 ClrWdt();
-                UpdataState();  //更新状态                
-                DsplaySwitchState();    //更新机构的状态显示
+                UpdataState();  //更新状态
+                //建立连接且不是在预制状态下才会周期上传
+                if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
+                {
+                    DsplaySwitchState();    //更新机构的状态显示
+                }
                 g_SuddenState.SuddenFlag = FALSE;  //Clear
                 OverflowDetection(SEND_TIME);   //增加溢出判断
                 g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
             }
+            
             ClrWdt();
             //运行指示灯
             if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
@@ -423,12 +434,11 @@ void YongciMainTask(void)
             {
                 if(!CheckIsOverTime())
                 {
-                    if((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) && 
+                    if((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) || 
                        (g_RemoteControlState.orderId == 0x05))   //判断是否是同步合闸命令
                     {
                         ON_INT();
                         TurnOffInt2();
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
                     }
                     g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
                     g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
@@ -446,7 +456,11 @@ void YongciMainTask(void)
             {
                 WriteAccumulateSum();  //写入累加和
                 g_RemoteControlState.SetFixedValue = FALSE;
-            }            
+            }   
+            if(g_RemoteControlState.GetAllValueFalg == TRUE)
+            {
+                GetValue(); //获取监控数据
+            }
         }
     }
 }
@@ -462,6 +476,9 @@ void YongciFirstInit(void)
     uint8_t index = 0;
     uint8_t data[8] = {0,0,0,0,0,0,0,0};
     ClrWdt();
+    
+    g_pPoint.pData = data;
+    g_pPoint.len = 8;
     
     g_lockUp = OFF_LOCK;    //处于解锁状态
     

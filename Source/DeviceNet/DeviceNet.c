@@ -10,7 +10,7 @@
  * @version ver 1.0
  */
 #include "DeviceNet.h"
-
+#include "../Header.h"
 #include "../Driver/CAN.h"
 #include "../Driver/Timer.h"
 #include "../SerialPort/Action.h"
@@ -70,6 +70,8 @@ static volatile USINT WorkMode = 0; //
 *******************************************************************************/
 void InitDeviceNet()
 {    
+    uint32_t time = 0;
+    
     DeviceNetReciveFrame.complteFlag = 0xff;
     DeviceNetReciveFrame.pBuffer = ReciveBufferData;
     DeviceNetSendFrame.complteFlag = 0xff;
@@ -100,9 +102,15 @@ void InitDeviceNet()
     BOOL result = CheckMACID( &DeviceNetReciveFrame, &DeviceNetSendFrame);
     ClrWdt();
     
-    while(result)   //时间超过10ms启动看门狗复位
+    time = g_SysTimeStamp.TickTime;
+    
+    while(result)   //时间超过10ms启动复位
     {
         WorkMode = MODE_FAULT;
+        if(IsOverTime(time,10))
+        {
+            Reset();    
+        }
     }
 
     ClrWdt();
