@@ -179,14 +179,14 @@ section                    address      alignment gaps    total length  (dec)
 .nbss                        0x800                   0            0x12  (18)
 .ndata                       0x812                   0            0x10  (16)
 .nbss                        0x822                   0            0x38  (56)
-_04E09180595373c9            0x85a                   0             0x4  (4)
+_04E4318059537597            0x85a                   0             0x4  (4)
 .ndata                       0x85e                   0             0x2  (2)
 .nbss                        0x860                   0             0x4  (4)
 .ndata                       0x864                   0             0x2  (2)
-_04D6F060595373c6            0x866                   0             0x2  (2)
-_04D6F0C0595373c6            0x868                   0             0x2  (2)
-_04E091E0595373c9            0x86a                   0             0x2  (2)
-_04E09120595373c9            0x86c                   0             0x2  (2)
+_04DE106059537594            0x866                   0             0x2  (2)
+_04DE10C059537594            0x868                   0             0x2  (2)
+_04E431E059537597            0x86a                   0             0x2  (2)
+_04E4312059537597            0x86c                   0             0x2  (2)
 .bss                         0x86e                   0           0x514  (1300)
 
                  Total data memory used (bytes):          0x582  (1410) 17%
@@ -2352,9 +2352,9 @@ __c30_signature
  .nbss              0x0856          0x4 build/default/production/Source/Yongci/SwtichCondition.o
                     0x0856                  _g_kairuValue
 
-_04E09180595373c9
+_04E4318059537597
                     0x085a          0x4
- _04E09180595373c9
+ _04E4318059537597
                     0x085a          0x4 build/default/production/Source/Yongci/yongci.o
                     0x085a                  _g_changeLedTime
 
@@ -2373,27 +2373,27 @@ _04E09180595373c9
                     0x0864                  _ReciveErrorFlag
                     0x0865                  _LocalAddress
 
-_04D6F060595373c6
+_04DE106059537594
                     0x0866          0x2
- _04D6F060595373c6
+ _04DE106059537594
                     0x0866          0x2 build/default/production/Source/SerialPort/RefParameter.o
                     0x0866                  _g_SyncReadyWaitTime
 
-_04D6F0C0595373c6
+_04DE10C059537594
                     0x0868          0x2
- _04D6F0C0595373c6
+ _04DE10C059537594
                     0x0868          0x2 build/default/production/Source/SerialPort/RefParameter.o
                     0x0868                  _g_RemoteWaitTime
 
-_04E091E0595373c9
+_04E431E059537597
                     0x086a          0x2
- _04E091E0595373c9
+ _04E431E059537597
                     0x086a          0x2 build/default/production/Source/Yongci/yongci.o
                     0x086a                  _g_lockUp
 
-_04E09120595373c9
+_04E4312059537597
                     0x086c          0x2
- _04E09120595373c9
+ _04E4312059537597
                     0x086c          0x2 build/default/production/Source/Yongci/yongci.o
                     0x086c                  _g_Order
 
