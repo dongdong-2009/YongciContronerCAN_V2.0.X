@@ -202,3 +202,6 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 
 2017/06/27(修改人：张东旭)
 精简DeviceNet中的部分函数
+
+2017/06/28(修改人：张东旭)
+将所有依靠看门狗超时检测的都修改为软件检测

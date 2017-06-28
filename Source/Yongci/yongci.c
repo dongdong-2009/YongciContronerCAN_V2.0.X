@@ -230,6 +230,10 @@ void YongciMainTask(void)
     uint32_t checkOrderDelay = UINT32_MAX;
     while(0xFFFF) //主循环
     {
+        UpdateLEDIndicateState(FENWEI3_LED,TURN_OFF);    //测试
+        UpdateLEDIndicateState(HEWEI3_LED,TURN_OFF);    //测试
+        UpdateLEDIndicateState(CAP3_LED,TURN_OFF);    //测试
+        
         ClrWdt();
         //机构1合闸、分闸刷新
         if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
@@ -246,6 +250,7 @@ void YongciMainTask(void)
         }
         else    //防止持续合闸或者分闸
         {
+            g_SetSwitchState[0].Order = IDLE_ORDER;
             RESET_CURRENT_A();
         }
         
@@ -264,6 +269,7 @@ void YongciMainTask(void)
         }
         else    //防止持续合闸或者分闸
         {
+            g_SetSwitchState[1].Order = IDLE_ORDER;
             RESET_CURRENT_B();
         }
         
@@ -284,6 +290,7 @@ void YongciMainTask(void)
             }
             else    //防止持续合闸或者分闸
             {
+                g_SetSwitchState[2].Order = IDLE_ORDER;
                 RESET_CURRENT_C();
             }
         }
@@ -298,8 +305,6 @@ void YongciMainTask(void)
                 CHECK_LAST_ORDER3())
             {
                 ON_INT();
-                ClrWdt();
-                ClrWdt();
                 ClrWdt();
                 checkOrderDelay = REFUSE_ACTION;
                 //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
@@ -381,9 +386,6 @@ void YongciMainTask(void)
                 ClrWdt();
                 UpdataState();  //更新状态                
                 DsplaySwitchState();    //更新机构的状态显示
-                UpdateLEDIndicateState(FENWEI3_LED,TURN_OFF);    //测试
-                UpdateLEDIndicateState(HEWEI3_LED,TURN_OFF);    //测试
-                UpdateLEDIndicateState(CAP3_LED,TURN_OFF);    //测试
                 g_SuddenState.SuddenFlag = FALSE;  //Clear
                 OverflowDetection(SEND_TIME);   //增加溢出判断
                 g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
@@ -444,8 +446,7 @@ void YongciMainTask(void)
             {
                 WriteAccumulateSum();  //写入累加和
                 g_RemoteControlState.SetFixedValue = FALSE;
-            }
-            
+            }            
         }
     }
 }

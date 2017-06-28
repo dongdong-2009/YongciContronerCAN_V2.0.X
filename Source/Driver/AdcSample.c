@@ -72,12 +72,18 @@ void AdcInit(void)
 **********************************************/
 void SoftSampleOnce(void)
 {
+    uint32_t time;
     ADCON1bits.ADON = 1; //启动转换
     ClrWdt();
+    time = g_SysTimeStamp.TickTime;
     //若10ms不能完成则启动看门狗复位
     while(!IFS0bits.ADIF)
     {
-        
+        if(IsOverTime(time , 10))
+        {
+            Reset();
+            return;
+        }
     }
     ClrWdt();
     IFS0bits.ADIF = 0;			// Clear the A/D interrupt flag bit

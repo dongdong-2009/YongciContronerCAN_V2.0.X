@@ -160,10 +160,10 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     /**
      * 发送数据帧赋值
      */
-    pSendFrame->ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    g_qSendFrame.ID = pSendFrame->ID;    //ID号传递
+    pSendFrame->ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame->pBuffer[0] = id | 0x80;
-    g_qSendFrame.pBuffer[0] = pSendFrame->pBuffer[0];   //数据传递
+    g_qSendFrame.pBuffer[0] = id | 0x80;  //数据传递
     ClrWdt();
 
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
@@ -183,8 +183,8 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
 		}
 		pSendFrame->len = pReciveFrame->len;
-        g_qSendFrame.len = pSendFrame->len; //数据长度传递
 	}
+    g_qSendFrame.len = pReciveFrame->len;
     
     switch(id)
     {
@@ -537,8 +537,10 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 }
                 pSendFrame->pBuffer[1] = idIndex;  //配置号  
-                pSendFrame->pBuffer[2] = Point.pData[0];
-                pSendFrame->pBuffer[3] = Point.pData[1];
+                for(uint8_t i = 0;i < Point.len;i++)
+                {
+                    pSendFrame->pBuffer[i + 2] = Point.pData[i];
+                }
                 pSendFrame->len = Point.len + 2;
                 ClrWdt();
                 SendData(pSendFrame);
