@@ -102,7 +102,6 @@ int main()
         __delay_ms(1);
         ClrWdt();
     }
-    
     InitDeviceIO(); //IO初始化 首先禁止中断
 //    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
     
