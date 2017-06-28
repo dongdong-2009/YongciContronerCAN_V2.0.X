@@ -72,6 +72,7 @@ void InitDeviceIO(void)
     DRIVER_B_1_DIR = 0;
     DRIVER_C_1_DIR = 0;
     DRIVER_D_1_DIR = 0;
+    DECTA_DIR = 0;
     RESET_CURRENT_A();
     ClrWdt();
     
@@ -81,6 +82,7 @@ void InitDeviceIO(void)
     DRIVER_B_2_DIR = 0;
     DRIVER_C_2_DIR = 0;
     DRIVER_D_2_DIR = 0;
+    DECTB_DIR = 0;
     RESET_CURRENT_B();
     ClrWdt();
 
@@ -90,6 +92,7 @@ void InitDeviceIO(void)
     DRIVER_B_3_DIR = 0;
     DRIVER_C_3_DIR = 0;
     DRIVER_D_3_DIR = 0;
+    DECTC_DIR = 0;
     RESET_CURRENT_C();
     ClrWdt();
     

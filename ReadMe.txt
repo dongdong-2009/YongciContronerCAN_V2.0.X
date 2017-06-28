@@ -206,3 +206,5 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 2017/06/28(修改人：张东旭)
 将所有依靠看门狗超时检测的都修改为软件检测
 将CAN中断中的定值写入、监控数据读取，均转移到主程序中
+修改同步预制函数中的BUG，修改同步控制中回路起始为0b01
+修复部分BUG

@@ -26,6 +26,7 @@ struct DefFrameData g_qSendFrame;   //CAN数据帧
 PointUint8 g_pPoint;   
 
 uint8_t static g_overID = 0;
+uint8_t static g_startID = 0;
 /**************************************************
  *函数名： SendAckMesssage()
  *功能：  回传校验码
@@ -417,7 +418,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 return;
             }
             //数据长度不对，数据长度不应为奇数
-            if((pReciveFrame->len  & 0x01)) 
+            if((pReciveFrame->len & 0x01)) 
             {
                 ClrWdt();
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
@@ -428,7 +429,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 
             if(CAP3_STATE)
             {
-                if((pReciveFrame->pBuffer[1] <= 0x34) && (pReciveFrame->len == 6)) //只有三个回路需要控制
+                if((pReciveFrame->pBuffer[1] <= 0x39) && (pReciveFrame->pBuffer[1] >= 0x19) && (pReciveFrame->len == 6)) //只有三个回路需要控制
                 {
                     pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
 
@@ -447,11 +448,16 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     pSendFrame->pBuffer[7] = pReciveFrame->pBuffer[5];
                     pSendFrame->len = 8;
                 }
+                else
+                {
+                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
+                    return;
+                }
             }
             else
             {
                 //只有两个回路需要控制
-                if((pReciveFrame->pBuffer[1] == 0x01) || (pReciveFrame->pBuffer[1] == 0x04))  //机构1先合、或者机构2先合
+                if((pReciveFrame->pBuffer[1] == 0x09) || (pReciveFrame->pBuffer[1] == 0x06))  //机构1先合、或者机构2先合
                 {
                     ClrWdt();
                     pSendFrame->pBuffer[3] = pReciveFrame->pBuffer[2];
@@ -525,6 +531,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case 0x12:  //顺序参数读取
         {
+            g_startID = pReciveFrame->pBuffer[1];
             g_overID = pReciveFrame->pBuffer[2];
             g_RemoteControlState.GetAllValueFalg = TRUE;
             break;
@@ -1261,7 +1268,7 @@ void GetValue(void)
     if(g_RemoteControlState.GetAllValueFalg == TRUE)
     {
         pSendFrame.pBuffer[0] = 0x92;
-        for(idIndex = 0x41 ;idIndex <= g_overID;idIndex++)    //抛除ID号所占的长度
+        for(idIndex = g_startID ;idIndex <= g_overID;idIndex++)    //抛除ID号所占的长度
         {
             ClrWdt();
             g_pPoint.len = 8;

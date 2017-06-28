@@ -540,8 +540,8 @@ EIDBits rEID;
 void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 {    
     ClrWdt();
-    uint8_t rxErrorCount = C2EC & 0x00FF;
-    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
+//    uint8_t rxErrorCount = C2EC & 0x00FF;
+//    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
         
     ClrWdt();
     IFS2bits.C2IF = 0;         //Clear interrupt flag
@@ -575,20 +575,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         ClrWdt();
     }
 
-    if((rxErrorCount < 120) || (txErrorCount < 120))
-    {
-        C2INTEbits.ERRIE = 1;   //开启错误中断
-        IEC2bits.C2IE = 1;      //允许CAN中断
-        ClrWdt();
-    }
-    
-    if((rxErrorCount > 200) || (txErrorCount > 200))
-    {
-        while(1)
-        {
-            UpdateLEDIndicateState(FENWEI3_LED,TURN_ON);    //测试
-        }
-    }
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {
@@ -597,15 +583,12 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //关闭错误中断
-        UpdateLEDIndicateState(FENWEI3_LED,TURN_ON);    //测试
         g_changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
     
-    UpdateLEDIndicateState(HEWEI3_LED,TURN_ON);    //测试
     if(C2INTFbits.ERRIF == 1)
     {
-        UpdateLEDIndicateState(CAP3_LED,TURN_ON);    //测试
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {

@@ -14,7 +14,7 @@
 #include "yongci.h"
 
 #define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
-#define GET_CAP_TIME   200      //按键扫描间隔时间
+#define GET_CAP_TIME   300      //按键扫描间隔时间
 #define SCAN_TIME   2           //按键扫描间隔时间
 #define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
@@ -63,21 +63,29 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 		g_SetSwitchState[g_Index[1].indexLoop].State = RUN_STATE;
         g_SetSwitchState[g_Index[1].indexLoop].Order = HE_ORDER;
 		g_SetSwitchState[g_Index[1].indexLoop].SysTime = g_MsTicks;
-        g_SetSwitchState[g_Index[1].indexLoop].SwitchOn(g_SetSwitchState + g_Index[1].indexLoop);
-        ResetTimer3();
+        g_SetSwitchState[g_Index[1].indexLoop].SwitchOn(g_SetSwitchState + g_Index[1].indexLoop);        
         if(CAP3_STATE)
         {
+            ClrWdt();
             StartTimer3(g_SetSwitchState[g_Index[2].indexLoop].OffestTime);//偏移时间
+            return;
+        }
+        else
+        {
+            ClrWdt();
+            ResetTimer3();
+            return;
         }
 		
 	}
-    else if((g_SetSwitchState[g_Index[2].indexLoop].State == REDAY_STATE) && (g_SetSwitchState[g_Index[1].indexLoop].Order == IDLE_ORDER))
+    else if((g_SetSwitchState[g_Index[2].indexLoop].State == REDAY_STATE) && (g_SetSwitchState[g_Index[2].indexLoop].Order == IDLE_ORDER))
 	{
 		g_SetSwitchState[g_Index[2].indexLoop].State = RUN_STATE;
         g_SetSwitchState[g_Index[2].indexLoop].Order = HE_ORDER;
 		g_SetSwitchState[g_Index[2].indexLoop].SysTime = g_MsTicks;
         g_SetSwitchState[g_Index[2].indexLoop].SwitchOn(g_SetSwitchState + g_Index[2].indexLoop);
         ResetTimer3();
+        ClrWdt();
 	}
     
 }
@@ -230,11 +238,7 @@ void YongciMainTask(void)
     uint32_t checkOrderTime = g_MsTicks;
     uint32_t checkOrderDelay = UINT32_MAX;
     while(0xFFFF) //主循环
-    {
-        UpdateLEDIndicateState(FENWEI3_LED,TURN_OFF);    //测试
-        UpdateLEDIndicateState(HEWEI3_LED,TURN_OFF);    //测试
-        UpdateLEDIndicateState(CAP3_LED,TURN_OFF);    //测试
-        
+    {        
         ClrWdt();
         //机构1合闸、分闸刷新
         if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
@@ -367,7 +371,7 @@ void YongciMainTask(void)
 //                ***************************************************************************/
             
             //检测是否欠电压， 并更新显示
-            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每200ms获取一次电容电压值
+            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每300ms获取一次电容电压值
             {
                 CheckVoltage();  
                 ClrWdt();
