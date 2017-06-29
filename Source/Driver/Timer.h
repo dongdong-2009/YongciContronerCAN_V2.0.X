@@ -9,8 +9,8 @@
  * @author Zhangxiaomou 
  * @version ver 1.0
  */
-#ifndef XC_TIMER_H
-#define	XC_TIMER_H
+#ifndef _TIMER_H
+#define	_TIMER_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -22,6 +22,7 @@ void StopTimer2(void);
 
 void Init_Timer3(void);
 void StartTimer3(unsigned int us);
+void ChangePr3(unsigned int us);
 void ResetTimer3(void);
 
 #ifdef	__cplusplus

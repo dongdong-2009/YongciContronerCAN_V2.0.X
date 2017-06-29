@@ -70,14 +70,14 @@
 //#define USE_RS485 0xB2
 #define USE_CAN 0xB1
 #ifdef  USE_CAN
-    #define ON_INT()  {ON_CAN_INT();}
-    #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+    #define ON_INT()  {IEC2bits.C2IE = 1;C2INTE = 0xBF;C1INTE = 0;}  //C2INTE = 0xBF;
+    #define OFF_INT() {IEC2bits.C2IE = 0;C2INTE = 0;C1INTE = 0;}
     #define APPLY_CAN    TRUE
     #define APPLY_485    FALSE
 
 #elif   USE_RS485
     #define ON_INT()  {ON_UART_INT();}
-    #define OFF_INT() {OFF_UART_INT(); OFF_CAN_INT();}
+    #define OFF_INT() {OFF_UART_INT();}
     #define APPLY_CAN    FALSE
     #define APPLY_485    TRUE
 

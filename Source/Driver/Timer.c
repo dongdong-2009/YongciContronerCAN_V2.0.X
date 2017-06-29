@@ -156,6 +156,16 @@ inline void StartTimer3(unsigned int us)
 }
 /**
  * 
+ * <p>Function name: [StartTimer3]</p>
+ * <p>Discription: [启动定时器]</p>
+ * @param us 延时时间
+ */
+inline void ChangePr3(unsigned int us)
+{
+    PR3 = us + 2;   //误差量
+}
+/**
+ * 
  * <p>Function name: [ResetTimer3]</p>
  * <p>Discription: [复位定时器]</p>
  */

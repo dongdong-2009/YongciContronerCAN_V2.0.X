@@ -155,7 +155,10 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     }
     uint8_t i = 1;    
     uint8_t id = pReciveFrame->pBuffer[0];
-    uint8_t error = 0;    //错误
+    uint8_t error = 0;  //错误号
+    uint8_t loopA = 0;  //回路顺序号码
+    uint8_t loopB = 0;	//回路顺序号码
+    uint8_t loopC = 0;	//回路顺序号码
     
     /**
      * 发送数据帧赋值
@@ -174,7 +177,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         return;
     }
     
-	if(id < 5)
+	if(id <= 5)
 	{
 		for(i = 1;i < pReciveFrame->len;i++)
 		{
@@ -276,9 +279,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     }
                     default :
                     {
+                        OffLock();  //解锁
                         SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                         g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                        OffLock();  //解锁
                         return;
                         break;
                     }
@@ -424,29 +427,22 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
-            pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1] & 0x03;
-            pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
+            loopA = pReciveFrame->pBuffer[1] & 0x03;
+            loopB = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
 
             if(CAP3_STATE)
             {
                 if((pReciveFrame->pBuffer[1] <= 0x39) && (pReciveFrame->pBuffer[1] >= 0x19) && (pReciveFrame->len == 6)) //只有三个回路需要控制
                 {
-                    pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
+                    loopC = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
 
-                    if((pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2]) || 
-                       (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3]) || 
-                       (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3]))//不应该出现相同的回路数
+                    if((loopA == loopB) || (loopB == loopC) || (loopA == loopC))//不应该出现相同的回路数
                     {
                         //错误消息为存在相同的回路数
                         SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                         return;
                     }
                     ClrWdt();
-                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[2];
-                    pSendFrame->pBuffer[5] = pReciveFrame->pBuffer[3];
-                    pSendFrame->pBuffer[6] = pReciveFrame->pBuffer[4];
-                    pSendFrame->pBuffer[7] = pReciveFrame->pBuffer[5];
-                    pSendFrame->len = 8;
                 }
                 else
                 {
@@ -460,9 +456,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 if((pReciveFrame->pBuffer[1] == 0x09) || (pReciveFrame->pBuffer[1] == 0x06))  //机构1先合、或者机构2先合
                 {
                     ClrWdt();
-                    pSendFrame->pBuffer[3] = pReciveFrame->pBuffer[2];
-                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[3];
-                    pSendFrame->len = 5;
                 }
                 else
                 {
@@ -480,14 +473,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)
             {                
                 ClrWdt();
-                SendData(pSendFrame);
-                ClrWdt();
-                GetOffestTime(pReciveFrame , pSendFrame);
-                ClrWdt();
-                SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-                g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
-                g_RemoteControlState.overTimeFlage = TRUE;  //预制成功后才会开启超时检测
-                TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
+                if(GetOffestTime(pReciveFrame))
+                {
+                    SendData(pSendFrame);
+                    SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
+                    ClrWdt();
+                    g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+                    g_RemoteControlState.overTimeFlage = TRUE;  //预制成功后才会开启超时检测
+                    TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
+                }
+                else
+                {
+                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
+                    return;
+                }
             }
             else
             {
@@ -761,11 +760,10 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     }
     if(RXD1_LASER || (validCount > 10))
     {
-        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
         g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
         TongBuHeZha();
-        ON_INT();
+        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         TurnOffInt2();
     }
 }

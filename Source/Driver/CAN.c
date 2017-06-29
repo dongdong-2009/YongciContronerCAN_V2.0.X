@@ -574,7 +574,6 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
         ClrWdt();
     }
-
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {
@@ -583,6 +582,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //关闭错误中断
+        g_RemoteControlState.CanErrorFlag = TRUE;    //发生了总线关断错误
         g_changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
@@ -592,8 +592,9 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {
-            ClrWdt();
             C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
+            ClrWdt();
+            C2INTEbits.RXB0IE = 1;
         }
         else if(C2INTFbits.RX1OVR)
         {

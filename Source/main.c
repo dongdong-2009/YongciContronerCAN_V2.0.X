@@ -103,7 +103,6 @@ int main()
         ClrWdt();
     }
     InitDeviceIO(); //IO初始化 首先禁止中断
-//    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
     
     AdcInit(); //ADC采样初始化
     ClrWdt();
@@ -143,7 +142,6 @@ int main()
     ClrWdt();
         
     cn = 0;
-    
     if(APPLY_CAN == TRUE)
     {
         OFF_UART_INT(); //485通信不开启
@@ -162,7 +160,6 @@ int main()
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys
     
-    //测试完成后需要更改回原来的位置
     UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
     
     while(TRUE)

@@ -129,7 +129,7 @@ void YongciFirstInit(void);
 void HEZHA_Action(uint8_t index,uint16_t time);
 void FENZHA_Action(uint8_t index,uint16_t time);
 void TongBuHeZha(void);
-void GetOffestTime(struct DefFrameData* pReciveFrame , struct DefFrameData* pSendFrame);
+uint8_t GetOffestTime(struct DefFrameData* pReciveFrame);
 void OnLock(void);
 void OffLock(void);
 

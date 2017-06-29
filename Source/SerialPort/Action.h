@@ -92,8 +92,9 @@ typedef struct RemoteControl
     uint8_t  overTimeFlage;     //超时标识位
     uint8_t  orderId;   //执行的命令
     uint8_t  SetFixedValue;     //设置定值指令
-    uint8_t  GetAllValueFalg;     //设置定值指令
-    uint8_t  GetOneValueFalg;     //设置定值指令
+    uint8_t  GetAllValueFalg;   //设置定值指令
+    uint8_t  GetOneValueFalg;   //设置定值指令
+    uint8_t  CanErrorFlag;      //CAN错误标识位
 }RemoteControlState;
 
 void ExecuteFunctioncode(frameRtu* pRtu);
