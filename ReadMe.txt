@@ -211,6 +211,8 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 
 2017/06/29(修改人：张东旭)
 修改同步预制应答
+修改同步信号识别函数
+精简程序，编译级别调高
 
 
 

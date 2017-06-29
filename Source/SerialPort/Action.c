@@ -674,12 +674,14 @@ void UpdataState(void)
  * <p>Function name: [_INT2Interrupt]</p>
  * <p>Discription: [外部中断函数]</p>
  */
-uint8_t state = 0x00;
 
+uint16_t g_validCount = 0;
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
     uint8_t i = 0;
-    uint8_t validCount = 0;
+    uint8_t state = 0x00;
+    
+    g_validCount = 0;   //初始化全局变量
     
     IFS1bits.INT2IF = 0;
     OFF_INT();
@@ -704,19 +706,19 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 		state &= 0x01;
 		while(RXD1_LASER == state)
 		{
-			validCount++;
-            if(validCount > 100)    //防止进入死循环
+			g_validCount++;
+            if(g_validCount >= 0xFFFF)    //防止进入死循环
             {
                 i = 10;
                 return;
             }
 		}
-		if((validCount < 13) || (validCount > 23))
+		if((g_validCount < 30) || (g_validCount > 50))  //较宽的范围85~125
 		{
             i = 10;
 			return;
 		}
-        validCount = 0;
+        g_validCount = 0;
 	}
 	if(RXD1_LASER == 1 && i == 4)
 	{
@@ -725,16 +727,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
         TongBuHeZha();
         g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         TurnOffInt2();
-		//run;
 	}
-//    if(RXD1_LASER || (validCount > 10))
-//    {
-//        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-//        g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
-//        TongBuHeZha();
-//        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
-//        TurnOffInt2();
-//    }
 }
 
 /**
