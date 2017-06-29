@@ -216,10 +216,11 @@ uint8_t CheckIOState(void)
                 ClrWdt();
                 FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                 FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                if(CAP3_STATE)  //判断第三块驱动是否存在
+                #if(CAP3_STATE)  //判断第三块驱动是否存在
                 {
                     FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 }
+                #endif
                 g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x02;
@@ -389,7 +390,7 @@ void DsplaySwitchState(void)
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_OFF);
     }
     
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         if(g_SuddenState.Cap3Error == CAP3_ERROR || 
            g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //机构3错误
@@ -412,6 +413,7 @@ void DsplaySwitchState(void)
             UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_OFF);
         }
     }
+    #endif
     
     if((g_SystemState.warning == CHECK_ERROR1_STATE) ||
        (g_SystemState.warning == CHECK_ERROR2_STATE) ||
@@ -473,7 +475,7 @@ void DsplaySwitchState(void)
         }
     }
     
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         //机构3的分合位指示    
         ClrWdt();
@@ -501,10 +503,11 @@ void DsplaySwitchState(void)
             }
         }    
     }
-    else
+    #else
     {        
         g_SystemState.heFenState3 = g_SystemState.heFenState2 + 2;  //主要应用在判断总分合位
     }
+    #endif
     
     //总的分合位检测    
     //分闸状态
@@ -720,7 +723,7 @@ void SwitchScan(void)
             g_lockflag[5] = 0;
         }
         
-        if(CAP3_STATE)  //判断第三块驱动是否存在
+        #if(CAP3_STATE)  //判断第三块驱动是否存在
         {
             //机构3合闸信号检测
             if(HEZHA3_CONDITION() && g_lockflag[6] == 0)   
@@ -776,6 +779,7 @@ void SwitchScan(void)
                 g_lockflag[7] = 0;
             }
         }
+        #endif
     }
     
     //机构1的合位检测
@@ -873,7 +877,7 @@ void SwitchScan(void)
         }
         g_lockflag[11] = 0;
     }   
-    if(CAP3_STATE)  //判断第三块驱动是否存在
+    #if(CAP3_STATE)  //判断第三块驱动是否存在
     {
         //机构3的合位检测
         if(HEWEI3_CONDITION() && g_lockflag[12] == 0)
@@ -923,6 +927,7 @@ void SwitchScan(void)
             g_lockflag[13] = 0;
         }   
     }
+    #endif
         
     
     //机构1的合分位同时存在\不存在
@@ -973,7 +978,7 @@ void SwitchScan(void)
         g_lockflag[15] = 0;
     }
     
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         //机构3的合分位同时存在\不存在
         if(ERROR3_CONDITION() && g_lockflag[16] == 0)
@@ -999,6 +1004,7 @@ void SwitchScan(void)
             g_lockflag[16] = 0;
         }
     }
+    #endif
     
     //远方\就地检测
     if(YUAN_BEN_CONDITION() && (g_lockflag[17] == 0))

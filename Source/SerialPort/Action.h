@@ -90,11 +90,17 @@ typedef struct RemoteControl
     uint16_t ReceiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
     uint16_t lastReceiveOrder;  //接收到的上一条命令
     uint8_t  overTimeFlage;     //超时标识位
-    uint8_t  orderId;   //执行的命令
+    uint8_t  orderId;           //执行的命令
     uint8_t  SetFixedValue;     //设置定值指令
-    uint8_t  GetAllValueFalg;   //设置定值指令
-    uint8_t  GetOneValueFalg;   //设置定值指令
+    uint8_t  GetAllValueFalg;   //读取所有的连续数据
+    uint8_t  GetOneValueFalg;   //读取单个数据
     uint8_t  CanErrorFlag;      //CAN错误标识位
+    uint8_t  FrameErrorFlag;	//接收数据错误标识位
+    uint8_t  TongbuReadFlag;	//同步预制到达标识位
+    uint8_t  HezhaReadFlag;		//合闸预制到达标识位
+    uint8_t  RunHezhaFlag;		//合闸执行命令到达标识位
+    uint8_t  FenzhaReadFlag;	//分闸预制到达标识位
+    uint8_t  RunFenzhaFlag;		//分闸执行命令到达标识位
 }RemoteControlState;
 
 void ExecuteFunctioncode(frameRtu* pRtu);

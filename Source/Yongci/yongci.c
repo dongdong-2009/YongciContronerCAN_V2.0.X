@@ -65,18 +65,19 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         g_SetSwitchState[g_Index[1].indexLoop].Order = HE_ORDER;
 		g_SetSwitchState[g_Index[1].indexLoop].SysTime = g_MsTicks;
         g_SetSwitchState[g_Index[1].indexLoop].SwitchOn(g_SetSwitchState + g_Index[1].indexLoop);        
-        if(CAP3_STATE)
+        #if(CAP3_STATE)
         {
             ClrWdt();
             ChangePr3(g_SetSwitchState[g_Index[2].indexLoop].OffestTime);//偏移时间
             return;
         }
-        else
+        #else
         {
             ClrWdt();
             ResetTimer3();
             return;
         }
+        #endif
 		
 	}
     else if((g_SetSwitchState[g_Index[2].indexLoop].State == REDAY_STATE) && (g_SetSwitchState[g_Index[2].indexLoop].Order == IDLE_ORDER))
@@ -119,30 +120,30 @@ inline void OffLock(void)
  */
 void TongBuHeZha(void)
 {
-    //不允许多次执行相同/不同的操作
-    if((g_SetSwitchState[0].State != IDLE_ORDER) || (g_SetSwitchState[0].Order != IDLE_ORDER) || 
-       (g_SetSwitchState[0].LastOrder != IDLE_ORDER))
-    {
-        g_Order = IDLE_ORDER;    //将命令清零
-        return ;
-    }
-    //不允许多次执行相同/不同的操作
-    if((g_SetSwitchState[1].State != IDLE_ORDER) || (g_SetSwitchState[1].Order != IDLE_ORDER) || 
-       (g_SetSwitchState[1].LastOrder != IDLE_ORDER))
-    {
-        g_Order = IDLE_ORDER;    //将命令清零
-        return ;
-    }
-    if(CAP3_STATE)
+    uint8_t i = 0;
+    uint8_t count = 0;
+    
+    #if CAP3_STATE
+        count = 3;
+    #else
+        count = 2;
+    #endif
+
+    for(i = 0; i < count; i++)
     {
         //不允许多次执行相同/不同的操作
-        if((g_SetSwitchState[2].State != IDLE_ORDER) || (g_SetSwitchState[2].Order != IDLE_ORDER) || 
-           (g_SetSwitchState[2].LastOrder != IDLE_ORDER))
+        if(g_SetSwitchState[i].State || g_SetSwitchState[i].Order || g_SetSwitchState[i].LastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
-            return ;
+            i = 10;
+            return;
         }
     }
+    if(i == 10)
+    {
+        return;
+    }
+    
     OFF_INT();  //关闭通信中断
 	g_SetSwitchState[g_Index[1].indexLoop].State = REDAY_STATE;
     g_SetSwitchState[g_Index[1].indexLoop].Order = IDLE_ORDER;
@@ -150,13 +151,14 @@ void TongBuHeZha(void)
 	g_SetSwitchState[g_Index[1].indexLoop].OffestTime = g_Index[1].offestTime;
     ClrWdt();
     
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         g_SetSwitchState[g_Index[2].indexLoop].State = REDAY_STATE;
         g_SetSwitchState[g_Index[2].indexLoop].Order = IDLE_ORDER;
         g_SetSwitchState[g_Index[2].indexLoop].SwitchOnTime = g_Index[2].onTime;
         g_SetSwitchState[g_Index[2].indexLoop].OffestTime = g_Index[2].offestTime;
     }
+    #endif
 
 	g_SetSwitchState[g_Index[0].indexLoop].State = RUN_STATE;
     g_SetSwitchState[g_Index[0].indexLoop].Order = HE_ORDER;
@@ -181,8 +183,7 @@ void HEZHA_Action(uint8_t index,uint16_t time)
         return;
     }
     //不允许多次执行相同/不同的操作
-    if((g_SetSwitchState[index].State != IDLE_ORDER) || (g_SetSwitchState[index].Order != IDLE_ORDER) || 
-       (g_SetSwitchState[index].LastOrder != IDLE_ORDER))
+    if(g_SetSwitchState[index].State || g_SetSwitchState[index].Order || g_SetSwitchState[index].LastOrder)
     {
         g_Order = IDLE_ORDER;    //将命令清零
         return ;
@@ -212,8 +213,7 @@ void FENZHA_Action(uint8_t index,uint16_t time)
         return;
     }
     //不允许多次执行相同/不同的操作
-    if((g_SetSwitchState[index].State != IDLE_ORDER) || (g_SetSwitchState[index].Order != IDLE_ORDER) || 
-       (g_SetSwitchState[index].LastOrder != IDLE_ORDER))
+    if(g_SetSwitchState[index].State || g_SetSwitchState[index].Order || g_SetSwitchState[index].LastOrder)
     {
         g_Order = IDLE_ORDER;    //将命令清零
         return ;
@@ -282,7 +282,7 @@ void YongciMainTask(void)
             RESET_CURRENT_B();
         }
         
-        if(CAP3_STATE)
+        #if(CAP3_STATE)
         {
             //机构3合闸、分闸刷新
             if((g_SetSwitchState[2].Order == HE_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
@@ -303,6 +303,7 @@ void YongciMainTask(void)
                 RESET_CURRENT_C();
             }
         }
+        #endif
         
         //机构空闲状态刷新
         if((g_SetSwitchState[0].Order == IDLE_ORDER) && (g_SetSwitchState[1].Order == IDLE_ORDER) && 
@@ -849,7 +850,7 @@ uint8_t GetOffestTime(struct DefFrameData* pReciveFrame)
 			g_Index[0].GetTime(g_Index);
 			g_Index[1].GetTime(g_Index + 1);
             
-            if(CAP3_STATE)
+            #if(CAP3_STATE)
             {
                 g_Index[2].indexLoop = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
                 g_Index[2].indexLoop -= 1;
@@ -862,6 +863,7 @@ uint8_t GetOffestTime(struct DefFrameData* pReciveFrame)
                 ClrWdt();
                 g_Index[2].GetTime(g_Index + 2);
             }
+            #endif
             return 0xFF;
         }
         default:
@@ -903,7 +905,7 @@ void UpdateCount(void)
         WriteFenzhaCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
     }
     
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         if (g_SetSwitchState[2].LastOrder == HE_ORDER)   //机构3合闸
         {
@@ -916,6 +918,7 @@ void UpdateCount(void)
             WriteFenzhaCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
         }
     }
+    #endif
     g_SetSwitchState[0].LastOrder = IDLE_ORDER;    //清零防止重复写入
     g_SetSwitchState[1].LastOrder = IDLE_ORDER;    //清零防止重复写入
     g_SetSwitchState[2].LastOrder = IDLE_ORDER;    //清零防止重复写入

@@ -81,14 +81,14 @@ void GetCapVoltage(void)
     adcFilter.Max.b = adcFilter.valueB;
     adcFilter.Min.b = adcFilter.valueB;
     adcFilter.Sum.b += adcFilter.valueB;
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         adcFilter.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
         adcFilter.Max.c = adcFilter.valueC;
         adcFilter.Min.c = adcFilter.valueC;
         adcFilter.Sum.c += adcFilter.valueC;
     }
-    
+    #endif
     for(i = 0;i < 5;i++)
     {
         SoftSampleOnce();
@@ -100,11 +100,12 @@ void GetCapVoltage(void)
 
         adcFilter.valueB = ADCBUF2 * LOCAL_CAP_MODULUS;
         adcFilter.Sum.b += adcFilter.valueB;
-        if(CAP3_STATE)
+        #if(CAP3_STATE)
         {
             adcFilter.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
             adcFilter.Sum.c += adcFilter.valueC;
         }
+        #endif
         ClrWdt();
         
         /* get workvoltage min value*/
@@ -122,7 +123,7 @@ void GetCapVoltage(void)
         {
             adcFilter.Min.w = adcFilter.valueW;
         }
-        if(CAP3_STATE)
+        #if(CAP3_STATE)
         {
             /* get capCvoltage min value*/
             if(adcFilter.Min.w > adcFilter.valueW)
@@ -130,6 +131,7 @@ void GetCapVoltage(void)
                 adcFilter.Min.w = adcFilter.valueW;
             }
         }
+        #endif
         ClrWdt();
         
         /* get workvoltage max value*/
@@ -147,7 +149,7 @@ void GetCapVoltage(void)
         {
             adcFilter.Max.b = adcFilter.valueB;
         }
-        if(CAP3_STATE)
+        #if(CAP3_STATE)
         {
             /* get capCvoltage max value*/
             if(adcFilter.Max.c < adcFilter.valueC)
@@ -155,19 +157,21 @@ void GetCapVoltage(void)
                 adcFilter.Max.c = adcFilter.valueC;
             }
         }
+        #endif
         ClrWdt();
     }
     g_SystemVoltageParameter.workVoltage = (adcFilter.Sum.w - adcFilter.Max.w - adcFilter.Min.w) / 4;
     g_SystemVoltageParameter.voltageCap1 = (adcFilter.Sum.a - adcFilter.Max.a - adcFilter.Min.a) / 4;
     g_SystemVoltageParameter.voltageCap2 = (adcFilter.Sum.b - adcFilter.Max.b - adcFilter.Min.b) / 4;    
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         g_SystemVoltageParameter.voltageCap3 = (adcFilter.Sum.c - adcFilter.Max.c - adcFilter.Min.c) / 4;
     }
-    else
+    #else
     {
         g_SystemVoltageParameter.voltageCap3 = 225;
     }
+    #endif
     ClrWdt();
 }
 
@@ -277,7 +281,7 @@ void CheckVoltage(void)
     }
     
     //机构3电容状态更新
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         if ((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper) && 
             (g_SuddenState.CapState3 != 0x30)) //电压超过上限
@@ -314,6 +318,7 @@ void CheckVoltage(void)
             g_SuddenState.CapState3 = 0x10;    //0b01 
         }
     }
+    #endif
 }
 
 /**
@@ -360,12 +365,13 @@ void ReadCapDropVoltage(uint16_t lastOrder)
         case CHECK_3_FEN_ORDER:
         case CHECK_3_HE_ORDER:
         {
-            if(CAP3_STATE)
+            #if(CAP3_STATE)
             {
                 SoftSampleOnce();
                 ClrWdt();
                 CAP3_DROP_VOLTAGE();
             }
+            #endif
             break;
         }
         default:

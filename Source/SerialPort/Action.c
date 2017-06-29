@@ -97,10 +97,11 @@ void ExecuteFunctioncode(frameRtu* pRtu)
                 {
                     FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                     FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                    if(CAP3_STATE)
+                    #if(CAP3_STATE)
                     {
                         FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                     }
+                    #endif
                     ClrWdt();
                 }
                 return ;
@@ -251,30 +252,33 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     }
                     case 0x05:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
                             HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     case 0x06:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
                             HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     case 0x07:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
                             HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
                             HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     default :
@@ -356,30 +360,33 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     }
                     case 0x05:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
                             FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     case 0x06:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
                             FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     case 0x07:
                     {
-                        if(CAP3_STATE)
+                        #if(CAP3_STATE)
                         {
                             FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
                             FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
                             FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
                         }
+                        #endif
                         break;
                     }
                     default :
@@ -430,7 +437,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             loopA = pReciveFrame->pBuffer[1] & 0x03;
             loopB = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
 
-            if(CAP3_STATE)
+            #if(CAP3_STATE)
             {
                 if((pReciveFrame->pBuffer[1] <= 0x39) && (pReciveFrame->pBuffer[1] >= 0x19) && (pReciveFrame->len == 6)) //只有三个回路需要控制
                 {
@@ -450,7 +457,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     return;
                 }
             }
-            else
+            #else
             {
                 //只有两个回路需要控制
                 if((pReciveFrame->pBuffer[1] == 0x09) || (pReciveFrame->pBuffer[1] == 0x06))  //机构1先合、或者机构2先合
@@ -462,7 +469,8 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                     SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
                     return;
                 }
-            }
+            }            
+            #endif
             //返回的数据帧赋值传递
             for(uint8_t i = 0;i < pSendFrame->len;i++)
             {
@@ -666,12 +674,12 @@ void UpdataState(void)
  * <p>Function name: [_INT2Interrupt]</p>
  * <p>Discription: [外部中断函数]</p>
  */
+uint8_t state = 0x00;
+
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
     uint8_t i = 0;
-    uint8_t j = 0;
     uint8_t validCount = 0;
-    uint8_t idleCount = 0;
     
     IFS1bits.INT2IF = 0;
     OFF_INT();
@@ -689,83 +697,44 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
         TurnOffInt2();
         return;
     }
-    //*************************************************************************************
-    //第一次的高电平持续时间判断
-    for(i = 0;i < 21;i++)
-    {
-        if(RXD1_LASER == 1)
-        {
-            validCount++;
-        }
-        else
-        {
-            idleCount++;
-        }
-    }
-    if(idleCount >= 2)
-    {
-        return;
-    }
-    validCount = 0;
-    idleCount = 0;
-    //判断四次高低电平持续时间
-    for(j = 0;j < 4;j++)
-    {        
+	//检测高电平
+	for(i = 0; i < 4; i++)
+	{
+		state = ~state;
+		state &= 0x01;
+		while(RXD1_LASER == state)
+		{
+			validCount++;
+            if(validCount > 100)    //防止进入死循环
+            {
+                i = 10;
+                return;
+            }
+		}
+		if((validCount < 13) || (validCount > 23))
+		{
+            i = 10;
+			return;
+		}
         validCount = 0;
-        idleCount = 0;
-        for(i = 0;i < 25;i++)
-        {
-            if(RXD1_LASER == 1)
-            {
-                validCount++;
-            }
-            else
-            {
-                idleCount++;
-            }
-        }
-        if((RXD1_LASER == 1) && (idleCount > 2))
-        {
-            return;
-        }
-        else if((RXD1_LASER == 0) && (validCount > 2))
-        {
-            return;
-        }
-    }
-    //查找最后一个低电平
-    for(i = 0;i < 20;i++)
-    {
-        if(RXD1_LASER == 1)
-        {
-            validCount++;
-        }
-        else
-        {
-            idleCount++;
-        }
-        if(idleCount >= 5)
-        {
-            break;
-        }
-    }
-    validCount = 0;
-    while(!RXD1_LASER)
-    {
-        validCount++;
-        if(validCount > 10)
-        {
-            break;
-        }
-    }
-    if(RXD1_LASER || (validCount > 10))
-    {
+	}
+	if(RXD1_LASER == 1 && i == 4)
+	{
         g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
         g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
         TongBuHeZha();
         g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         TurnOffInt2();
-    }
+		//run;
+	}
+//    if(RXD1_LASER || (validCount > 10))
+//    {
+//        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+//        g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
+//        TongBuHeZha();
+//        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
+//        TurnOffInt2();
+//    }
 }
 
 /**
@@ -861,7 +830,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		}
 		case 4:
 		{
-			if(CAP3_STATE)
+			#if(CAP3_STATE)
 			{
 				if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
 				{
@@ -895,12 +864,13 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                     return;
 				}
 			}
-			else
+			#else
 			{
 				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
+            #endif
 			break;
 		}
 		case 3:
@@ -943,7 +913,7 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
 		}
 		case 5: 
 		{
-			if(CAP3_STATE)
+			#if(CAP3_STATE)
 			{
 				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
 		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
@@ -980,17 +950,18 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                     return;
 				}
 			}
-			else
+			#else
 			{
 				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
+            #endif
 			break;
 		}
 		case 6:
 		{
-			if(CAP3_STATE)
+			#if(CAP3_STATE)
 			{
 				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
 		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
@@ -1027,17 +998,18 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                     return;
 				}
 			}
-			else
+			#else
 			{
 				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
+            #endif
 			break;
 		}
 		case 7:
 		{
-			if(CAP3_STATE)
+			#if(CAP3_STATE)
 			{
 				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
 		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
@@ -1077,12 +1049,13 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
                     return;
 				}
 			}
-			else
+			#else
 			{
 				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
 				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
                 return;
 			}
+            #endif
 			break;
 		}
 		default:
@@ -1199,36 +1172,36 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_3_HE_ORDER:
         {
-            if(CAP3_STATE == 0x00)
+            #if(CAP3_STATE)
             {
-                break;
+                if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                {
+                    SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+                    g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
+                }
+                else
+                {
+                    g_SuddenState.RefuseAction = FALSE;  //未发生拒动
+                }
             }
-            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
+            #endif  
             break;
         }
         case CHECK_3_FEN_ORDER:
         {
-            if(CAP3_STATE == 0x00)
+            #if(CAP3_STATE)
             {
-                break;
+                if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                {
+                    SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+                    g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
+                }
+                else
+                {
+                    g_SuddenState.RefuseAction = FALSE;  //未发生拒动
+                }
             }
-            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
+            #endif  
             break;
         }
         default:

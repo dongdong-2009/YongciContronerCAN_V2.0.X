@@ -533,7 +533,7 @@ void RefParameterInit(void)
     ReadWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
 	
 	ClrWdt();
-    if(CAP3_STATE)
+    #if(CAP3_STATE)
     {
         ReadWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
         ReadWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
@@ -548,11 +548,12 @@ void RefParameterInit(void)
             WriteWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
         }
     }
-    else
+    #else
     {
         g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
         g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
     }
+    #endif  
     
     if(g_ActionCount.hezhaCount1 == 0xFFFF)
     {
