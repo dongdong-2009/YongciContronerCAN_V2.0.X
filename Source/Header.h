@@ -39,8 +39,8 @@
 
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
-#define SMALL_CHOSE 0xF1
-//#define BIG_CHOSE   0xF2
+//#define SMALL_CHOSE 0xF1
+#define BIG_CHOSE   0xF2
 
 #ifdef	SMALL_CHOSE
     #define ADCS()  {ADCSSL = 0x000F;}  //ADC扫描通道数,AN0--AN3全部扫描
@@ -51,6 +51,7 @@
     #define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
     #define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
     #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
+    #define MAC_ID (0x10)   //缺省A相
 
 #elif BIG_CHOSE
     #define ADCS()  {ADCSSL = 0x0007;}  //ADC扫描通道数，扫描AN0--AN2
@@ -62,6 +63,7 @@
     #define CHECK_ORDER3()          (0xFF)
     #define CHECK_LAST_ORDER3()     (0x00)
     #define CHECK_VOLTAGE_CAP3()    (0xFF)
+    #define MAC_ID                  (0x14) //A-0x10   B-0x12  C-0x14
 #endif
 //**************************************
 
