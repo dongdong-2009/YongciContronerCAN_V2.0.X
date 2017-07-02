@@ -282,7 +282,8 @@ void ResponseMACID(struct DefFrameData* pSendFrame, BYTE config)
 *******************************************************************************/
 BOOL CheckMACID(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {	
-    int sendCount = 0; 
+    CAN_msg reciveMsg;
+    int sendCount = 0, result = 0; 
     do
     {
         ClrWdt();
@@ -292,6 +293,14 @@ BOOL CheckMACID(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFra
         while( IsTimeRemain())
         {
             ClrWdt();
+           
+            result = BufferDequeue(&reciveMsg);
+            if (result)
+            {
+                DeviceNetReciveCenter(&reciveMsg.id, reciveMsg.data, reciveMsg.len);
+            }
+            
+            
             if ( pReciveFrame->complteFlag)//判断是否有未发送的数据
             {
                 ClrWdt();
@@ -577,88 +586,7 @@ void UnconVisibleMsgService(struct DefFrameData* pReciveFrame, struct DefFrameDa
 		return ;
 	}
 }
-/*********************************************************************************
-** 函数名:	void VisibleMsgService(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
-** 形参:	struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame，接收的报文数组 
-** 返回值:      无 	
-** 功能描述:	显式信息服务函数，执行主站的显示请求响应
-*********************************************************************************/
-//void VisibleMsgService(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
-//{
-//	BYTE class, obj;
-//
-//	class = pReciveFrame->pBuffer[2]; //类ID
-//	obj = pReciveFrame->pBuffer[3];   //实例ID
-//    ClrWdt();
-//	//信息路由
-//	if(!(DeviceNetObj.assign_info.select & VISIBLE_MSG))	//没有建立显式信息连接 
-//		return ;
-//    
-//    switch(class)
-//    {
-//        ClrWdt();
-//        case 0x01: //标识符对象
-//        {   
-//            ClrWdt();
-//            if(obj == 0)	    //类服务
-//            {
-//                ClrWdt();
-//                IdentifierClassService( pReciveFrame, pSendFrame);
-//            }
-//            else if(obj == 1)	//实例1服务	
-//            {
-//                ClrWdt();
-//                IdentifierObjService(pReciveFrame, pSendFrame);
-//            }              
-//            break;
-//        }
-//        case 0x02: //信息路由器对象
-//        {
-//            ClrWdt();
-//            RountineClassObjService(pReciveFrame, pSendFrame);
-//            break;
-//        }
-//        case 0x03://DeviceNet对象
-//        {
-//            ClrWdt();
-//            if(obj == 0)	    //类服务
-//            {
-//                DeviceNetClassService(pReciveFrame, pSendFrame);
-//                ClrWdt();
-//                return ;
-//            }
-//            else if(obj == 1)	//实例1服务
-//            {
-//                ClrWdt();
-//                DeviceNetObjService(pReciveFrame, pSendFrame);
-//                return ;
-//            }
-//            break;
-//        }
-//        case 0x05:	//连接对象
-//        {
-//            if(obj == 0)	    //类服务
-//            {
-//                ClrWdt();
-//                ConnectionClassService(pReciveFrame, pSendFrame); 
-//                return ;
-//            }
-//            else if(obj == 1)	//显式信息连接
-//            {
-//                ClrWdt();
-//                VisibleConnectObjService(pReciveFrame, pSendFrame); 
-//                return ;
-//            }
-//            else if(obj == 2)	//I/O轮询连接
-//            {
-//                ClrWdt();
-//                CycInquireConnectObjService(pReciveFrame, pSendFrame);
-//                return ;
-//            }
-//            break;
-//        }   
-//    } 
-//}
+
 /********************************************************************************
 ** 函数名:	void  CycleInquireMsgService(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 ** 功能描述:	I/O轮询信息服务函数，在主站和从站之间传输数据
@@ -681,32 +609,7 @@ static void  CycleInquireMsgService(struct DefFrameData* pReciveFrame, struct De
     
 	return ;
 }
-/*******************************************************************************
-** 函数名:	void DeviceMonitorPluse(void)
-** 功能描述:	设备监测脉冲函数
-** 形参:	无
-** 返回值:      无 	
-********************************************************************************/
-void DeviceMonitorPluse(void)
-{
-    ClrWdt();
-//	if(query_time_event(2))
-//	{
-//		start_time(160);
-//		//发送检测脉冲
-//		pSendFrame->pBuffer[0] = 0x80 | DeviceNetObj.MACID;
-//		pSendFrame->pBuffer[1] = 0x60;
-//		pSendFrame->pBuffer[2] = DeviceNetObj.assign_info.master_MACID;
-//		pSendFrame->pBuffer[3]= 0x80 | SVC_MONITOR_PLUSE;
-//		pSendFrame->pBuffer[4] = 0x01;		//标识符对象ID=1
-//		pSendFrame->pBuffer[5] = 0x00;
-//		*(send_buf + 6) = IdentifierObj.device_state;
-//		*(send_buf + 7) = 0;
-//		*(send_buf + 8) = 0;
-//		*(send_buf + 9) = 0;
-//		SendData(10, send_buf);
-//	}
-}
+
 
 
 /*******************************************************************************

@@ -192,7 +192,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     
     switch(id)
     {
-        case 1: //合闸预制
+        case ReadyClose : //合闸预制
         {
             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
@@ -222,7 +222,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             break;
         }
-        case 2: //合闸执行
+        case CloseAction: //合闸执行
         {
             g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if((g_RemoteControlState.ReceiveStateFlag == HE_ORDER) && 
@@ -300,7 +300,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             break;
         }
-        case 3: //分闸预制
+        case ReadyOpen: //分闸预制
         {
             if(g_SystemState.yuanBenState == BEN_STATE) //本地控制不能执行远方操作错误
             {
@@ -331,7 +331,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             break;
         }
-        case 4: //分闸执行
+        case OpenAction: //分闸执行
         {
             g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             if((g_RemoteControlState.ReceiveStateFlag == FEN_ORDER) && 
@@ -409,7 +409,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             break;
         }        
-        case 5: //同步合闸预制
+        case SyncReadyClose: //同步合闸预制
         {
             g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
             //分合位错误
@@ -504,12 +504,8 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             break;
         }
-        case 0x10:  //顺序参数设置
-        {
-            ClrWdt();
-            break;
-        }
-        case 0x11:  //非顺序参数设置
+       
+        case MasterParameterSetOne:  //非顺序参数设置
         {
             ClrWdt();
             pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
@@ -536,39 +532,14 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             
             break;
         }
-        case 0x12:  //顺序参数读取
+        case MasterParameterRead:  //顺序参数读取
         {
             g_startID = pReciveFrame->pBuffer[1];
             g_overID = pReciveFrame->pBuffer[2];
             g_RemoteControlState.GetAllValueFalg = TRUE;
             break;
         }        
-        case 0x13:  //非顺序参数读取
-        {
-            for(i = 1;i < pReciveFrame->len;i++)    //抛除ID号所占的长度
-            {
-                ClrWdt();
-                g_pPoint.len = 8;
-                error = ReadParamValue(pReciveFrame->pBuffer[i],&g_pPoint);
-                if((error == 0xF1)||(error == 0xF3))    //数据长度错误
-                {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                }
-                if((error == 0xF2)||(error == 0xF4))    //ID号错误
-                {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
-                }
-                pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[i];  //配置号
-                pSendFrame->pBuffer[2] = g_pPoint.pData[0];
-                pSendFrame->pBuffer[3] = g_pPoint.pData[1];
-                pSendFrame->len = g_pPoint.len + 2;
-                ClrWdt();
-                SendData(pSendFrame);
-            }
-            break;
-        }
+
         default:
         {
             //错误的ID号处理

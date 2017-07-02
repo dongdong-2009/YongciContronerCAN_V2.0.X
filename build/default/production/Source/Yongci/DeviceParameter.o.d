@@ -16,7 +16,8 @@ Source/Yongci/../Driver/InitTemp.h  \
  Source/Yongci/../Driver/Delay.h  \
 Source/Yongci/../Driver/ImitationIIC.h  \
  Source/Yongci/../Driver/SD2405.h  \
-Source/Yongci/../SerialPort/Action.h  \
+Source/Yongci/../Driver/buffer.h  \
+ Source/Yongci/../SerialPort/Action.h  \
  Source/Yongci/../SerialPort/RtuFrame.h  \
  Source/Yongci/../SerialPort/../Driver/tydef.h  \
  Source/Yongci/../SerialPort/../DeviceNet/DeviceNet.h  \

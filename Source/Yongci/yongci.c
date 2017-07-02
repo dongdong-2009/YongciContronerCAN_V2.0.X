@@ -25,6 +25,8 @@ IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 uint16_t _PERSISTENT g_lockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 uint16_t g_lastRunOrder = IDLE_ORDER;
+CAN_msg ReciveMsg;
+
 
 void InitSetSwitchState(void);
 void UpdateCount(void);
@@ -311,7 +313,8 @@ uint8_t  RefreshIdleState()
         static uint8_t runLedCount = 0;
         static uint32_t checkOrderTime = UINT32_MAX;
         static uint32_t checkOrderDelay = UINT32_MAX;
-    
+        uint8_t result = 0;
+        
        //任意一项不是空闲状态
         if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
              (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
@@ -382,6 +385,17 @@ uint8_t  RefreshIdleState()
             return 0xff;
         }
 
+        //始终进行处理，处理完缓冲区。 TODO:远方本地检测?
+        do
+        {
+            result = BufferDequeue(&ReciveMsg);
+            if (result)
+            {
+                DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
+            }
+        }
+         while(result);
+         
         
         //周期性状态更新
         if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || (g_SuddenState.SuddenFlag == TRUE))

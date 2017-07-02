@@ -138,6 +138,7 @@ int main()
     cn = 0;
  #if(APPLY_CAN == TRUE)
     {
+        BufferInit();
         OFF_UART_INT(); //485通信不开启        
         InitStandardCAN(0, 0);      //初始化CAN模块
         ClrWdt();

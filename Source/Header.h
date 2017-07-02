@@ -26,6 +26,9 @@
 #include "Driver/Delay.h"
 #include "Driver/ImitationIIC.h"
 #include "Driver/SD2405.h"
+#include "Driver/buffer.h"
+
+
 
 #include "SerialPort/Action.h"
 #include "SerialPort/RtuFrame.h"

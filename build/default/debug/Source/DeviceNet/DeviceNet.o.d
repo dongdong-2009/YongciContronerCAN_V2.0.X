@@ -17,6 +17,7 @@ Source/DeviceNet/../Driver/InitTemp.h  \
  Source/DeviceNet/../Driver/Delay.h  \
  Source/DeviceNet/../Driver/ImitationIIC.h  \
  Source/DeviceNet/../Driver/SD2405.h  \
+Source/DeviceNet/../Driver/buffer.h  \
  Source/DeviceNet/../SerialPort/Action.h  \
  Source/DeviceNet/../SerialPort/RtuFrame.h  \
  Source/DeviceNet/../SerialPort/../Driver/tydef.h  \

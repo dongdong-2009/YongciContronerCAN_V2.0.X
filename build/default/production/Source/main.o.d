@@ -16,9 +16,10 @@ Source/Driver/CAN.h  \
 Source/Driver/Delay.h  \
  Source/Driver/ImitationIIC.h  \
 Source/Driver/SD2405.h  \
- Source/SerialPort/Action.h  \
-Source/SerialPort/RtuFrame.h  \
- Source/SerialPort/../Driver/tydef.h  \
+ Source/Driver/buffer.h  \
+Source/SerialPort/Action.h  \
+ Source/SerialPort/RtuFrame.h  \
+Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
 Source/SerialPort/RtuFrame.h  \
  Source/Yongci/SwtichCondition.h  \
