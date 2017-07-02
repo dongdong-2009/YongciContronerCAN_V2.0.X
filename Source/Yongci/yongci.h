@@ -117,8 +117,8 @@ typedef struct TagSwitchConfig
 	uint16_t  powerOffTime;	//分闸动作时间
 	uint16_t  offestTime;	//偏移时间
 	uint32_t  systemTime;      //当前的系统时间
-	void (*SwitchOn)(struct  TagSwitchConfig* );     //开关合闸动作函数
-	void (*SwitchOff)(struct TagSwitchConfig* );    //开关分闸动作函数
+	void (*SwitchClose)(struct  TagSwitchConfig* );     //开关合闸动作函数
+	void (*SwitchOpen)(struct TagSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
 
 /**
@@ -137,10 +137,11 @@ void YongciFirstInit(void);
 
 void HEZHA_Action(uint8_t index,uint16_t time);
 void FENZHA_Action(uint8_t index,uint16_t time);
-void TongBuHeZha(void);
+
 uint8_t GetOffestTime(struct DefFrameData* pReciveFrame);
 void OnLock(void);
 void OffLock(void);
+void SynCloseAction(void);
 
 extern frameRtu sendFrame, recvFrame;
 extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存

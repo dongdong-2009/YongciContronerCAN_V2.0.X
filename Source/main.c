@@ -131,7 +131,7 @@ int main()
     StartTimer2();  //开启系统时钟
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); 
-
+    ActionParameterInit();
     //SD2405_Init();  //时钟芯片初始化    
 
         

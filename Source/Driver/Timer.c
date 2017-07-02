@@ -127,7 +127,7 @@ inline void StopTimer2(void)
 void Init_Timer3(void)
 {
     ClrWdt();
-    T1CON = 0;
+    T3CON = 0;
     IPC1bits.T3IP = 7;  //最高的优先级
     IFS0bits.T3IF = 0;
 
@@ -148,7 +148,7 @@ void Init_Timer3(void)
  */
 inline void StartTimer3(unsigned int us)
 {
-    PR3 = us + 2;   //误差量
+    PR3 = us/2 + 2;   //误差量
     ClrWdt();
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
@@ -162,7 +162,7 @@ inline void StartTimer3(unsigned int us)
  */
 inline void ChangePr3(unsigned int us)
 {
-    PR3 = us + 2;   //误差量
+    PR3 = us/2 + 2;   //误差量
 }
 /**
  * 

@@ -185,7 +185,7 @@ typedef struct RemoteControl
 {
     uint16_t ReceiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
     uint16_t lastReceiveOrder;  //接收到的上一条命令
-    uint8_t  overTimeFlage;     //超时标识位
+    uint8_t  overTimeFlag;     //超时标识位
     uint8_t  orderId;           //执行的命令
     uint8_t  SetFixedValue;     //设置定值指令
     uint8_t  GetAllValueFalg;   //读取所有的连续数据
@@ -199,6 +199,25 @@ typedef struct RemoteControl
     uint8_t  RunFenzhaFlag;		//分闸执行命令到达标识位
 }RemoteControlState;
 
+/**
+ *执行同步合闸参数,
+ */
+typedef struct TagActionParameter
+{
+	uint8_t readyFlag; //相应控制器应答 准备标志 0--未准备，非0--准备动作
+	uint8_t enable; //使能标志，0-禁止，非零使能
+    uint8_t loop; //相I-1, II-2, III-3
+    uint16_t offsetTime;//偏移时间
+    uint16_t powerOnTime;// 通电时间
+    
+    uint8_t loopByte;//回路控制字
+    uint8_t count; //控制数量  
+    uint8_t currentIndex; //当前执行位置
+}ActionParameter;
+
+
+
+
 void ExecuteFunctioncode(frameRtu* pRtu);
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
@@ -207,12 +226,13 @@ void CheckOrder(uint16_t lastOrder);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 void SendMessage(uint16_t data);
 void GetValue(void);
+void ActionParameterInit(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 extern struct DefFrameData g_qSendFrame;   //CAN数据帧
 extern PointUint8 g_pPoint;   
-
+extern ActionParameter g_ActionParameter[3];
 
 #ifdef	__cplusplus
 }

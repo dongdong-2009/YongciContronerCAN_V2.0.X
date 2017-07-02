@@ -189,7 +189,7 @@ uint8_t CheckIOState(void)
                     g_Order = IDLE_ORDER;    //将命令清零
                     return 0xFF;
                 }
-                TongBuHeZha();
+               // TongBuHeZha(); TODO:
                 g_RemoteControlState.orderId = 0x05;    //拒动错误ID号
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x01;
