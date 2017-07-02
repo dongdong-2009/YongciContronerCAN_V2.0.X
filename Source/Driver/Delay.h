@@ -76,28 +76,35 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
 #include "tydef.h"
 
-typedef struct SysTime
+typedef struct TagTimeStamp
 {
-    //仅用于通信超时判断
-    uint32_t TickTime;      //系统时间
-    uint32_t StarTime;    //超时判断起始时间
+    uint32_t startTime;    //超时判断起始时间
     uint32_t delayTime;   
     
     //系统运行时需要的时间值
-    uint32_t GetTempTime;   //记录上一次获取温度值的时间
-    uint32_t SendDataTime;  //记录上一次上传数据的时间
-    uint32_t ScanTime;      //记录上一次按键扫描的时间
-    uint32_t ChangeLedTime; //记录上一次改变指示灯的时间
-    uint32_t GetCapVolueTime;   //获取电容电压的时间间隔
-}SysTimeStamp;
+
+}TimeStamp;
+
+typedef struct TagTimeStampCollect
+{
+    uint32_t  msTicks; //系统时间MsTick
+    TimeStamp getTempTime;   //记录上一次获取温度值的时间
+    TimeStamp sendDataTime;  //记录上一次上传数据的时间
+    TimeStamp scanTime;      //记录上一次按键扫描的时间
+    TimeStamp changeLedTime; //记录上一次改变指示灯的时间
+    TimeStamp getCapVolueTime;   //获取电容电压的时间间隔
+    TimeStamp canStartTime;     //CAN启动时间定时器
+}TimeStampCollect;
 
 
-void Delay_ms(uint32_t ms);
+
+void InitSystemTime();
+void DelayMs(uint32_t ms);
+uint8_t IsOverTimeStamp(TimeStamp* pStamp);
 uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime);
-void OverflowDetection(uint32_t delayTime);
+//void OverflowDetection(uint32_t delayTime);
 
-extern uint32_t g_MsTicks;
-extern SysTimeStamp g_SysTimeStamp;    //状态时间
+extern TimeStampCollect g_TimeStampCollect;    //状态时间
 
 
 #ifdef	__cplusplus

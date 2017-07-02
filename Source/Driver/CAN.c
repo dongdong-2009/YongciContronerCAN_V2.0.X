@@ -583,7 +583,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //关闭错误中断
         g_RemoteControlState.CanErrorFlag = TRUE;    //发生了总线关断错误
-        g_changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
+        g_TimeStampCollect.changeLedTime.delayTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
     

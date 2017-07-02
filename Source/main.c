@@ -54,8 +54,8 @@
 // FWDT
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
-//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -127,7 +127,7 @@ int main()
     
     SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
     Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us    
-    g_SysTimeStamp.TickTime = 0;     //初始化系统时间    
+    InitSystemTime();     //初始化系统时间    
     StartTimer2();  //开启系统时钟
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); 

@@ -433,7 +433,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == JIGOU1_FEN_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
     }
@@ -444,7 +444,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == JIGOU1_HE_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
     }
@@ -458,7 +458,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == JIGOU2_FEN_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
         
@@ -470,7 +470,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == JIGOU2_HE_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
     }
@@ -486,7 +486,7 @@ void DsplaySwitchState(void)
             ClrWdt();
             if(g_SuddenState.RefuseAction == JIGOU3_FEN_ERROR)
             {
-                g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+                g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
                 g_SuddenState.RefuseAction = FALSE; //Clear
             }
 
@@ -498,7 +498,7 @@ void DsplaySwitchState(void)
             ClrWdt();
             if(g_SuddenState.RefuseAction == JIGOU3_HE_ERROR)
             {
-                g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+                g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
                 g_SuddenState.RefuseAction = FALSE; //Clear
             }
         }    
@@ -521,7 +521,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == Z_HE_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
     }
@@ -534,7 +534,7 @@ void DsplaySwitchState(void)
         ClrWdt();
         if(g_SuddenState.RefuseAction == Z_FEN_ERROR)
         {
-            g_changeLedTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
             g_SuddenState.RefuseAction = FALSE; //Clear
         }
     }

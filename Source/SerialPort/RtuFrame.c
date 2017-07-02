@@ -280,10 +280,10 @@ void SendFrame(uint8_t* pFrame, uint8_t len)
  * <p>Discription: [设置超时时间]</p>
  * @param delayTime 超时时间参数
  */
-void SetOverTime(uint16_t delayTime)
-{
-    g_SysTimeStamp.StarTime = g_MsTicks;
-    g_SysTimeStamp.delayTime = delayTime + 1;
+inline void SetOverTime(uint16_t delayTime)
+{    
+    g_TimeStampCollect.canStartTime.startTime = g_TimeStampCollect.msTicks;
+    g_TimeStampCollect.canStartTime.delayTime = delayTime + 1;    
     ClrWdt();
 }
 
@@ -296,7 +296,7 @@ void SetOverTime(uint16_t delayTime)
  */
 uint8_t CheckIsOverTime(void)
 {
-    if(IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
+    if(IsOverTimeStamp( &g_TimeStampCollect.canStartTime))
     {
         ClrWdt();
         return FALSE;

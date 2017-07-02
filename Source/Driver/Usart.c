@@ -89,13 +89,13 @@ void UsartSend(unsigned char abyte)
     uint32_t time = 0;
     RX_TX_MODE = TX_MODE;   //--鉴于光耦响应时间，须有一定的延时
     U1TXREG = abyte;
-    time = g_SysTimeStamp.TickTime;
+   
     while(!U1STAbits.TRMT)
     {
-        //此处需要添加超时复位
-        if(IsOverTime(time,10))
+        //估算值
+        if( time ++ > 40000)
         {
-            Reset();    
+            return;
         }
     }
     

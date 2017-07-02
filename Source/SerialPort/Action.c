@@ -1204,11 +1204,11 @@ void CheckOrder(uint16_t lastOrder)
     }
     if(g_SuddenState.RefuseAction != FALSE)
     {
-        g_changeLedTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+        g_TimeStampCollect.changeLedTime.delayTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
     }
     else
     {
-        g_changeLedTime = 500;  //正常状态下指示灯闪烁的间隔
+        g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
     }
     g_SuddenState.SuddenFlag = TRUE;  //发送突发错误
 }

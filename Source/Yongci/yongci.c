@@ -13,10 +13,7 @@
 #include "../Header.h"
 #include "yongci.h"
 
-#define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
-#define GET_CAP_TIME   300      //按键扫描间隔时间
-#define SCAN_TIME   2           //按键扫描间隔时间
-#define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
+
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
 
 frameRtu sendFrame, recvFrame;
@@ -24,7 +21,7 @@ frameRtu sendFrame, recvFrame;
 SwitchConfig g_SwitchConfig[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
-uint32_t _PERSISTENT g_changeLedTime;   //改变LED灯闪烁时间 (ms)
+//uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
 uint16_t _PERSISTENT g_lockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 uint16_t g_lastRunOrder = IDLE_ORDER;
@@ -53,7 +50,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 	{
 		g_SwitchConfig[g_Index[1].indexLoop].currentState = RUN_STATE;
         g_SwitchConfig[g_Index[1].indexLoop].order = HE_ORDER;
-		g_SwitchConfig[g_Index[1].indexLoop].systemTime = g_MsTicks;
+		g_SwitchConfig[g_Index[1].indexLoop].systemTime = g_TimeStampCollect.msTicks;
         g_SwitchConfig[g_Index[1].indexLoop].SwitchOn(g_SwitchConfig + g_Index[1].indexLoop);        
         #if(CAP3_STATE)
         {
@@ -74,7 +71,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 	{
 		g_SwitchConfig[g_Index[2].indexLoop].currentState = RUN_STATE;
         g_SwitchConfig[g_Index[2].indexLoop].order = HE_ORDER;
-		g_SwitchConfig[g_Index[2].indexLoop].systemTime = g_MsTicks;
+		g_SwitchConfig[g_Index[2].indexLoop].systemTime = g_TimeStampCollect.msTicks;
         g_SwitchConfig[g_Index[2].indexLoop].SwitchOn(g_SwitchConfig + g_Index[2].indexLoop);
         ResetTimer3();
         ClrWdt();
@@ -153,7 +150,7 @@ void TongBuHeZha(void)
 	g_SwitchConfig[g_Index[0].indexLoop].currentState = RUN_STATE;
     g_SwitchConfig[g_Index[0].indexLoop].order = HE_ORDER;
 	g_SwitchConfig[g_Index[0].indexLoop].powerOnTime = g_Index[0].onTime;;
-	g_SwitchConfig[g_Index[0].indexLoop].systemTime = g_MsTicks;
+	g_SwitchConfig[g_Index[0].indexLoop].systemTime = g_TimeStampCollect.msTicks;
 	g_SwitchConfig[g_Index[0].indexLoop].SwitchOn(g_SwitchConfig + g_Index[0].indexLoop);
     
     StartTimer3(g_SwitchConfig[g_Index[1].indexLoop].offestTime);
@@ -182,11 +179,11 @@ void HEZHA_Action(uint8_t index,uint16_t time)
     ClrWdt();
     g_SwitchConfig[index].currentState = RUN_STATE;
     g_SwitchConfig[index].order = HE_ORDER;
-    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
     g_SwitchConfig[index].powerOnTime = time + 3;   //使用示波器发现时间少3ms左右
     ClrWdt();
     g_SwitchConfig[index].SwitchOn(g_SwitchConfig + index);
-    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
 }
 
 /**
@@ -212,11 +209,11 @@ void FENZHA_Action(uint8_t index,uint16_t time)
     ClrWdt();
     g_SwitchConfig[index].currentState = RUN_STATE;
     g_SwitchConfig[index].order = FEN_ORDER;
-    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
     g_SwitchConfig[index].powerOffTime = time + 2;   //使用示波器发现分闸时间少2ms左右
     ClrWdt();
     g_SwitchConfig[index].SwitchOff(g_SwitchConfig + index);
-    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
 }
 
 /**
@@ -312,12 +309,13 @@ uint8_t  RefreshIdleState()
 {
         static uint8_t runLedState = TURN_ON;
         static uint8_t runLedCount = 0;
-        static uint32_t checkOrderTime = g_MsTicks;
+        static uint32_t checkOrderTime = UINT32_MAX;
         static uint32_t checkOrderDelay = UINT32_MAX;
     
        //任意一项不是空闲状态
-        if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) && (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
-           CHECK_ORDER3()))
+        if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
+             (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
+              CHECK_ORDER3()))
         {
             return 0xF1;        
         }     
@@ -337,7 +335,7 @@ uint8_t  RefreshIdleState()
             //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
             UpdateCount();//更新计数
             ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
-            checkOrderTime = g_SysTimeStamp.TickTime;
+            checkOrderTime = g_TimeStampCollect.msTicks;
             //Clear Flag
             g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
             g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
@@ -351,7 +349,7 @@ uint8_t  RefreshIdleState()
         }
 
         //拒动错误检测
-        if(g_SysTimeStamp.TickTime - checkOrderTime >= checkOrderDelay)//TODO：错误是
+        if(g_TimeStampCollect.msTicks - checkOrderTime >= checkOrderDelay)//TODO：错误是
         {
             CheckOrder(g_lastRunOrder);  //检测命令是否执行
             checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
@@ -362,19 +360,20 @@ uint8_t  RefreshIdleState()
         }
         ClrWdt();
 
+        
         //检测是否欠电压， 并更新显示
-        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每300ms获取一次电容电压值
+        if(IsOverTimeStamp( &g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
         {
             CheckVoltage();  
             ClrWdt();
-            g_SysTimeStamp.GetCapVolueTime = g_SysTimeStamp.TickTime;
+            g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
         }  
 
-        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
+        if(IsOverTimeStamp( &g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
         {
-            SwitchScan();   //执行按键扫描程序
+            SwitchScan();   //执行按键扫描程序 TODO:用时时长
             ClrWdt();
-            g_SysTimeStamp.ScanTime = g_SysTimeStamp.TickTime;
+            g_TimeStampCollect.scanTime.startTime = g_TimeStampCollect.msTicks;  
         }
         if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
         {
@@ -383,8 +382,9 @@ uint8_t  RefreshIdleState()
             return 0xff;
         }
 
+        
         //周期性状态更新
-        if((g_SysTimeStamp.TickTime - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
+        if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || (g_SuddenState.SuddenFlag == TRUE))
         {
             ClrWdt();
             DsplaySwitchState();    //更新机构的状态显示
@@ -394,13 +394,15 @@ uint8_t  RefreshIdleState()
                 UpdataState();  //更新状态
             }
             g_SuddenState.SuddenFlag = FALSE;  //Clear
-            OverflowDetection(SEND_TIME);   //增加溢出判断
-            g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
+            //OverflowDetection(SEND_TIME);   //增加溢出判断  TODO:所有事件判断，都将出问题
+            g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
         }
 
         ClrWdt();
+        
+
         //运行指示灯
-        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
+        if(IsOverTimeStamp( &g_TimeStampCollect.changeLedTime))
         {
             UpdateLEDIndicateState(RUN_LED, runLedState);
             runLedState = ~runLedState;
@@ -410,19 +412,19 @@ uint8_t  RefreshIdleState()
                 if(runLedCount >= 10) //1500*4ms
                 {
                     InitStandardCAN(0, 0);  //初始化CAN模块
-                    g_changeLedTime = 500;  //运行指示灯闪烁间隔为500ms
+                    g_TimeStampCollect.changeLedTime.delayTime = 500;  //运行指示灯闪烁间隔为500ms
                 }
                 //TODO:什么时候恢复？
             }
-            g_SysTimeStamp.ChangeLedTime = g_SysTimeStamp.TickTime;
+            g_TimeStampCollect.changeLedTime.startTime = g_TimeStampCollect.msTicks;  
         }
 
+         ClrWdt();
         //获取温度数据
-        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
-        {
-            g_SysTimeStamp.GetTempTime = g_SysTimeStamp.TickTime;
-            ClrWdt();
-            g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
+        if(IsOverTimeStamp( &g_TimeStampCollect.getTempTime))
+        {                   
+            g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值            
+            g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
         }
 
         //超时检测复位
@@ -478,9 +480,12 @@ void YongciMainTask(void)
             continue;
         }
         
-      
-        
-     
+        result =   RefreshIdleState();      
+        //检测到按钮动作
+       if (result)
+        {
+            continue;
+        }
         
         
         
@@ -572,12 +577,14 @@ void YongciFirstInit(void)
     ClrWdt();
     InitSetSwitchState();
     
-    g_SysTimeStamp.ChangeLedTime = g_MsTicks;   //对于时间状态量的初始化
-    g_SysTimeStamp.GetTempTime = g_MsTicks;     //对于时间状态量的初始化
-    g_SysTimeStamp.ScanTime = g_MsTicks;        //对于时间状态量的初始化
-    g_SysTimeStamp.SendDataTime = g_MsTicks;    //对于时间状态量的初始化
+    g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
+    g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;   
+    g_TimeStampCollect.scanTime.startTime = g_TimeStampCollect.msTicks;   
+    g_TimeStampCollect.changeLedTime.startTime = g_TimeStampCollect.msTicks;    
+    g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;  
     
-    g_changeLedTime = 500;    //初始化值为500ms
+    
+    g_TimeStampCollect.changeLedTime.delayTime = 500;    //初始化值为500ms
     
     //远方控制标识位初始化
     g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
@@ -678,7 +685,7 @@ void SwitchOnFirstPhase(SwitchConfig* pConfig)
 		HEZHA_A();
 		HEZHA_A();
 	}
-	if(IsOverTime(pConfig->systemTime,pConfig->powerOnTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime, pConfig->powerOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();

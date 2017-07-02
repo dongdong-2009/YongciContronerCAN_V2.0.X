@@ -102,19 +102,28 @@ void InitDeviceNet()
     BOOL result = CheckMACID( &DeviceNetReciveFrame, &DeviceNetSendFrame);
     ClrWdt();
     
-    time = g_SysTimeStamp.TickTime;
+    time = g_TimeStampCollect.msTicks;
     
-    while(result)   //时间超过10ms启动复位
-    {
-        WorkMode = MODE_FAULT;
-        if(IsOverTime(time,10))
-        {
-            Reset();    
-        }
-    }
+    //TODO:如何处理离线情况？？？？
+//    while(result)   //时间超过10ms启动复位
+//    {
+//        WorkMode = MODE_FAULT;
+//        if(IsOverTime(time,10))
+//        {
+//            Reset();    
+//        }
+//    }
 
     ClrWdt();
-    WorkMode = MODE_NORMAL;
+    if (result)
+    {
+        WorkMode =MODE_FAULT;
+    }
+    else
+    {
+        WorkMode = MODE_NORMAL;
+    }
+            
 }
 
 /******************************************************************************* 
@@ -773,8 +782,8 @@ void SendData(struct DefFrameData* pFrame)
 ********************************************************************************/
 void StartOverTimer()
 {
-    g_SysTimeStamp.StarTime = g_MsTicks;
-    g_SysTimeStamp.delayTime = 1000;
+    g_TimeStampCollect.canStartTime.startTime = g_TimeStampCollect.msTicks;
+    g_TimeStampCollect.canStartTime.delayTime = 1000;  
     ClrWdt();
 }
 /*******************************************************************************
@@ -785,7 +794,7 @@ void StartOverTimer()
 ********************************************************************************/
 BOOL IsTimeRemain()
 {
-    if (IsOverTime(g_SysTimeStamp.StarTime,g_SysTimeStamp.delayTime))
+    if (IsOverTimeStamp( &g_TimeStampCollect.canStartTime))
     {
         ClrWdt();
         return FALSE;

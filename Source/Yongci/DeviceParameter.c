@@ -212,7 +212,7 @@ void CheckVoltage(void)
     if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper) && 
         (g_SuddenState.CapState1 != 0x03)) //电压超过上限
     {
-        Delay_ms(50);
+        DelayMs(50);
         GetCapVoltage();
         if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper)
             {
@@ -248,7 +248,7 @@ void CheckVoltage(void)
     if ((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper) && 
         (g_SuddenState.CapState2 != 0x0C)) //电压超过上限
     {
-        Delay_ms(50);
+        DelayMs(50);
         GetCapVoltage();
         if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
             {
@@ -286,7 +286,7 @@ void CheckVoltage(void)
         if ((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper) && 
             (g_SuddenState.CapState3 != 0x30)) //电压超过上限
         {
-            Delay_ms(50);
+            DelayMs(50);
             GetCapVoltage();
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
                 {

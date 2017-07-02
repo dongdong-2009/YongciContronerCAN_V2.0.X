@@ -75,7 +75,7 @@ void SoftSampleOnce(void)
     uint32_t time;
     ADCON1bits.ADON = 1; //启动转换
     ClrWdt();
-    time = g_SysTimeStamp.TickTime;
+    time = g_TimeStampCollect.msTicks;
     //若10ms不能完成则启动看门狗复位
     while(!IFS0bits.ADIF)
     {

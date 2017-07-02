@@ -144,7 +144,7 @@ void OffLock(void);
 
 extern frameRtu sendFrame, recvFrame;
 extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
-extern uint32_t _PERSISTENT g_changeLedTime; //改变LED灯闪烁时间 (ms)
+//extern uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime; //改变LED灯闪烁时间 (ms) TODO:为什么？
 extern uint16_t _PERSISTENT g_lockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 
 
