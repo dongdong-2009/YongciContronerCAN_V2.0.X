@@ -96,20 +96,29 @@ extern "C" {
 #define ON_LOCK     0xAA55    
 #define OFF_LOCK    0x0000
 
+/**
+ * 结构代号
+ */    
+#define  DEVICE_I  0
+#define  DEVICE_II 1
+#define  DEVICE_III 2
+  
+    
+    
  /**
   * 分合闸控制
   */
-typedef struct SynchroSwitchConfig
+typedef struct TagSwitchConfig
 {
-	uint8_t   State;	//当前的状态
-	uint16_t  Order;	//分合闸命令
-    uint16_t  LastOrder;  //上一次执行的指令
-	uint16_t  SwitchOnTime;   //合闸动作时间
-	uint16_t  SwitchOffTime;	//分闸动作时间
-	uint16_t  OffestTime;	//偏移时间
-	uint32_t  SysTime;      //当前的系统时间
-	void (*SwitchOn)(struct SynchroSwitchConfig* );     //开关合闸动作函数
-	void (*SwitchOff)(struct SynchroSwitchConfig* );    //开关分闸动作函数
+	uint8_t   currentState;	//当前的状态
+	uint16_t  order;	//分合闸命令
+    uint16_t  lastOrder;  //上一次执行的指令
+	uint16_t  powerOnTime;   //合闸动作时间
+	uint16_t  powerOffTime;	//分闸动作时间
+	uint16_t  offestTime;	//偏移时间
+	uint32_t  systemTime;      //当前的系统时间
+	void (*SwitchOn)(struct  TagSwitchConfig* );     //开关合闸动作函数
+	void (*SwitchOff)(struct TagSwitchConfig* );    //开关分闸动作函数
 }SwitchConfig;
 
 /**

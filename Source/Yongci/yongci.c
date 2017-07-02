@@ -21,7 +21,7 @@
 
 frameRtu sendFrame, recvFrame;
 
-SwitchConfig g_SetSwitchState[4];	//配置机构状态
+SwitchConfig g_SwitchConfig[4];	//配置机构状态
 IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
 uint32_t _PERSISTENT g_changeLedTime;   //改变LED灯闪烁时间 (ms)
@@ -42,16 +42,6 @@ void GetSwitchOnTime(IndexConfig* pIndex);
 
 /**
  * 
- * <p>Function name: [_T1Interrupt]</p>
- * <p>Discription: [定时器1的中断函数]</p>
- */
-//void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void)
-//{
-//    
-//}
-
-/**
- * 
  * <p>Function name: [_T3Interrupt]</p>
  * <p>Discription: [定时器3的中断函数]</p>
  */
@@ -59,16 +49,16 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
     IFS0bits.T3IF = 0;
     ClrWdt();
-	if((g_SetSwitchState[g_Index[1].indexLoop].State == REDAY_STATE) && (g_SetSwitchState[g_Index[1].indexLoop].Order == IDLE_ORDER))
+	if((g_SwitchConfig[g_Index[1].indexLoop].currentState == REDAY_STATE) && (g_SwitchConfig[g_Index[1].indexLoop].order == IDLE_ORDER))
 	{
-		g_SetSwitchState[g_Index[1].indexLoop].State = RUN_STATE;
-        g_SetSwitchState[g_Index[1].indexLoop].Order = HE_ORDER;
-		g_SetSwitchState[g_Index[1].indexLoop].SysTime = g_MsTicks;
-        g_SetSwitchState[g_Index[1].indexLoop].SwitchOn(g_SetSwitchState + g_Index[1].indexLoop);        
+		g_SwitchConfig[g_Index[1].indexLoop].currentState = RUN_STATE;
+        g_SwitchConfig[g_Index[1].indexLoop].order = HE_ORDER;
+		g_SwitchConfig[g_Index[1].indexLoop].systemTime = g_MsTicks;
+        g_SwitchConfig[g_Index[1].indexLoop].SwitchOn(g_SwitchConfig + g_Index[1].indexLoop);        
         #if(CAP3_STATE)
         {
             ClrWdt();
-            ChangePr3(g_SetSwitchState[g_Index[2].indexLoop].OffestTime);//偏移时间
+            ChangePr3(g_SwitchConfig[g_Index[2].indexLoop].offestTime);//偏移时间
             return;
         }
         #else
@@ -80,12 +70,12 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         #endif
 		
 	}
-    else if((g_SetSwitchState[g_Index[2].indexLoop].State == REDAY_STATE) && (g_SetSwitchState[g_Index[2].indexLoop].Order == IDLE_ORDER))
+    else if((g_SwitchConfig[g_Index[2].indexLoop].currentState == REDAY_STATE) && (g_SwitchConfig[g_Index[2].indexLoop].order == IDLE_ORDER))
 	{
-		g_SetSwitchState[g_Index[2].indexLoop].State = RUN_STATE;
-        g_SetSwitchState[g_Index[2].indexLoop].Order = HE_ORDER;
-		g_SetSwitchState[g_Index[2].indexLoop].SysTime = g_MsTicks;
-        g_SetSwitchState[g_Index[2].indexLoop].SwitchOn(g_SetSwitchState + g_Index[2].indexLoop);
+		g_SwitchConfig[g_Index[2].indexLoop].currentState = RUN_STATE;
+        g_SwitchConfig[g_Index[2].indexLoop].order = HE_ORDER;
+		g_SwitchConfig[g_Index[2].indexLoop].systemTime = g_MsTicks;
+        g_SwitchConfig[g_Index[2].indexLoop].SwitchOn(g_SwitchConfig + g_Index[2].indexLoop);
         ResetTimer3();
         ClrWdt();
 	}
@@ -132,7 +122,7 @@ void TongBuHeZha(void)
     for(i = 0; i < count; i++)
     {
         //不允许多次执行相同/不同的操作
-        if(g_SetSwitchState[i].State || g_SetSwitchState[i].Order || g_SetSwitchState[i].LastOrder)
+        if(g_SwitchConfig[i].currentState || g_SwitchConfig[i].order || g_SwitchConfig[i].lastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
             i = 10;
@@ -144,29 +134,29 @@ void TongBuHeZha(void)
         return;
     }
     
-    OFF_INT();  //关闭通信中断
-	g_SetSwitchState[g_Index[1].indexLoop].State = REDAY_STATE;
-    g_SetSwitchState[g_Index[1].indexLoop].Order = IDLE_ORDER;
-	g_SetSwitchState[g_Index[1].indexLoop].SwitchOnTime = g_Index[1].onTime;
-	g_SetSwitchState[g_Index[1].indexLoop].OffestTime = g_Index[1].offestTime;
+    OFF_COMMUNICATION_INT();  //关闭通信中断
+	g_SwitchConfig[g_Index[1].indexLoop].currentState = REDAY_STATE;
+    g_SwitchConfig[g_Index[1].indexLoop].order = IDLE_ORDER;
+	g_SwitchConfig[g_Index[1].indexLoop].powerOnTime = g_Index[1].onTime;
+	g_SwitchConfig[g_Index[1].indexLoop].offestTime = g_Index[1].offestTime;
     ClrWdt();
     
     #if(CAP3_STATE)
     {
-        g_SetSwitchState[g_Index[2].indexLoop].State = REDAY_STATE;
-        g_SetSwitchState[g_Index[2].indexLoop].Order = IDLE_ORDER;
-        g_SetSwitchState[g_Index[2].indexLoop].SwitchOnTime = g_Index[2].onTime;
-        g_SetSwitchState[g_Index[2].indexLoop].OffestTime = g_Index[2].offestTime;
+        g_SwitchConfig[g_Index[2].indexLoop].currentState = REDAY_STATE;
+        g_SwitchConfig[g_Index[2].indexLoop].order = IDLE_ORDER;
+        g_SwitchConfig[g_Index[2].indexLoop].powerOnTime = g_Index[2].onTime;
+        g_SwitchConfig[g_Index[2].indexLoop].offestTime = g_Index[2].offestTime;
     }
     #endif
 
-	g_SetSwitchState[g_Index[0].indexLoop].State = RUN_STATE;
-    g_SetSwitchState[g_Index[0].indexLoop].Order = HE_ORDER;
-	g_SetSwitchState[g_Index[0].indexLoop].SwitchOnTime = g_Index[0].onTime;;
-	g_SetSwitchState[g_Index[0].indexLoop].SysTime = g_MsTicks;
-	g_SetSwitchState[g_Index[0].indexLoop].SwitchOn(g_SetSwitchState + g_Index[0].indexLoop);
+	g_SwitchConfig[g_Index[0].indexLoop].currentState = RUN_STATE;
+    g_SwitchConfig[g_Index[0].indexLoop].order = HE_ORDER;
+	g_SwitchConfig[g_Index[0].indexLoop].powerOnTime = g_Index[0].onTime;;
+	g_SwitchConfig[g_Index[0].indexLoop].systemTime = g_MsTicks;
+	g_SwitchConfig[g_Index[0].indexLoop].SwitchOn(g_SwitchConfig + g_Index[0].indexLoop);
     
-    StartTimer3(g_SetSwitchState[g_Index[1].indexLoop].OffestTime);
+    StartTimer3(g_SwitchConfig[g_Index[1].indexLoop].offestTime);
     ClrWdt();
 }
 /**
@@ -183,20 +173,20 @@ void HEZHA_Action(uint8_t index,uint16_t time)
         return;
     }
     //不允许多次执行相同/不同的操作
-    if(g_SetSwitchState[index].State || g_SetSwitchState[index].Order || g_SetSwitchState[index].LastOrder)
+    if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
     {
         g_Order = IDLE_ORDER;    //将命令清零
         return ;
     }
-    OFF_INT();  //关闭通信中断
+    OFF_COMMUNICATION_INT();  //关闭通信中断
     ClrWdt();
-    g_SetSwitchState[index].State = RUN_STATE;
-    g_SetSwitchState[index].Order = HE_ORDER;
-    g_SetSwitchState[index].SysTime = g_MsTicks;
-    g_SetSwitchState[index].SwitchOnTime = time + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[index].currentState = RUN_STATE;
+    g_SwitchConfig[index].order = HE_ORDER;
+    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].powerOnTime = time + 3;   //使用示波器发现时间少3ms左右
     ClrWdt();
-    g_SetSwitchState[index].SwitchOn(g_SetSwitchState + index);
-    g_SetSwitchState[index].SysTime = g_MsTicks;
+    g_SwitchConfig[index].SwitchOn(g_SwitchConfig + index);
+    g_SwitchConfig[index].systemTime = g_MsTicks;
 }
 
 /**
@@ -213,22 +203,262 @@ void FENZHA_Action(uint8_t index,uint16_t time)
         return;
     }
     //不允许多次执行相同/不同的操作
-    if(g_SetSwitchState[index].State || g_SetSwitchState[index].Order || g_SetSwitchState[index].LastOrder)
+    if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
     {
         g_Order = IDLE_ORDER;    //将命令清零
         return ;
     }
-    OFF_INT();  //关闭通信中断
+    OFF_COMMUNICATION_INT();  //关闭通信中断
     ClrWdt();
-    g_SetSwitchState[index].State = RUN_STATE;
-    g_SetSwitchState[index].Order = FEN_ORDER;
-    g_SetSwitchState[index].SysTime = g_MsTicks;
-    g_SetSwitchState[index].SwitchOffTime = time + 2;   //使用示波器发现分闸时间少2ms左右
+    g_SwitchConfig[index].currentState = RUN_STATE;
+    g_SwitchConfig[index].order = FEN_ORDER;
+    g_SwitchConfig[index].systemTime = g_MsTicks;
+    g_SwitchConfig[index].powerOffTime = time + 2;   //使用示波器发现分闸时间少2ms左右
     ClrWdt();
-    g_SetSwitchState[index].SwitchOff(g_SetSwitchState + index);
-    g_SetSwitchState[index].SysTime = g_MsTicks;
+    g_SwitchConfig[index].SwitchOff(g_SwitchConfig + index);
+    g_SwitchConfig[index].systemTime = g_MsTicks;
 }
 
+/**
+ * 
+ * <p>Function name: [ RefreshActionState]</p>
+ * <p>Discription: [刷新合分闸工作状态]</p>
+ * <p>return :[非0 -- 有正在工作的合分闸动作状态]
+ *            0--空闲状态
+ *    </p>
+ */
+uint8_t  RefreshActionState()
+{
+    uint8_t state = 0;
+     ClrWdt();
+      //机构1合闸、分闸刷新
+        if((g_SwitchConfig[DEVICE_I].order == HE_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
+        {
+            ClrWdt();
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+            g_SwitchConfig[DEVICE_I].SwitchOn(g_SwitchConfig);
+            state |= 0x81;
+        }
+        else if((g_SwitchConfig[DEVICE_I].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
+        {
+            ClrWdt();
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+            g_SwitchConfig[DEVICE_I].SwitchOff(g_SwitchConfig);
+            state |= 0x82;
+        }
+        else    //防止持续合闸或者分闸
+        {
+            g_SwitchConfig[DEVICE_I].order = IDLE_ORDER;
+            RESET_CURRENT_A();            
+        }
+        
+        //机构2合闸、分闸刷新
+        if((g_SwitchConfig[DEVICE_II].order == HE_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
+        {
+            ClrWdt();
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+            g_SwitchConfig[DEVICE_II].SwitchOn(g_SwitchConfig + 1);
+            state |= 0x84;
+        }
+        else if((g_SwitchConfig[DEVICE_II].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
+        {
+            ClrWdt();
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+            g_SwitchConfig[DEVICE_II].SwitchOff(g_SwitchConfig + 1);
+             state |= 0x88;
+        }
+        else    //防止持续合闸或者分闸
+        {
+            g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
+            RESET_CURRENT_B();
+        }
+        
+        #if(CAP3_STATE)
+        {
+            //机构3合闸、分闸刷新
+            if((g_SwitchConfig[DEVICE_III].order == HE_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
+            {
+                ClrWdt();
+                OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+                g_SwitchConfig[DEVICE_III].SwitchOn(g_SwitchConfig + 2);
+                state |= 0x10;
+            }
+            else if((g_SwitchConfig[DEVICE_III].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
+            {
+                ClrWdt();
+                g_SwitchConfig[DEVICE_III].SwitchOff(g_SwitchConfig + 2);
+                OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+                 state |= 0x20;
+            }
+            else    //防止持续合闸或者分闸
+            {
+                g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
+                RESET_CURRENT_C();
+            }
+        }
+        #endif
+
+        return state;
+}
+/**
+ * 
+ * <p>Function name: [RefreshIdleState]</p>
+ * <p>Discription: [刷新空闲的工作状态]</p>
+ * <p>return : 非0--跳出
+ *              0--正常执行
+ *    </p>
+ */
+uint8_t  RefreshIdleState()
+{
+        static uint8_t runLedState = TURN_ON;
+        static uint8_t runLedCount = 0;
+        static uint32_t checkOrderTime = g_MsTicks;
+        static uint32_t checkOrderDelay = UINT32_MAX;
+    
+       //任意一项不是空闲状态
+        if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) && (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
+           CHECK_ORDER3()))
+        {
+            return 0xF1;        
+        }     
+        
+        
+        //空闲状态，状态刷新        
+        ON_COMMUNICATION_INT();
+        ResetTimer3();  //刷新关闭定时器3
+        ClrWdt();
+        if((g_SwitchConfig[DEVICE_I].lastOrder != IDLE_ORDER) || 
+            (g_SwitchConfig[DEVICE_II].lastOrder != IDLE_ORDER) || 
+            CHECK_LAST_ORDER3())
+        {
+            ON_COMMUNICATION_INT();
+            ClrWdt();
+            checkOrderDelay = REFUSE_ACTION;
+            //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
+            UpdateCount();//更新计数
+            ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
+            checkOrderTime = g_SysTimeStamp.TickTime;
+            //Clear Flag
+            g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
+            g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
+            g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
+        }
+
+        //拒动错误检测
+        if(g_SysTimeStamp.TickTime - checkOrderTime >= checkOrderDelay)//TODO：错误是
+        {
+            CheckOrder(g_lastRunOrder);  //检测命令是否执行
+            checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
+            checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
+            g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
+            g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
+            OffLock();  //解锁
+        }
+        ClrWdt();
+
+        //检测是否欠电压， 并更新显示
+        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每300ms获取一次电容电压值
+        {
+            CheckVoltage();  
+            ClrWdt();
+            g_SysTimeStamp.GetCapVolueTime = g_SysTimeStamp.TickTime;
+        }  
+
+        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
+        {
+            SwitchScan();   //执行按键扫描程序
+            ClrWdt();
+            g_SysTimeStamp.ScanTime = g_SysTimeStamp.TickTime;
+        }
+        if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
+        {
+            g_lastRunOrder = g_Order;
+            g_Order = IDLE_ORDER;    //将命令清零
+            return 0xff;
+        }
+
+        //周期性状态更新
+        if((g_SysTimeStamp.TickTime - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
+        {
+            ClrWdt();
+            DsplaySwitchState();    //更新机构的状态显示
+            //建立连接且不是在预制状态下才会周期上传
+            if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
+            {
+                UpdataState();  //更新状态
+            }
+            g_SuddenState.SuddenFlag = FALSE;  //Clear
+            OverflowDetection(SEND_TIME);   //增加溢出判断
+            g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
+        }
+
+        ClrWdt();
+        //运行指示灯
+        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
+        {
+            UpdateLEDIndicateState(RUN_LED, runLedState);
+            runLedState = ~runLedState;
+            if(g_RemoteControlState.CanErrorFlag == TRUE)
+            {
+                runLedCount++;
+                if(runLedCount >= 10) //1500*4ms
+                {
+                    InitStandardCAN(0, 0);  //初始化CAN模块
+                    g_changeLedTime = 500;  //运行指示灯闪烁间隔为500ms
+                }
+                //TODO:什么时候恢复？
+            }
+            g_SysTimeStamp.ChangeLedTime = g_SysTimeStamp.TickTime;
+        }
+
+        //获取温度数据
+        if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
+        {
+            g_SysTimeStamp.GetTempTime = g_SysTimeStamp.TickTime;
+            ClrWdt();
+            g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
+        }
+
+        //超时检测复位
+        if((g_RemoteControlState.overTimeFlage == TRUE) && 
+           (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
+           (g_RemoteControlState.orderId <= 4) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
+        {
+            if(!CheckIsOverTime())
+            {
+                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
+                g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
+                SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
+                g_RemoteControlState.orderId = 0;   //Clear
+                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
+                OffLock();  //解锁
+            }
+            else
+            {
+                g_RemoteControlState.overTimeFlage = TRUE;  //Updata
+            }
+        }
+        if(g_RemoteControlState.SetFixedValue == TRUE)
+        {
+            WriteAccumulateSum();  //写入累加和
+            g_RemoteControlState.SetFixedValue = FALSE;
+        }
+        if(g_RemoteControlState.GetAllValueFalg == TRUE)
+        {
+            GetValue(); //获取监控数据
+
+        }
+
+        return 0;
+        
+        
+}
 /**************************************************
  *函数名：YongciMainTask()
  *功能: 永磁控制主循环 
@@ -237,236 +467,32 @@ void FENZHA_Action(uint8_t index,uint16_t time)
 ****************************************************/
 void YongciMainTask(void)
 {
-    uint8_t state = TURN_ON;
-    uint8_t cn = 0;
-    uint32_t checkOrderTime = g_MsTicks;
-    uint32_t checkOrderDelay = UINT32_MAX;
+    uint8_t result = 0;
+ 
     while(0xFFFF) //主循环
     {        
-        ClrWdt();
-        //机构1合闸、分闸刷新
-        if((g_SetSwitchState[0].Order == HE_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
+        result = RefreshActionState();
+        //有正在执行的合分闸动作，则继续刷新状态。
+        if (result)
         {
-            ClrWdt();
-            OFF_INT();  //刷新关闭通信中断
-            g_SetSwitchState[0].SwitchOn(g_SetSwitchState);
-        }
-        else if((g_SetSwitchState[0].Order == FEN_ORDER) && (g_SetSwitchState[0].State == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_INT();  //刷新关闭通信中断
-            g_SetSwitchState[0].SwitchOff(g_SetSwitchState);
-        }
-        else    //防止持续合闸或者分闸
-        {
-            g_SetSwitchState[0].Order = IDLE_ORDER;
-            RESET_CURRENT_A();
+            continue;
         }
         
-        //机构2合闸、分闸刷新
-        if((g_SetSwitchState[1].Order == HE_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_INT();  //刷新关闭通信中断
-            g_SetSwitchState[1].SwitchOn(g_SetSwitchState + 1);
-        }
-        else if((g_SetSwitchState[1].Order == FEN_ORDER) && (g_SetSwitchState[1].State == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_INT();  //刷新关闭通信中断
-            g_SetSwitchState[1].SwitchOff(g_SetSwitchState + 1);
-        }
-        else    //防止持续合闸或者分闸
-        {
-            g_SetSwitchState[1].Order = IDLE_ORDER;
-            RESET_CURRENT_B();
-        }
+      
         
-        #if(CAP3_STATE)
-        {
-            //机构3合闸、分闸刷新
-            if((g_SetSwitchState[2].Order == HE_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
-            {
-                ClrWdt();
-                OFF_INT();  //刷新关闭通信中断
-                g_SetSwitchState[2].SwitchOn(g_SetSwitchState + 2);
-            }
-            else if((g_SetSwitchState[2].Order == FEN_ORDER) && (g_SetSwitchState[2].State == RUN_STATE))
-            {
-                ClrWdt();
-                g_SetSwitchState[2].SwitchOff(g_SetSwitchState + 2);
-                OFF_INT();  //刷新关闭通信中断
-            }
-            else    //防止持续合闸或者分闸
-            {
-                g_SetSwitchState[2].Order = IDLE_ORDER;
-                RESET_CURRENT_C();
-            }
-        }
-        #endif
+     
         
-        //机构空闲状态刷新
-        if((g_SetSwitchState[0].Order == IDLE_ORDER) && (g_SetSwitchState[1].Order == IDLE_ORDER) && 
-           CHECK_ORDER3())
-        {
-            ON_INT();
-            ResetTimer3();  //刷新关闭定时器3
-            ClrWdt();
-            if((g_SetSwitchState[0].LastOrder != IDLE_ORDER) || 
-                (g_SetSwitchState[1].LastOrder != IDLE_ORDER) || 
-                CHECK_LAST_ORDER3())
-            {
-                ON_INT();
-                ClrWdt();
-                checkOrderDelay = REFUSE_ACTION;
-                //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
-                UpdateCount();//更新计数
-                ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
-                checkOrderTime = g_SysTimeStamp.TickTime;
-                //Clear Flag
-                g_SetSwitchState[0].Order = IDLE_ORDER; //清零
-                g_SetSwitchState[1].Order = IDLE_ORDER;
-                g_SetSwitchState[2].Order = IDLE_ORDER;
-                g_SetSwitchState[0].State = IDLE_ORDER;
-                g_SetSwitchState[1].State = IDLE_ORDER;
-                g_SetSwitchState[2].State = IDLE_ORDER;
-                g_SetSwitchState[0].LastOrder = IDLE_ORDER;
-                g_SetSwitchState[1].LastOrder = IDLE_ORDER;
-                g_SetSwitchState[2].LastOrder = IDLE_ORDER;
-            }
-            
-            //拒动错误检测
-            if(g_SysTimeStamp.TickTime - checkOrderTime >= checkOrderDelay)
-            {
-                CheckOrder(g_lastRunOrder);  //检测命令是否执行
-                checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
-                checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
-                g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
-                OffLock();  //解锁
-            }
-            ClrWdt();
-            
-            //判断远方与就地的延时消抖
-            ClrWdt();   
-            //远方控制时允许通信
-                
-            //暂时不要485通信，所以需要屏蔽
-//                /***************************************************************************
-//                //空闲状态下，处理通讯程序
-//                result = ReciveBufferDataDealing(&sendFrame, &recvFrame);//返回剩余长度
-//                ClrWdt();
-//                if (recvFrame.completeFlag == TRUE)
-//                {
-//                    ExecuteFunctioncode(&recvFrame);
-//                }
-//                ClrWdt();
-//                if (result) //若缓存中还有数据先处理帧数据。
-//                {
-//                    continue;
-//                }
-//                ***************************************************************************/
-            
-            //检测是否欠电压， 并更新显示
-            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetCapVolueTime >= GET_CAP_TIME) //大约每300ms获取一次电容电压值
-            {
-                CheckVoltage();  
-                ClrWdt();
-                g_SysTimeStamp.GetCapVolueTime = g_SysTimeStamp.TickTime;
-            }  
-            
-            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ScanTime >= SCAN_TIME) //大约每2ms扫描一次
-            {
-                SwitchScan();   //执行按键扫描程序
-                ClrWdt();
-                g_SysTimeStamp.ScanTime = g_SysTimeStamp.TickTime;
-            }
-            if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
-            {
-                g_lastRunOrder = g_Order;
-                g_Order = IDLE_ORDER;    //将命令清零
-                continue;
-            }
-            
-            //周期性状态更新
-            if((g_SysTimeStamp.TickTime - g_SysTimeStamp.SendDataTime >= SEND_TIME) || (g_SuddenState.SuddenFlag == TRUE))
-            {
-                ClrWdt();
-                DsplaySwitchState();    //更新机构的状态显示
-                //建立连接且不是在预制状态下才会周期上传
-                if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
-                {
-                    UpdataState();  //更新状态
-                }
-                g_SuddenState.SuddenFlag = FALSE;  //Clear
-                OverflowDetection(SEND_TIME);   //增加溢出判断
-                g_SysTimeStamp.SendDataTime = g_SysTimeStamp.TickTime;
-            }
-            
-            ClrWdt();
-            //运行指示灯
-            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.ChangeLedTime >= g_changeLedTime)
-            {
-                UpdateLEDIndicateState(RUN_LED,state);
-                state = ~state;
-                if(g_RemoteControlState.CanErrorFlag == TRUE)
-                {
-                    cn++;
-                    if(cn >= 10) //1500*4ms
-                    {
-                        InitStandardCAN(0, 0);  //初始化CAN模块
-                        g_changeLedTime = 500;  //运行指示灯闪烁间隔为500ms
-                    }
-                }
-                g_SysTimeStamp.ChangeLedTime = g_SysTimeStamp.TickTime;
-            }
-            
-            //获取温度数据
-            if(g_SysTimeStamp.TickTime - g_SysTimeStamp.GetTempTime >= GET_TEMP_TIME)
-            {
-                g_SysTimeStamp.GetTempTime = g_SysTimeStamp.TickTime;
-                ClrWdt();
-                g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值
-            }
-            
-            //超时检测复位
-            if((g_RemoteControlState.overTimeFlage == TRUE) && 
-               (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
-               (g_RemoteControlState.orderId <= 4) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
-            {
-                if(!CheckIsOverTime())
-                {
-                    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
-                    g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
-                    SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
-                    g_RemoteControlState.orderId = 0;   //Clear
-                    g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                    OffLock();  //解锁
-                }
-                else
-                {
-                    g_RemoteControlState.overTimeFlage = TRUE;  //Updata
-                }
-            }
-            if(g_RemoteControlState.SetFixedValue == TRUE)
-            {
-                WriteAccumulateSum();  //写入累加和
-                g_RemoteControlState.SetFixedValue = FALSE;
-            }
-            if(g_RemoteControlState.GetAllValueFalg == TRUE)
-            {
-                GetValue(); //获取监控数据
-            }
-        }
+        
+        
         //同步合闸预制是单独执行的
         while((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) && (g_RemoteControlState.orderId == 0x05) && 
               (g_RemoteControlState.overTimeFlage == TRUE))
         {
             if(!CheckIsOverTime())
             {
-                ON_INT();
+                ON_COMMUNICATION_INT();
                 TurnOffInt2();
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear Order
+                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
                 g_RemoteControlState.overTimeFlage = FALSE;  //Clear Flag
                 SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
                 g_RemoteControlState.orderId = 0;   //Clear
@@ -597,39 +623,39 @@ void InitSetSwitchState(void)
 {
 	uint8_t index = 0;
 
-	g_SetSwitchState[index].State = IDLE_ORDER;	//默认为空闲状态
-	g_SetSwitchState[index].Order = IDLE_ORDER; //默认未执行
-    g_SetSwitchState[index].LastOrder = IDLE_ORDER; //默认上一次未执行任何指令
-	g_SetSwitchState[index].SwitchOnTime = HEZHA_TIME;  //默认合闸时间50ms
-	g_SetSwitchState[index].SwitchOffTime = FENZHA_TIME;    //默认合闸时间50ms
-	g_SetSwitchState[index].OffestTime = 0; //默认无偏移时间
-	g_SetSwitchState[index].SysTime = 0;    //默认系统时间为零
-	g_SetSwitchState[index].SwitchOn = SwitchOnFirstPhase;
-	g_SetSwitchState[index].SwitchOff = SwitchOffFirstPhase;
+	g_SwitchConfig[index].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[index].order = IDLE_ORDER; //默认未执行
+    g_SwitchConfig[index].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
+	g_SwitchConfig[index].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
+	g_SwitchConfig[index].powerOffTime = FENZHA_TIME;    //默认合闸时间50ms
+	g_SwitchConfig[index].offestTime = 0; //默认无偏移时间
+	g_SwitchConfig[index].systemTime = 0;    //默认系统时间为零
+	g_SwitchConfig[index].SwitchOn = SwitchOnFirstPhase;
+	g_SwitchConfig[index].SwitchOff = SwitchOffFirstPhase;
 	index++;
     ClrWdt();
 
-	g_SetSwitchState[index].State = IDLE_ORDER;	//默认为空闲状态
-	g_SetSwitchState[index].Order = IDLE_ORDER; //默认未执行
-    g_SetSwitchState[index].LastOrder = IDLE_ORDER; //默认上一次未执行任何指令
-	g_SetSwitchState[index].SwitchOnTime = HEZHA_TIME;  //默认合闸时间50ms
-	g_SetSwitchState[index].SwitchOffTime = FENZHA_TIME;    //默认分闸时间30ms
-	g_SetSwitchState[index].OffestTime = 0; //默认无偏移时间
-	g_SetSwitchState[index].SysTime = 0;    //默认系统时间为零
-	g_SetSwitchState[index].SwitchOn = SwitchOnSecondPhase;
-	g_SetSwitchState[index].SwitchOff = SwitchOffSecondPhase;
+	g_SwitchConfig[index].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[index].order = IDLE_ORDER; //默认未执行
+    g_SwitchConfig[index].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
+	g_SwitchConfig[index].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
+	g_SwitchConfig[index].powerOffTime = FENZHA_TIME;    //默认分闸时间30ms
+	g_SwitchConfig[index].offestTime = 0; //默认无偏移时间
+	g_SwitchConfig[index].systemTime = 0;    //默认系统时间为零
+	g_SwitchConfig[index].SwitchOn = SwitchOnSecondPhase;
+	g_SwitchConfig[index].SwitchOff = SwitchOffSecondPhase;
 	index++;
     ClrWdt();
 
-	g_SetSwitchState[index].State = IDLE_ORDER;	//默认为空闲状态
-	g_SetSwitchState[index].Order = IDLE_ORDER; //默认未执行
-    g_SetSwitchState[index].LastOrder = IDLE_ORDER; //默认上一次未执行任何指令
-	g_SetSwitchState[index].SwitchOnTime = HEZHA_TIME;  //默认合闸时间50ms
-	g_SetSwitchState[index].SwitchOffTime = FENZHA_TIME;    //默认分闸时间30ms
-	g_SetSwitchState[index].OffestTime = 0; //默认无偏移时间
-	g_SetSwitchState[index].SysTime = 0;    //默认系统时间为零
-	g_SetSwitchState[index].SwitchOn = SwitchOnThirdPhase;
-	g_SetSwitchState[index].SwitchOff = SwitchOffThirdPhase;
+	g_SwitchConfig[index].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[index].order = IDLE_ORDER; //默认未执行
+    g_SwitchConfig[index].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
+	g_SwitchConfig[index].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
+	g_SwitchConfig[index].powerOffTime = FENZHA_TIME;    //默认分闸时间30ms
+	g_SwitchConfig[index].offestTime = 0; //默认无偏移时间
+	g_SwitchConfig[index].systemTime = 0;    //默认系统时间为零
+	g_SwitchConfig[index].SwitchOn = SwitchOnThirdPhase;
+	g_SwitchConfig[index].SwitchOff = SwitchOffThirdPhase;
 	index++;
     ClrWdt();
     
@@ -647,19 +673,19 @@ void InitSetSwitchState(void)
  */
 void SwitchOnFirstPhase(SwitchConfig* pConfig)
 {
-	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
+	if((pConfig->order == HE_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
 		HEZHA_A();
 		HEZHA_A();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime,pConfig->powerOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
 	}
 }
 
@@ -671,19 +697,19 @@ void SwitchOnFirstPhase(SwitchConfig* pConfig)
  */
 void SwitchOnSecondPhase(SwitchConfig* pConfig)
 {
-	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
+	if((pConfig->order == HE_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
 		HEZHA_B();
 		HEZHA_B();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime,pConfig->powerOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_B();
 		RESET_CURRENT_B();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
 	}
 }
 
@@ -695,19 +721,19 @@ void SwitchOnSecondPhase(SwitchConfig* pConfig)
  */
 void SwitchOnThirdPhase(SwitchConfig* pConfig)
 {
-	if((pConfig->Order == HE_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
+	if((pConfig->order == HE_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是合闸命令,且是否是可以执行状态
 	{
 		HEZHA_C();
 		HEZHA_C();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOnTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime,pConfig->powerOnTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_C();
 		RESET_CURRENT_C();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
 	}
 }
 
@@ -724,19 +750,19 @@ void SwitchOnThirdPhase(SwitchConfig* pConfig)
  */
 void SwitchOffFirstPhase(SwitchConfig* pConfig)
 {
-	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
+	if((pConfig->order == FEN_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是分闸命令
 	{
 		FENZHA_A();
 		FENZHA_A();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime,pConfig->powerOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
 	}
 }
 
@@ -748,19 +774,19 @@ void SwitchOffFirstPhase(SwitchConfig* pConfig)
  */
 void SwitchOffSecondPhase(SwitchConfig* pConfig)
 {
-	if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
+	if((pConfig->order == FEN_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是分闸命令
 	{
 		FENZHA_B();
 		FENZHA_B();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime, pConfig->powerOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_B();
 		RESET_CURRENT_B();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
 	}
 }
 
@@ -772,19 +798,19 @@ void SwitchOffSecondPhase(SwitchConfig* pConfig)
  */
 void SwitchOffThirdPhase(SwitchConfig* pConfig)
 {
-    if((pConfig->Order == FEN_ORDER) && (pConfig->State == RUN_STATE))	//首先判断是否是分闸命令
+    if((pConfig->order == FEN_ORDER) && (pConfig->currentState == RUN_STATE))	//首先判断是否是分闸命令
 	{
 		FENZHA_C();
 		FENZHA_C();
 	}
-	if(IsOverTime(pConfig->SysTime,pConfig->SwitchOffTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime,pConfig->powerOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_C();
 		RESET_CURRENT_C();
-		pConfig->Order = IDLE_ORDER;
-		pConfig->State = IDLE_ORDER;
+		pConfig->order = IDLE_ORDER;
+		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
-        pConfig->LastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
 	}
 }
 
@@ -883,23 +909,23 @@ uint8_t GetOffestTime(struct DefFrameData* pReciveFrame)
 void UpdateCount(void)
 {
     //应禁止中断
-    if (g_SetSwitchState[0].LastOrder == HE_ORDER) //机构1合闸
+    if (g_SwitchConfig[DEVICE_I].lastOrder == HE_ORDER) //机构1合闸
     {
         ClrWdt();
         WriteFenzhaCount(JG1_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount1);
     }
-    else if (g_SetSwitchState[0].LastOrder == FEN_ORDER)  //机构1分闸
+    else if (g_SwitchConfig[DEVICE_I].lastOrder == FEN_ORDER)  //机构1分闸
     {
         ClrWdt();
         WriteFenzhaCount(JG1_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount1);
     }
     
-    if (g_SetSwitchState[1].LastOrder == HE_ORDER)   //机构2合闸
+    if (g_SwitchConfig[DEVICE_II].lastOrder == HE_ORDER)   //机构2合闸
     {
         ClrWdt();
         WriteFenzhaCount(JG2_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount2);
     }
-    else if (g_SetSwitchState[1].LastOrder == FEN_ORDER)  //机构2分闸
+    else if (g_SwitchConfig[DEVICE_II].lastOrder == FEN_ORDER)  //机构2分闸
     {
         ClrWdt();
         WriteFenzhaCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
@@ -907,21 +933,21 @@ void UpdateCount(void)
     
     #if(CAP3_STATE)
     {
-        if (g_SetSwitchState[2].LastOrder == HE_ORDER)   //机构3合闸
+        if (g_SwitchConfig[DEVICE_III].lastOrder == HE_ORDER)   //机构3合闸
         {
             ClrWdt();
             WriteFenzhaCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
         }
-        else if (g_SetSwitchState[2].LastOrder == FEN_ORDER)  //机构3分闸
+        else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
         {
             ClrWdt();
             WriteFenzhaCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
         }
     }
     #endif
-    g_SetSwitchState[0].LastOrder = IDLE_ORDER;    //清零防止重复写入
-    g_SetSwitchState[1].LastOrder = IDLE_ORDER;    //清零防止重复写入
-    g_SetSwitchState[2].LastOrder = IDLE_ORDER;    //清零防止重复写入
+    g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;    //清零防止重复写入
+    g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;    //清零防止重复写入
+    g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;    //清零防止重复写入
     ClrWdt();
     
 }

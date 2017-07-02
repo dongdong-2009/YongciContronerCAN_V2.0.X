@@ -684,18 +684,18 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     g_validCount = 0;   //初始化全局变量
     
     IFS1bits.INT2IF = 0;
-    OFF_INT();
+    OFF_COMMUNICATION_INT();
     //*************************************************************************************
     //以下判断防止误触发
     if(g_RemoteControlState.ReceiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
     {
-        ON_INT();
+        ON_COMMUNICATION_INT();
         TurnOffInt2();
         return;
     }
     if(g_RemoteControlState.overTimeFlage == FALSE) //发生超时
     {
-        ON_INT();
+        ON_COMMUNICATION_INT();
         TurnOffInt2();
         return;
     }

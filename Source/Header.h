@@ -39,8 +39,8 @@
 
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
-//#define SMALL_CHOSE 0xF1
-#define BIG_CHOSE   0xF2
+#define SMALL_CHOSE 0xF1
+//#define BIG_CHOSE   0xF2
 
 #ifdef	SMALL_CHOSE
     #define ADCS()  {ADCSSL = 0x000F;}  //ADC扫描通道数,AN0--AN3全部扫描
@@ -48,8 +48,8 @@
     #define CAP3_DROP_VOLTAGE() {g_SystemVoltageParameter.capDropVoltage3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}    
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
-    #define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
-    #define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
+    #define CHECK_ORDER3()    (g_SwitchConfig[DEVICE_III].order == IDLE_ORDER)
+    #define CHECK_LAST_ORDER3()     (g_SwitchConfig[DEVICE_III].lastOrder != IDLE_ORDER)
     #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
     #define MAC_ID (0x10)   //缺省A相
 
@@ -72,14 +72,14 @@
 //#define USE_RS485 0xB2
 #define USE_CAN 0xB1
 #ifdef  USE_CAN
-    #define ON_INT()  {IEC2bits.C2IE = 1;C2INTE = 0xBF;C1INTE = 0;}  //C2INTE = 0xBF;
-    #define OFF_INT() {IEC2bits.C2IE = 0;C2INTE = 0;C1INTE = 0;}
+    #define ON_COMMUNICATION_INT()  {IEC2bits.C2IE = 1; C2INTE = 0xBF; C1INTE = 0;}  //C2INTE = 0xBF;
+    #define OFF_COMMUNICATION_INT() {IEC2bits.C2IE = 0; C2INTE = 0; C1INTE = 0;}
     #define APPLY_CAN    TRUE
     #define APPLY_485    FALSE
 
 #elif   USE_RS485
-    #define ON_INT()  {ON_UART_INT();}
-    #define OFF_INT() {OFF_UART_INT();}
+    #define ON_COMMUNICATION_INT()  {ON_UART_INT();}
+    #define OFF_COMMUNICATION_INT() {OFF_UART_INT();}
     #define APPLY_CAN    FALSE
     #define APPLY_485    TRUE
 

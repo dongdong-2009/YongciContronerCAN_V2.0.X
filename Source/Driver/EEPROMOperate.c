@@ -173,10 +173,10 @@ void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata)
     ClrWdt();
     *eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
     
-    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+    OFF_COMMUNICATION_INT();  //关闭通信中断，防止在写入EEPROM时被打断
     ClrWdt();
     WriteWord_EEPROM(addr , eedata);
-    ON_INT();
+    ON_COMMUNICATION_INT();
 }
 
 
