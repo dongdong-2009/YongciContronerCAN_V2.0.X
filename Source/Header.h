@@ -15,8 +15,8 @@
 #define FCY 4e6
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
-//#define SMALL_CHOSE 0xF1
-#define BIG_CHOSE   0xF2
+#define SMALL_CHOSE 0xF1
+//#define BIG_CHOSE   0xF2
 
 #include <libpic30.h>
 
@@ -51,8 +51,10 @@
     #define CAP3_DROP_VOLTAGE() {g_SystemVoltageParameter.capDropVoltage3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}    
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
-    #define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
-    #define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
+    //#define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
+     #define CHECK_ORDER3()    (g_SwitchConfig[DEVICE_III].order == IDLE_ORDER)   
+    //#define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
+    #define CHECK_LAST_ORDER3()     ( g_SwitchConfig[DEVICE_III].lastOrder != IDLE_ORDER)
     #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
     #define MAC_ID (0x10)   //缺省A相
 

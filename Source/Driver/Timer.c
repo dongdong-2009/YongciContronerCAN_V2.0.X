@@ -165,8 +165,11 @@ inline void StartTimer3(unsigned int us)
  */
 inline void ChangeTimerPeriod3(unsigned int us)
 {
+    T3CONbits.TON = 0;
+    IFS0bits.T3IF = 0;
     TMR3 = 0;
     PR3 = us/2 + 2;   //误差量
+     T3CONbits.TON = 1;
 }
 /**
  * 
