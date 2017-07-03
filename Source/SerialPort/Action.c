@@ -24,6 +24,9 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
 uint8_t GetLoopSet(struct DefFrameData* pReciveFrame);
 uint8_t CheckOpenCondition(void);
 uint8_t CheckCloseCondition(void);
+uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
+uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
+
 
 extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
@@ -157,159 +160,40 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     switch(id)
     {
         case ReadyClose : //合闸预制
-        {            
-            if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
-            {
-                SendErrorFrame(id, WORK_MODE_ERROR);
-                return;
-            }      
-             if (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)//检测是否多次预制
-            {                
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(id, SEVERAL_PERFABRICATE_ERROR);
-                return;
-            }   
-            result = GetLoopSet(pReciveFrame);   //获取回路   
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-                return;
-            }                   
-            result =  CheckCloseCondition(); //检测合分闸条件
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-                return;
-            } 
-            ClrWdt();  
-            
-            memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
-            g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
-            SendData(pSendFrame);
-            g_RemoteControlState.ReceiveStateFlag = HE_ORDER;    //合闸命令
-            SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间         
-            break;
+        {      
+            result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+             if (result)
+             {
+                     SendErrorFrame(id, result);
+             }
+             break;
         }
         case CloseAction: //合闸执行
         {           
             
-             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
-            {
-                SendErrorFrame(id, WORK_MODE_ERROR);
-                return;
-            }   
-             //是否已经预制或者超时                 
-            if((g_RemoteControlState.ReceiveStateFlag != HE_ORDER) || 
-                (g_RemoteControlState.overTimeFlag != TRUE))
-            {
-                ClrWdt();
-                SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-            
-            }
-               //比较配置字是否一致
-            for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
-            {
-                if (pReciveFrame->pBuffer[i] != LastCommand[i])
-                {
-                    SendErrorFrame(id, ERROR_DIFF_CONFIG);
-                    return;
-                }
-            }      
-             
-             //再次检查合闸闸条件                
-            result =  CheckCloseCondition(); //检测合分闸条件
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-            }
-             
-            g_RemoteControlState.orderId = id;
-            OnLock();   //上锁             
-            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
-            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
-            ClrWdt();               
-            SendData(pSendFrame);
-            CloseOperation();
-            
+            result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
+             if (result)
+             {
+                     SendErrorFrame(id, result);
+             }            
             break;
         }
         case ReadyOpen: //分闸预制
         {
-            if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
-            {
-                SendErrorFrame(id, WORK_MODE_ERROR);
-                return;
-            }      
-             if (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)//检测是否多次预制
-            {                
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(id, SEVERAL_PERFABRICATE_ERROR);
-                return;
-            }   
-            result = GetLoopSet(pReciveFrame);   //获取回路   
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-                return;
-            }                   
-            result =  CheckOpenCondition(); //检测合分闸条件
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-                return;
-            } 
-            ClrWdt();  
-            
-            memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
-            g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
-            SendData(pSendFrame);
-            g_RemoteControlState.ReceiveStateFlag = FEN_ORDER;    //合闸命令
-            SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间                                 
-            break;
+             result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+             if (result)
+             {
+                     SendErrorFrame(id, result);
+             }
+             break;
         }
         case OpenAction: //分闸执行
         {
-            if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
-            {
-                SendErrorFrame(id, WORK_MODE_ERROR);
-                return;
-            }   
-             
-             //是否已经预制或者超时                 
-            if((g_RemoteControlState.ReceiveStateFlag != FEN_ORDER) || 
-                (g_RemoteControlState.overTimeFlag != TRUE))              
-            {
-                ClrWdt();
-                SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                return;
-            }
-               //比较配置字是否一致
-            for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
-            {
-                if (pReciveFrame->pBuffer[i] != LastCommand[i])
-                {
-                    SendErrorFrame(id, ERROR_DIFF_CONFIG);
-                    return;
-                }
-            }            
-           //再次检查分闸条件                
-            result =  CheckOpenCondition(); //检测合分闸条件
-            if (result)
-            {
-                 SendErrorFrame(id, result);
-                 return;
-            }
-            g_RemoteControlState.orderId = id;
-            OnLock();   //上锁             
-            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
-            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
-            ClrWdt();               
-            SendData(pSendFrame);
-            OpenOperation();
+            result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
+             if (result)
+             {
+                     SendErrorFrame(id, result);
+             }
             break;
         }        
         case SyncReadyClose: //同步合闸预制
@@ -361,6 +245,116 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             break;
         }          
     }
+}
+uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+{
+    uint8_t result = 0;
+    uint16_t order = 0;
+    
+    
+     if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {        
+        return WORK_MODE_ERROR;
+    }   
+     //区分合分闸检测
+    if (id == CloseAction )
+    {
+        result =  CheckCloseCondition(); //检测合分闸条件
+        order = HE_ORDER;
+    }
+    else if (id == OpenAction)
+    {
+        result =  CheckOpenCondition(); //检测合分闸条件
+        order = FEN_ORDER;
+    }
+    else
+    {
+        return ID_ERROR;
+    }
+     
+     //是否已经预制或者超时                 
+    if((g_RemoteControlState.ReceiveStateFlag != order) || 
+        (g_RemoteControlState.overTimeFlag != TRUE))
+    {
+        ClrWdt();
+        SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
+        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
+
+    }
+       //比较配置字是否一致
+    for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
+    {
+        if (pReciveFrame->pBuffer[i] != LastCommand[i])
+        {          
+            return ERROR_DIFF_CONFIG;
+        }
+    }     
+    
+     
+    g_RemoteControlState.orderId = id;
+    OnLock();   //上锁             
+    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
+    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
+    ClrWdt();               
+    SendData(pSendFrame);
+    
+    if (id == CloseAction )
+    {
+        CloseOperation();      
+    }
+    else if (id == OpenAction)
+    {
+        OpenOperation();
+    }
+    return 0;
+}
+uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+{
+    uint8_t result = 0;
+    uint16_t order = 0;
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {       
+        return WORK_MODE_ERROR;
+    }      
+     if (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)//检测是否多次预制
+    {                
+        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;       
+        return SEVERAL_PERFABRICATE_ERROR;
+    }   
+    result = GetLoopSet(pReciveFrame);   //获取回路   
+    if (result)
+    {       
+        return result;
+    }   
+    //区分合分闸检测
+    if (id == ReadyClose)
+    {
+        result =  CheckCloseCondition(); //检测合分闸条件
+        order = HE_ORDER;
+    }
+    else if (id == ReadyOpen)
+    {
+        result =  CheckOpenCondition(); //检测合分闸条件
+        order = FEN_ORDER;
+    }
+    else
+    {
+        return ID_ERROR;
+    }
+    
+    if (result)
+    {
+          return result;
+    } 
+    ClrWdt();  
+
+    memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
+    g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
+    SendData(pSendFrame);
+    g_RemoteControlState.ReceiveStateFlag = order;    //合闸命令
+    SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间      
+    return 0;
 }
 
 
