@@ -557,11 +557,7 @@ uint8_t  RefreshIdleState()
             WriteAccumulateSum();  //写入累加和
             g_RemoteControlState.SetFixedValue = FALSE;
         }
-        if(g_RemoteControlState.GetAllValueFalg == TRUE)
-        {
-            GetValue(); //获取监控数据
-
-        }
+    
 
         return 0;
         
