@@ -52,7 +52,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     uint8_t index = g_SynActionAttribute.currentIndex;
    
     uint8_t loop =  g_SynActionAttribute.Attribute[index].loop - 1;
-    if((g_SwitchConfig[loop].currentState == REDAY_STATE) &&
+    if((g_SwitchConfig[loop].currentState == READY_STATE) &&
             (g_SwitchConfig[loop].order == IDLE_ORDER))
 	{
 		g_SwitchConfig[loop].currentState = RUN_STATE;
@@ -142,7 +142,7 @@ void SynCloseAction(void)
     for(uint8_t i = 1; i < g_SynActionAttribute.count; i++)
     {
         loop =  g_SynActionAttribute.Attribute[i].loop - 1;
-        g_SwitchConfig[loop].currentState = REDAY_STATE;
+        g_SwitchConfig[loop].currentState = READY_STATE;
         g_SwitchConfig[loop].order = IDLE_ORDER;
         g_SwitchConfig[loop].powerOnTime =  50;//TODO:固定值
         g_SwitchConfig[loop].offestTime =    g_SynActionAttribute.Attribute[i].offsetTime;
@@ -389,6 +389,21 @@ uint8_t  RefreshActionState()
         }
         #endif
 
+        //就绪状态则继续等待 TODO：就绪超时
+        if((g_SwitchConfig[DEVICE_I].currentState == READY_STATE)
+                || (g_SwitchConfig[DEVICE_II].currentState == READY_STATE)
+                ||(g_SwitchConfig[DEVICE_III].currentState == READY_STATE))
+        {
+             state |= 0x40;
+        }
+       
+        //再次检测是否处于运行状态，若处于则继续执行。
+        if((g_SwitchConfig[DEVICE_I].currentState == RUN_STATE)
+                || (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE)
+                ||(g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
+        {
+             state |= 0x80;
+        }
         return state;
 }
 /**

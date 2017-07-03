@@ -19,7 +19,7 @@ extern "C" {
 #include "../Driver/tydef.h"
 
 #define RUN_STATE   0x77    //运行状态
-#define REDAY_STATE 0x88    //准备状态
+#define READY_STATE 0x88    //准备状态
     
 //远方就地
 #define YUAN_STATE  0xA1    //远方状态
