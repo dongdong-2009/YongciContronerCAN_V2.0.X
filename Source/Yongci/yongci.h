@@ -143,7 +143,7 @@ void OnLock(void);
 void OffLock(void);
 void SynCloseAction(void);
 void CloseOperation(void);
-
+void OpenOperation(void);
 extern frameRtu sendFrame, recvFrame;
 extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 //extern uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime; //改变LED灯闪烁时间 (ms) TODO:为什么？

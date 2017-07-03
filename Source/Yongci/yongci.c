@@ -206,7 +206,46 @@ void CloseOperation(void)
     }
     g_NormalAttribute.count = 0;
 }
+/**
+ *分闸操作
+ */
+void OpenOperation(void)
+{
+    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    {
+        return;
+    }
+    //不允许多次执行相同/不同的操作   
+    ClrWdt();
+    uint8_t index = 0;
+    //g_NormalAttribute
+     for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
+     {
+          if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
+        {
+            g_Order = IDLE_ORDER;    //将命令清零
+            return ;
+        }   
+     }
+      OFF_COMMUNICATION_INT();  //关闭通信中断
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        if (g_NormalAttribute.Attribute[i].enable)
+        {
+               index = g_NormalAttribute.Attribute[i].loop - 1;
+               g_SwitchConfig[index].currentState = RUN_STATE;
+               g_SwitchConfig[index].order = FEN_ORDER;
+               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
+               g_SwitchConfig[index].powerOnTime = 30;   //使用示波器发现时间少3ms左右
+               ClrWdt();
+               g_SwitchConfig[index].SwitchOpen(g_SwitchConfig + index);
+               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
 
+               g_NormalAttribute.Attribute[i].enable = 0;
+        }        
+    }
+    g_NormalAttribute.count = 0;
+}
 
 /**
  * 
