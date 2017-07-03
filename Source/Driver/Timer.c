@@ -148,6 +148,7 @@ void Init_Timer3(void)
  */
 inline void StartTimer3(unsigned int us)
 {
+    TMR3 = 0;
     PR3 = us/2 + 2;   //误差量
     ClrWdt();
     IFS0bits.T3IF = 0;

@@ -200,7 +200,7 @@ typedef struct RemoteControl
 }RemoteControlState;
 
 /**
- *执行同步合闸参数,
+ *执行合分闸参数
  */
 typedef struct TagActionParameter
 {
@@ -208,13 +208,20 @@ typedef struct TagActionParameter
 	uint8_t enable; //使能标志，0-禁止，非零使能
     uint8_t loop; //相I-1, II-2, III-3
     uint16_t offsetTime;//偏移时间
-    uint16_t powerOnTime;// 通电时间
-    
+    uint16_t powerOnTime;// 通电时间    
+
+}ActionParameter;
+
+/**
+ *执行同步合闸参数,
+ */
+typedef struct TagActionAttribute
+{
+    ActionParameter  Attribute[3]; //动作属性合集
     uint8_t loopByte;//回路控制字
     uint8_t count; //控制数量  
     uint8_t currentIndex; //当前执行位置
-}ActionParameter;
-
+}ActionAttribute;
 
 
 
@@ -232,7 +239,7 @@ extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 extern struct DefFrameData g_qSendFrame;   //CAN数据帧
 extern PointUint8 g_pPoint;   
-extern ActionParameter g_ActionParameter[3];
+extern ActionAttribute g_SynActionAttribute;
 
 #ifdef	__cplusplus
 }

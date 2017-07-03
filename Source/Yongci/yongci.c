@@ -48,9 +48,9 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
     IFS0bits.T3IF = 0;
      ClrWdt();
-    uint8_t index = g_ActionParameter[0].currentIndex;
+    uint8_t index = g_SynActionAttribute.currentIndex;
    
-    uint8_t loop =  g_ActionParameter[index].loop - 1;
+    uint8_t loop =  g_SynActionAttribute.Attribute[index].loop - 1;
     if((g_SwitchConfig[loop].currentState == REDAY_STATE) &&
             (g_SwitchConfig[loop].order == IDLE_ORDER))
 	{
@@ -59,11 +59,10 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 		g_SwitchConfig[loop].systemTime = g_TimeStampCollect.msTicks;
         g_SwitchConfig[loop].SwitchClose(g_SwitchConfig + loop);        
       
-        index = ++g_ActionParameter[0].currentIndex;
-        if(index < g_ActionParameter[0].count)
+        index = ++ g_SynActionAttribute.currentIndex;
+        if(index < g_SynActionAttribute.count)
         {
-            ChangePr3(g_ActionParameter[index].offsetTime);//偏移时间
-           // StartTimer3(g_ActionParameter[nextIndex].offsetTime);
+            ChangePr3(g_SynActionAttribute.Attribute[index].offsetTime);//偏移时间          
         } 
         else
         {
@@ -128,16 +127,16 @@ void SynCloseAction(void)
     
     OFF_COMMUNICATION_INT();  //关闭通信中断
 	uint8_t loop = 0;
-    g_ActionParameter[0].currentIndex = 0;
-    for(uint8_t i = 1; i < g_ActionParameter->count; i++)
+    g_SynActionAttribute.currentIndex = 0;
+    for(uint8_t i = 1; i < g_SynActionAttribute.count; i++)
     {
-        loop = g_ActionParameter[i].loop - 1;
+        loop =  g_SynActionAttribute.Attribute[i].loop - 1;
         g_SwitchConfig[loop].currentState = REDAY_STATE;
         g_SwitchConfig[loop].order = IDLE_ORDER;
         g_SwitchConfig[loop].powerOnTime =  50;//TODO:固定值
-        g_SwitchConfig[loop].offestTime =   g_ActionParameter[i].offsetTime;
+        g_SwitchConfig[loop].offestTime =    g_SynActionAttribute.Attribute[i].offsetTime;
     }
-    loop =  g_ActionParameter[0].loop -1;
+    loop =  g_SynActionAttribute.Attribute[0].loop -1;
 	g_SwitchConfig[loop].currentState = RUN_STATE;
     g_SwitchConfig[loop].order = HE_ORDER;
 	g_SwitchConfig[loop].powerOnTime = 50;//TODO:固定值
@@ -145,10 +144,10 @@ void SynCloseAction(void)
 	g_SwitchConfig[loop].SwitchClose(g_SwitchConfig + loop);
     
     //判断执行的路数
-      uint8_t nextIndex = ++g_ActionParameter[0].currentIndex;
-    if(nextIndex < g_ActionParameter[0].count)
+      uint8_t nextIndex = ++ g_SynActionAttribute.currentIndex;
+    if(nextIndex < g_SynActionAttribute.count)
     {     
-       StartTimer3(g_ActionParameter[nextIndex].offsetTime);
+       StartTimer3(g_SynActionAttribute.Attribute[nextIndex].offsetTime);
     }
     ClrWdt();
 }

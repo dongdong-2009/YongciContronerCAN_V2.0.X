@@ -26,7 +26,12 @@ RemoteControlState g_RemoteControlState; //远方控制状态标识位
 /**
  *同步合闸参数
  */
-ActionParameter g_ActionParameter[3];
+//ActionParameter g_ActionParameter[3];
+/**
+ * 同步动作属性
+ */
+ActionAttribute g_SynActionAttribute;
+
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
 struct DefFrameData g_qSendFrame;   //CAN数据帧
@@ -41,32 +46,28 @@ uint8_t static g_startID = 0;
  */
 void ActionParameterInit(void)
 {
-    g_ActionParameter[0].count = 0;
-    g_ActionParameter[0].enable = 0;
-    g_ActionParameter[0].loop = 0;
-    g_ActionParameter[0].loopByte = 0;
-    g_ActionParameter[0].offsetTime = 0;
-    g_ActionParameter[0].readyFlag = 0;
-    g_ActionParameter[0].powerOnTime = 50;
-    g_ActionParameter[0].currentIndex = 0; 
+    g_SynActionAttribute.count = 0;
+    g_SynActionAttribute.loopByte = 0;
+    g_SynActionAttribute.currentIndex = 0; 
+     
+    g_SynActionAttribute.Attribute[0].enable = 0;
+    g_SynActionAttribute.Attribute[0].loop = 0;    
+    g_SynActionAttribute.Attribute[0].offsetTime = 0;
+    g_SynActionAttribute.Attribute[0].readyFlag = 0;
+    g_SynActionAttribute.Attribute[0].powerOnTime = 50;        
+  
+    g_SynActionAttribute.Attribute[1].enable = 0;
+    g_SynActionAttribute.Attribute[1].loop = 0;   
+    g_SynActionAttribute.Attribute[1].offsetTime = 0;
+    g_SynActionAttribute.Attribute[1].readyFlag = 0;
+    g_SynActionAttribute.Attribute[1].powerOnTime = 50;
     
-    g_ActionParameter[1].count = 0;
-    g_ActionParameter[1].enable = 0;
-    g_ActionParameter[1].loop = 0;
-    g_ActionParameter[1].loopByte = 0;
-    g_ActionParameter[1].offsetTime = 0;
-    g_ActionParameter[1].readyFlag = 0;
-    g_ActionParameter[1].powerOnTime = 50;
-    g_ActionParameter[1].currentIndex = 0;
-    
-    g_ActionParameter[2].count = 0;
-    g_ActionParameter[2].enable = 0;
-    g_ActionParameter[2].loop = 0;
-    g_ActionParameter[2].loopByte = 0;
-    g_ActionParameter[2].offsetTime = 0;
-    g_ActionParameter[2].readyFlag = 0;
-    g_ActionParameter[2].powerOnTime = 50;
-    g_ActionParameter[2].currentIndex = 0;
+
+    g_SynActionAttribute.Attribute[2].enable = 0;
+    g_SynActionAttribute.Attribute[2].loop = 0;
+    g_SynActionAttribute.Attribute[2].offsetTime = 0;
+    g_SynActionAttribute.Attribute[2].readyFlag = 0;
+    g_SynActionAttribute.Attribute[2].powerOnTime = 50;
 }
 
 /**************************************************
@@ -683,26 +684,27 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     }
     
     //按照执行顺序参数赋值    
-    g_ActionParameter[0].count = count;
-    g_ActionParameter[0].enable = TRUE;
-    g_ActionParameter[0].loop = loop[0];
-    g_ActionParameter[0].loopByte = configbyte;    
-    g_ActionParameter[0].offsetTime = 0;
+     g_SynActionAttribute.count = count;
+     g_SynActionAttribute.loopByte = configbyte;
+     g_SynActionAttribute.currentIndex = 0;
+      
+     g_SynActionAttribute.Attribute[0].enable = TRUE;
+     g_SynActionAttribute.Attribute[0].loop = loop[0];        
+     g_SynActionAttribute.Attribute[0].offsetTime = 0;
         
     uint16_t time = 0;
     for(uint8_t i = 1; i < count; i++)
     {
-        g_ActionParameter[i].count = count;
-        g_ActionParameter[i].enable = TRUE;
-        g_ActionParameter[i].loop = loop[i];
-        g_ActionParameter[i].loopByte = configbyte;
+         
+        g_SynActionAttribute.Attribute[i].enable = TRUE;
+        g_SynActionAttribute.Attribute[i].loop = loop[i];       
         time = pReciveFrame->pBuffer[2*i + 1];   
         time = (time<<8)|  pReciveFrame->pBuffer[2*i];   
-        g_ActionParameter[i].offsetTime = time;
+        g_SynActionAttribute.Attribute[i].offsetTime = time;
     }   
     for (uint8_t i = count; i < 3;i++)
     {
-        g_ActionParameter[i].enable = FALSE;
+         g_SynActionAttribute.Attribute[i].enable = FALSE;
     }
     
     g_RemoteControlState.orderId = id;
