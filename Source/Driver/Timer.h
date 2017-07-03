@@ -16,15 +16,20 @@
 extern "C" {
 #endif
 
-void SetTimer2(unsigned int ms);
+void InitTimer2(unsigned int ms);
 void StartTimer2(void);
 void StopTimer2(void);
 
-void Init_Timer3(void);
+void InitTimer3(void);
 void StartTimer3(unsigned int us);
-void ChangePr3(unsigned int us);
-void ResetTimer3(void);
+void ChangeTimerPeriod3(unsigned int us);
+void StopTimer3(void);
 
+
+void InitTimer4(unsigned int ms);
+void ChangeTimerPeriod4(unsigned int ms);
+void StartTimer4(void);
+ void StopTimer4(void);
 #ifdef	__cplusplus
 }
 #endif

@@ -38,11 +38,12 @@ void SwitchCloseSecondPhase(SwitchConfig* pConfig);
 void SwitchCloseThirdPhase(SwitchConfig* pConfig);
 void GetSwitchCloseTime(IndexConfig* pIndex);
 
-//
+
+
+
+
 /**
- * 
- * <p>Function name: [_T3Interrupt]</p>
- * <p>Discription: [定时器3的中断函数]</p>
+ * @brief 用于同步永磁定时器控制
  */
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
@@ -62,16 +63,26 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         index = ++ g_SynActionAttribute.currentIndex;
         if(index < g_SynActionAttribute.count)
         {
-            ChangePr3(g_SynActionAttribute.Attribute[index].offsetTime);//偏移时间          
+            ChangeTimerPeriod3(g_SynActionAttribute.Attribute[index].offsetTime);//偏移时间          
         } 
         else
         {
-              ResetTimer3();
+              StopTimer3();
         }		
 	}
     
 }
-
+/**
+ * @brief 永磁控制器不同分合闸控制
+ */
+void __attribute__((interrupt, no_auto_psv)) _T4Interrupt(void)
+{
+    IFS1bits.T4IF = 0;
+    
+    
+    
+    
+}
 /**
  * 
  * <p>Function name: [OnLock]</p>
@@ -151,6 +162,52 @@ void SynCloseAction(void)
     }
     ClrWdt();
 }
+
+
+
+
+/**
+ *合闸操作
+ */
+void CloseOperation(void)
+{
+    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    {
+        return;
+    }
+    //不允许多次执行相同/不同的操作   
+    ClrWdt();
+    uint8_t index = 0;
+    //g_NormalAttribute
+     for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
+     {
+          if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
+        {
+            g_Order = IDLE_ORDER;    //将命令清零
+            return ;
+        }   
+     }
+      OFF_COMMUNICATION_INT();  //关闭通信中断
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        if (g_NormalAttribute.Attribute[i].enable)
+        {
+               index = g_NormalAttribute.Attribute[i].loop - 1;
+               g_SwitchConfig[index].currentState = RUN_STATE;
+               g_SwitchConfig[index].order = HE_ORDER;
+               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
+               g_SwitchConfig[index].powerOnTime = 50;   //使用示波器发现时间少3ms左右
+               ClrWdt();
+               g_SwitchConfig[index].SwitchClose(g_SwitchConfig + index);
+               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
+
+               g_NormalAttribute.Attribute[i].enable = 0;
+        }        
+    }
+    g_NormalAttribute.count = 0;
+}
+
+
 /**
  * 
  * <p>Function name: [HEZHA_Action]</p>
@@ -322,7 +379,7 @@ uint8_t  RefreshIdleState()
         
         //空闲状态，状态刷新        
         ON_COMMUNICATION_INT();
-        ResetTimer3();  //刷新关闭定时器3
+        StopTimer3();  //刷新关闭定时器3
         ClrWdt();
         if((g_SwitchConfig[DEVICE_I].lastOrder != IDLE_ORDER) || 
             (g_SwitchConfig[DEVICE_II].lastOrder != IDLE_ORDER) || 

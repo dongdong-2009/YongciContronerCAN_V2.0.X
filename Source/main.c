@@ -125,8 +125,9 @@ int main()
     }
 #endif
     
-    SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
-    Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us    
+    InitTimer2(1);   //系统心跳时钟，优先级为1，时钟1ms
+    InitTimer3();  //用于永磁控制器的同步合闸偏移时间，精度2us    
+    InitTimer4(50);//默认合闸时间50ms
     InitSystemTime();     //初始化系统时间    
     StartTimer2();  //开启系统时钟
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理

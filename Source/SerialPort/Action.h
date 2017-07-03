@@ -152,7 +152,8 @@ enum CommandIdentify
 #define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
 #define HEFEN_STATE_ERROR 0x0A      //合、分位错误
 #define REFUSE_ERROR 0x0B       //拒动错误
-
+#define ERROR_DIFF_CONFIG    0x0C//合闸预制配置不同
+    
 //*************************************************************************
 
 
@@ -207,9 +208,7 @@ typedef struct TagActionParameter
 	uint8_t readyFlag; //相应控制器应答 准备标志 0--未准备，非0--准备动作
 	uint8_t enable; //使能标志，0-禁止，非零使能
     uint8_t loop; //相I-1, II-2, III-3
-    uint16_t offsetTime;//偏移时间
-    uint16_t powerOnTime;// 通电时间    
-
+    uint16_t offsetTime;//偏移时间   
 }ActionParameter;
 
 /**
@@ -221,11 +220,13 @@ typedef struct TagActionAttribute
     uint8_t loopByte;//回路控制字
     uint8_t count; //控制数量  
     uint8_t currentIndex; //当前执行位置
+    uint8_t powerOnTime;
 }ActionAttribute;
 
 
 
-void ExecuteFunctioncode(frameRtu* pRtu);
+
+
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
@@ -240,6 +241,8 @@ extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
 extern struct DefFrameData g_qSendFrame;   //CAN数据帧
 extern PointUint8 g_pPoint;   
 extern ActionAttribute g_SynActionAttribute;
+extern ActionAttribute g_NormalAttribute;
+
 
 #ifdef	__cplusplus
 }

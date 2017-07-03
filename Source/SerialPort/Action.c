@@ -1,3 +1,6 @@
+
+#include "Action.h"
+
 /** 
  * <p>application name： Action.c</p> 
  * <p>application describing： 配置Action</p> 
@@ -12,13 +15,15 @@
 #include "../Header.h"
 #include "../Yongci/DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
-
+#include <string.h>
 #define  SUDDEN_ID 0x9A     //突发状态上传ID
 
 void SendAckMesssage(uint8_t fun);
 void GetLoopSwitch(struct DefFrameData* pReciveFrame);
-uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
-
+uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+uint8_t GetLoopSet(struct DefFrameData* pReciveFrame);
+uint8_t CheckOpenCondition(void);
+uint8_t CheckCloseCondition(void);
 
 extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
@@ -31,6 +36,11 @@ RemoteControlState g_RemoteControlState; //远方控制状态标识位
  * 同步动作属性
  */
 ActionAttribute g_SynActionAttribute;
+
+/**
+ * 普通合分闸动作属性
+ */
+ActionAttribute g_NormalAttribute;
 
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
@@ -54,136 +64,49 @@ void ActionParameterInit(void)
     g_SynActionAttribute.Attribute[0].loop = 0;    
     g_SynActionAttribute.Attribute[0].offsetTime = 0;
     g_SynActionAttribute.Attribute[0].readyFlag = 0;
-    g_SynActionAttribute.Attribute[0].powerOnTime = 50;        
+      
   
     g_SynActionAttribute.Attribute[1].enable = 0;
     g_SynActionAttribute.Attribute[1].loop = 0;   
     g_SynActionAttribute.Attribute[1].offsetTime = 0;
     g_SynActionAttribute.Attribute[1].readyFlag = 0;
-    g_SynActionAttribute.Attribute[1].powerOnTime = 50;
+   
     
 
     g_SynActionAttribute.Attribute[2].enable = 0;
     g_SynActionAttribute.Attribute[2].loop = 0;
     g_SynActionAttribute.Attribute[2].offsetTime = 0;
     g_SynActionAttribute.Attribute[2].readyFlag = 0;
-    g_SynActionAttribute.Attribute[2].powerOnTime = 50;
+  
+    g_NormalAttribute.count = 0;
+    g_NormalAttribute.loopByte = 0;
+    g_NormalAttribute.currentIndex = 0; 
+     
+    g_NormalAttribute.Attribute[0].enable = 0;
+    g_NormalAttribute.Attribute[0].loop = 0;    
+    g_NormalAttribute.Attribute[0].offsetTime = 0;
+    g_NormalAttribute.Attribute[0].readyFlag = 0;
+      
+  
+    g_NormalAttribute.Attribute[1].enable = 0;
+    g_NormalAttribute.Attribute[1].loop = 0;   
+    g_NormalAttribute.Attribute[1].offsetTime = 0;
+    g_NormalAttribute.Attribute[1].readyFlag = 0;
+   
+    
+
+    g_NormalAttribute.Attribute[2].enable = 0;
+    g_NormalAttribute.Attribute[2].loop = 0;
+    g_NormalAttribute.Attribute[2].offsetTime = 0;
+    g_NormalAttribute.Attribute[2].readyFlag = 0;   
+    
+    
 }
 
-/**************************************************
- *函数名： SendAckMesssage()
- *功能：  回传校验码
- *形参：  Uint16 fun 功能代码地址
- *返回值：void
-****************************************************/
-inline void SendAckMesssage(uint8_t fun)
-{
-    uint16_t len = 0;
-    ClrWdt();
-    GenRTUFrame(LOCAL_ADDRESS, ACK, &fun, 1, (uint8_t*)SendFrameData, (uint8_t *)&len);
-    ClrWdt();
-    SendFrame((uint8_t*)SendFrameData, len);
-    ClrWdt();
-}
-/**************************************************
- *函数名： ExecuteFunctioncode()
- *功能：  执行功能代码
- *形参：  接收帧指针 frameRtu* pRtu
- *返回值：void
-****************************************************/
-void ExecuteFunctioncode(frameRtu* pRtu)
-{
-    ClrWdt();
-    //该数据帧未处理过
-    if (pRtu->completeFlag == TRUE)
-    {
-       // LEDE ^= 1;
-        if ( pRtu->funcode != YONGCI_WAIT_HE_ACTION)
-        {
-            SendAckMesssage( pRtu->funcode);
-        }
-         ClrWdt();
-        switch(pRtu->funcode)
-        {
-            case RESET_MCU:
-            {
-                Reset(); //软件复位
-                break;
-            }
-            case TURN_ON_INT0:
-            {
-                TurnOnInt2();
-                break;
-            }
-            case TURN_OFF_INT0:
-            {
-                TurnOffInt2();
-                break;
-            }
-            case HEZHA: //立即合闸
-            {
-                if(g_SystemState.workMode == WORK_STATE)
-                {
-                    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
-                    {
-                        return;
-                    }
-                   // SynCloseAction(); TODO:暂时屏蔽
-                    ClrWdt();
-                    return ;
-                }
-                break;
-            }
-           case FENZHA: //立即分闸
-            {
-                if(g_SystemState.workMode == WORK_STATE) //多加入一重验证
-                {
-                    FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
-                    FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                    #if(CAP3_STATE)
-                    {
-                        FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
-                    }
-                    #endif
-                    ClrWdt();
-                }
-                return ;
-                break;
-            }
-            case WRITE_HEZHA_TIME:
-            {
-                ClrWdt();
-                if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
-                {
-                    g_DelayTime.hezhaTime1 = (pRtu->pData)[3];
-                }
-                break;
-            }
-            case WRITE_FENZHA_TIME:
-            {
-                ClrWdt();
-                if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
-                {
-                    g_DelayTime.fenzhaTime1 = (pRtu->pData)[3];
-                }
-                break;
-            }
-            case  YONGCI_WAIT_HE_ACTION:
-            {
-                ClrWdt();
-                break;
-            }
-            default :
-            {
-                ClrWdt();
-                break;
-            }
-        }
-    pRtu->completeFlag = FALSE;
-    }
-}
-
-
+/**
+ * 暂存命令字
+ */
+uint8_t LastCommand[8] = {0};//最新的命令字
 /**
  * 引用帧服务
  *
@@ -200,7 +123,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     uint8_t i = 1;    
     uint8_t id = pReciveFrame->pBuffer[0];
     uint8_t error = 0;  //错误号
-
+    uint8_t result = 0;
     
     /**
      * 发送数据帧赋值
@@ -235,110 +158,73 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     {
         case ReadyClose : //合闸预制
         {
+            
             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
-                SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
+                SendErrorFrame(id, WORK_MODE_ERROR);
                 return;
-            }
-            if((pReciveFrame->pBuffer[1] < 1) || (pReciveFrame->pBuffer[1] > 7))    //回路数错误
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
-            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
+            }      
+             if (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)//检测是否多次预制
             {                
-                GetLoopSwitch(pReciveFrame);
-                if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
-                {
-                    OnLock();   //上锁
-                    g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
-                    SendData(pSendFrame);
-                }
-            }
-            else
-            {
-                ClrWdt();
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
-            }
+                SendErrorFrame(id, SEVERAL_PERFABRICATE_ERROR);
+                return;
+            }   
+            result = GetLoopSet(pReciveFrame);   //获取回路   
+            if (result)
+            {
+                 SendErrorFrame(id, result);
+                return;
+            }                   
+            result =  CheckCloseCondition(); //检测合分闸条件
+            if (result)
+            {
+                 SendErrorFrame(id, result);
+                return;
+            } 
+            ClrWdt();  
+            
+            memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
+            g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
+            SendData(pSendFrame);
+            g_RemoteControlState.ReceiveStateFlag = HE_ORDER;    //合闸命令
+            SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间         
             break;
         }
         case CloseAction: //合闸执行
         {
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
-            if((g_RemoteControlState.ReceiveStateFlag == HE_ORDER) && 
-                (g_RemoteControlState.overTimeFlag == TRUE))
+             if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
             {
-                g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
-                ClrWdt();               
-                switch(pReciveFrame->pBuffer[1])
-                {
-                    case 0x01:
-                    case 0x02:
-                    case 0x04:
-                    {
-                        if(pReciveFrame->pBuffer[1] == 0x04)
-                        {
-                            pReciveFrame->pBuffer[1] --;
-                        }
-                        HEZHA_Action((pReciveFrame->pBuffer[1] - 1) , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x03:
-                    {
-                        HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                        HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x05:
-                    {
-                        #if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        #endif
-                        break;
-                    }
-                    case 0x06:
-                    {
-                        #if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        #endif
-                        break;
-                    }
-                    case 0x07:
-                    {
-                        #if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        #endif
-                        break;
-                    }
-                    default :
-                    {
-                        OffLock();  //解锁
-                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                        return;
-                        break;
-                    }
-                }
-            }
-            else
+                SendErrorFrame(id, WORK_MODE_ERROR);
+                return;
+            }   
+             //是否已经预制或者超时                 
+            if((g_RemoteControlState.ReceiveStateFlag != HE_ORDER) || 
+                (g_RemoteControlState.overTimeFlag != TRUE))
             {
                 ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
+                SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
                 g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
                 g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
+            
             }
+               //比较配置字是否一致
+            for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
+            {
+                if (pReciveFrame->pBuffer[i] != LastCommand[i])
+                {
+                    SendErrorFrame(id, ERROR_DIFF_CONFIG);
+                    return;
+                }
+            }      
+            g_RemoteControlState.orderId = id;
+            OnLock();   //上锁             
+            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
+            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
+            ClrWdt();               
+            SendData(pSendFrame);
+            CloseOperation();
+            
             break;
         }
         case ReadyOpen: //分闸预制
@@ -502,116 +388,6 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 }
 
 
-
-//    uint8_t loopA = 0;  //回路顺序号码
-//    uint8_t loopB = 0;	//回路顺序号码
-//    uint8_t loopC = 0;	//回路顺序号码
-//    uint8_t id = 0;
-//    uint8_t configbyte = 0;
-//    //数据长度不对，数据长度不应为奇数
-//    if(pReciveFrame->len % 2 != 0) 
-//    {
-//        ClrWdt();
-//        SendErrorFrame(id, DATA_LEN_ERROR);
-//        return;
-//    }
-//    //必须不小于4
-//    if (pReciveFrame->len < 4)
-//    {
-//        return DATA_LEN_ERROR;
-//    }
-//        
-//    id  = pReciveFrame->pBuffer[0];
-//    configbyte = pReciveFrame->pBuffer[1];
-//           
-//    //分合位错误
-//    if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-//       (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-//       (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
-//    {
-//        SendErrorFrame(id, HEFEN_STATE_ERROR);
-//        return;
-//    }   
-//    
-//    //电容电压未达到设定电压错误
-//    if(GetCapVolatageState() == 0)
-//    {
-//        ClrWdt();
-//        SendErrorFrame(id, CAPVOLTAGE_ERROR);
-//        return;
-//    }
-//    
-//    //都满足要求以后，再进行命令执行
-//     g_RemoteControlState.orderId = id;    //获取命令ID号
-//    loopA = pReciveFrame->pBuffer[1] & 0x03;
-//    loopB = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-//
-//    #if(CAP3_STATE)
-//    {
-//        //TODO: 借用同步控制器程序--重构结构
-//        if((pReciveFrame->pBuffer[1] <= 0x39) && (pReciveFrame->pBuffer[1] >= 0x19) && (pReciveFrame->len == 6)) //只有三个回路需要控制
-//        {
-//            loopC = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-//
-//            if((loopA == loopB) || (loopB == loopC) || (loopA == loopC))//不应该出现相同的回路数
-//            {
-//                //错误消息为存在相同的回路数
-//                SendErrorFrame(pReciveFrame->pBuffer[0], LOOP_ERROR);
-//                return;
-//            }
-//            ClrWdt();
-//        }
-//        else
-//        {
-//            SendErrorFrame(pReciveFrame->pBuffer[0], LOOP_ERROR);    //回路数错误
-//            return;
-//        }
-//    }
-//    #else
-//    {
-//        //只有两个回路需要控制
-//        if((pReciveFrame->pBuffer[1] == 0x09) || (pReciveFrame->pBuffer[1] == 0x06))  //机构1先合、或者机构2先合
-//        {
-//            ClrWdt();
-//        }
-//        else
-//        {
-//            SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
-//            return;
-//        }
-//    }            
-//    #endif
-//    //返回的数据帧赋值传递
-//    for(uint8_t i = 0;i < pSendFrame->len;i++)
-//    {
-//        g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
-//        ClrWdt();
-//    }
-//
-//    if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)
-//    {                
-//        ClrWdt();
-//        if(GetOffestTime(pReciveFrame))
-//        {
-//            SendData(pSendFrame);
-//            SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-//            ClrWdt();
-//            g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
-//            g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
-//            TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
-//        }
-//        else
-//        {
-//            SendErrorFrame(pReciveFrame->pBuffer[0], LOOP_ERROR);    //回路数错误
-//            return;
-//        }
-//    }
-//    else
-//    {
-//        TurnOffInt2();
-//        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-//        SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
-//    }
 uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
     uint8_t id = 0;
@@ -888,6 +664,179 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 
 
 
+/**
+ * 获取合分闸设置回路参数
+ * @retrun 错误代码
+ */
+uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
+{
+    if(pReciveFrame->len != 3)
+    {
+        return DATA_LEN_ERROR;
+    }
+    uint8_t configLoop =  pReciveFrame->pBuffer[1];//回路选择配置字
+    uint8_t actionTime =  pReciveFrame->pBuffer[2];//合分闸时间
+    if ((configLoop == 0) || (configLoop > 0x07))
+    {
+        return  LOOP_ERROR;
+    }    
+     g_NormalAttribute.count = 0;
+    for(uint8_t i = 0; i < 3; i++)
+    {       
+        if (configLoop & (1<<i))
+        {
+            g_NormalAttribute.Attribute[i].enable = TRUE;
+            g_NormalAttribute.Attribute[i].loop = i+1;
+            g_NormalAttribute.Attribute[i].offsetTime = 0;            
+            g_NormalAttribute.count++;            
+        }
+        else
+        {
+            g_NormalAttribute.Attribute[i].enable = FALSE;
+        }
+            
+    }
+    g_NormalAttribute.powerOnTime = actionTime;   
+    return 0;
+}
+
+/**
+ * 检查合闸条件
+ * @return 错误代码
+ */
+uint8_t CheckCloseCondition(void)
+{
+    
+    for(uint8_t i = 0; i< 3; i++)
+    {
+        if( g_NormalAttribute.Attribute[i].enable)
+        {
+            switch( g_NormalAttribute.Attribute[i].loop)
+            {
+                case 1:
+                {
+                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+
+                    break;
+                }
+                case 2:
+                {
+                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                    break;
+                }
+                case 3:
+                {
+                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                     break;
+                }
+                default:
+                {
+                    return  LOOP_ERROR;
+                }
+
+            }
+        }
+    }
+    if (g_NormalAttribute.count != 0)
+    {
+        return 0;
+    }
+    else
+    {
+         return  LOOP_ERROR;
+    }
+    
+}
+
+/**
+ * 检查分闸条件
+ * @return 错误代码
+ */
+uint8_t CheckOpenCondition(void)
+{
+    
+    for(uint8_t i = 0; i< 3; i++)
+    {
+        if ( g_NormalAttribute.Attribute[i].enable)
+        {
+            switch( g_NormalAttribute.Attribute[i].loop)
+            {
+                case 1:
+                {
+                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+
+                    break;
+                }
+                case 2:
+                {
+                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                    break;
+                }
+                case 3:
+                {
+                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                     break;
+                }
+                default:
+                {
+                    return  LOOP_ERROR;
+                }
+            }
+                            
+        }
+    }
+    if (g_NormalAttribute.count != 0)
+    {
+        return 0;
+    }
+    else
+    {
+         return  LOOP_ERROR;
+    }
+    
+}
 /**
  * 
  * <p>Function name: [GetLoopSwitch]</p>
