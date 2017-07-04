@@ -190,6 +190,14 @@ uint8_t CheckIOState(void)
                     return 0xFF;
                 }
                // TongBuHeZha(); TODO:
+                ClrWdt();
+                HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
+                HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
+                #if(CAP3_STATE)  //判断第三块驱动是否存在
+                {
+                    HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
+                }
+                #endif
                 g_RemoteControlState.orderId = 0x05;    //拒动错误ID号
                 ClrWdt();
                 g_SuddenState.ExecuteOrder1 = 0x01;
@@ -552,6 +560,38 @@ void DsplaySwitchState(void)
 void SwitchScan(void)
 {
     g_kairuValue = ReHC74165();
+    //远方\就地检测
+    if(YUAN_BEN_CONDITION() && (g_lockflag[17] == 0))
+    {
+        ClrWdt();
+        g_timeCount[17]++;
+        if(g_timeCount[17] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[17] = 1;
+            g_timeCount[17] = 0;
+            g_SystemState.yuanBenState = YUAN_STATE;
+        }
+        g_lockflag[18] = 0;
+        g_timeCount[18] = 0;
+    }
+    else if(!YUAN_BEN_CONDITION() && (g_lockflag[18] == 0))
+    {
+        ClrWdt();
+        g_timeCount[18]++;
+        if(g_timeCount[18] >= KEY_COUNT_DOWN)
+        {            
+            g_lockflag[18] = 1;
+            g_timeCount[18] = 0;
+            g_SystemState.yuanBenState = BEN_STATE;
+        }
+        g_lockflag[17] = 0;
+        g_timeCount[17] = 0;
+    }
+    //*****************************
+    //作用，屏蔽掉远方就地
+    uint32_t i = ~YUAN_INPUT;
+    g_kairuValue &= i;
+    //*****************************
     if(g_lockUp == OFF_LOCK)
     {
         ClrWdt();
@@ -1005,34 +1045,6 @@ void SwitchScan(void)
         }
     }
     #endif
-    
-    //远方\就地检测
-    if(YUAN_BEN_CONDITION() && (g_lockflag[17] == 0))
-    {
-        ClrWdt();
-        g_timeCount[17]++;
-        if(g_timeCount[17] >= KEY_COUNT_DOWN)
-        {            
-            g_lockflag[17] = 1;
-            g_timeCount[17] = 0;
-            g_SystemState.yuanBenState = YUAN_STATE;
-        }
-        g_lockflag[18] = 0;
-        g_timeCount[18] = 0;
-    }
-    else if(!YUAN_BEN_CONDITION() && (g_lockflag[18] == 0))
-    {
-        ClrWdt();
-        g_timeCount[18]++;
-        if(g_timeCount[18] >= KEY_COUNT_DOWN)
-        {            
-            g_lockflag[18] = 1;
-            g_timeCount[18] = 0;
-            g_SystemState.yuanBenState = BEN_STATE;
-        }
-        g_lockflag[17] = 0;
-        g_timeCount[17] = 0;
-    }
     
     //工作\调试模式检测
     if(WORK_DEBUG_CONDITION() && (g_lockflag[19] == 0))

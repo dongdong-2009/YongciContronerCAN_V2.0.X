@@ -133,19 +133,20 @@ void SynCloseAction(void)
     
     OFF_COMMUNICATION_INT();  //关闭通信中断
 	uint8_t loop = 0;
+    g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[2].powerOnTime = g_DelayTime.hezhaTime3 + 3;   //使用示波器发现时间少3ms左右
     g_SynActionAttribute.currentIndex = 0;
     for(uint8_t i = 1; i < g_SynActionAttribute.count; i++)
     {
         loop =  g_SynActionAttribute.Attribute[i].loop - 1;
         g_SwitchConfig[loop].currentState = READY_STATE;
         g_SwitchConfig[loop].order = IDLE_ORDER;
-        g_SwitchConfig[loop].powerOnTime =  50;//TODO:固定值
         g_SwitchConfig[loop].offestTime =    g_SynActionAttribute.Attribute[i].offsetTime;
     }
     loop =  g_SynActionAttribute.Attribute[0].loop -1;
 	g_SwitchConfig[loop].currentState = RUN_STATE;
     g_SwitchConfig[loop].order = HE_ORDER;
-	g_SwitchConfig[loop].powerOnTime = 50;//TODO:固定值
 	g_SwitchConfig[loop].systemTime = g_TimeStampCollect.msTicks;
 	g_SwitchConfig[loop].SwitchClose(g_SwitchConfig + loop);
     
@@ -176,27 +177,29 @@ void CloseOperation(void)
     //g_NormalAttribute
      for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
      {
-          if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
+        if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
             return ;
         }   
      }
-      OFF_COMMUNICATION_INT();  //关闭通信中断
+    OFF_COMMUNICATION_INT();  //关闭通信中断
+    g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[2].powerOnTime = g_DelayTime.hezhaTime3 + 3;   //使用示波器发现时间少3ms左右
     for(uint8_t i = 0; i < 3; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
         {
-               index = g_NormalAttribute.Attribute[i].loop - 1;
-               g_SwitchConfig[index].currentState = RUN_STATE;
-               g_SwitchConfig[index].order = HE_ORDER;
-               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
-               g_SwitchConfig[index].powerOnTime = 50;   //使用示波器发现时间少3ms左右
-               ClrWdt();
-               g_SwitchConfig[index].SwitchClose(g_SwitchConfig + index);
-               g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
+            index = g_NormalAttribute.Attribute[i].loop - 1;
+            g_SwitchConfig[index].currentState = RUN_STATE;
+            g_SwitchConfig[index].order = HE_ORDER;
+            g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
+            ClrWdt();
+            g_SwitchConfig[index].SwitchClose(g_SwitchConfig + index);
+            g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
 
-               g_NormalAttribute.Attribute[i].enable = 0;
+            g_NormalAttribute.Attribute[i].enable = 0;
         }        
     }
     g_NormalAttribute.count = 0;
@@ -223,6 +226,9 @@ void OpenOperation(void)
         }   
     }
     OFF_COMMUNICATION_INT();  //关闭通信中断
+    g_SwitchConfig[0].powerOffTime = g_DelayTime.fenzhaTime1 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[1].powerOffTime = g_DelayTime.fenzhaTime2 + 3;   //使用示波器发现时间少3ms左右
+    g_SwitchConfig[2].powerOffTime = g_DelayTime.fenzhaTime3 + 3;   //使用示波器发现时间少3ms左右
     for(uint8_t i = 0; i < 3; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
@@ -231,7 +237,6 @@ void OpenOperation(void)
                g_SwitchConfig[index].currentState = RUN_STATE;
                g_SwitchConfig[index].order = FEN_ORDER;
                g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
-               g_SwitchConfig[index].powerOnTime = 30;   //使用示波器发现时间少3ms左右
                ClrWdt();
                g_SwitchConfig[index].SwitchOpen(g_SwitchConfig + index);
                g_SwitchConfig[index].systemTime = g_TimeStampCollect.msTicks;
@@ -411,165 +416,166 @@ uint8_t  RefreshActionState()
  */
 uint8_t  RefreshIdleState()
 {
-        static uint8_t runLedState = TURN_ON;
-        static uint8_t runLedCount = 0;
-        static uint32_t checkOrderTime = UINT32_MAX;
-        static uint32_t checkOrderDelay = UINT32_MAX;
-        uint8_t result = 0;
-        
-       //任意一项不是空闲状态
-        if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
-             (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
-              CHECK_ORDER3()))
-        {
-            return 0xF1;        
-        }     
-        
-        
-        //空闲状态，状态刷新        
-        ON_COMMUNICATION_INT();
-        StopTimer3();  //刷新关闭定时器3
-        ClrWdt();
-        if((g_SwitchConfig[DEVICE_I].lastOrder != IDLE_ORDER) || 
-            (g_SwitchConfig[DEVICE_II].lastOrder != IDLE_ORDER) || 
-            CHECK_LAST_ORDER3())
-        {
-            ON_COMMUNICATION_INT();
-            ClrWdt();
-            checkOrderDelay = REFUSE_ACTION;
-            //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
-            UpdateCount();//更新计数
-            ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
-            checkOrderTime = g_TimeStampCollect.msTicks;
-            //Clear Flag
-            g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
-            g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
-            g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
-        }
+    static uint8_t runLedState = TURN_ON;
+    static uint8_t runLedCount = 0;
+    static uint32_t checkOrderTime = UINT32_MAX;
+    static uint32_t checkOrderDelay = UINT32_MAX;
+    uint8_t result = 0;
 
-        //拒动错误检测
-        if(g_TimeStampCollect.msTicks - checkOrderTime >= checkOrderDelay)//TODO：错误是
+   //任意一项不是空闲状态
+    if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
+         (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
+          CHECK_ORDER3()))
+    {
+        return 0xF1;        
+    }     
+
+
+    //空闲状态，状态刷新        
+    ON_COMMUNICATION_INT();
+    StopTimer3();  //刷新关闭定时器3
+    ClrWdt();
+    if((g_SwitchConfig[DEVICE_I].lastOrder != IDLE_ORDER) || 
+        (g_SwitchConfig[DEVICE_II].lastOrder != IDLE_ORDER) || 
+        CHECK_LAST_ORDER3())
+    {
+        ON_COMMUNICATION_INT();
+        ClrWdt();
+        checkOrderDelay = REFUSE_ACTION;
+        //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
+        UpdateCount();//更新计数
+        ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
+        checkOrderTime = g_TimeStampCollect.msTicks;
+        //Clear Flag
+        g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
+        g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
+        OffLock();  //解锁
+    }
+
+    //拒动错误检测
+    if(g_TimeStampCollect.msTicks - checkOrderTime >= checkOrderDelay)//TODO：错误是
+    {
+        CheckOrder(g_lastRunOrder);  //检测命令是否执行
+        checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
+        checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
+        g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
+        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
+        OffLock();  //解锁
+    }
+    ClrWdt();
+
+
+    //检测是否欠电压， 并更新显示
+    if(IsOverTimeStamp( &g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
+    {
+        CheckVoltage();  
+        ClrWdt();
+        g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
+    }  
+
+    if(IsOverTimeStamp( &g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
+    {
+        SwitchScan();   //执行按键扫描程序 TODO:用时时长
+        ClrWdt();
+        g_TimeStampCollect.scanTime.startTime = g_TimeStampCollect.msTicks;  
+    }
+    if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
+    {
+        g_lastRunOrder = g_Order;
+        g_Order = IDLE_ORDER;    //将命令清零
+        return 0xff;
+    }
+
+    //始终进行处理，处理完缓冲区。 TODO:远方本地检测?
+    do
+    {
+        result = BufferDequeue(&ReciveMsg);
+        if (result)
         {
-            CheckOrder(g_lastRunOrder);  //检测命令是否执行
-            checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
-            checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
-            g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
-            g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
+            DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
+        }
+    }
+     while(result);
+
+
+    //周期性状态更新
+    if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || (g_SuddenState.SuddenFlag == TRUE))
+    {
+        ClrWdt();
+        DsplaySwitchState();    //更新机构的状态显示
+        //建立连接且不是在预制状态下才会周期上传
+        if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
+        {
+            UpdataState();  //更新状态
+        }
+        g_SuddenState.SuddenFlag = FALSE;  //Clear
+        //OverflowDetection(SEND_TIME);   //增加溢出判断  TODO:所有事件判断，都将出问题
+        g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
+    }
+
+    ClrWdt();
+
+
+    //运行指示灯
+    if(IsOverTimeStamp( &g_TimeStampCollect.changeLedTime))
+    {
+        UpdateLEDIndicateState(RUN_LED, runLedState);
+        runLedState = ~runLedState;
+        if(g_RemoteControlState.CanErrorFlag == TRUE)
+        {
+            runLedCount++;
+            if(runLedCount >= 10) //1500*4ms
+            {
+                InitStandardCAN(0, 0);  //初始化CAN模块
+                g_TimeStampCollect.changeLedTime.delayTime = 500;  //运行指示灯闪烁间隔为500ms
+            }
+            //TODO:什么时候恢复？
+        }
+        g_TimeStampCollect.changeLedTime.startTime = g_TimeStampCollect.msTicks;  
+    }
+
+     ClrWdt();
+    //获取温度数据
+    if(IsOverTimeStamp( &g_TimeStampCollect.getTempTime))
+    {                   
+        g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值            
+        g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
+    }
+
+    //超时检测复位
+    if((g_RemoteControlState.overTimeFlag == TRUE) && 
+       (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
+       (g_RemoteControlState.orderId <= 4) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
+    {
+        if(!CheckIsOverTime())
+        {
+            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
+            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
+            SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
+            g_RemoteControlState.orderId = 0;   //Clear
+            g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
             OffLock();  //解锁
         }
-        ClrWdt();
-
-        
-        //检测是否欠电压， 并更新显示
-        if(IsOverTimeStamp( &g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
+        else
         {
-            CheckVoltage();  
-            ClrWdt();
-            g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
-        }  
+            g_RemoteControlState.overTimeFlag = TRUE;  //Updata
+        }
+    }
+    if(g_RemoteControlState.SetFixedValue == TRUE)
+    {
+        WriteAccumulateSum();  //写入累加和
+        g_RemoteControlState.SetFixedValue = FALSE;
+    }
 
-        if(IsOverTimeStamp( &g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
-        {
-            SwitchScan();   //执行按键扫描程序 TODO:用时时长
-            ClrWdt();
-            g_TimeStampCollect.scanTime.startTime = g_TimeStampCollect.msTicks;  
-        }
-        if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
-        {
-            g_lastRunOrder = g_Order;
-            g_Order = IDLE_ORDER;    //将命令清零
-            return 0xff;
-        }
 
-        //始终进行处理，处理完缓冲区。 TODO:远方本地检测?
-        do
-        {
-            result = BufferDequeue(&ReciveMsg);
-            if (result)
-            {
-                DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
-            }
-        }
-         while(result);
-         
-        
-        //周期性状态更新
-        if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || (g_SuddenState.SuddenFlag == TRUE))
-        {
-            ClrWdt();
-            DsplaySwitchState();    //更新机构的状态显示
-            //建立连接且不是在预制状态下才会周期上传
-            if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
-            {
-                UpdataState();  //更新状态
-            }
-            g_SuddenState.SuddenFlag = FALSE;  //Clear
-            //OverflowDetection(SEND_TIME);   //增加溢出判断  TODO:所有事件判断，都将出问题
-            g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
-        }
-
-        ClrWdt();
-        
-
-        //运行指示灯
-        if(IsOverTimeStamp( &g_TimeStampCollect.changeLedTime))
-        {
-            UpdateLEDIndicateState(RUN_LED, runLedState);
-            runLedState = ~runLedState;
-            if(g_RemoteControlState.CanErrorFlag == TRUE)
-            {
-                runLedCount++;
-                if(runLedCount >= 10) //1500*4ms
-                {
-                    InitStandardCAN(0, 0);  //初始化CAN模块
-                    g_TimeStampCollect.changeLedTime.delayTime = 500;  //运行指示灯闪烁间隔为500ms
-                }
-                //TODO:什么时候恢复？
-            }
-            g_TimeStampCollect.changeLedTime.startTime = g_TimeStampCollect.msTicks;  
-        }
-
-         ClrWdt();
-        //获取温度数据
-        if(IsOverTimeStamp( &g_TimeStampCollect.getTempTime))
-        {                   
-            g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值            
-            g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
-        }
-
-        //超时检测复位
-        if((g_RemoteControlState.overTimeFlag == TRUE) && 
-           (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
-           (g_RemoteControlState.orderId <= 4) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
-        {
-            if(!CheckIsOverTime())
-            {
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
-                g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
-                SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
-                g_RemoteControlState.orderId = 0;   //Clear
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                OffLock();  //解锁
-            }
-            else
-            {
-                g_RemoteControlState.overTimeFlag = TRUE;  //Updata
-            }
-        }
-        if(g_RemoteControlState.SetFixedValue == TRUE)
-        {
-            WriteAccumulateSum();  //写入累加和
-            g_RemoteControlState.SetFixedValue = FALSE;
-        }
-    
-
-        return 0;
+    return 0;
         
         
 }
@@ -874,7 +880,7 @@ void SwitchOpenFirstPhase(SwitchConfig* pConfig)
 		FENZHA_A();
 		FENZHA_A();
 	}
-	if(IsOverTime(pConfig->systemTime,pConfig->powerOffTime))	//超时时间到则复位
+	if(IsOverTime(pConfig->systemTime , pConfig->powerOffTime))	//超时时间到则复位
 	{
 		RESET_CURRENT_A();
 		RESET_CURRENT_A();

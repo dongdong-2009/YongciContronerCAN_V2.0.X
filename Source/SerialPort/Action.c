@@ -158,38 +158,38 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         case ReadyClose : //合闸预制
         {      
             result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
-             if (result)
-             {
-                     SendErrorFrame(id, result);
-             }
-             break;
+            if (result)
+            {
+                SendErrorFrame(id, result);
+            }
+            break;
         }
         case CloseAction: //合闸执行
         {           
             
             result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
-             if (result)
-             {
-                     SendErrorFrame(id, result);
-             }            
+            if (result)
+            {
+                SendErrorFrame(id, result);
+            }            
             break;
         }
         case ReadyOpen: //分闸预制
         {
-             result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
-             if (result)
-             {
-                     SendErrorFrame(id, result);
-             }
-             break;
+            result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if (result)
+            {
+                SendErrorFrame(id, result);
+            }
+            break;
         }
         case OpenAction: //分闸执行
         {
             result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
-             if (result)
-             {
-                     SendErrorFrame(id, result);
-             }
+            if (result)
+            {
+                SendErrorFrame(id, result);
+            }
             break;
         }        
         case SyncReadyClose: //同步合闸预制
@@ -245,7 +245,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     uint16_t order = 0;
     
     
-     if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
     {        
         return WORK_MODE_ERROR;
     }   
@@ -356,6 +356,10 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     uint8_t id = 0;
     uint8_t configbyte = 0;
     uint8_t loop[3] = {0};
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {       
+        return WORK_MODE_ERROR;
+    }
     //数据长度不对，数据长度不应为奇数
     if(pReciveFrame->len % 2 != 0) 
     {

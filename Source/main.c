@@ -54,8 +54,8 @@
 // FWDT
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
-#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -96,15 +96,15 @@ int main()
 {
     uint16_t cn = 0;
     
+    InitDeviceIO(); //IO初始化 首先禁止中断
+    
+    AdcInit(); //ADC采样初始化
     //延时4s判断启动
     while(cn++ < 4000)
     {
         __delay_ms(1);
         ClrWdt();
     }
-    InitDeviceIO(); //IO初始化 首先禁止中断
-    
-    AdcInit(); //ADC采样初始化
     ClrWdt();
 
     //是用485通信
@@ -125,9 +125,9 @@ int main()
     }
 #endif
     
-    InitTimer2(1);   //系统心跳时钟，优先级为1，时钟1ms
-    InitTimer3();  //用于永磁控制器的同步合闸偏移时间，精度2us    
-    InitTimer4(50);//默认合闸时间50ms
+    InitTimer2(1);  //系统心跳时钟，优先级为1，时钟1ms
+    InitTimer3();   //用于永磁控制器的同步合闸偏移时间，精度2us    
+    InitTimer4(50); //默认合闸时间50ms
     InitSystemTime();     //初始化系统时间    
     StartTimer2();  //开启系统时钟
     sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理

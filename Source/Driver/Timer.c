@@ -198,7 +198,7 @@ void InitTimer4(unsigned int ms)
     IPC5bits.T4IP = 2;  //优先级较低
     IFS1bits.T4IF = 0;
 
-     T4CON = 0;
+    T4CON = 0;
     T4CONbits.TCKPS = 0b11; //1:256
     T4CONbits.TCS = 0;
     T4CONbits.TGATE = 0;

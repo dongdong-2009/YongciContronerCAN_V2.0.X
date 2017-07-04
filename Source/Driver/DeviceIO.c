@@ -138,7 +138,6 @@ void InitDeviceIO(void)
     InitInt2(); //初始化外部中断
 
     ClrWdt();
-    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯、继电器
 }
 /**
  * 
