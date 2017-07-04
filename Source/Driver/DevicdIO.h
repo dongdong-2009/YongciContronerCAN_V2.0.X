@@ -191,8 +191,8 @@
 #define Z_FENWEI_RELAY   RELAY8_OPEN    //总分位指示继电器
     
 #define HEWEI1_RELAY    RELAY7_OPEN    //机构1合位指示继电器
-#define HEWEI3_RELAY    RELAY6_OPEN    //机构2合位指示继电器
-#define HEWEI2_RELAY    RELAY5_OPEN    //机构3合位指示继电器
+#define HEWEI2_RELAY    RELAY6_OPEN    //机构2合位指示继电器
+#define HEWEI3_RELAY    RELAY5_OPEN    //机构3合位指示继电器
 
 #define FENWEI1_RELAY   RELAY4_OPEN    //机构1分位指示继电器
 #define FENWEI2_RELAY   RELAY3_OPEN    //机构2分位指示继电器
@@ -249,9 +249,9 @@
 #define CAP2_LED LED2_ON    //电容2储能指示灯
 #define CAP3_LED LED1_ON    //电容3储能指示灯
 
-#define ERROR1_LED  LED6_ON //故障指示灯1
-#define ERROR2_LED  LED5_ON //故障指示灯1
-#define ERROR3_LED  LED4_ON //故障指示灯1
+#define ERROR1_LED  LED6_ON     //故障指示灯1
+#define ERROR2_LED  LED5_ON     //故障指示灯1
+#define ERROR3_LED  LED4_ON     //故障指示灯1
 
 #define HEWEI1_LED  LED12_ON    //机构1合位指示灯
 #define HEWEI2_LED  LED11_ON    //机构2合位指示灯
@@ -267,6 +267,7 @@
 #define RUN_LED LED13_ON    //工作指示灯
 
 //Binary Input
+//对于以下开入量注释，均为正常状态下注释
 //*************************
 #define KR1_H  0x00000001   //Work or Debug
 #define KR2_H  0x00000002   //ON 1
@@ -358,8 +359,8 @@
 /**
  * 总的合闸、分闸输入
  */
-#define Z_HEZHA_INPUT  KR5_H
-#define Z_FENZHA_INPUT KR3_H
+#define Z_HEZHA_INPUT  KR3_H
+#define Z_FENZHA_INPUT KR1_H
 
 //合位、分位1、2、3的输入
 #define HEWEI1_INPUT  KR24_H

@@ -230,7 +230,7 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 修改同步信号识别函数
 精简程序，编译级别调高
 
-
+2017/07/04(修改人：张宇飞)
 
 
 

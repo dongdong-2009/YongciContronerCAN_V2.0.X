@@ -48,7 +48,7 @@ void GetSwitchCloseTime(IndexConfig* pIndex);
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
     IFS0bits.T3IF = 0;
-     ClrWdt();
+    ClrWdt();
     uint8_t index = g_SynActionAttribute.currentIndex;
    
     uint8_t loop =  g_SynActionAttribute.Attribute[index].loop - 1;
@@ -67,7 +67,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         } 
         else
         {
-              StopTimer3();
+            StopTimer3();
         }		
 	}
     
@@ -127,13 +127,8 @@ void SynCloseAction(void)
         if(g_SwitchConfig[i].currentState || g_SwitchConfig[i].order || g_SwitchConfig[i].lastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
-            i = 10;
             return;
         }
-    }
-    if(i == 10) //TODO:为什么？
-    {
-        return;
     }
     
     OFF_COMMUNICATION_INT();  //关闭通信中断
@@ -219,15 +214,15 @@ void OpenOperation(void)
     ClrWdt();
     uint8_t index = 0;
     //g_NormalAttribute
-     for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
-     {
-          if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
+    for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
+    {
+        if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
             return ;
         }   
-     }
-      OFF_COMMUNICATION_INT();  //关闭通信中断
+    }
+    OFF_COMMUNICATION_INT();  //关闭通信中断
     for(uint8_t i = 0; i < 3; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
@@ -318,24 +313,24 @@ void FENZHA_Action(uint8_t index,uint16_t time)
 uint8_t  RefreshActionState()
 {
     uint8_t state = 0;
-     ClrWdt();
-      //机构1合闸、分闸刷新
-        if((g_SwitchConfig[DEVICE_I].order == HE_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-            g_SwitchConfig[DEVICE_I].SwitchClose(g_SwitchConfig);
-            state |= 0x81;
-        }
-        else if((g_SwitchConfig[DEVICE_I].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-            g_SwitchConfig[DEVICE_I].SwitchOpen(g_SwitchConfig);
-            state |= 0x82;
-        }
-        else    //防止持续合闸或者分闸
-        {
+    ClrWdt();
+    //机构1合闸、分闸刷新
+    if((g_SwitchConfig[DEVICE_I].order == HE_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
+    {
+        ClrWdt();
+        OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+        g_SwitchConfig[DEVICE_I].SwitchClose(g_SwitchConfig);
+        state |= 0x81;
+    }
+    else if((g_SwitchConfig[DEVICE_I].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_I].currentState == RUN_STATE))
+    {
+        ClrWdt();
+        OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+        g_SwitchConfig[DEVICE_I].SwitchOpen(g_SwitchConfig);
+        state |= 0x82;
+    }
+    else    //防止持续合闸或者分闸
+    {
 //            __delay_us(100);
 //            g_SwitchConfig[DEVICE_I].order = IDLE_ORDER;
 //            RESET_CURRENT_A();            
