@@ -1039,23 +1039,23 @@ void UpdateCount(void)
     if (g_SwitchConfig[DEVICE_I].lastOrder == HE_ORDER) //机构1合闸
     {
         ClrWdt();
-        WriteFenzhaCount(JG1_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount1);
+        SaveActionCount(JG1_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount1);
     }
     else if (g_SwitchConfig[DEVICE_I].lastOrder == FEN_ORDER)  //机构1分闸
     {
         ClrWdt();
-        WriteFenzhaCount(JG1_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount1);
+        SaveActionCount(JG1_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount1);
     }
     
     if (g_SwitchConfig[DEVICE_II].lastOrder == HE_ORDER)   //机构2合闸
     {
         ClrWdt();
-        WriteFenzhaCount(JG2_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount2);
+        SaveActionCount(JG2_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount2);
     }
     else if (g_SwitchConfig[DEVICE_II].lastOrder == FEN_ORDER)  //机构2分闸
     {
         ClrWdt();
-        WriteFenzhaCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
+        SaveActionCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
     }
     
     #if(CAP3_STATE)
@@ -1063,12 +1063,12 @@ void UpdateCount(void)
         if (g_SwitchConfig[DEVICE_III].lastOrder == HE_ORDER)   //机构3合闸
         {
             ClrWdt();
-            WriteFenzhaCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
+            SaveActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
         }
         else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
         {
             ClrWdt();
-            WriteFenzhaCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
+            SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
         }
     }
     #endif

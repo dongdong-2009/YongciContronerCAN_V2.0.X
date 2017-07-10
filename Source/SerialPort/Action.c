@@ -53,7 +53,7 @@ PointUint8 g_pPoint;
 
 
 
-/*
+/**
  * Action参数初始化
  */
 void ActionParameterInit(void)

@@ -108,8 +108,7 @@ int main()
     AdcInit(); //ADC采样初始化
     
     //是用485通信
-   #if(APPLY_485 == TRUE)
-    {
+#if(APPLY_485 == TRUE)
         ClrWdt(); 
         UsartInit(); //串口初始化 9600bps 785cycs 上
         ClrWdt(); 
@@ -122,22 +121,20 @@ int main()
         ClrWdt(); //204cys 
         ReciveFrameDataInit();              //接收帧初始化
         ClrWdt(); //452cycs
-    }
+        sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
 #endif
     
     InitTimer2(1);  //系统心跳时钟，优先级为1，时钟1ms
     InitTimer3();   //用于永磁控制器的同步合闸偏移时间，精度2us    
-    InitTimer4(50); //默认合闸时间50ms
     InitSystemTime();     //初始化系统时间    
     StartTimer2();  //开启系统时钟
-    sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
     ClrWdt(); 
     ActionParameterInit();
     //SD2405_Init();  //时钟芯片初始化    
 
         
     cn = 0;
- #if(APPLY_CAN == TRUE)
+#if(APPLY_CAN == TRUE)
     {
         BufferInit();
         OFF_UART_INT(); //485通信不开启        

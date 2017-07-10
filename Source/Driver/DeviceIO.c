@@ -48,7 +48,7 @@
 #define IP595_B_MR     	 LATGbits.LATG14
 #define IP595_B_MR_DIR   TRISGbits.TRISG14
 
-#define NOP()   {Nop();Nop();Nop();}
+#define NOP()   {Nop();Nop();}
 
 void HC595BSendData(uint16_t SendVal);
 void HC595SendData(uint16_t SendVal);
@@ -259,20 +259,20 @@ uint32_t ReadHC165(void)
     
     ClrWdt();
     PL = 0;  
-    __delay_us(1);
+    NOP();
     PL = 1;
     
     CE = 0;
-    __delay_us(1);
+    NOP();
     for(i = 0; i < 24; i++)
     {
         ClrWdt();
         CP = 0;
-        __delay_us(1);
+        NOP();
         indata <<= 1;
         indata |= Q7;
         CP = 1;
-        __delay_us(1);
+        NOP();
     }
     PL = 1;
     CP = 1;

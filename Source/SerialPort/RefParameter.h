@@ -219,6 +219,8 @@ uint8_t ReadParamValue(uint8_t id,PointUint8* pPoint);
 void RefParameterInit(void);
 void WriteAccumulateSum(void);
 uint8_t AccumulateSumVerify(void);
+void WriteAccumulateSumEEPROM(uint16_t* writeData);
+void ReadAccumulateSumEEPROM(uint16_t* readData);
 
 #ifdef	__cplusplus
 }

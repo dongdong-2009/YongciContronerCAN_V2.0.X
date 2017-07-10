@@ -91,12 +91,8 @@ extern "C" {
 void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data);
 void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data);
 
-void WriteEEPROM(uint8_t id,PointUint8* pPoint);
-void ReadEEPROM(uint8_t id,PointUint8* pPoint);
-void WriteAccumulateSum_EEPROM(uint16_t* writeData);
-void ReadAccumulateSum(uint16_t* readData);
-void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata);
-
+void SaveActionCount(_prog_addressT addr , uint16_t* eedata);
+void ReadActionCount(_prog_addressT addr , uint16_t* pdata);
 #ifdef	__cplusplus
 }
 #endif /* __cplusplus */

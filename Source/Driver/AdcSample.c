@@ -54,7 +54,7 @@ void AdcInit(void)
     ADCON2bits.ALTS = 0;    //总是使用MUX A输入多路开关设置
 
     ADCON3bits.ADRC = 0;    // 时钟由系统时钟产生
-    ADCON3bits.ADCS = 5;    // ADC Conversion Clock Tad = Tcy/2*(ADCS+1)= (1/4M/2) * 6 = 0.75us
+    ADCON3bits.ADCS = 11;    // ADC Conversion Clock Tad = Tcy/2*(ADCS+1)= (1/4M/2) * 11 = 3us
     
     ADCSSL = 0x0000;    
     ADCS(); //扫描的通道数量
@@ -72,19 +72,10 @@ void AdcInit(void)
 **********************************************/
 void SoftSampleOnce(void)
 {
-    uint32_t time;
     ADCON1bits.ADON = 1; //启动转换
     ClrWdt();
-    time = g_TimeStampCollect.msTicks;
     //若10ms不能完成则启动看门狗复位
-    while(!IFS0bits.ADIF)
-    {
-//        if(IsOverTime(time , 10))
-//        {
-//            Reset();
-//            return;
-//        }
-    }
+    while(!IFS0bits.ADIF);
     ClrWdt();
     IFS0bits.ADIF = 0;			// Clear the A/D interrupt flag bit
     ADCON1bits.ADON = 0;
