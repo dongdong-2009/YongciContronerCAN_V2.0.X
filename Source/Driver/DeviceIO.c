@@ -48,13 +48,16 @@
 #define IP595_B_MR     	 LATGbits.LATG14
 #define IP595_B_MR_DIR   TRISGbits.TRISG14
 
+#define NOP()   {Nop();Nop();Nop();}
+
 void HC595BSendData(uint16_t SendVal);
 void HC595SendData(uint16_t SendVal);
 void UpdateRelayIndicateState(uint16_t port, uint8_t state);
+void AllHC595SendData(uint16_t lValue , uint16_t rValue);
 
 //输出状态LED1-LED6 Relay1 Relay7
-uint16_t g_LEDOutState = 0xFFFF;
-uint16_t g_RelayOutState = 0;
+uint16_t LEDOutState = 0xFFFF;
+uint16_t RelayOutState = 0;
 /**
  * 
  * <p>Function name: [InitDeviceIO]</p>
@@ -110,6 +113,10 @@ void InitDeviceIO(void)
     IP595_MR=1;
     ClrWdt();
     
+    ClrWdt();
+    UpdateIndicateState(RUN_RELAY, RUN_LED, TURN_ON); //开启运行指示灯和指示继电器   
+    ClrWdt();
+    
     PL_DIR=0;
     CE_DIR=0;
     CP_DIR =0;
@@ -161,16 +168,16 @@ void HC595BSendData(uint16_t SendVal)
             IP595_B_DS = 0;
         }
         IP595_B_SHCP = 0;
-        __delay_us(1);
+        NOP();
         IP595_B_SHCP = 1;	
-        __delay_us(1);
+        NOP();
         SendVal = SendVal << 1;
     }  
     ClrWdt();
     IP595_B_STCP = 0; //set dataline low
-    __delay_us(1);
+    NOP();
     IP595_B_STCP = 1; 
-    __delay_us(1);
+    NOP();
 }
 
 /**
@@ -194,28 +201,61 @@ void HC595SendData(uint16_t SendVal)
             IP595_DS = 0;
         }
         IP595_SHCP = 0;
-        __delay_us(1);
+        NOP();
         IP595_SHCP = 1;	
-        __delay_us(1);
+        NOP();
         SendVal = SendVal << 1;
     }  
     ClrWdt();
     IP595_STCP = 0; //set dataline low
-    __delay_us(1);
+    NOP();
     IP595_STCP = 1; 
-    __delay_us(1);
+    NOP();
 }
 
 /**
  * 
- * <p>Function name: [ReHC74165]</p>
+ * <p>Function name: [AllHC595SendData]</p>
+ * <p>Discription: [595控制继电器函数]</p>
+ * @param lValue
+ * @param rValue
+ */
+void AllHC595SendData(uint16_t lValue , uint16_t rValue)
+{
+    uint8_t i = 0;
+    ClrWdt();
+    for(i = 0; i < 16; i++)
+    {
+        IP595_DS = (lValue & 0x8000) ? 1 : 0;
+        IP595_B_DS = (rValue & 0x8000) ? 1 : 0;
+        //产生上升沿
+        IP595_SHCP = LOW;
+        IP595_B_SHCP = LOW;
+        NOP();
+        IP595_SHCP = HIGH;
+        IP595_B_SHCP = HIGH;
+        NOP();
+        lValue = lValue << 1; 
+        rValue = rValue << 1;
+    }
+    IP595_STCP = 0; //set dataline low
+    IP595_B_STCP = 0; //set dataline low
+    NOP();
+    IP595_STCP = 1; 
+    IP595_B_STCP = 1; 
+    NOP();
+}
+
+/**
+ * 
+ * <p>Function name: [ReadHC165]</p>
  * <p>Discription: [读取165中的数值]</p>
  * @return 返回165的值
  */
-unsigned long ReHC74165(void)
+uint32_t ReadHC165(void)
 {  
-    unsigned char i;
-    unsigned long indata = 0;	 
+    uint8_t i;
+    uint32_t indata = 0;	 
     
     ClrWdt();
     PL = 0;  
@@ -244,7 +284,7 @@ unsigned long ReHC74165(void)
 }
 
 /**
- * @description 外部中断1初始化
+ * @description 外部中断2初始化
  */
 void InitInt2(void)
 {
@@ -256,7 +296,6 @@ void InitInt2(void)
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;    //首先禁止中断
     
-    ClrWdt();
 }
 
 /**
@@ -266,8 +305,6 @@ void InitInt2(void)
  */
 inline void TurnOnInt2(void)
 {
-    
-    ClrWdt();
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 1;
 }
@@ -279,8 +316,6 @@ inline void TurnOnInt2(void)
  */
 inline void TurnOffInt2(void)
 {
-    
-    ClrWdt();
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;
 }
@@ -298,15 +333,18 @@ void UpdateLEDIndicateState(uint16_t port, uint8_t state)
     if (state == TURN_ON)
     {
         ClrWdt();
-        g_LEDOutState &= port;
-        HC595BSendData(g_LEDOutState);
+        LEDOutState &= port;
     }
-     if (state == TURN_OFF)
+    else if (state == TURN_OFF)
     {
         ClrWdt();
-        g_LEDOutState |= ~port;     //取反即可关闭
-        HC595BSendData(g_LEDOutState);
+        LEDOutState |= ~port;     //取反即可关闭
     }
+    else
+    {
+        return;
+    }
+    HC595BSendData(LEDOutState);
 }
 
 /**
@@ -322,15 +360,18 @@ void UpdateRelayIndicateState(uint16_t port, uint8_t state)
     if (state == TURN_ON)
     {
         ClrWdt();
-        g_RelayOutState |= port;
-        HC595SendData(g_RelayOutState);
+        RelayOutState |= port;
     }
-     if (state == TURN_OFF)
+    else if (state == TURN_OFF)
     {
         ClrWdt();
-        g_RelayOutState &= ~port;   //取反即可关闭
-        HC595SendData(g_RelayOutState);
+        RelayOutState &= ~port;   //取反即可关闭
     }
+    else
+    {
+        return;
+    }
+    HC595SendData(RelayOutState);
 }
 
 /**
@@ -341,11 +382,27 @@ void UpdateRelayIndicateState(uint16_t port, uint8_t state)
  * @param ledPort   LED灯的位
  * @param state 状态，TURN_ON \ TURN_OFF
  */
-void UpdateIndicateState(uint16_t relayPort,uint16_t ledPort,uint8_t state)
+void UpdateIndicateState(uint16_t relayPort, uint16_t ledPort, uint8_t state)
 {
     ClrWdt();
-    UpdateRelayIndicateState(relayPort,state);
-    ClrWdt();
-    UpdateLEDIndicateState(ledPort,state);
+    //开启状态
+    if (state == TURN_ON)
+    {
+        ClrWdt();
+        LEDOutState &= ledPort;
+        RelayOutState |= relayPort;
+    }
+    else if (state == TURN_OFF)
+    {
+        ClrWdt();
+        LEDOutState |= ~ledPort;      //取反即可关闭
+        RelayOutState &= ~relayPort;   //取反即可关闭
+    }
+    else
+    {
+        return;
+    }
+    AllHC595SendData(RelayOutState , LEDOutState);  //LED & Relay Synchronize Action
     ClrWdt();
 }
+

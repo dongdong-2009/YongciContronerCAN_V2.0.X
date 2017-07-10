@@ -265,7 +265,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
         return ID_ERROR;
     }
      
-     //是否已经预制或者超时                 
+    //是否已经预制或者超时                 
     if((g_RemoteControlState.ReceiveStateFlag != order) || 
         (g_RemoteControlState.overTimeFlag != TRUE))
     {

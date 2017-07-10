@@ -11,8 +11,9 @@ Source/Driver/Timer.h  \
 Source/Driver/../SerialPort/RefParameter.h  \
  Source/Driver/../SerialPort/../Driver/tydef.h  \
  Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
-Source/Driver/CAN.h  \
- Source/Driver/InitTemp.h  \
+ Source/Driver/../SerialPort/../DeviceNet/../Driver/tydef.h  \
+ Source/Driver/CAN.h  \
+Source/Driver/InitTemp.h  \
 Source/Driver/Delay.h  \
  Source/Driver/ImitationIIC.h  \
 Source/Driver/SD2405.h  \

@@ -19,6 +19,8 @@
 #define TURN_ON  0x00
 #define TURN_OFF 0xFF
 
+#define HIGH 1
+#define LOW  0
 /**
  * <p>Discription:[IGBT 控制---A]</p>
  */
@@ -392,7 +394,7 @@
 //*****************************************
 
 void InitDeviceIO(void);
-unsigned long ReHC74165(void);
+uint32_t ReadHC165(void);
 
 void InitInt2(void);
 void TurnOnInt2(void);

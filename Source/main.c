@@ -54,8 +54,8 @@
 // FWDT
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
-//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -96,17 +96,17 @@ int main()
 {
     uint16_t cn = 0;
     
-    InitDeviceIO(); //IO初始化 首先禁止中断
-    
-    AdcInit(); //ADC采样初始化
     //延时4s判断启动
     while(cn++ < 4000)
     {
         __delay_ms(1);
+        InitDeviceIO(); //IO初始化 首先禁止中断 TODO:算一下指令数
         ClrWdt();
     }
     ClrWdt();
 
+    AdcInit(); //ADC采样初始化
+    
     //是用485通信
    #if(APPLY_485 == TRUE)
     {

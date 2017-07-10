@@ -84,7 +84,7 @@ void UsartInit(void)
     InitPortsUART1();
     InitUART1(9600);
 }
-void UsartSend(unsigned char abyte)
+void UsartSend(uint8_t abyte)
 {
     uint32_t time = 0;
     RX_TX_MODE = TX_MODE;   //--鉴于光耦响应时间，须有一定的延时
@@ -101,7 +101,7 @@ void UsartSend(unsigned char abyte)
     
     RX_TX_MODE = RX_MODE;
 }
-void UsartRecive(unsigned char abyte)
+void UsartRecive(uint8_t abyte)
 {
     ClrWdt();
 }

@@ -32,7 +32,7 @@ typedef struct
 uint8_t FrameQueneIn(uint8_t recivData);
 uint8_t FrameQueneOut(uint8_t* pData);
 void  ReciveFrameDataInit(void);
-unsigned char ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame);
+uint8_t ReciveBufferDataDealing(frameRtu* pJudgeFrame, frameRtu* pReciveFrame);
 
 void  GenRTUFrame(uint8_t addr, uint8_t funcode,
                         uint8_t sendData[], uint8_t datalen, uint8_t* pRtuFrame, uint8_t *plen);

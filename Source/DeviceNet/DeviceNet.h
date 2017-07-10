@@ -16,7 +16,7 @@
 #define	XC_HEADER_TEMPLATE_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
-
+#include "../Driver/tydef.h"
 
 #ifdef	__cplusplus
 extern "C" {
@@ -28,15 +28,15 @@ extern "C" {
 #define VISIBLE_MSG	0x01    //显式信息连接
 
 /////////////数据类型///////////////////////
-typedef unsigned char BOOL;      //1BYTE
+typedef uint8_t     BOOL;      //1BYTE
 typedef signed char SINT;        //1BYTE
 typedef signed int INT;          //2BYTE
 typedef signed long DINT;        //4BYTE
-typedef struct{signed long a; unsigned long b;} LINT;  
-typedef unsigned char USINT;     //1BYTE
+typedef struct{signed long a; uint32_t b;} LINT;  
+typedef uint8_t     USINT;     //1BYTE
 typedef unsigned int UINT;       //2BYTE
-typedef unsigned long UDINT;     //4BYTE
-typedef struct{unsigned long a; unsigned long b;} ULINT;
+typedef uint32_t UDINT;     //4BYTE
+typedef struct{uint32_t a; uint32_t b;} ULINT;
 typedef float REAL;              //4BYTE
 typedef double LREAL;            //4BYTE
 typedef INT ITIME;
@@ -45,14 +45,14 @@ typedef DINT FTIME;
 typedef LINT LTIME;
 typedef UINT DATE;
 typedef UDINT TOD;
-typedef struct{UINT length; unsigned char *ucdata;} STRING;
+typedef struct{UINT length; uint8_t*ucdata;} STRING;
 typedef struct{UINT length; unsigned int *undata;} STRING2;
-typedef	struct{UINT length; unsigned char *ucdata;} STRINGN;
-typedef struct{UINT length; unsigned char *ucdata;} SHORT_STRING;
-typedef unsigned char BYTE;
+typedef	struct{UINT length; uint8_t*ucdata;} STRINGN;
+typedef struct{UINT length; uint8_t*ucdata;} SHORT_STRING;
+typedef uint8_t BYTE;
 typedef unsigned int WORD;
-typedef unsigned long DWORD;
-typedef struct{unsigned long a; unsigned long b;} LWORD;
+typedef uint32_t DWORD;
+typedef struct{uint32_t a; uint32_t b;} LWORD;
 typedef struct{BYTE type; BYTE value;} EPATH;
 typedef UINT ENGUNITS;
 ///////////////服务代码定义/////////////////////////
@@ -227,7 +227,7 @@ struct DefFrameData
 
 //////////////供其他模块调用的函数///////////////
 extern void CANFrameFilter(struct DefFrameData * pReciveBuf, struct DefFrameData * pSendBuf);
-extern unsigned char CheckMACID(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+extern uint8_t CheckMACID(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 extern void DeviceMonitorPluse(void);
 extern BOOL DeviceNetReciveCenter(WORD* pID, BYTE * pbuff, BYTE len);
 extern void InitDeviceNet();

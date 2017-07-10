@@ -588,10 +588,10 @@ void RefParameterInit(void)
 	ClrWdt();
     
     //远方与本地的初始化
-    kairuValue = ReHC74165();
+    kairuValue = ReadHC165();
     DelayMs(10);
 	ClrWdt();
-    kairuValue = ReHC74165();
+    kairuValue = ReadHC165();
     if (kairuValue == YUAN_INPUT)//远控
     {
 		ClrWdt();

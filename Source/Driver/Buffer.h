@@ -8,10 +8,10 @@
 typedef struct  
 {
   unsigned int   id;                    /* 29 bit identifier */
-  unsigned char  data[8];               /* Data field */
-  unsigned char  len;                   /* Length of data field in bytes */
-  unsigned char  format;                /* 0 - STANDARD, 1- EXTENDED IDENTIFIER */
-  unsigned char  type;                  /* 0 - DATA FRAME, 1 - REMOTE FRAME */
+  uint8_t data[8];               /* Data field */
+  uint8_t len;                   /* Length of data field in bytes */
+  uint8_t format;                /* 0 - STANDARD, 1- EXTENDED IDENTIFIER */
+  uint8_t type;                  /* 0 - DATA FRAME, 1 - REMOTE FRAME */
 } CAN_msg;
 
 

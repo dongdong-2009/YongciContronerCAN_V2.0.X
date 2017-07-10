@@ -336,10 +336,10 @@ uint8_t  RefreshActionState()
     }
     else    //防止持续合闸或者分闸
     {
-//            __delay_us(100);
-//            g_SwitchConfig[DEVICE_I].order = IDLE_ORDER;
-//            RESET_CURRENT_A();            
-        }
+//        __delay_us(100);
+//        g_SwitchConfig[DEVICE_I].order = IDLE_ORDER;
+//        RESET_CURRENT_A();            
+    }
         
         //机构2合闸、分闸刷新
         if((g_SwitchConfig[DEVICE_II].order == HE_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
@@ -391,18 +391,18 @@ uint8_t  RefreshActionState()
 
         //就绪状态则继续等待 TODO：就绪超时
         if((g_SwitchConfig[DEVICE_I].currentState == READY_STATE)
-                || (g_SwitchConfig[DEVICE_II].currentState == READY_STATE)
-                ||(g_SwitchConfig[DEVICE_III].currentState == READY_STATE))
+            || (g_SwitchConfig[DEVICE_II].currentState == READY_STATE)
+            ||(g_SwitchConfig[DEVICE_III].currentState == READY_STATE))
         {
-             state |= 0x40;
+            state |= 0x40;
         }
        
         //再次检测是否处于运行状态，若处于则继续执行。
         if((g_SwitchConfig[DEVICE_I].currentState == RUN_STATE)
-                || (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE)
-                ||(g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
+            || (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE)
+            ||(g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
         {
-             state |= 0x80;
+            state |= 0x80;
         }
         return state;
 }
@@ -424,8 +424,8 @@ uint8_t  RefreshIdleState()
 
    //任意一项不是空闲状态
     if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
-         (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
-          CHECK_ORDER3()))
+        (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
+         CHECK_ORDER3()))
     {
         return 0xF1;        
     }     
@@ -466,21 +466,21 @@ uint8_t  RefreshIdleState()
         checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
         checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
         g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
-        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //情况上一次执行的命令
+        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //清空上一次执行的命令
         OffLock();  //解锁
     }
     ClrWdt();
 
 
     //检测是否欠电压， 并更新显示
-    if(IsOverTimeStamp( &g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
+    if(IsOverTimeStamp(&g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
     {
-        CheckVoltage();  
+        GetCapVolatageState();  //获取电容电压  
         ClrWdt();
         g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
     }  
 
-    if(IsOverTimeStamp( &g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
+    if(IsOverTimeStamp(&g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
     {
         SwitchScan();   //执行按键扫描程序 TODO:用时时长
         ClrWdt();
@@ -502,7 +502,7 @@ uint8_t  RefreshIdleState()
             DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
         }
     }
-     while(result);
+    while(result);
 
 
     //周期性状态更新
@@ -559,6 +559,7 @@ uint8_t  RefreshIdleState()
             g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
             g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
             SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
+            ClrWdt();
             g_RemoteControlState.orderId = 0;   //Clear
             g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
             OffLock();  //解锁
@@ -591,7 +592,7 @@ void YongciMainTask(void)
  
     while(0xFFFF) //主循环
     {        
-        result = RefreshActionState();
+        result = RefreshActionState();  //刷新合分闸工作状态
         //有正在执行的合分闸动作，则继续刷新状态。
         if (result)
         {
@@ -603,7 +604,7 @@ void YongciMainTask(void)
         RESET_CURRENT_C();
         result =   RefreshIdleState();      
         //检测到按钮动作
-       if (result)
+        if (result)
         {
             continue;
         }
@@ -741,6 +742,7 @@ void YongciFirstInit(void)
     g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     
     g_lastRunOrder = IDLE_ORDER;
+    g_lockUp = OFF_LOCK;    //初始化为解锁状态
 }  
 
 /**

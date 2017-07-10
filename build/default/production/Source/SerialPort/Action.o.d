@@ -4,8 +4,9 @@ Source/SerialPort/Action.h  \
  Source/SerialPort/RtuFrame.h  \
 Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
-Source/SerialPort/../Header.h  \
- Source/SerialPort/../Driver/tydef.h  \
+ Source/SerialPort/../DeviceNet/../Driver/tydef.h  \
+ Source/SerialPort/../Header.h  \
+Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../Driver/AdcSample.h  \
  Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../Driver/DevicdIO.h  \

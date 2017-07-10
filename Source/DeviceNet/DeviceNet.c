@@ -30,7 +30,7 @@ UINT  product_code = 0X00d2;             // 产品代码
 USINT  major_ver = 0X01;
 USINT  minor_ver = 0X01;                 // 版本
 UDINT  serialID = 0x001169BC;            // 序列号
-SHORT_STRING  product_name = {8, (unsigned char *)"YongCi"};// 产品名称
+SHORT_STRING  product_name = {8, (uint8_t*)"YongCi"};// 产品名称
 ////////////////////////////////////////////////////////////////////////////////
 
 

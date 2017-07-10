@@ -11,6 +11,7 @@ Source/Yongci/../Driver/EEPROMOperate.h  \
  Source/Yongci/../Driver/../SerialPort/RefParameter.h  \
  Source/Yongci/../Driver/../SerialPort/../Driver/tydef.h  \
  Source/Yongci/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/Yongci/../Driver/../SerialPort/../DeviceNet/../Driver/tydef.h  \
  Source/Yongci/../Driver/CAN.h  \
 Source/Yongci/../Driver/InitTemp.h  \
  Source/Yongci/../Driver/Delay.h  \

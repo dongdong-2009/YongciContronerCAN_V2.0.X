@@ -1,8 +1,9 @@
 build/default/production/Source/DeviceNet/DeviceNet.o:  \
  Source/DeviceNet/DeviceNet.c  \
 Source/DeviceNet/DeviceNet.h  \
- Source/DeviceNet/../Header.h  \
-Source/DeviceNet/../Driver/tydef.h  \
+ Source/DeviceNet/../Driver/tydef.h  \
+Source/DeviceNet/../Header.h  \
+ Source/DeviceNet/../Driver/tydef.h  \
  Source/DeviceNet/../Driver/AdcSample.h  \
  Source/DeviceNet/../Driver/tydef.h  \
 Source/DeviceNet/../Driver/DevicdIO.h  \

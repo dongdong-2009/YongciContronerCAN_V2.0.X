@@ -13,6 +13,7 @@ Source/SerialPort/../Driver/Timer.h  \
  Source/SerialPort/../Driver/../SerialPort/RefParameter.h  \
  Source/SerialPort/../Driver/../SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/SerialPort/../Driver/../SerialPort/../DeviceNet/../Driver/tydef.h  \
  Source/SerialPort/../Driver/CAN.h  \
 Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Driver/Delay.h  \

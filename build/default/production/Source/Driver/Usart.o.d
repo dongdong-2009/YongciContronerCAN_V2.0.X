@@ -1,7 +1,8 @@
 build/default/production/Source/Driver/Usart.o:  \
 Source/Driver/Usart.c  \
  Source/Driver/usart.h  \
-Source/Driver/../SerialPort/RtuFrame.h  \
+Source/Driver/tydef.h  \
+ Source/Driver/../SerialPort/RtuFrame.h  \
  Source/Driver/../SerialPort/../Driver/tydef.h  \
 Source/Driver/../Header.h  \
  Source/Driver/../Driver/tydef.h  \
@@ -14,6 +15,7 @@ Source/Driver/../Driver/Timer.h  \
  Source/Driver/../Driver/../SerialPort/RefParameter.h  \
  Source/Driver/../Driver/../SerialPort/../Driver/tydef.h  \
  Source/Driver/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/Driver/../Driver/../SerialPort/../DeviceNet/../Driver/tydef.h  \
  Source/Driver/../Driver/CAN.h  \
 Source/Driver/../Driver/InitTemp.h  \
  Source/Driver/../Driver/Delay.h  \

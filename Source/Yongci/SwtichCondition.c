@@ -162,10 +162,10 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 //***************************************************************************************************
 
 
-#define KEY_COUNT_DOWN 30   // *2ms
-uint8_t g_timeCount[22] = {0};
-uint8_t g_lockflag[22] = {0}; 
-
+#define INPUT_FILT_TIME 20   // * 2ms
+#define MIN_EFFECTIVE_TIME  18  //最小的有效时间是（INPUT_FILT_TIME * 90%）
+uint8_t g_timeCount[16] = {0};
+uint8_t g_ScenCount = 0;    //扫描计数
 
 /**
  * 
@@ -355,9 +355,12 @@ uint8_t CheckIOState(void)
  */
 void DsplaySwitchState(void)
 {    
+    uint8_t warningJg1 = g_SystemState.heFenState1; //机构1警告
+    uint8_t warningJg2 = g_SystemState.heFenState2; //机构2警告
+    uint8_t warningJg3 = g_SystemState.heFenState3; //机构3警告
     ClrWdt();
     if(g_SuddenState.Cap1Error == CAP1_ERROR || 
-       g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //机构1错误
+       warningJg1 == CHECK_ERROR1_STATE) //机构1错误
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
         if(g_SystemState.heFenState1 == CHECK_ERROR1_STATE) //进一步判断是分合位错误，还是电容电压错误
@@ -370,15 +373,11 @@ void DsplaySwitchState(void)
     }
     else 
     {
-        if(g_SystemState.warning == CHECK_ERROR1_STATE)
-        {
-            g_SystemState.warning = NO_ERROR;
-        }
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
     }
     
     if(g_SuddenState.Cap2Error == CAP2_ERROR || 
-       g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //机构2错误
+       warningJg2 == CHECK_ERROR2_STATE) //机构2错误
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
         if(g_SystemState.heFenState2 == CHECK_ERROR2_STATE) //进一步判断是分合位错误，还是电容电压错误
@@ -391,17 +390,13 @@ void DsplaySwitchState(void)
     }
     else
     {
-        if(g_SystemState.warning == CHECK_ERROR2_STATE)
-        {
-            g_SystemState.warning = NO_ERROR;
-        }
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_OFF);
     }
     
     #if(CAP3_STATE)
     {
         if(g_SuddenState.Cap3Error == CAP3_ERROR || 
-           g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //机构3错误
+           warningJg3 == CHECK_ERROR3_STATE) //机构3错误
         {
             UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
             if(g_SystemState.heFenState3 == CHECK_ERROR3_STATE) //进一步判断是分合位错误，还是电容电压错误
@@ -414,19 +409,16 @@ void DsplaySwitchState(void)
         }
         else
         {
-            if(g_SystemState.warning == CHECK_ERROR3_STATE)
-            {
-                g_SystemState.warning = NO_ERROR;
-            }
             UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_OFF);
         }
     }
     #endif
     
-    if((g_SystemState.warning == CHECK_ERROR1_STATE) ||
-       (g_SystemState.warning == CHECK_ERROR2_STATE) ||
-       (g_SystemState.warning == CHECK_ERROR3_STATE))
+    if((warningJg1 == CHECK_ERROR1_STATE) ||
+       (warningJg2 == CHECK_ERROR2_STATE) ||
+       (warningJg3 == CHECK_ERROR3_STATE))
     {
+        g_SystemState.warning = warningJg1 | warningJg2 | warningJg3;
         return ;
     }
     g_SystemState.warning = NO_ERROR;
@@ -461,8 +453,8 @@ void DsplaySwitchState(void)
     ClrWdt();
     if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE) //分闸状态
     {
-        UpdateIndicateState(FENWEI2_RELAY,FENWEI2_LED,TURN_ON);
-        UpdateIndicateState(HEWEI2_RELAY,HEWEI2_LED,TURN_OFF);
+        UpdateIndicateState(FENWEI2_RELAY , FENWEI2_LED , TURN_ON);
+        UpdateIndicateState(HEWEI2_RELAY , HEWEI2_LED , TURN_OFF);
         ClrWdt();
         if(g_SuddenState.RefuseAction == JIGOU2_FEN_ERROR)
         {
@@ -551,6 +543,7 @@ void DsplaySwitchState(void)
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_OFF);
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_OFF);
     }    
+    UpdataVoltageState();   //更新电容电压显示状态
 }
 /**
  * 
@@ -559,52 +552,239 @@ void DsplaySwitchState(void)
  */
 void SwitchScan(void)
 {
-    g_kairuValue = ReHC74165();
+    g_kairuValue = ReadHC165();
+    g_ScenCount++;  //每次扫描均计数
     //远方\就地检测
-    if(YUAN_BEN_CONDITION() && (g_lockflag[17] == 0))
+    if(YUAN_BEN_CONDITION())
     {
-        ClrWdt();
-        g_timeCount[17]++;
-        if(g_timeCount[17] >= KEY_COUNT_DOWN)
-        {            
-            g_lockflag[17] = 1;
-            g_timeCount[17] = 0;
-            g_SystemState.yuanBenState = YUAN_STATE;
-        }
-        g_lockflag[18] = 0;
-        g_timeCount[18] = 0;
+        g_timeCount[0] ++;
     }
-    else if(!YUAN_BEN_CONDITION() && (g_lockflag[18] == 0))
+    else
     {
-        ClrWdt();
-        g_timeCount[18]++;
-        if(g_timeCount[18] >= KEY_COUNT_DOWN)
-        {            
-            g_lockflag[18] = 1;
-            g_timeCount[18] = 0;
-            g_SystemState.yuanBenState = BEN_STATE;
+        if(g_timeCount[0] != 0)
+        {
+            g_timeCount[0] --;
         }
-        g_lockflag[17] = 0;
-        g_timeCount[17] = 0;
     }
     //*****************************
     //作用，屏蔽掉远方就地
     uint32_t i = ~YUAN_INPUT;
     g_kairuValue &= i;
     //*****************************
-    if(g_lockUp == OFF_LOCK)
+    if(g_lockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
     {
         ClrWdt();
         //同时合闸信号检测
-        if(Z_HEZHA_CONDITION() && g_lockflag[0] == 0)   
+        if(Z_HEZHA_CONDITION())
         {
-            ClrWdt();
-            g_timeCount[0]++;
-            if(g_timeCount[0] >= KEY_COUNT_DOWN)
+            g_timeCount[1] ++;
+        }
+        else
+        {
+            if(g_timeCount[1] != 0)
             {
-                ClrWdt();
-                g_lockflag[0] = 1;
-                g_timeCount[0] = 0;
+                g_timeCount[1] --;
+            }
+        }
+        //同时分闸信号检测
+        if(Z_FENZHA_CONDITION())
+        {
+            g_timeCount[2] ++;
+        }
+        else
+        {
+            if(g_timeCount[2] != 0)
+            {
+                g_timeCount[2] --;
+            }
+        }
+        //机构1合闸信号检测
+        if(HEZHA1_CONDITION())
+        {
+            g_timeCount[3]++;
+        }
+        else
+        {
+            if(g_timeCount[3] != 0)
+            {
+                g_timeCount[3] --;
+            }
+        }
+        //机构1分闸信号检测
+        if(FENZHA1_CONDITION())
+        {
+            g_timeCount[4]++;
+        }
+        else
+        {
+            if(g_timeCount[4] != 0)
+            {
+                g_timeCount[4] --;
+            }
+        }
+        //机构2合闸信号检测
+        if(HEZHA2_CONDITION())
+        {
+            g_timeCount[5]++;
+        }
+        else
+        {
+            if(g_timeCount[5] != 0)
+            {
+                g_timeCount[5] --;
+            }
+        }
+        //机构2分闸信号检测
+        if(FENZHA2_CONDITION())
+        {
+            g_timeCount[6]++;
+        }
+        else
+        {
+            if(g_timeCount[6] != 0)
+            {
+                g_timeCount[6] --;
+            }
+        }        
+    #if(CAP3_STATE)  //判断第三块驱动是否存在
+    {
+        //机构3合闸信号检测
+        if(HEZHA3_CONDITION())
+        {
+            g_timeCount[7]++;
+        }
+        else
+        {
+            if(g_timeCount[7] != 0)
+            {
+                g_timeCount[7] --;
+            }
+        }
+        //机构3分闸信号检测
+        if(FENZHA3_CONDITION())
+        {
+            g_timeCount[8]++;
+        }
+        else
+        {
+            if(g_timeCount[8] != 0)
+            {
+                g_timeCount[8] --;
+            }
+        }
+    }
+    #endif
+    }
+    //机构1的合位检测
+    if(HEWEI1_CONDITION())
+    {
+        g_timeCount[9]++;
+    }
+    else
+    {
+        if(g_timeCount[9] != 0)
+        {
+            g_timeCount[9] --;
+        }
+    }   
+    //机构1的分位检测
+    if(FENWEI1_CONDITION())
+    {
+        g_timeCount[10]++;
+    }
+    else
+    {
+        if(g_timeCount[10] != 0)
+        {
+            g_timeCount[10] --;
+        }
+    }      
+    //机构2的合位检测
+    if(HEWEI2_CONDITION())
+    {
+        g_timeCount[11]++;
+    }
+    else
+    {
+        if(g_timeCount[11] != 0)
+        {
+            g_timeCount[11] --;
+        }
+    }
+    //机构2的分位检测
+    if(FENWEI2_CONDITION())
+    {
+        g_timeCount[12]++;
+    }
+    else
+    {
+        if(g_timeCount[12] != 0)
+        {
+            g_timeCount[12] --;
+        }
+    }
+#if(CAP3_STATE)  //判断第三块驱动是否存在
+{
+    //机构3的合位检测
+    if(HEWEI3_CONDITION())
+    {
+        g_timeCount[13]++;
+    }
+    else
+    {
+        if(g_timeCount[13] != 0)
+        {
+            g_timeCount[13] --;
+        }
+    }
+    //机构3的分位检测
+    if(FENWEI3_CONDITION())
+    {
+        g_timeCount[14]++;
+    }
+    else
+    {
+        if(g_timeCount[14] != 0)
+        {
+            g_timeCount[14] --;
+        }
+    }
+}
+#endif
+    //工作\调试模式检测
+    if(WORK_DEBUG_CONDITION())
+    {
+        g_timeCount[15]++;
+    }
+    else
+    {
+        if(g_timeCount[15] != 0)
+        {
+            g_timeCount[15] --;
+        }
+    }
+    
+//******************************************************************************
+    //时间到达后才对各个状态位进行检查
+    if(g_ScenCount >= INPUT_FILT_TIME)
+    {
+        g_ScenCount = 0;    //Clear
+        //首先对远方就地进行检查
+        if(g_timeCount[0] >= MIN_EFFECTIVE_TIME)
+        {
+            g_SystemState.yuanBenState = YUAN_STATE;
+            g_timeCount[0] = 0;
+        }
+        else
+        {
+            g_SystemState.yuanBenState = BEN_STATE;
+            g_timeCount[0] = 0;
+        }
+        if(g_lockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
+        {
+            //对总合总分信号检测        
+            if(g_timeCount[1] >= MIN_EFFECTIVE_TIME)
+            {
                 if((g_SystemState.heFenState1 == CHECK_1_FEN_STATE) || 
                    (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) || 
                    (g_SystemState.heFenState3 == CHECK_3_FEN_STATE))
@@ -612,28 +792,11 @@ void SwitchScan(void)
                     g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
                     OnLock();   //上锁
                 }
-            }
-        }
-        else if(!Z_HEZHA_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[0] != 0)
-            {
-                g_timeCount[0] -= 1;
-            }
-            g_lockflag[0] = 0;
-        }
-
-        //同时分闸信号检测
-        if(Z_FENZHA_CONDITION() && g_lockflag[1] == 0)   
-        {
-            g_timeCount[1]++;
-            ClrWdt();
-            if(g_timeCount[1] >= KEY_COUNT_DOWN)
-            {
-                ClrWdt();
-                g_lockflag[1] = 1;
                 g_timeCount[1] = 0;
+                g_timeCount[2] = 0;
+            }
+            else if(g_timeCount[2] >= MIN_EFFECTIVE_TIME)
+            {
                 if((g_SystemState.heFenState1 == CHECK_1_HE_STATE) || 
                    (g_SystemState.heFenState2 == CHECK_2_HE_STATE) || 
                    (g_SystemState.heFenState3 == CHECK_3_HE_STATE) )
@@ -641,438 +804,169 @@ void SwitchScan(void)
                     g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
                     OnLock();   //上锁
                 }
-            }
-        }
-        else if(!Z_FENZHA_CONDITION())
-        {
-            if(g_timeCount[1] != 0)
-            {
-                ClrWdt();
-                g_timeCount[1] -= 1;
-            }
-            g_lockflag[1] = 0;
-        }
-
-        //机构1合闸信号检测
-        if(HEZHA1_CONDITION() && g_lockflag[2] == 0)   
-        {
-            ClrWdt();
-            g_timeCount[2]++;
-            if(g_timeCount[2] >= KEY_COUNT_DOWN)
-            {
-                ClrWdt();
-                g_lockflag[2] = 1;
+                g_timeCount[1] = 0;
                 g_timeCount[2] = 0;
+            }
+            //对机构1的合分信号检测
+            if(g_timeCount[3] >= MIN_EFFECTIVE_TIME)
+            {
                 if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE)
                 {
-                    g_Order = CHECK_1_HE_ORDER;     //机构1合闸命令
+                    g_Order = CHECK_1_HE_ORDER;     //同时合闸命令
                     OnLock();   //上锁
                 }
-            }
-        }
-        else if(!HEZHA1_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[2] != 0)
-            {
-                ClrWdt();
-                g_timeCount[2] -= 1;
-            }
-            g_lockflag[2] = 0;
-        }
-
-        //机构1分闸信号检测
-        if(FENZHA1_CONDITION() && g_lockflag[3] == 0)   
-        {
-            g_timeCount[3]++;
-            ClrWdt();
-            if(g_timeCount[3] >= KEY_COUNT_DOWN)
-            {
-                ClrWdt();
-                g_lockflag[3] = 1;
                 g_timeCount[3] = 0;
+                g_timeCount[4] = 0;
+            }
+            else if(g_timeCount[4] >= MIN_EFFECTIVE_TIME)
+            {
                 if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)
                 {
-                    g_Order = CHECK_1_FEN_ORDER;     //机构1分闸命令
+                    g_Order = CHECK_1_FEN_ORDER;     //同时分闸命令
                     OnLock();   //上锁
                 }
-            }
-        }
-        else if(!FENZHA1_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[3] != 0)
-            {
-                ClrWdt();
-                g_timeCount[3] -= 1;
-            }
-            g_lockflag[3] = 0;
-        }
-
-        //机构2合闸信号检测
-        if(HEZHA2_CONDITION() && g_lockflag[4] == 0)   
-        {
-            ClrWdt();
-            g_timeCount[4]++;
-            if(g_timeCount[4] >= KEY_COUNT_DOWN)
-            {
-                ClrWdt();
-                g_lockflag[4] = 1;
+                g_timeCount[3] = 0;
                 g_timeCount[4] = 0;
+            }
+            //对机构2的合分信号检测   
+            if(g_timeCount[5] >= MIN_EFFECTIVE_TIME)
+            {
                 if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE)
                 {
-                    g_Order = CHECK_2_HE_ORDER;     //机构2合闸命令
+                    g_Order = CHECK_2_HE_ORDER;     //同时合闸命令
                     OnLock();   //上锁
                 }
-            }
-        }
-        else if(!HEZHA2_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[4] != 0)
-            {
-                ClrWdt();
-                g_timeCount[4] -= 1;
-            }
-            g_lockflag[4] = 0;
-        }
-
-        //机构2分闸信号检测
-        if(FENZHA2_CONDITION() && g_lockflag[5] == 0)   
-        {
-            g_timeCount[5]++;
-            ClrWdt();
-            if(g_timeCount[5] >= KEY_COUNT_DOWN)
-            {
-                g_lockflag[5] = 1;
                 g_timeCount[5] = 0;
+                g_timeCount[6] = 0;
+            }
+            else if(g_timeCount[6] >= MIN_EFFECTIVE_TIME)
+            {
                 if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)
                 {
-                    g_Order = CHECK_2_FEN_ORDER;     //机构2分闸命令
+                    g_Order = CHECK_2_FEN_ORDER;     //同时分闸命令
                     OnLock();   //上锁
-                }          
+                }
+                g_timeCount[5] = 0;
+                g_timeCount[6] = 0;
             }
-        }
-        else if(!FENZHA2_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[5] != 0)
+            //对机构3的合分信号检测   
+            #if(CAP3_STATE)  //判断第三块驱动是否存在
+            if(g_timeCount[7] >= MIN_EFFECTIVE_TIME)
             {
-                g_timeCount[5] -= 1;
+                if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE)
+                {
+                    g_Order = CHECK_3_HE_ORDER;     //同时合闸命令
+                    OnLock();   //上锁
+                }
+                g_timeCount[7] = 0;
+                g_timeCount[8] = 0;
             }
-            g_lockflag[5] = 0;
+            else if(g_timeCount[8] >= MIN_EFFECTIVE_TIME)
+            {
+                if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)
+                {
+                    g_Order = CHECK_3_FEN_ORDER;     //同时分闸命令
+                    OnLock();   //上锁
+                }
+                g_timeCount[7] = 0;
+                g_timeCount[8] = 0;
+            }
+            #endif
         }
         
-        #if(CAP3_STATE)  //判断第三块驱动是否存在
+        //对机构1的合分位进行检查
+        if((g_timeCount[9] >= MIN_EFFECTIVE_TIME) && (g_timeCount[10] < MIN_EFFECTIVE_TIME))
         {
-            //机构3合闸信号检测
-            if(HEZHA3_CONDITION() && g_lockflag[6] == 0)   
-            {
-                ClrWdt();
-                g_timeCount[6]++;
-                if(g_timeCount[6] >= KEY_COUNT_DOWN)
-                {
-                    ClrWdt();
-                    g_lockflag[6] = 1;
-                    g_timeCount[6] = 0;
-                    if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE)
-                    {
-                        g_Order = CHECK_3_HE_ORDER;     //机构3合闸命令
-                        OnLock();   //上锁
-                    }                
-                }
-            }
-            else if(!HEZHA3_CONDITION())
-            {
-                ClrWdt();
-                if(g_timeCount[6] != 0)
-                {
-                    ClrWdt();
-                    g_timeCount[6] -= 1;
-                }
-                g_lockflag[6] = 0;
-            }
-
-            //机构3分闸信号检测
-            if(FENZHA3_CONDITION() && g_lockflag[7] == 0)   
-            {
-                g_timeCount[7]++;
-                ClrWdt();
-                if(g_timeCount[7] >= KEY_COUNT_DOWN)
-                {
-                    g_lockflag[7] = 1;
-                    g_timeCount[7] = 0;
-                    if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)
-                    {
-                        g_Order = CHECK_3_FEN_ORDER;     //机构3分闸命令
-                        OnLock();   //上锁
-                    }
-                }
-            }
-            else if(!FENZHA3_CONDITION())
-            {
-                ClrWdt();
-                if(g_timeCount[7] != 0)
-                {
-                    g_timeCount[7] -= 1;
-                }
-                g_lockflag[7] = 0;
-            }
-        }
-        #endif
-    }
-    
-    //机构1的合位检测
-    if(HEWEI1_CONDITION() && g_lockflag[8] == 0)
-    {
-        ClrWdt();
-        g_timeCount[8]++;
-        if(g_timeCount[8] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[8] = 1;
-            g_timeCount[8] = 0;
             g_SystemState.heFenState1 = CHECK_1_HE_STATE;  
             g_SuddenState.SwitchState1 = 0x02; //0b10
             g_SuddenState.SuddenFlag = TRUE;
-        }
-    }
-    else if(!HEWEI1_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[8] != 0)
-        {
-            g_timeCount[8] -= 1;
-        }
-        g_lockflag[8] = 0;
-    }   
-    
-    //机构1的分位检测
-    if(FENWEI1_CONDITION() && g_lockflag[9] == 0)
-    {
-        ClrWdt();
-        g_timeCount[9]++;
-        if(g_timeCount[9] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[9] = 1;
             g_timeCount[9] = 0;
+            g_timeCount[10] = 0;
+        }
+        else if((g_timeCount[10] >= MIN_EFFECTIVE_TIME) && (g_timeCount[9] < MIN_EFFECTIVE_TIME))
+        {
             g_SystemState.heFenState1 = CHECK_1_FEN_STATE;  
             g_SuddenState.SwitchState1 = 0x01; //0b01
             g_SuddenState.SuddenFlag = TRUE;
-        }
-    }
-    else if(!FENWEI1_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[9] != 0)
-        {
-            g_timeCount[9] -= 1;
-        }
-        g_lockflag[9] = 0;
-    }   
-    
-    //机构2的合位检测
-    if(HEWEI2_CONDITION() && g_lockflag[10] == 0)
-    {
-        ClrWdt();
-        g_timeCount[10]++;
-        if(g_timeCount[10] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[10] = 1;
+            g_timeCount[9] = 0;
             g_timeCount[10] = 0;
+        }
+        else    //此时存在错误
+        {            
+            g_SystemState.heFenState1 = CHECK_ERROR1_STATE;     //合分位同时存在\不存在            
+            g_SuddenState.SwitchState1 = 0x03;
+            g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[9] = 0;
+            g_timeCount[10] = 0;
+        }
+        
+        //对机构2的合分位进行检查
+        if((g_timeCount[11] >= MIN_EFFECTIVE_TIME) && (g_timeCount[12] < MIN_EFFECTIVE_TIME))
+        {
             g_SystemState.heFenState2 = CHECK_2_HE_STATE;  
             g_SuddenState.SwitchState2 = 0x08; //0b010
             g_SuddenState.SuddenFlag = TRUE;
-        }
-    }
-    else if(!HEWEI2_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[10] != 0)
-        {
-            g_timeCount[10] -= 1;
-        }
-        g_lockflag[10] = 0;
-    }   
-    
-    //机构2的分位检测
-    if(FENWEI2_CONDITION() && g_lockflag[11] == 0)
-    {
-        ClrWdt();
-        g_timeCount[11]++;
-        if(g_timeCount[11] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[11] = 1;
             g_timeCount[11] = 0;
+            g_timeCount[12] = 0;
+        }
+        else if((g_timeCount[12] >= MIN_EFFECTIVE_TIME) && (g_timeCount[11] < MIN_EFFECTIVE_TIME))
+        {
             g_SystemState.heFenState2 = CHECK_2_FEN_STATE;  
             g_SuddenState.SwitchState2 = 0x04; //0b001
             g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[11] = 0;
+            g_timeCount[12] = 0;
         }
-    }
-    else if(!FENWEI2_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[11] != 0)
-        {
-            g_timeCount[11] -= 1;
-        }
-        g_lockflag[11] = 0;
-    }   
-    #if(CAP3_STATE)  //判断第三块驱动是否存在
-    {
-        //机构3的合位检测
-        if(HEWEI3_CONDITION() && g_lockflag[12] == 0)
-        {
-            ClrWdt();
-            g_timeCount[12]++;
-            if(g_timeCount[12] >= KEY_COUNT_DOWN)
-            {
-                g_lockflag[12] = 1;
-                g_timeCount[12] = 0;
-                g_SystemState.heFenState3 = CHECK_3_HE_STATE;  
-                g_SuddenState.SwitchState3 = 0x20; //0b10                
-                g_SuddenState.SuddenFlag = TRUE;
-            }
-        }
-        else if(!HEWEI3_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[12] != 0)
-            {
-                g_timeCount[12] -= 1;
-            }
-            g_lockflag[12] = 0;
-        }   
-
-        //机构3的分位检测
-        if(FENWEI3_CONDITION() && g_lockflag[13] == 0)
-        {
-            ClrWdt();
-            g_timeCount[13]++;
-            if(g_timeCount[13] >= KEY_COUNT_DOWN)
-            {
-                g_lockflag[13] = 1;
-                g_timeCount[13] = 0;
-                g_SystemState.heFenState3 = CHECK_3_FEN_STATE;      
-                g_SuddenState.SwitchState3 = 0x10; //0b01
-                g_SuddenState.SuddenFlag = TRUE;
-            }
-        }
-        else if(!FENWEI3_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[13] != 0)
-            {
-                g_timeCount[13] -= 1;
-            }
-            g_lockflag[13] = 0;
-        }   
-    }
-    #endif
-        
-    
-    //机构1的合分位同时存在\不存在
-    if(ERROR1_CONDITION() && g_lockflag[14] == 0)
-    {
-        ClrWdt();
-        g_timeCount[14]++;
-        if(g_timeCount[14] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[14] = 1;
-            g_timeCount[14] = 0;
-            g_SystemState.heFenState1 = CHECK_ERROR1_STATE;     //合分位同时存在            
-            g_SuddenState.SwitchState1 = 0x03;
-            g_SuddenState.SuddenFlag = TRUE;
-        }
-    }
-    else if(!ERROR1_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[14] != 0)
-        {
-            g_timeCount[14] -= 1;
-        }
-        g_lockflag[14] = 0;
-    }
-    
-    //机构2的合分位同时存在\不存在
-    if(ERROR2_CONDITION() && g_lockflag[15] == 0)
-    {
-        ClrWdt();
-        g_timeCount[15]++;
-        if(g_timeCount[15] >= KEY_COUNT_DOWN)
-        {
-            g_lockflag[15] = 1;
-            g_timeCount[15] = 0;
+        else    //此时存在错误
+        {            
             g_SystemState.heFenState2 = CHECK_ERROR2_STATE;     //合分位同时存在
             g_SuddenState.SwitchState2 = 0x0C;
             g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[11] = 0;
+            g_timeCount[12] = 0;
         }
-    }
-    else if(!ERROR2_CONDITION())
-    {
-        ClrWdt();
-        if(g_timeCount[15] != 0)
+        
+        #if(CAP3_STATE)  //判断第三块驱动是否存在
+        //对机构3的合分位进行检查
+        if((g_timeCount[13] >= MIN_EFFECTIVE_TIME) && (g_timeCount[14] < MIN_EFFECTIVE_TIME))
         {
-            g_timeCount[15] -= 1;
+            g_SystemState.heFenState3 = CHECK_3_HE_STATE;  
+            g_SuddenState.SwitchState3 = 0x20; //0b10                
+            g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[13] = 0;
+            g_timeCount[14] = 0;
         }
-        g_lockflag[15] = 0;
-    }
-    
-    #if(CAP3_STATE)
-    {
-        //机构3的合分位同时存在\不存在
-        if(ERROR3_CONDITION() && g_lockflag[16] == 0)
+        else if((g_timeCount[14] >= MIN_EFFECTIVE_TIME) && (g_timeCount[13] < MIN_EFFECTIVE_TIME))
         {
-            ClrWdt();
-            g_timeCount[16]++;
-            if(g_timeCount[16] >= KEY_COUNT_DOWN)
-            {
-                g_lockflag[16] = 1;
-                g_timeCount[16] = 0;
-                g_SystemState.heFenState3 = CHECK_ERROR3_STATE;     //合分位同时存在
-                g_SuddenState.SwitchState3 = 0x30;
-                g_SuddenState.SuddenFlag = TRUE;
-            }
+            g_SystemState.heFenState3 = CHECK_3_FEN_STATE;      
+            g_SuddenState.SwitchState3 = 0x10; //0b01
+            g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[13] = 0;
+            g_timeCount[14] = 0;
         }
-        else if(!ERROR3_CONDITION())
-        {
-            ClrWdt();
-            if(g_timeCount[16] != 0)
-            {
-                g_timeCount[16] -= 1;
-            }
-            g_lockflag[16] = 0;
-        }
-    }
-    #endif
-    
-    //工作\调试模式检测
-    if(WORK_DEBUG_CONDITION() && (g_lockflag[19] == 0))
-    {
-        ClrWdt();
-        g_timeCount[19]++;
-        if(g_timeCount[19] >= KEY_COUNT_DOWN)
+        else    //此时存在错误
         {            
-            g_lockflag[19] = 1;
-            g_timeCount[19] = 0;
+            g_SystemState.heFenState3 = CHECK_ERROR3_STATE;     //合分位同时存在
+            g_SuddenState.SwitchState3 = 0x30;
+            g_SuddenState.SuddenFlag = TRUE;
+            g_timeCount[13] = 0;
+            g_timeCount[14] = 0;
+        }
+        #endif
+        //工作\调试模式判断
+        if(g_timeCount[15] >= MIN_EFFECTIVE_TIME)
+        {
             g_SystemState.workMode = WORK_STATE;
+            g_timeCount[15] = 0;
         }
-        g_lockflag[20] = 0;
-        g_timeCount[20] = 0;
-    }
-    else if(!WORK_DEBUG_CONDITION() && (g_lockflag[20] == 0))
-    {
-        ClrWdt();
-        g_timeCount[20]++;
-        if(g_timeCount[20] >= KEY_COUNT_DOWN)
-        {            
-            g_lockflag[20] = 1;
-            g_timeCount[20] = 0;
+        else
+        {
             g_SystemState.workMode = DEBUG_STATE;
+            g_timeCount[15] = 0;
         }
-        g_lockflag[19] = 0;
-        g_timeCount[19] = 0;
     }
+//******************************************************************************
+    
 }
 
 
