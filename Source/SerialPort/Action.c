@@ -1,3 +1,6 @@
+
+#include "Action.h"
+
 /** 
  * <p>application name： Action.c</p> 
  * <p>application describing： 配置Action</p> 
@@ -12,127 +15,92 @@
 #include "../Header.h"
 #include "../Yongci/DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
-
+#include <string.h>
 #define  SUDDEN_ID 0x9A     //突发状态上传ID
 
 void SendAckMesssage(uint8_t fun);
 void GetLoopSwitch(struct DefFrameData* pReciveFrame);
+uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+uint8_t GetLoopSet(struct DefFrameData* pReciveFrame);
+uint8_t CheckOpenCondition(void);
+uint8_t CheckCloseCondition(void);
+uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
+uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
 
-extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
-SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
 
-/**************************************************
- *函数名： SendAckMesssage()
- *功能：  回传校验码
- *形参：  Uint16 fun 功能代码地址
- *返回值：void
-****************************************************/
-inline void SendAckMesssage(uint8_t fun)
+/**
+ * 同步动作属性
+ */
+ActionAttribute g_SynActionAttribute;
+
+/**
+ * 普通合分闸动作属性
+ */
+ActionAttribute g_NormalAttribute;
+
+/**
+ * 暂存命令字
+ */
+uint8_t LastCommand[8] = {0};//最新的命令字
+
+SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
+struct DefFrameData ActionCommandTemporaryAck;   //CAN数据帧
+PointUint8 g_ParameterBuffer;   
+
+
+
+/**
+ * Action参数初始化
+ */
+void ActionParameterInit(void)
 {
-    uint16_t len = 0;
-    ClrWdt();
-    GenRTUFrame(LOCAL_ADDRESS, ACK, &fun, 1, (uint8_t*)SendFrameData, (uint8_t *)&len);
-    ClrWdt();
-    SendFrame((uint8_t*)SendFrameData, len);
-    ClrWdt();
-}
-/**************************************************
- *函数名： ExecuteFunctioncode()
- *功能：  执行功能代码
- *形参：  接收帧指针 frameRtu* pRtu
- *返回值：void
-****************************************************/
-void ExecuteFunctioncode(frameRtu* pRtu)
-{
-    ClrWdt();
-    //该数据帧未处理过
-    if (pRtu->completeFlag == TRUE)
-    {
-       // LEDE ^= 1;
-        if ( pRtu->funcode != YONGCI_WAIT_HE_ACTION)
-        {
-            SendAckMesssage( pRtu->funcode);
-        }
-         ClrWdt();
-        switch(pRtu->funcode)
-        {
-            case RESET_MCU:
-            {
-                Reset(); //软件复位
-                break;
-            }
-            case TURN_ON_INT0:
-            {
-                TurnOnInt2();
-                break;
-            }
-            case TURN_OFF_INT0:
-            {
-                TurnOffInt2();
-                break;
-            }
-            case HEZHA: //立即合闸
-            {
-                if(g_SystemState.workMode == WORK_STATE)
-                {
-                    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
-                    {
-                        return;
-                    }
-                    TongBuHeZha();
-                    ClrWdt();
-                    return ;
-                }
-                break;
-            }
-           case FENZHA: //立即分闸
-            {
-                if(g_SystemState.workMode == WORK_STATE) //多加入一重验证
-                {
-                    FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
-                    FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
-                    if(CAP3_STATE)
-                    {
-                        FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
-                    }
-                    ClrWdt();
-                }
-                return ;
-                break;
-            }
-            case WRITE_HEZHA_TIME:
-            {
-                ClrWdt();
-                if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
-                {
-                    g_DelayTime.hezhaTime1 = (pRtu->pData)[3];
-                }
-                break;
-            }
-            case WRITE_FENZHA_TIME:
-            {
-                ClrWdt();
-                if ( ((pRtu->pData)[3] < 101) && ((pRtu->pData)[3] > 0))
-                {
-                    g_DelayTime.fenzhaTime1 = (pRtu->pData)[3];
-                }
-                break;
-            }
-            case  YONGCI_WAIT_HE_ACTION:
-            {
-                ClrWdt();
-                break;
-            }
-            default :
-            {
-                ClrWdt();
-                break;
-            }
-        }
-    pRtu->completeFlag = FALSE;
-    }
+    g_SynActionAttribute.count = 0;
+    g_SynActionAttribute.loopByte = 0;
+    g_SynActionAttribute.currentIndex = 0; 
+     
+    g_SynActionAttribute.Attribute[0].enable = 0;
+    g_SynActionAttribute.Attribute[0].loop = 0;    
+    g_SynActionAttribute.Attribute[0].offsetTime = 0;
+    g_SynActionAttribute.Attribute[0].readyFlag = 0;
+      
+  
+    g_SynActionAttribute.Attribute[1].enable = 0;
+    g_SynActionAttribute.Attribute[1].loop = 0;   
+    g_SynActionAttribute.Attribute[1].offsetTime = 0;
+    g_SynActionAttribute.Attribute[1].readyFlag = 0;
+   
+    
+
+    g_SynActionAttribute.Attribute[2].enable = 0;
+    g_SynActionAttribute.Attribute[2].loop = 0;
+    g_SynActionAttribute.Attribute[2].offsetTime = 0;
+    g_SynActionAttribute.Attribute[2].readyFlag = 0;
+  
+    g_NormalAttribute.count = 0;
+    g_NormalAttribute.loopByte = 0;
+    g_NormalAttribute.currentIndex = 0; 
+     
+    g_NormalAttribute.Attribute[0].enable = 0;
+    g_NormalAttribute.Attribute[0].loop = 0;    
+    g_NormalAttribute.Attribute[0].offsetTime = 0;
+    g_NormalAttribute.Attribute[0].readyFlag = 0;
+      
+  
+    g_NormalAttribute.Attribute[1].enable = 0;
+    g_NormalAttribute.Attribute[1].loop = 0;   
+    g_NormalAttribute.Attribute[1].offsetTime = 0;
+    g_NormalAttribute.Attribute[1].readyFlag = 0;
+   
+    
+
+    g_NormalAttribute.Attribute[2].enable = 0;
+    g_NormalAttribute.Attribute[2].loop = 0;
+    g_NormalAttribute.Attribute[2].offsetTime = 0;
+    g_NormalAttribute.Attribute[2].readyFlag = 0;   
+    
+    
 }
 
 
@@ -145,21 +113,19 @@ void ExecuteFunctioncode(frameRtu* pRtu)
  */
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
+    if(pReciveFrame->pBuffer[0] > 0x13)
+    {
+        return;
+    }
     uint8_t i = 1;    
     uint8_t id = pReciveFrame->pBuffer[0];
-    uint8_t error = 0;    //错误
-    uint8_t idIndex = 1;  //索引，读取属性值时可用到
+    uint8_t error = 0;  //错误号
+    uint8_t result = 0;
     
-    ClrWdt();
-    uint8_t Data[8] = {0,0,0,0,0,0,0,0};
-    PointUint8 Point;
-    Point.pData = Data;
-    Point.len = 8;
-
     /**
      * 发送数据帧赋值
      */
-    pSendFrame->ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    pSendFrame->ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame->pBuffer[0] = id | 0x80;
     ClrWdt();
 
@@ -171,324 +137,71 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         return;
     }
     
-	if(id < 5)
+    ActionCommandTemporaryAck.ID = pSendFrame->ID;
+    ActionCommandTemporaryAck.pBuffer[0] = pSendFrame->pBuffer[0];  //数据传递
+	if(id <= 5)
 	{
 		for(i = 1;i < pReciveFrame->len;i++)
 		{
             ClrWdt();
 			pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
+            ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
 		}
 		pSendFrame->len = pReciveFrame->len;
-	}  
+	}
+    ActionCommandTemporaryAck.len = pReciveFrame->len;
     
     switch(id)
     {
-        case 1: //合闸预制
-        {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
-            if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+        case ReadyClose : //合闸预制
+        {      
+            result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if (result)
             {
-                SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
-                return;
-            }
-            if((pReciveFrame->pBuffer[1] < 1) || (pReciveFrame->pBuffer[1] > 7))    //回路数错误
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
-            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)  //防止多次预制,防止多次合闸
-            {                
-                GetLoopSwitch(pReciveFrame);
-                OnLock();   //上锁
-                if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
-                {
-                    SendData(pSendFrame);
-                }
-            }
-            else
-            {
-                ClrWdt();
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
+                SendErrorFrame(id, result);
             }
             break;
         }
-        case 2: //合闸执行
+        case CloseAction: //合闸执行
+        {           
+            
+            result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if (result)
+            {
+                SendErrorFrame(id, result);
+            }            
+            break;
+        }
+        case ReadyOpen: //分闸预制
         {
-            if((g_RemoteControlState.ReceiveStateFlag == HE_ORDER) && 
-                (g_RemoteControlState.overTimeFlage == TRUE))
+            result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if (result)
             {
-                g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
-                ClrWdt();               
-                switch(pReciveFrame->pBuffer[1])
-                {
-                    case 0x01:
-                    case 0x02:
-                    case 0x04:
-                    {
-                        if(pReciveFrame->pBuffer[1] == 0x04)
-                        {
-                            pReciveFrame->pBuffer[1] --;
-                        }
-                        HEZHA_Action((pReciveFrame->pBuffer[1] - 1) , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x03:
-                    {
-                        HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                        HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x05:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    case 0x06:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    case 0x07:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            HEZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            HEZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    default :
-                    {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                        OffLock();  //解锁
-                        return;
-                        break;
-                    }
-                }
-                SendData(pSendFrame);
-            }
-            else
-            {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+                SendErrorFrame(id, result);
             }
             break;
         }
-        case 3: //分闸预制
+        case OpenAction: //分闸执行
         {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
-            if(g_SystemState.yuanBenState == BEN_STATE) //本地控制不能执行远方操作错误
+            result = ActionCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if (result)
             {
-                SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
-                return;
-            }
-            if((pReciveFrame->pBuffer[1] < 1) || (pReciveFrame->pBuffer[1] > 7))    //回路数错误
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-            }
-            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER) //防止多次预制,防止多次分闸
-            {
-                GetLoopSwitch(pReciveFrame);
-                OnLock();   //上锁
-                if(g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)
-                {
-                    SendData(pSendFrame);
-                }
-            }
-            else
-            {
-                ClrWdt();
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);
-                OffLock();  //解锁
-            }
-            break;
-        }
-        case 4: //分闸执行
-        {
-            if((g_RemoteControlState.ReceiveStateFlag == FEN_ORDER) && 
-                (g_RemoteControlState.overTimeFlage == TRUE))
-            {
-                g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag          
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
-                switch(pReciveFrame->pBuffer[1])
-                {
-                    case 0x01:
-                    case 0x02:
-                    case 0x04:
-                    {
-                        if(pReciveFrame->pBuffer[1] == 0x04)
-                        {
-                            pReciveFrame->pBuffer[1] --;
-                        }
-                        FENZHA_Action((pReciveFrame->pBuffer[1] - 1) , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x03:
-                    {
-                        FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                        FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                        break;
-                    }
-                    case 0x05:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    case 0x06:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    case 0x07:
-                    {
-                        if(CAP3_STATE)
-                        {
-                            FENZHA_Action(SWITCH_ONE , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_TWO , pReciveFrame->pBuffer[2]);
-                            FENZHA_Action(SWITCH_THREE , pReciveFrame->pBuffer[2]);
-                        }
-                        break;
-                    }
-                    default :
-                    {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                        OffLock();  //解锁
-                        return;
-                        break;
-                    }
-                }
-                SendData(pSendFrame);
-            }
-            else
-            {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],NOT_PERFABRICATE_ERROR);
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
-                OffLock();  //解锁
+                SendErrorFrame(id, result);
             }
             break;
         }        
-        case 5: //同步合闸预制
+        case SyncReadyClose: //同步合闸预制
         {
-            g_RemoteControlState.overTimeFlage = TRUE;  //开启超时检测
-            g_RemoteControlState.orderId = pReciveFrame->pBuffer[0];    //获取命令ID号
-            //分合位错误
-            if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-               (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-               (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
-            {
-                SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                return;
-            }
-            //电容电压未达到设定电压错误
-            if(GetCapVolatageState() == 0)
-            {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                return;
-            }
-            //数据长度不对，数据长度不应为奇数
-            if((pReciveFrame->len  & 0x01)) 
-            {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                return;
-            }
-            pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1] & 0x03;
-            pSendFrame->pBuffer[2] = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-
-            if(CAP3_STATE)
-            {
-                if((pReciveFrame->pBuffer[1] <= 0x34) && (pReciveFrame->len == 6)) //只有三个回路需要控制
-                {
-                    pSendFrame->pBuffer[3] = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-
-                    if((pSendFrame->pBuffer[1] == pSendFrame->pBuffer[2]) || 
-                       (pSendFrame->pBuffer[1] == pSendFrame->pBuffer[3]) || 
-                       (pSendFrame->pBuffer[2] == pSendFrame->pBuffer[3]))//不应该出现相同的回路数
-                    {
-                        //错误消息为存在相同的回路数
-                        SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                        return;
-                    }
-                    ClrWdt();
-                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[2];
-                    pSendFrame->pBuffer[5] = pReciveFrame->pBuffer[3];
-                    pSendFrame->pBuffer[6] = pReciveFrame->pBuffer[4];
-                    pSendFrame->pBuffer[7] = pReciveFrame->pBuffer[5];
-                    pSendFrame->len = 8;
-                }
-            }
-            else
-            {
-                //只有两个回路需要控制
-                if((pReciveFrame->pBuffer[1] == 0x01) || (pReciveFrame->pBuffer[1] == 0x04))  //机构1先合、或者机构2先合
-                {
-                    ClrWdt();
-                    pSendFrame->pBuffer[3] = pReciveFrame->pBuffer[2];
-                    pSendFrame->pBuffer[4] = pReciveFrame->pBuffer[3];
-                    pSendFrame->len = 5;
-                }
-                else
-                {
-                    SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);    //回路数错误
-                    return;
-                }
-            }
-            if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)
-            {                
-                ClrWdt();
-                SendData(pSendFrame);
-                ClrWdt();
-                GetOffestTime(pReciveFrame , pSendFrame);
-                ClrWdt();
-                SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
-                g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
-                TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
-            }
-            else
-            {
-                TurnOffInt2();
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                SendErrorFrame(pReciveFrame->pBuffer[0],SEVERAL_PERFABRICATE_ERROR);    //多次预制
-            }
+            SynCloseReady(pReciveFrame, pSendFrame);
             break;
         }
-        case 0x10:  //顺序参数设置
-        {
-            ClrWdt();
-            break;
-        }
-        case 0x11:  //非顺序参数设置
+       
+        case MasterParameterSetOne:  //非顺序参数设置
         {
             ClrWdt();
             pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
-            Point.pData = pReciveFrame->pBuffer + 2;
-            error = SetParamValue(pReciveFrame->pBuffer[1],&Point);
+            g_ParameterBuffer.pData = pReciveFrame->pBuffer + 2;
+            error = SetParamValue(pReciveFrame->pBuffer[1],&g_ParameterBuffer);
             if(error == 0xFF)
             {
                 ClrWdt();
@@ -501,67 +214,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
-            pSendFrame->pBuffer[2] = Point.pData[0];
-            pSendFrame->pBuffer[3] = Point.pData[1];
-            pSendFrame->len = Point.len + 2;
+            pSendFrame->pBuffer[2] = g_ParameterBuffer.pData[0];
+            pSendFrame->pBuffer[3] = g_ParameterBuffer.pData[1];
+            pSendFrame->len = g_ParameterBuffer.len + 2;
             ClrWdt();
             SendData(pSendFrame);
-            
-            if(pSendFrame->complteFlag == 0)    //当数据发送完毕后进行写累加和
-            {
-                ClrWdt();
-                WriteAccumulateSum();  //写入累加和
-            }
+            g_RemoteControlState.setFixedValue = TRUE;  //设置定值成功
             
             break;
         }
-        case 0x12:  //顺序参数读取
-        {
-            for(idIndex = pReciveFrame->pBuffer[1];idIndex <= pReciveFrame->pBuffer[2];idIndex++)    //抛除ID号所占的长度
-            {
-                ClrWdt();
-                Point.len = 8;
-                error = ReadParamValue(idIndex,&Point);
-                if((error == 0xF1)||(error == 0xF3))    //数据长度错误
-                {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                }
-                pSendFrame->pBuffer[1] = idIndex;  //配置号  
-                pSendFrame->pBuffer[2] = Point.pData[0];
-                pSendFrame->pBuffer[3] = Point.pData[1];
-                pSendFrame->len = Point.len + 2;
-                ClrWdt();
-                SendData(pSendFrame);
-            }
+        case MasterParameterRead:  //顺序参数读取
+        {    
+            SendMonitorParameter(pReciveFrame);
             break;
-        }        
-        case 0x13:  //非顺序参数读取
-        {
-            for(i = 1;i < pReciveFrame->len;i++)    //抛除ID号所占的长度
-            {
-                ClrWdt();
-                Point.len = 8;
-                error = ReadParamValue(pReciveFrame->pBuffer[i],&Point);
-                if((error == 0xF1)||(error == 0xF3))    //数据长度错误
-                {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                }
-                if((error == 0xF2)||(error == 0xF4))    //ID号错误
-                {
-                    ClrWdt();
-                    SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
-                }
-                pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[i];  //配置号
-                pSendFrame->pBuffer[2] = Point.pData[0];
-                pSendFrame->pBuffer[3] = Point.pData[1];
-                pSendFrame->len = Point.len + 2;
-                ClrWdt();
-                SendData(pSendFrame);
-            }
-            break;
-        }
+        }       
         default:
         {
             //错误的ID号处理
@@ -571,14 +237,253 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }          
     }
 }
+uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+{
+    uint8_t result = 0;
+    uint16_t order = 0;
+    
+    
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {        
+        return WORK_MODE_ERROR;
+    }   
+     //区分合分闸检测
+    if (id == CloseAction )
+    {
+        result =  CheckCloseCondition(); //检测合分闸条件
+        order = HE_ORDER;
+    }
+    else if (id == OpenAction)
+    {
+        result =  CheckOpenCondition(); //检测合分闸条件
+        order = FEN_ORDER;
+    }
+    else
+    {
+        return ID_ERROR;
+    }
+     
+    //是否已经预制或者超时                 
+    if((g_RemoteControlState.receiveStateFlag != order) || 
+        (g_RemoteControlState.overTimeFlag != TRUE))
+    {
+        ClrWdt();
+        SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令
+        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
+    }
+       //比较配置字是否一致
+    for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
+    {
+        if (pReciveFrame->pBuffer[i] != LastCommand[i])
+        {          
+            return ERROR_DIFF_CONFIG;
+        }
+    }     
+    
+     
+    g_RemoteControlState.orderId = id;
+    OnLock();   //上锁             
+    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
+    g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令                
+    ClrWdt();               
+    SendData(pSendFrame);
+    
+    if (id == CloseAction )
+    {
+        CloseOperation();      
+    }
+    else if (id == OpenAction)
+    {
+        OpenOperation();
+    }
+    return 0;
+}
+uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+{
+    uint8_t result = 0;
+    uint16_t order = 0;
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {       
+        return WORK_MODE_ERROR;
+    }      
+     if (g_RemoteControlState.receiveStateFlag != IDLE_ORDER)//检测是否多次预制
+    {                
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;       
+        return SEVERAL_PERFABRICATE_ERROR;
+    }   
+    result = GetLoopSet(pReciveFrame);   //获取回路   
+    if (result)
+    {       
+        return result;
+    }   
+    //区分合分闸检测
+    if (id == ReadyClose)
+    {
+        result =  CheckCloseCondition(); //检测合分闸条件
+        order = HE_ORDER;
+    }
+    else if (id == ReadyOpen)
+    {
+        result =  CheckOpenCondition(); //检测合分闸条件
+        order = FEN_ORDER;
+    }
+    else
+    {
+        return ID_ERROR;
+    }
+    
+    if (result)
+    {
+          return result;
+    } 
+    ClrWdt();  
+
+    memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
+    g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
+    SendData(pSendFrame);
+    g_RemoteControlState.receiveStateFlag = order;    //合闸命令
+    g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置预制超时等待时间     
+    g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks; 
+    return 0;
+}
 
 
+uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+{
+    uint8_t id = 0;
+    uint8_t configbyte = 0;
+    uint8_t loop[3] = {0};
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {       
+        return WORK_MODE_ERROR;
+    }
+    //数据长度不对，数据长度不应为奇数
+    if(pReciveFrame->len % 2 != 0) 
+    {
+        ClrWdt();      
+        return DATA_LEN_ERROR;
+    }
+    //必须不小于4
+    if (pReciveFrame->len < 2)
+    {
+        return DATA_LEN_ERROR;
+    }
+        
+    id  = pReciveFrame->pBuffer[0];
+    configbyte = pReciveFrame->pBuffer[1];
+           
+    //分合位错误
+    if((g_SystemState.heFenState1 != OPEN_STATE) || 
+       (g_SystemState.heFenState2 != OPEN_STATE) || 
+       (g_SystemState.heFenState3 != OPEN_STATE))
+    {       
+        return HEFEN_STATE_ERROR;
+    }   
+    
+    //电容电压未达到设定电压错误
+    if(GetCapVolatageState() == 0)
+    {
+        ClrWdt();
+        SendErrorFrame(id, CAPVOLTAGE_ERROR);
+        return CAPVOLTAGE_ERROR;
+    }
+    
+    uint8_t count = (pReciveFrame->len-2) / 2 + 1;//参数时间为差值，比回路数少一个
+    
+     //检查回路数
+    if (count > 3)
+    {
+           return LOOP_ERROR;
+    }
+     //获取回路参数   
+    for(uint8_t i = 0; i < count; i++)
+    {
+        loop[i] = (uint8_t)((configbyte>>(2*i)) & 0x03); 
+        if (loop[i] == 0)
+        {
+            return  LOOP_ERROR;
+        }
+        //TODO:添加回路数限制        
+    }
+    
+    //简单查重
+    if (count == 2)
+    {
+        if (loop[0] == loop[1])
+        {
+            return LOOP_ERROR;
+        }
+    }
+    else  if (count == 3)
+    {
+        if ((loop[0] == loop[1]) || (loop[1] == loop[2])
+                || (loop[0] == loop[2]))
+        {
+            return LOOP_ERROR;
+        } 
+    }
+    
+    //按照执行顺序参数赋值    
+     g_SynActionAttribute.count = count;
+     g_SynActionAttribute.loopByte = configbyte;
+     g_SynActionAttribute.currentIndex = 0;
+      
+     g_SynActionAttribute.Attribute[0].enable = TRUE;
+     g_SynActionAttribute.Attribute[0].loop = loop[0];        
+     g_SynActionAttribute.Attribute[0].offsetTime = 0;
+        
+    uint16_t time = 0;
+    for(uint8_t i = 1; i < count; i++)
+    {
+         
+        g_SynActionAttribute.Attribute[i].enable = TRUE;
+        g_SynActionAttribute.Attribute[i].loop = loop[i];       
+        time = pReciveFrame->pBuffer[2*i + 1];   
+        time = (time<<8)|  pReciveFrame->pBuffer[2*i];   
+        g_SynActionAttribute.Attribute[i].offsetTime = time;
+    }   
+    for (uint8_t i = count; i < 3;i++)
+    {
+         g_SynActionAttribute.Attribute[i].enable = FALSE;
+    }
+    
+    g_RemoteControlState.orderId = id;
+    
+    //返回的数据帧赋值传递
+    for(uint8_t i = 0;i < pSendFrame->len;i++)
+    {
+        ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
+        ClrWdt();
+    }
+    
+
+    if(g_RemoteControlState.receiveStateFlag == IDLE_ORDER)
+    {               
+        ClrWdt();              
+        SendData(pSendFrame);
+        g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置同步预制超时等待时间
+        g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks;
+        ClrWdt();
+        g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+        g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
+        TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
+       
+    }
+    else
+    {
+        TurnOffInt2();
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
+        return SEVERAL_PERFABRICATE_ERROR;    //多次预制
+    }
+    return 0;
+}
 /**
  * @description: 发送错误帧数据
  * @param receiveID 主站发送的ID号
  * @param errorID   错误代码
  */
-void SendErrorFrame(uint8_t receiveID,uint8_t errorID)
+void SendErrorFrame(uint8_t receiveID, uint8_t errorID)
 {
     uint8_t data[8] = {0,0,0,0,0,0,0,0};
     struct DefFrameData pSendFrame;
@@ -596,30 +501,7 @@ void SendErrorFrame(uint8_t receiveID,uint8_t errorID)
     SendData(&pSendFrame);
 }
 
-/**
- * @description: 发送错误帧数据
- * @param data 发送的数据
- */
-void SendMessage(uint16_t sendData)
-{
-    uint8_t highData = (sendData & 0xFF00) >> 8;
-    uint8_t lowData = sendData & 0x00FF;
-    uint8_t data[8] = {0,0,0,0,0,0,0,0};
-    struct DefFrameData pSendFrame;
-    
-    pSendFrame.pBuffer = data;
-    pSendFrame.complteFlag = 0xFF;
-    
-    ClrWdt();
-    pSendFrame.ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    pSendFrame.pBuffer[0] = 0x15;       //应答ID
-    pSendFrame.pBuffer[1] = highData;   //主站发送ID
-    pSendFrame.pBuffer[2] = lowData;    //错误代码     
-    pSendFrame.pBuffer[3] = 0x5A;       //扩展代码        
-    pSendFrame.len = 4;   //错误帧长度
-    ClrWdt();
-    SendData(&pSendFrame);
-}
+
 /**
  * 
  * <p>Function name: [UpdataState]</p>
@@ -627,20 +509,29 @@ void SendMessage(uint16_t sendData)
  */
 void UpdataState(void)
 {
-    uint8_t Data[8] = {0,0,0,0,0,0,0,0};
+    uint8_t data[8] = {0,0,0,0,0,0,0,0};
 
     struct DefFrameData pSendFrame;
 
-    pSendFrame.pBuffer = Data;
+    pSendFrame.pBuffer = data;
     pSendFrame.complteFlag = 0xFF;
 
     ClrWdt();
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
 	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
-
-	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState1 | g_SuddenState.SwitchState2 | g_SuddenState.SwitchState3;	
-	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder1 | g_SuddenState.ExecuteOrder2 | g_SuddenState.ExecuteOrder3;	
-	pSendFrame.pBuffer[3] = g_SuddenState.CapState1 | g_SuddenState.CapState2 | g_SuddenState.CapState3;	
+    
+    g_SuddenState.CapState[LOOP_B] <<= 2;
+    g_SuddenState.CapState[LOOP_C] <<= 4;
+    
+    g_SuddenState.ExecuteOrder[LOOP_B] <<= 2;
+    g_SuddenState.ExecuteOrder[LOOP_C] <<= 4;
+    
+    g_SuddenState.SwitchState[LOOP_B] <<= 2;
+    g_SuddenState.SwitchState[LOOP_C] <<= 2;
+    
+	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState[LOOP_A] | g_SuddenState.SwitchState[LOOP_B] | g_SuddenState.SwitchState[LOOP_C];	
+	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder[LOOP_A] | g_SuddenState.ExecuteOrder[LOOP_B] | g_SuddenState.ExecuteOrder[LOOP_C];	
+	pSendFrame.pBuffer[3] = g_SuddenState.CapState[LOOP_A] | g_SuddenState.CapState[LOOP_B] | g_SuddenState.CapState[LOOP_C];	
     
 	if(!g_SystemState.warning)
 	{
@@ -658,443 +549,186 @@ void UpdataState(void)
     SendData(&pSendFrame);
     
     ClrWdt();
-    g_SuddenState.ExecuteOrder1 = 0;
-    g_SuddenState.ExecuteOrder2 = 0;
-    g_SuddenState.ExecuteOrder3 = 0;
+    g_SuddenState.ExecuteOrder[LOOP_A] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_B] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_C] = 0;
 }
 
+
 /**
- * <p>Function name: [_INT2Interrupt]</p>
- * <p>Discription: [外部中断函数]</p>
+ * 获取合分闸设置回路参数
+ * @retrun 错误代码
  */
-void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
+uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
 {
-    uint8_t i = 0;
-    uint8_t j = 0;
-    uint8_t validCount = 0;
-    uint8_t idleCount = 0;
-    
-    IFS1bits.INT2IF = 0;
-    OFF_INT();
-    //*************************************************************************************
-    //一下判断防止误触发
-    if(g_RemoteControlState.ReceiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
+    if(pReciveFrame->len != 3)
     {
-        ON_INT();
-        TurnOffInt2();
-        return;
+        return DATA_LEN_ERROR;
     }
-    if(g_RemoteControlState.overTimeFlage == FALSE) //发生超时
+    uint8_t configLoop =  pReciveFrame->pBuffer[1];//回路选择配置字
+    uint8_t actionTime =  pReciveFrame->pBuffer[2];//合分闸时间
+    if ((configLoop == 0) || (configLoop > 0x07))
     {
-        ON_INT();
-        TurnOffInt2();
-        return;
-    }
-    //*************************************************************************************
-    //第一次的高电平持续时间判断
-    for(i = 0;i < 20;i++)
-    {
-        if(RXD1_LASER == 1)
+        return  LOOP_ERROR;
+    }    
+     g_NormalAttribute.count = 0;
+    for(uint8_t i = 0; i < 3; i++)
+    {       
+        if (configLoop & (1<<i))
         {
-            validCount++;
+            g_NormalAttribute.Attribute[i].enable = TRUE;
+            g_NormalAttribute.Attribute[i].loop = i+1;
+            g_NormalAttribute.Attribute[i].offsetTime = 0;            
+            g_NormalAttribute.count++;            
         }
         else
         {
-            idleCount++;
+            g_NormalAttribute.Attribute[i].enable = FALSE;
         }
+            
     }
-    if(idleCount >= 2)
-    {
-        return;
-    }
-    validCount = 0;
-    idleCount = 0;
-    //判断四次高低电平持续时间
-    for(j = 0;j < 4;j++)
-    {        
-        validCount = 0;
-        idleCount = 0;
-        for(i = 0;i < 25;i++)
-        {
-            if(RXD1_LASER == 1)
-            {
-                validCount++;
-            }
-            else
-            {
-                idleCount++;
-            }
-        }
-        if((RXD1_LASER == 1) && (idleCount > 2))
-        {
-            return;
-        }
-        else if((RXD1_LASER == 0) && (validCount > 2))
-        {
-            return;
-        }
-    }
-    //查找最后一个低电平
-    for(i = 0;i < 20;i++)
-    {
-        if(RXD1_LASER == 1)
-        {
-            validCount++;
-        }
-        else
-        {
-            idleCount++;
-        }
-        if(idleCount >= 5)
-        {
-            break;
-        }
-    }
-    validCount = 0;
-    while(!RXD1_LASER)
-    {
-        validCount++;
-        if(validCount > 10)
-        {
-            break;
-        }
-    }
-    if(RXD1_LASER || (validCount > 10))
-    {
-        TurnOffInt2();
-        ON_INT();
-        g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
-        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-        g_RemoteControlState.overTimeFlage = FALSE;  //Clear Overtime Flag   
-        TongBuHeZha();
-    }
+    g_NormalAttribute.powerOnTime = actionTime;   
+    return 0;
 }
 
 /**
- * 
- * <p>Function name: [GetLoopSwitch]</p>
- * <p>Discription: [获取需要动作的回路开关]</p>
- * @param pReciveFrame 接收的数据
+ * 检查合闸条件
+ * @return 错误代码
  */
-void GetLoopSwitch(struct DefFrameData* pReciveFrame)
+uint8_t CheckCloseCondition(void)
 {
-	uint8_t orderID = pReciveFrame->pBuffer[0];
-	uint8_t loop = pReciveFrame->pBuffer[1];
     
-    if(orderID == 1)
-	{
-		g_RemoteControlState.ReceiveStateFlag = HE_ORDER;    //合闸命令
-	}	
-	else if(orderID == 3)
-	{
-		g_RemoteControlState.ReceiveStateFlag = FEN_ORDER;   //分闸命令
-	}
-	switch (loop)
-	{
-		case 1:
-		{
-			if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
-			{
-                ClrWdt();
-                if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                {                    
-                    if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
-                    {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
-                    }
-                    g_RemoteControlState.ReceiveStateFlag = CHECK_1_HE_ORDER;
-                }
-                else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
-                {   
-                    if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
-                    {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
-                    }
-                    g_RemoteControlState.ReceiveStateFlag = CHECK_1_FEN_ORDER;
-                }
-                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                return;
-			}
-			break;
-		}
-		case 2:
-		{
-			if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
-			{
-                ClrWdt();
-                if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                {                    
-                    if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
-                    {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
-                    }
-                    g_RemoteControlState.lastReceiveOrder = CHECK_2_HE_ORDER;
-                }
-                else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
+    for(uint8_t i = 0; i< 3; i++)
+    {
+        if( g_NormalAttribute.Attribute[i].enable)
+        {
+            switch( g_NormalAttribute.Attribute[i].loop)
+            {
+                case 1:
                 {
-                    if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
                     {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
+                        return CAPVOLTAGE_ERROR;
                     }
-                    g_RemoteControlState.lastReceiveOrder = CHECK_2_FEN_ORDER;
+                    if (g_SystemState.heFenState1 != OPEN_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+
+                    break;
                 }
-                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                return;
-			}
-			break;
-		}
-		case 4:
-		{
-			if(CAP3_STATE)
-			{
-				if(g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
-				{
-                	ClrWdt();
-                    if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                    {                    
-                        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_3_HE_ORDER;
-                    }
-                    else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
+                case 2:
+                {
+                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
                     {
-                        if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_3_FEN_ORDER;
+                        return CAPVOLTAGE_ERROR;
                     }
-                	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
-				}
-				else
-				{
-					g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    return;
-				}
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-			}
-			break;
-		}
-		case 3:
-		{
-			if((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
-		       (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
-			{
-                ClrWdt();
-                if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                {                          
-                    if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
-                       g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                    if (g_SystemState.heFenState2 != OPEN_STATE)
                     {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
+                        return HEFEN_STATE_ERROR;
                     }
-                    g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
+                    break;
                 }
-                else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
-                {              
-                    if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
-                       g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                case 3:
+                {
+                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
                     {
-                        SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                        return;
+                        return CAPVOLTAGE_ERROR;
                     }
-                    g_RemoteControlState.lastReceiveOrder = CHECK_Z_FEN_ORDER;
+                    if (g_SystemState.heFenState3 != OPEN_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                     break;
                 }
-                SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                return;
-			}
-			break;
-		}
-		case 5: 
-		{
-			if(CAP3_STATE)
-			{
-				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
-		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
-				{
-                	ClrWdt();
-                    if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                    {                           
-                        if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
-                           g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
-                    }
-                    else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
-                    {
-                        if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
-                           g_SystemState.heFenState3 != CHECK_3_HE_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_FEN_ORDER;
-                    }
-                	SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间
-				}
-				else
-				{
-					g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    return;
-				}
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-			}
-			break;
-		}
-		case 6:
-		{
-			if(CAP3_STATE)
-			{
-				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
-		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
-				{
-                	ClrWdt();
-                    if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                    {                           
-                        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE && 
-                           g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
-                    }
-                    else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
-                    {
-                        if(g_SystemState.heFenState3 != CHECK_3_HE_STATE && 
-                           g_SystemState.heFenState2 != CHECK_2_HE_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_FEN_ORDER;
-                    }
-                	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
-				}
-				else
-				{
-					g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    return;
-				}
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-			}
-			break;
-		}
-		case 7:
-		{
-			if(CAP3_STATE)
-			{
-				if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
-		       	   (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
-		       	   (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
-				{
-                	ClrWdt();
-                    if(g_RemoteControlState.ReceiveStateFlag == HE_ORDER)
-                    {                           
-                        if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE && 
-                           g_SystemState.heFenState2 != CHECK_2_FEN_STATE && 
-                           g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_HE_ORDER;
-                    }
-                    else if(g_RemoteControlState.ReceiveStateFlag == FEN_ORDER)
-                    {
-                        if(g_SystemState.heFenState1 != CHECK_1_HE_STATE && 
-                           g_SystemState.heFenState2 != CHECK_2_HE_STATE && 
-                           g_SystemState.heFenState3 != CHECK_3_HE_STATE)
-                        {
-                            SendErrorFrame(pReciveFrame->pBuffer[0],HEFEN_STATE_ERROR);
-                            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-                            return;
-                        }
-                        g_RemoteControlState.lastReceiveOrder = CHECK_Z_FEN_ORDER;
-                    }
-                	SetOverTime(g_RemoteWaitTime);   //设置分闸预制超时等待时间
-				}
-				else
-				{
-					g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-					SendErrorFrame(pReciveFrame->pBuffer[0],CAPVOLTAGE_ERROR);
-                    return;
-				}
-			}
-			else
-			{
-				g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-				SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-                return;
-			}
-			break;
-		}
-		default:
-		{
-			g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
-			SendErrorFrame(pReciveFrame->pBuffer[0],LOOP_ERROR);
-			break;
-		}
-	}
+                default:
+                {
+                    return  LOOP_ERROR;
+                }
+
+            }
+        }
+    }
+    if (g_NormalAttribute.count != 0)
+    {
+        return 0;
+    }
+    else
+    {
+         return  LOOP_ERROR;
+    }
+    
 }
+
+/**
+ * 检查分闸条件
+ * @return 错误代码
+ */
+uint8_t CheckOpenCondition(void)
+{
+    
+    for(uint8_t i = 0; i< 3; i++)
+    {
+        if ( g_NormalAttribute.Attribute[i].enable)
+        {
+            switch( g_NormalAttribute.Attribute[i].loop)
+            {
+                case 1:
+                {
+                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState1 != CLOSE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+
+                    break;
+                }
+                case 2:
+                {
+                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState2 != CLOSE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                    break;
+                }
+                case 3:
+                {
+                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
+                    {
+                        return CAPVOLTAGE_ERROR;
+                    }
+                    if (g_SystemState.heFenState3 != CLOSE_STATE)
+                    {
+                        return HEFEN_STATE_ERROR;
+                    }
+                     break;
+                }
+                default:
+                {
+                    return  LOOP_ERROR;
+                }
+            }
+                            
+        }
+    }
+    if (g_NormalAttribute.count != 0)
+    {
+        return 0;
+    }
+    else
+    {
+         return  LOOP_ERROR;
+    }
+    
+}
+
 
 /**
  * 
@@ -1102,22 +736,28 @@ void GetLoopSwitch(struct DefFrameData* pReciveFrame)
  * <p>Discription: [检测命令是否正确执行]</p>
  * @param lastOrder 上一次执行的命令
  */
-void CheckOrder(uint8_t lastOrder)
+void CheckOrder(uint16_t lastOrder)
 {
     //远方与就地命令的转换
-    if(lastOrder == IDLE_ORDER && g_RemoteControlState.lastReceiveOrder != IDLE_ORDER)
+    if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))
     {
-        lastOrder = g_RemoteControlState.lastReceiveOrder;
+        lastOrder = g_RemoteControlState.lastReceiveOrder;        
+        ActionCommandTemporaryAck.complteFlag = TRUE;
+        if(lastOrder != TONGBU_HEZHA)
+        {
+            SendData(&ActionCommandTemporaryAck); //发送执行反馈指令
+        }        
     }
     switch(lastOrder)
     {
+        case TONGBU_HEZHA:
         case CHECK_Z_HE_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE || 
-               g_SystemState.heFenState2 != CHECK_2_HE_STATE || 
-               g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+            if(g_SystemState.heFenState1 != CLOSE_STATE || 
+               g_SystemState.heFenState2 != CLOSE_STATE || 
+               g_SystemState.heFenState3 != CLOSE_STATE)
             {
-                SendErrorFrame(CHECK_Z_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_HE_ERROR;  //发生拒动
             }
             else
@@ -1128,11 +768,11 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_Z_FEN_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE || 
-               g_SystemState.heFenState2 != CHECK_2_FEN_STATE || 
-               g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+            if(g_SystemState.heFenState1 != OPEN_STATE || 
+               g_SystemState.heFenState2 != OPEN_STATE || 
+               g_SystemState.heFenState3 != OPEN_STATE)
             {
-                SendErrorFrame(CHECK_Z_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_FEN_ERROR;  //发生拒动
             }
             else
@@ -1143,9 +783,9 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_1_HE_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+            if(g_SystemState.heFenState1 != CLOSE_STATE)
             {
-                SendErrorFrame(CHECK_1_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_HE_ERROR;  //发生拒动
             }
             else
@@ -1156,9 +796,9 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_1_FEN_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+            if(g_SystemState.heFenState1 != OPEN_STATE)
             {
-                SendErrorFrame(CHECK_1_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_FEN_ERROR;  //发生拒动
             }
             else
@@ -1169,9 +809,9 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_2_HE_ORDER:
         {
-            if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+            if(g_SystemState.heFenState2 != CLOSE_STATE)
             {
-                SendErrorFrame(CHECK_2_HE_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_HE_ERROR;  //发生拒动
             }
             else
@@ -1182,9 +822,9 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_2_FEN_ORDER:
         {
-            if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+            if(g_SystemState.heFenState2 != OPEN_STATE)
             {
-                SendErrorFrame(CHECK_2_FEN_ORDER , REFUSE_ERROR);
+                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_FEN_ERROR;  //发生拒动
             }
             else
@@ -1195,52 +835,148 @@ void CheckOrder(uint8_t lastOrder)
         }
         case CHECK_3_HE_ORDER:
         {
-            if(CAP3_STATE == 0x00)
+            #if(CAP3_STATE)
             {
-                return;
+                if(g_SystemState.heFenState3 != CLOSE_STATE)
+                {
+                    SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+                    g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
+                }
+                else
+                {
+                    g_SuddenState.RefuseAction = FALSE;  //未发生拒动
+                }
             }
-            if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
-            {
-                SendErrorFrame(CHECK_3_HE_ORDER , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
+            #endif  
             break;
         }
         case CHECK_3_FEN_ORDER:
         {
-            if(CAP3_STATE == 0x00)
-            {
-                return;
-            }
-            if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-            {
-                SendErrorFrame(CHECK_3_FEN_ORDER , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
+#if(CAP3_STATE)
+        if(g_SystemState.heFenState3 != OPEN_STATE)
+        {
+            SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+            g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
+        }
+        else
+        {
+            g_SuddenState.RefuseAction = FALSE;  //未发生拒动
+        }
+#endif  
             break;
         }
         default:
         {
-            return;
+            break;
         }
     }
     if(g_SuddenState.RefuseAction != FALSE)
     {
-        g_changeLedTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+        g_TimeStampCollect.changeLedTime.delayTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
     }
     else
     {
-        g_changeLedTime = 500;  //正常状态下指示灯闪烁的间隔
+        g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
     }
     g_SuddenState.SuddenFlag = TRUE;  //发送突发错误
 }
 
+/**
+ * 
+ * <p>Function name: [SendMonitorParameter]</p>
+ * <p>Discription: [发送参数]</p>
+ */
+void SendMonitorParameter(struct DefFrameData* pReciveFrame)
+{
+    uint8_t idIndex = pReciveFrame->pBuffer[1];
+    uint8_t error = 0;
+    uint8_t i = 0;
+    struct DefFrameData pSendFrame;   //要发送的数据
+    uint8_t data[8] = {0};
+    pSendFrame.pBuffer = data;
+    pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+    pSendFrame.complteFlag = 0xFF;
+    
+    uint8_t start = pReciveFrame->pBuffer[1];
+    uint8_t end = pReciveFrame->pBuffer[2];
+    
+    pSendFrame.pBuffer[0] = 0x92;
+    for(idIndex = start; idIndex <= end;idIndex++)    //抛除ID号所占的长度
+    {
+        ClrWdt();
+        g_ParameterBuffer.len = 8;
+        error = ReadParamValue(idIndex,&g_ParameterBuffer);
+        if((error == 0xF1)||(error == 0xF3))    //数据长度错误
+        {
+            ClrWdt();
+            SendErrorFrame(pSendFrame.pBuffer[0],DATA_LEN_ERROR);
+        }
+        pSendFrame.pBuffer[1] = idIndex;  //配置号  
+        pSendFrame.len = g_ParameterBuffer.len + 2;
+        for(i = 0;i < pSendFrame.len;i++)
+        {
+            pSendFrame.pBuffer[i + 2] = g_ParameterBuffer.pData[i];
+        }
+        ClrWdt();
+        SendData(&pSendFrame);
+    }
+}
+/**
+ * <p>Function name: [_INT2Interrupt]</p>
+ * <p>Discription: [外部中断函数]</p>
+ */
 
+uint16_t g_validCount = 0;
+void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
+{
+    uint8_t i = 0;
+    uint8_t state = 0x00;
+    
+    g_validCount = 0;   //初始化全局变量
+    
+    IFS1bits.INT2IF = 0;
+    OFF_COMMUNICATION_INT();
+    //*************************************************************************************
+    //以下判断防止误触发
+    if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
+    {
+        ON_COMMUNICATION_INT();
+        TurnOffInt2();
+        return;
+    }
+    if(g_RemoteControlState.overTimeFlag == FALSE) //发生超时
+    {
+        ON_COMMUNICATION_INT();
+        TurnOffInt2();
+        return;
+    }
+	//检测高电平
+	for(i = 0; i < 4; i++)
+	{
+		state = ~state;
+		state &= 0x01;
+		while(RXD1_LASER == state)
+		{
+			g_validCount++;
+            if(g_validCount >= 0xFFFF)    //防止进入死循环//TODO:设定最大值
+            {
+                i = 10;
+                return;
+            }
+		}
+		if((g_validCount < 30) || (g_validCount > 50))  //较宽的范围85~125
+		{
+            i = 10;
+			return;
+		}
+        g_validCount = 0;
+	}
+	if((RXD1_LASER == 1) && (i == 4))
+	{
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
+        g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag   
+        SynCloseAction();
+        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
+        TurnOffInt2();
+	}
+}

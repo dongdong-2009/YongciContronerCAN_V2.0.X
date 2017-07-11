@@ -13,9 +13,42 @@
 #include "../Header.h"
 #include "Delay.h"
 
-uint32_t g_MsTicks = 0;
+#define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
+#define GET_CAP_TIME   300      //按键扫描间隔时间
+#define SCAN_TIME   2           //按键扫描间隔时间
+#define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
 
-SysTimeStamp g_SysTimeStamp;    //状态时间
+
+/**
+ * 时间戳合集
+ */
+TimeStampCollect g_TimeStampCollect;    //状态时间
+
+void InitSystemTime()
+{
+    g_TimeStampCollect.msTicks = 0;
+    g_TimeStampCollect.getTempTime.delayTime = GET_TEMP_TIME;
+    g_TimeStampCollect.getTempTime.startTime = 0;
+    
+    g_TimeStampCollect.sendDataTime.delayTime = SEND_TIME;
+    g_TimeStampCollect.sendDataTime.startTime = 0;
+    
+    g_TimeStampCollect.scanTime.delayTime = SCAN_TIME;
+    g_TimeStampCollect.scanTime.startTime = 0;
+    
+    g_TimeStampCollect.changeLedTime.delayTime = 500;
+    g_TimeStampCollect.changeLedTime.startTime = 0;
+    
+    g_TimeStampCollect.getCapVolueTime.delayTime = GET_CAP_TIME;    
+    g_TimeStampCollect.getCapVolueTime.startTime = 0;
+    
+    g_TimeStampCollect.overTime.delayTime = 0;    
+    g_TimeStampCollect.overTime.startTime = 0;
+    
+    g_TimeStampCollect.canStartTime.delayTime = 0;
+    g_TimeStampCollect.canStartTime.startTime = 0;
+    
+}
 
 /**
  * 判断时间是否超时
@@ -32,10 +65,10 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
     if (UINT32_MAX - delayTime < startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
         ClrWdt();
-        if(g_MsTicks < startTime)//先判断是否小于startTime
+        if(g_TimeStampCollect.msTicks < startTime)//先判断是否小于startTime
         {
             ClrWdt();
-            if (g_MsTicks >= (delayTime + startTime))
+            if (g_TimeStampCollect.msTicks >= (startTime + delayTime))
             {
                 ClrWdt();
                 return 0xFF;
@@ -45,7 +78,42 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
     else
     {
         ClrWdt();
-        if (g_MsTicks >= startTime + delayTime)
+        if (g_TimeStampCollect.msTicks >= startTime + delayTime)
+        {
+            return 0xFF;
+        }                
+    }
+    return 0;
+}
+/**
+ * 判断时间是否超时
+ *
+ * @param   startTime 启动时间
+ * @param   delayTime 延时时间
+ * 
+ * @return  0xFF-时间到达 0-时间还未到达
+ *
+ * @bref   比较时间是否达到设定值，对溢出进行超时判断
+ */
+inline uint8_t IsOverTimeStamp(TimeStamp* pStamp)
+{
+    if (UINT32_MAX - pStamp->delayTime < pStamp->startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
+    {
+        ClrWdt();
+        if(g_TimeStampCollect.msTicks < pStamp->startTime)//先判断是否小于startTime
+        {
+            ClrWdt();
+            if (g_TimeStampCollect.msTicks >= (pStamp->startTime + pStamp->delayTime))
+            {
+                ClrWdt();
+                return 0xFF;
+            }
+        }
+    }
+    else
+    {
+        ClrWdt();
+        if (g_TimeStampCollect.msTicks >= pStamp->startTime + pStamp->delayTime)
         {
             return 0xFF;
         }                
@@ -55,30 +123,16 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 
 /**
  * 
- * <p>Function name: [OverflowDetection]</p>
- * <p>Discription: [检查系统计数是否会溢出]</p>
- */
-inline void OverflowDetection(uint32_t delayTime)
-{
-    if(UINT32_MAX - g_SysTimeStamp.TickTime <= delayTime) //需要延时等待的时间是否会使系统时钟计数溢出
-    {
-        g_SysTimeStamp.TickTime = 0;  //会溢出则先进行清零
-    }
-}
-
-/**
- * 
  * <p>Function name: [Delay_ms]</p>
  * <p>Discription: [delays number of tick Systicks ]</p>
  * @param ms 延时时间ms
  */
-inline void Delay_ms(uint32_t dlyTicks)
+inline void DelayMs(uint32_t dlyTicks)
 {
-    uint32_t curTicks;
-    OverflowDetection(dlyTicks);    //溢出检测
-    curTicks = g_SysTimeStamp.TickTime;
+    uint32_t curTicks;  
+    curTicks = g_TimeStampCollect.msTicks;
     ClrWdt();
-    while ((g_SysTimeStamp.TickTime - curTicks) < dlyTicks)
+    while ((g_TimeStampCollect.msTicks - curTicks) < dlyTicks)
     {
         ClrWdt();
     }
@@ -92,6 +146,5 @@ inline void Delay_ms(uint32_t dlyTicks)
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
     IFS0bits.T2IF = 0;
-    g_MsTicks ++;                        /* increment counter necessary in Delay() */  
-    g_SysTimeStamp.TickTime ++;
+    g_TimeStampCollect.msTicks ++;                        /* increment counter necessary in Delay() */    
 }

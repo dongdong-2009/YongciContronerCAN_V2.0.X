@@ -20,16 +20,17 @@
 extern "C" {
 #endif /* __cplusplus */
    
-#define CAP1_ERROR  0xC1
-#define CAP2_ERROR  0xC2
-#define CAP3_ERROR  0xC3
-    
+#define CAP_LOW_STATE       0x01    //电容欠压状态
+#define CAP_UPPER_STATE     0x03    //电容超压状态
+#define CAP_NORMAL_STATE    0x02    //电容正常状态
+
+
 //获取电压
 void GetCapVoltage(void);
 //获取电压状态
 uint16_t GetCapVolatageState(void);
-void CheckVoltage(void);
-void ReadCapDropVoltage(uint8_t lastOrder);
+void UpdataCapVoltageState(void);
+void ReadCapDropVoltage(void);
 
 #ifdef	__cplusplus
 }

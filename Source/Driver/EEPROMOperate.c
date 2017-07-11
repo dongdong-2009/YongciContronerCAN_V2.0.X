@@ -13,14 +13,6 @@
 #include "../SerialPort/RefParameter.h"
 
 /**
- * EEPROM地址
- */
-#define EEPROM_STAR_ADDRESS 0x7FF100    //EEPROM起始地址
-#define EEPROM_END_ADDRESS  0x7FFFFE    //EEPROM结束地址
-#define EEPROM_OFFSET_ADDRESS 0x04      //EEPROM偏移地址
-#define ACCUMULATE_SUM_ADDRESS 0x7FFFFC   //累加和EEPROM地址
-
-/**
  * 
  * <p>Function name: [WriteWord_EEPROM]</p>
  * <p>Discription: [按地址写入一个word]</p>
@@ -83,100 +75,42 @@ inline void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data)
 
 /**
  * 
- * <p>Function name: [ReadEEPROM]</p>
- * <p>Discription: [读取EEPROM中的定值]</p>
- * @param id  配置号
- * @param data 指向数据的指针
- */
-void ReadEEPROM(uint8_t id,PointUint8* pPoint)
-{    
-    uint16_t readData = 0;
-    uint8_t i = 0;
-    ClrWdt();
-    _prog_addressT address;
-    address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
-    for(i = 0;i < pPoint->len;i += 2)
-    { 
-        ClrWdt();
-        ReadWord_EEPROM(address + i,&readData);
-        pPoint->pData[i] = (readData & 0x00FF); //低位先读取
-        if((pPoint->len % 2) == 0)  //对长度进行奇数校验
-        {
-            pPoint->pData[i + 1] = (readData >> 8);               
-        }
-    }
-}
-/**
- * 
- * <p>Function name: [WriteEEPROM]</p>
- * <p>Discription: [将定值写入EEPROM]</p>
- * @param id  配置号
- * @param data 指向数据的指针
- */
-void WriteEEPROM(uint8_t id,PointUint8* pPoint)
-{
-    uint16_t data[2] = {0,0};
-    uint8_t i = 0;
-    ClrWdt();
-    _prog_addressT address;
-    address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
-    for(i = 0;i < pPoint->len;i += 2)
-    {
-        ClrWdt();
-        if((pPoint->len % 2) == 0)  //对长度进行奇数校验
-        {
-            data[i] = pPoint->pData[i + 1];               
-        }
-        data[i] = data[i] << 8 | pPoint->pData[i];
-        WriteWord_EEPROM(address + i,&data[i]);
-    }
-}
-/**
- * 
- * <p>Function name: [WriteAccumulateSum_EEPROM]</p>
- * <p>Discription: [写累加和到EEPROM中]</p>
- * @param writeData 所需写的数据
- */
-void WriteAccumulateSum_EEPROM(uint16_t* writeData)
-{
-    OFF_CAN_INT();  //不允许CAN中断
-    ClrWdt();
-    _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
-    WriteWord_EEPROM(address,writeData);    //写EEPROM时关闭CAN中断
-    
-    ON_CAN_INT();  //允许CAN中断
-}
-
-/**
- * 
- * <p>Function name: [ReadAccumulateSum]</p>
- * <p>Discription: [读累加和]</p>
- * @param writeData 所需读取的数据
- */
-void ReadAccumulateSum(uint16_t* readData)
-{
-    _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
-    ClrWdt();
-    ReadWord_EEPROM(address,readData);    
-}
-
-/**
- * 
- * <p>Function name: [WriteFenzhaCount]</p>
+ * <p>Function name: [SaveActionCount]</p>
  * <p>Discription: [写入分合闸次数]</p>
  * @param writeData 所需读取的数据
  */
-void WriteFenzhaCount(_prog_addressT addr , uint16_t* eedata)
+void SaveActionCount(_prog_addressT addr , uint16_t* eedata)
 {
-    ReadWord_EEPROM(addr , eedata);
+    ReadWord_EEPROM(addr, eedata);
     
     ClrWdt();
     *eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
     
-    OFF_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+    OFF_COMMUNICATION_INT();  //关闭通信中断，防止在写入EEPROM时被打断
     ClrWdt();
-    WriteWord_EEPROM(addr , eedata);
-    ON_INT();
+    WriteWord_EEPROM(addr, eedata);
+    ON_COMMUNICATION_INT();
+}
+
+/**
+ * 
+ * <p>Function name: [ReadActionCount]</p>
+ * <p>Discription: [写入分合闸次数]</p>
+ * @param writeData 所需读取的数据
+ */
+void ReadActionCount(_prog_addressT addr , uint16_t* pdata)
+{
+    ClrWdt();
+    ReadWord_EEPROM(addr, pdata);
+    
+    if(*pdata >= UINT16_MAX)
+    {
+        *pdata = 0;
+        OFF_COMMUNICATION_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+        ClrWdt();
+        WriteWord_EEPROM(addr, pdata);
+        ON_COMMUNICATION_INT();
+    }  
 }
 
 

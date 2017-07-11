@@ -24,6 +24,11 @@ void ConfigCANOneMaskFilterRX0(EIDBits* pRm0, EIDBits* pRf0);
 void GetReciveRX0EID(EIDBits* pEID);
 void ConfigCANOneBraud(void);
 
+CAN_msg       CAN_TxMsg;                      /* CAN message for sending */
+CAN_msg       CAN_RxMsg;                      /* CAN message for receiving */                                
+
+unsigned int  CAN_TxRdy;              /* CAN HW ready to transmit a message */
+unsigned int  CAN_RxRdy;              /* CAN HW received a message */
 
 /********************************************
 *函数名： ConfigCANOneBraud()
@@ -482,40 +487,64 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
 *返回值：uint8 —— 接收数据长度 0--数据出错
 *功能： 读取帧数据 
 **************************************************************/
-uint8_t ReadRx0Frame(CANFrame* pframe)
-{
-    uint8_t len = 0, i = 0, j = 0;
-
-    if ((C2RX0CONbits.RXFUL == 1) && (C2RX0CONbits.RXRTRRO == 0) ) //包含一个有效报文 且不是远程帧
-    {
-        len = C2RX0DLCbits.DLC;
-        for ( i = 0, j = 0; i < len; i += 2, j++)
-        {
-            ClrWdt();
-            switch (j)
-            {
-                case 0:
-                    pframe->frameDataWord[j] = C2RX0B1 ;
-                    break;
-                case 1:
-                    pframe->frameDataWord[j] = C2RX0B2 ;
-                    break;
-                case 2:
-                    pframe->frameDataWord[j] = C2RX0B3 ;
-                    break;
-                case 3:
-                    pframe->frameDataWord[j] = C2RX0B4 ;
-                    break;
-                default:
-                    return 0;//错误跳出
-            }
-        }
-    }
-    ClrWdt();
-    C2RX0CONbits.RXFUL = 0; 
-    return len;
-}
-
+//uint8_t ReadRx0Frame(CANFrame* pframe)
+//{
+//    uint8_t len = 0, i = 0, j = 0;
+//
+//    if ((C2RX0CONbits.RXFUL == 1) && (C2RX0CONbits.RXRTRRO == 0) ) //包含一个有效报文 且不是远程帧
+//    {
+//        len = C2RX0DLCbits.DLC;
+//        for ( i = 0, j = 0; i < len; i += 2, j++)
+//        {
+//            ClrWdt();
+//            switch (j)
+//            {
+//                case 0:
+//                    pframe->frameDataWord[j] = C2RX0B1 ;
+//                    break;
+//                case 1:
+//                    pframe->frameDataWord[j] = C2RX0B2 ;
+//                    break;
+//                case 2:
+//                    pframe->frameDataWord[j] = C2RX0B3 ;
+//                    break;
+//                case 3:
+//                    pframe->frameDataWord[j] = C2RX0B4 ;
+//                    break;
+//                default:
+//                    return 0;//错误跳出
+//            }
+//        }
+//    }
+//    ClrWdt();
+//    C2RX0CONbits.RXFUL = 0; 
+//    return len;
+//}
+ uint8_t ReadRx0Frame(PointUint8* pPoint)
+ {
+     uint8_t len = 0;
+     if (pPoint->len >= 8)
+     {
+         if ((C2RX0CONbits.RXFUL == 1) && (C2RX0CONbits.RXRTRRO == 0) ) //包含一个有效报文 且不是远程帧
+         {
+            len = C1RX0DLCbits.DLC;
+            pPoint->pData[0] = C2RX0B1  ;
+            pPoint->pData[1] = C2RX0B1 >> 8 ;
+            pPoint->pData[2] = C2RX0B2  ;
+            pPoint->pData[3] = C2RX0B2 >> 8 ;
+            pPoint->pData[4] = C2RX0B3  ;
+            pPoint->pData[5] = C2RX0B3 >> 8 ;
+            pPoint->pData[6] = C2RX0B4  ;
+            pPoint->pData[7] = C2RX0B4 >> 8 ;                     
+         }
+     }
+     else
+     {
+         len = 0;
+     }
+      C2RX0CONbits.RXFUL = 0; 
+     return len;
+ }
 /***********************************************************
 * 函数名：GetReciveRX0EID()
 * 形参：uint8 len --数据长度, CANFrame* pframe --待检测帧数据
@@ -540,8 +569,8 @@ EIDBits rEID;
 void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 {    
     ClrWdt();
-    uint8_t rxErrorCount = C2EC & 0x00FF;
-    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
+//    uint8_t rxErrorCount = C2EC & 0x00FF;
+//    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
         
     ClrWdt();
     IFS2bits.C2IF = 0;         //Clear interrupt flag
@@ -562,26 +591,25 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
     {   
         ClrWdt();
         C2INTFbits.RX0IF = 0; 	//If the Interrupt is due to Receive0 of CAN1 Clear the Interrupt
-        uint16_t id = C2RX0SIDbits.SID;
-        uint8_t len = C2RX0DLCbits.DLC;
+        CAN_RxMsg.id =  C2RX0SIDbits.SID;
+        CAN_RxMsg.len = C2RX0DLCbits.DLC;
         ClrWdt();
-        ReadRx0Frame(&Rframe);
+        
+        PointUint8 point;
+        point.len = 8;
+        point.pData = CAN_RxMsg.data;
+      
+        ReadRx0Frame(&point);
         ClrWdt();
-        DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
+        CAN_RxRdy = 1;                            /*  set receive flag */
+        BufferEnqueue(&CAN_RxMsg);
+      //  DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
     }
     else if(C2INTFbits.RX1IF)
     {  
         C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
         ClrWdt();
     }
-
-    if((rxErrorCount < 120) || (txErrorCount < 120))
-    {
-        C2INTEbits.ERRIE = 1;   //开启错误中断
-        IEC2bits.C2IE = 1;      //允许CAN中断
-        ClrWdt();
-    }
-    
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {
@@ -590,20 +618,19 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
         C2INTEbits.ERRIE = 0;   //关闭错误中断
-        UpdateLEDIndicateState(FENWEI3_LED,TURN_ON);    //测试
-        g_changeLedTime = 1500;   //运行指示灯闪烁间隔为1500ms
+        g_RemoteControlState.CanErrorFlag = TRUE;    //发生了总线关断错误
+        g_TimeStampCollect.changeLedTime.delayTime = 1500;   //运行指示灯闪烁间隔为1500ms
         return;
     }
     
-    UpdateLEDIndicateState(HEWEI3_LED,TURN_ON);    //测试
     if(C2INTFbits.ERRIF == 1)
     {
-        UpdateLEDIndicateState(CAP3_LED,TURN_ON);    //测试
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {
-            ClrWdt();
             C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
+            ClrWdt();
+            C2INTEbits.RXB0IE = 1;
         }
         else if(C2INTFbits.RX1OVR)
         {

@@ -12,6 +12,8 @@
 #ifndef USART_H
 #define	USART_H
 
+#include "tydef.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -31,7 +33,7 @@ extern "C" {
 #define OFF_UART_INT()  {IEC0bits.U1RXIE = 0;	}    
     
 void UsartInit();
-void UsartSend(unsigned char abyte);
+void UsartSend(uint8_t abyte);
 
 #ifdef	__cplusplus
 }

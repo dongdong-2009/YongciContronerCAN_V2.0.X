@@ -13,18 +13,19 @@ Source/Yongci/../Driver/Timer.h  \
  Source/Yongci/../Driver/../SerialPort/RefParameter.h  \
  Source/Yongci/../Driver/../SerialPort/../Driver/tydef.h  \
  Source/Yongci/../Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/Yongci/../Driver/../SerialPort/../DeviceNet/../Driver/tydef.h  \
  Source/Yongci/../Driver/CAN.h  \
 Source/Yongci/../Driver/InitTemp.h  \
  Source/Yongci/../Driver/Delay.h  \
 Source/Yongci/../Driver/ImitationIIC.h  \
  Source/Yongci/../Driver/SD2405.h  \
-Source/Yongci/../SerialPort/Action.h  \
- Source/Yongci/../SerialPort/RtuFrame.h  \
- Source/Yongci/../SerialPort/../Driver/tydef.h  \
- Source/Yongci/../SerialPort/../DeviceNet/DeviceNet.h  \
- Source/Yongci/../SerialPort/RtuFrame.h  \
+Source/Yongci/../Driver/buffer.h  \
  Source/Yongci/../Yongci/SwtichCondition.h  \
  Source/Yongci/../Yongci/yongci.h  \
  Source/Yongci/../Yongci/../Driver/tydef.h  \
  Source/Yongci/../Yongci/DeviceParameter.h  \
+ Source/Yongci/../SerialPort/Action.h  \
+ Source/Yongci/../SerialPort/../Driver/tydef.h  \
+ Source/Yongci/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/Yongci/../SerialPort/../Yongci/yongci.h  \
  Source/Yongci/DeviceParameter.h 

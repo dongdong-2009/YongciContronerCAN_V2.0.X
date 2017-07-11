@@ -14,7 +14,27 @@
 #include "DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
 
-#define MARGIN_VALUE    10
+#define THRESHOLD_VALUE    3   //V
+
+typedef struct TagVoltageColect
+{
+    float32_t valueA;
+    float32_t valueB;
+    float32_t valueC;
+    float32_t valueW;
+}VoltageColect;
+
+typedef struct TagAdcFilter
+{
+    VoltageColect sum;
+    VoltageColect max;
+    VoltageColect min;
+    VoltageColect value;
+}AdcFilter;
+
+static uint8_t LastCapState[LOOP_QUANTITY] = {0};   //获取上一次电容电压状态
+
+void GetCapState(uint8_t loop, float min, float max, float capVale);
 /**
  * 
  * <p>Function name: [GetCapVoltage]</p>
@@ -22,12 +42,109 @@
  */
 void GetCapVoltage(void)
 {
+    uint8_t i = 0;
+    uint8_t count = 5;
+    AdcFilter adcFilter;
+    /* Clear */
+    adcFilter.sum.valueA = 0;
+    adcFilter.sum.valueB = 0;
+    adcFilter.sum.valueC = 0;
+    adcFilter.sum.valueW = 0;
+    
     SoftSampleOnce();
-    ClrWdt();
-    g_SystemVoltageParameter.workVoltage = ADCBUF0 * ADC_MODULUS;
-    g_SystemVoltageParameter.voltageCap1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
-    g_SystemVoltageParameter.voltageCap2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
-    VOLTAGE_CAP3(); //电容3赋值函数
+    adcFilter.value.valueW = ADCBUF0 * ADC_MODULUS;
+    adcFilter.max.valueW = adcFilter.value.valueW ;
+    adcFilter.min.valueW = adcFilter.value.valueW;
+    adcFilter.sum.valueW += adcFilter.value.valueW;
+
+    adcFilter.value.valueA = ADCBUF1 * LOCAL_CAP_MODULUS;
+    adcFilter.max.valueA = adcFilter.value.valueA;
+    adcFilter.min.valueA = adcFilter.value.valueA;
+    adcFilter.sum.valueA += adcFilter.value.valueA;
+
+    adcFilter.value.valueB = ADCBUF2 * LOCAL_CAP_MODULUS;
+    adcFilter.max.valueB = adcFilter.value.valueB;
+    adcFilter.min.valueB = adcFilter.value.valueB;
+    adcFilter.sum.valueB += adcFilter.value.valueB;
+#if(CAP3_STATE)
+    adcFilter.value.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
+    adcFilter.max.valueC = adcFilter.value.valueC;
+    adcFilter.min.valueC = adcFilter.value.valueC;
+    adcFilter.sum.valueC += adcFilter.value.valueC;
+#endif
+    for(i = 0; i < count; i++)
+    {
+        SoftSampleOnce();
+        adcFilter.value.valueW = ADCBUF0 * ADC_MODULUS;
+        adcFilter.sum.valueW += adcFilter.value.valueW;
+
+        adcFilter.value.valueA = ADCBUF1 * LOCAL_CAP_MODULUS;
+        adcFilter.sum.valueA += adcFilter.value.valueA;
+
+        adcFilter.value.valueB = ADCBUF2 * LOCAL_CAP_MODULUS;
+        adcFilter.sum.valueB += adcFilter.value.valueB;
+        ClrWdt();
+        
+        /* get workvoltage min value*/
+        if(adcFilter.min.valueW > adcFilter.value.valueW)
+        {
+            adcFilter.min.valueW = adcFilter.value.valueW;
+        }
+        /* get capAvoltage min value*/
+        if(adcFilter.min.valueA > adcFilter.value.valueA)
+        {
+            adcFilter.min.valueA = adcFilter.value.valueA;
+        }
+        /* get capBvoltage min value*/
+        if(adcFilter.min.valueW > adcFilter.value.valueB)
+        {
+            adcFilter.min.valueW = adcFilter.value.valueB;
+        }
+        ClrWdt();
+        
+        /* get workvoltage max value*/
+        if(adcFilter.max.valueW < adcFilter.value.valueW)
+        {
+            adcFilter.max.valueW = adcFilter.value.valueW;
+        }
+        /* get capAvoltage max value*/
+        if(adcFilter.max.valueA < adcFilter.value.valueA)
+        {
+            adcFilter.max.valueA = adcFilter.value.valueA;
+        }
+        /* get capBvoltage max value*/
+        if(adcFilter.max.valueB < adcFilter.value.valueB)
+        {
+            adcFilter.max.valueB = adcFilter.value.valueB;
+        }
+#if(CAP3_STATE)
+        adcFilter.value.valueC = ADCBUF3 * LOCAL_CAP_MODULUS;
+        adcFilter.sum.valueC += adcFilter.value.valueC;
+        /* get capCvoltage min value*/
+        if(adcFilter.min.valueC > adcFilter.value.valueC)
+        {
+            adcFilter.min.valueC = adcFilter.value.valueC;
+        }
+        /* get capCvoltage max value*/
+        if(adcFilter.max.valueC < adcFilter.value.valueC)
+        {
+            adcFilter.max.valueC = adcFilter.value.valueC;
+        }
+#endif
+        ClrWdt();
+    }
+    g_SystemVoltageParameter.workVoltage = (adcFilter.sum.valueW - adcFilter.max.valueW - adcFilter.min.valueW) / (count - 1);
+    g_SystemVoltageParameter.voltageCap1 = (adcFilter.sum.valueA - adcFilter.max.valueA - adcFilter.min.valueA) / (count - 1);
+    g_SystemVoltageParameter.voltageCap2 = (adcFilter.sum.valueB - adcFilter.max.valueB - adcFilter.min.valueB) / (count - 1);    
+    
+    g_SystemVoltageParameter.voltageCap1 *= g_SystemCalibrationCoefficient.capVoltageCoefficient1;
+    g_SystemVoltageParameter.voltageCap2 *= g_SystemCalibrationCoefficient.capVoltageCoefficient2;    
+#if(CAP3_STATE)
+    g_SystemVoltageParameter.voltageCap3 = (adcFilter.sum.valueC - adcFilter.max.valueC - adcFilter.min.valueC) / (count - 1);
+    g_SystemVoltageParameter.voltageCap3 *= g_SystemCalibrationCoefficient.capVoltageCoefficient3;  
+#else
+    g_SystemVoltageParameter.voltageCap3 = 0;
+#endif
     ClrWdt();
 }
 
@@ -41,12 +158,10 @@ uint16_t GetCapVolatageState(void)
 {
     GetCapVoltage();
     ClrWdt();
-    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
-        (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
+    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down + THRESHOLD_VALUE) && 
+        (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down + THRESHOLD_VALUE) && 
         CHECK_VOLTAGE_CAP3())
     {
-        ClrWdt();        
-        ClrWdt();
         return 0xAAAA;
     }
     else
@@ -57,180 +172,72 @@ uint16_t GetCapVolatageState(void)
 
 /**
  * 
- * <p>Function name: [CheckVoltage]</p>
- * <p>Discription: [检测电压的状态,并更新指示灯和继电器]</p>
+ * <p>Function name: [UpdataCapVoltageState]</p>
+ * <p>Discription: [更新电容指示灯和继电器]</p>
  */
-void CheckVoltage(void)
+void UpdataCapVoltageState(void)
 {
-    GetCapVoltage();
-    ClrWdt();
-    //机构1电容状态更新
-    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper) && 
-        (g_SuddenState.CapState1 != 0x03)) //电压超过上限
+    GetCapState(LOOP_A, g_SystemLimit.capVoltage1.down, g_SystemLimit.capVoltage1.upper, g_SystemVoltageParameter.voltageCap1);
+    GetCapState(LOOP_B, g_SystemLimit.capVoltage2.down, g_SystemLimit.capVoltage2.upper, g_SystemVoltageParameter.voltageCap2);
+    if(LastCapState[LOOP_A] != g_SuddenState.CapState[LOOP_A])
     {
-        Delay_ms(50);
-        GetCapVoltage();
-        if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.upper)
-            {
-                ClrWdt();
-                if(g_SuddenState.SuddenFlag == FALSE)
-                {
-                    g_SuddenState.Cap1Error = CAP1_ERROR;
-                    g_SuddenState.CapState1 = 0x03;    //0b11
-                    g_SuddenState.SuddenFlag = TRUE;   //该状态属于突发状态
-                    return ;
-                }
-            }
+        LastCapState[LOOP_A] = g_SuddenState.CapState[LOOP_A];
+        g_SuddenState.SuddenFlag = TRUE;    //发送突发状态
     }
-    else if((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down) && 
-            (g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.upper) && 
-            (g_SuddenState.CapState1 != 0x02)) //正常电压
+    if(LastCapState[LOOP_B] != g_SuddenState.CapState[LOOP_B])
     {
-        ClrWdt();
-        g_SuddenState.Cap1Error = NO_ERROR;
-        g_SuddenState.SuddenFlag = TRUE;
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_ON);     
-        g_SuddenState.CapState1 = 0x02;    //0b10
+        LastCapState[LOOP_B] = g_SuddenState.CapState[LOOP_B];
+        g_SuddenState.SuddenFlag = TRUE;    //发送突发状态
     }
-    else if((g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down - MARGIN_VALUE) && 
-            (g_SuddenState.CapState1 != 0x01)) //低电压
+#if(CAP3_STATE)
+    GetCapState(LOOP_C, g_SystemLimit.capVoltage3.down, g_SystemLimit.capVoltage3.upper, g_SystemVoltageParameter.voltageCap3);
+    if(LastCapState[LOOP_C] != g_SuddenState.CapState[LOOP_C])
     {
-        ClrWdt();
-        UpdateIndicateState(CAP1_RELAY , CAP1_LED ,TURN_OFF); 
-        g_SuddenState.CapState1 = 0x01;    //0b01
+        LastCapState[LOOP_C] = g_SuddenState.CapState[LOOP_C];
+        g_SuddenState.SuddenFlag = TRUE;    //发送突发状态
     }
+#endif
+}
+/**
+ * 
+ * <p>Function name: [GetCapState]</p>
+ * <p>Discription: [获取电容状态]</p>
+ * @param loop  回路数
+ * @param min   电容电压最小值
+ * @param max   电容电压最大值
+ * @param capVale   电容电压值
+ */
+void GetCapState(uint8_t loop, float min, float max, float capVale)
+{
+    float minValue = min + THRESHOLD_VALUE;
     
-    //机构2电容状态更新
-    if ((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper) && 
-        (g_SuddenState.CapState2 != 0x0C)) //电压超过上限
+    if (capVale  >= max)    //超过上限
     {
-        Delay_ms(50);
-        GetCapVoltage();
-        if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
-            {
-                ClrWdt();
-                if(g_SuddenState.SuddenFlag == FALSE)
-                {
-                    g_SuddenState.Cap2Error = CAP2_ERROR;
-                    g_SuddenState.CapState2 = 0x0C;    //0b11
-                    g_SuddenState.SuddenFlag = TRUE;   //该状态属于突发状态
-                    return ;
-                }
-            }
+        g_SuddenState.CapState[loop] = CAP_UPPER_STATE; //超压状态
     }
-    else if((g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down) && 
-            (g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.upper) && 
-            (g_SuddenState.CapState2 != 0x08)) //正常电压
+    else if((capVale < max) && (capVale >= minValue))
     {
-        ClrWdt();
-        g_SuddenState.Cap2Error = NO_ERROR;
-        g_SuddenState.SuddenFlag = TRUE;
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_ON);      
-        g_SuddenState.CapState2 = 0x08;    //0b10 
+        g_SuddenState.CapState[loop] = CAP_NORMAL_STATE; //正常状态
     }
-    else if((g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down - MARGIN_VALUE) && 
-            (g_SuddenState.CapState2 != 0x04)) //低电压
+    else if(capVale <= min)
     {
-        ClrWdt();
-        UpdateIndicateState(CAP2_RELAY , CAP2_LED ,TURN_OFF);      
-        g_SuddenState.CapState2 = 0x04;    //0b01 
+        g_SuddenState.CapState[loop] = CAP_LOW_STATE; //欠压状态
     }
-    
-    //机构3电容状态更新
-    if(CAP3_STATE)
+    else
     {
-        if ((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.upper) && 
-            (g_SuddenState.CapState3 != 0x30)) //电压超过上限
-        {
-            Delay_ms(50);
-            GetCapVoltage();
-            if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.upper)
-                {
-                    ClrWdt();
-                    if(g_SuddenState.SuddenFlag == FALSE)
-                    {
-                        g_SuddenState.Cap3Error = CAP3_ERROR;
-                        g_SuddenState.CapState3 = 0x30;    //0b11
-                        g_SuddenState.SuddenFlag = TRUE;   //该状态属于突发状态
-                        return ;
-                    }
-                }
-        }
-        else if((g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down) && 
-                (g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.upper) && 
-                (g_SuddenState.CapState3 != 0x20)) //正常电压
-        {
-            ClrWdt();
-            g_SuddenState.Cap3Error = NO_ERROR;
-            g_SuddenState.SuddenFlag = TRUE;
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_ON);   
-            g_SuddenState.CapState3 = 0x20;    //0b10      
-        }
-        else if((g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down - MARGIN_VALUE) && 
-                (g_SuddenState.CapState3 != 0x10)) //低电压
-        {
-            ClrWdt();
-            UpdateIndicateState(CAP3_RELAY , CAP3_LED ,TURN_OFF);  
-            g_SuddenState.CapState3 = 0x10;    //0b01 
-        }
+        g_SuddenState.CapState[loop] = 0;   //错误状态
     }
 }
-
 /**
  * 
  * <p>Function name: [ReadCapDropVoltage]</p>
  * <p>Discription: [读取在执行合闸或者分闸后电容电压的变化]</p>
- * @param lastOrder 上一次执行的命令
  */
-void ReadCapDropVoltage(uint8_t lastOrder)
+void ReadCapDropVoltage(void)
 {
-    //远方与就地命令的转换
-    if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))  //远端遥控与就地遥控
-    {
-        lastOrder = g_RemoteControlState.lastReceiveOrder;
-    }
-    switch(lastOrder)
-    {
-        case CHECK_Z_FEN_ORDER:
-        case CHECK_Z_HE_ORDER:
-        {
-            SoftSampleOnce();
-            ClrWdt();
-            g_SystemVoltageParameter.capDropVoltage1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
-            g_SystemVoltageParameter.capDropVoltage2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
-            CAP3_DROP_VOLTAGE();
-            break;
-        }
-        case CHECK_1_FEN_ORDER:
-        case CHECK_1_HE_ORDER:
-        {
-            SoftSampleOnce();
-            ClrWdt();
-            g_SystemVoltageParameter.capDropVoltage1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
-            break;
-        }
-        case CHECK_2_FEN_ORDER:
-        case CHECK_2_HE_ORDER:
-        {
-            SoftSampleOnce();
-            ClrWdt();
-            g_SystemVoltageParameter.capDropVoltage2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
-            break;
-        }
-        case CHECK_3_FEN_ORDER:
-        case CHECK_3_HE_ORDER:
-        {
-            if(CAP3_STATE)
-            {
-                SoftSampleOnce();
-                ClrWdt();
-                CAP3_DROP_VOLTAGE();
-            }
-            break;
-        }
-        default:
-        {
-            return;
-        }
-    }
+    SoftSampleOnce();
+    ClrWdt();
+    g_SystemVoltageParameter.capDropVoltage1 = ADCBUF1 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient1;
+    g_SystemVoltageParameter.capDropVoltage2 = ADCBUF2 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient2;
+    CAP3_DROP_VOLTAGE();
 }

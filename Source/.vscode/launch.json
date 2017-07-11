@@ -1,6 +1,15 @@
 {
     "version": "0.2.0",
     "configurations": [
+        { 
+            "name": "(gdb) Attach",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "enter program name, for example ${workspaceRoot}/a.exe",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/path/to/gdb"
+        },
         {
             "name": "Python",
             "type": "python",

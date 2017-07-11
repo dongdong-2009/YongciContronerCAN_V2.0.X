@@ -16,7 +16,6 @@
       <itemPath>Source/Driver/tydef.h</itemPath>
       <itemPath>Source/SerialPort/Action.h</itemPath>
       <itemPath>Source/SerialPort/CRC16.h</itemPath>
-      <itemPath>Source/SerialPort/RtuFrame.h</itemPath>
       <itemPath>Source/Header.h</itemPath>
       <itemPath>Source/SerialPort/RefParameter.h</itemPath>
       <itemPath>Source/Driver/EEPROMOperate.h</itemPath>
@@ -24,6 +23,7 @@
       <itemPath>Source/Driver/Delay.h</itemPath>
       <itemPath>Source/Driver/ImitationIIC.h</itemPath>
       <itemPath>Source/Driver/SD2405.h</itemPath>
+      <itemPath>Source/Driver/Buffer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -47,11 +47,11 @@
         <itemPath>Source/Driver/Delay.c</itemPath>
         <itemPath>Source/Driver/ImitationIIC.c</itemPath>
         <itemPath>Source/Driver/SD2405.c</itemPath>
+        <itemPath>Source/Driver/Buffer.c</itemPath>
       </logicalFolder>
       <logicalFolder name="SerialPort" displayName="SerialPort" projectFiles="true">
         <itemPath>Source/SerialPort/Action.c</itemPath>
         <itemPath>Source/SerialPort/CRC16.c</itemPath>
-        <itemPath>Source/SerialPort/RtuFrame.c</itemPath>
         <itemPath>Source/SerialPort/RefParameter.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="Yongci" projectFiles="true">
@@ -146,7 +146,7 @@
         <property key="oXC16gcc-sfr-warn" value="false"/>
         <property key="oXC16gcc-smar-io-lvl" value="1"/>
         <property key="oXC16gcc-smart-io-fmt" value=""/>
-        <property key="optimization-level" value="0"/>
+        <property key="optimization-level" value="1"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="preprocessor-macros" value=""/>
@@ -271,7 +271,6 @@
         <property key="UART 1" value="true"/>
         <property key="UART 2" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
@@ -292,7 +291,7 @@
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges" value=""/>
         <property key="programoptions.preserveeeprom" value="true"/>
-        <property key="programoptions.preserveeeprom.ranges" value="007FF000-007FFFFF"/>
+        <property key="programoptions.preserveeeprom.ranges" value="007ff000-007fffff"/>
         <property key="programoptions.preserveprogram.ranges" value=""/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>
@@ -361,8 +360,8 @@
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
                   value="${programoptions.preservedataflash.ranges}"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="programoptions.preserveeeprom.ranges" value=""/>
+        <property key="programoptions.preserveeeprom" value="true"/>
+        <property key="programoptions.preserveeeprom.ranges" value="007FF000-007FFFFF"/>
         <property key="programoptions.preserveprogram.ranges" value=""/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>

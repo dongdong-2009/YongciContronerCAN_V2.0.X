@@ -13,6 +13,14 @@
 #include "RefParameter.h"
 #include "../DeviceNet/DeviceNet.h"
 
+/**
+ * EEPROM地址
+ */
+#define EEPROM_STAR_ADDRESS 0x7FF100    //EEPROM起始地址
+#define EEPROM_END_ADDRESS  0x7FFFFE    //EEPROM结束地址
+#define EEPROM_OFFSET_ADDRESS 0x04      //EEPROM偏移地址
+#define ACCUMULATE_SUM_ADDRESS 0x7FFFFC   //累加和EEPROM地址
+
 /*
  * 局部函数定义
  */
@@ -24,6 +32,10 @@ void GetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint16(PointUint8* pPoint, ConfigData* pConfig);
 void SetValueUint8(PointUint8* pPoint, ConfigData* pConfig);
 void GetValueUint8(PointUint8* pPoint, ConfigData* pConfig);
+
+void ParameterWriteByID(uint8_t id,PointUint8* pPoint);
+void ParameterReadByID(uint8_t id,PointUint8* pPoint);
+
 
 /**
  * 分合闸延时时间
@@ -85,8 +97,7 @@ ConfigData g_ReadOnlyParameterCollect[READONLY_PARAMETER_LEN]; //参数合集--�
 /**
  * 
  */
-uint8_t g_data[8] = {0,0,0,0,0,0,0,0};
-PointUint8 g_pointData;
+PointUint8 BufferData;
 /**
  * 设置参数
  * @param id      配置号
@@ -108,10 +119,10 @@ uint8_t SetParamValue(uint8_t id,PointUint8* pPoint)
 				return 0xF1;
 			}
             
-            g_pointData.len = pPoint->len;
-            WriteEEPROM(id , pPoint);   //写EEPROM           
-            ClrWdt();
-            ReadEEPROM(id , &g_pointData);      //读取EEPROM
+//            BufferData.len = pPoint->len;
+//            ParameterWriteByID(id , pPoint);   //写EEPROM           
+//            ClrWdt();
+//            ParameterReadByID(id , &BufferData);      //读取EEPROM
             //添加判断读取出来的数据是否与变换之后的一致性
             ClrWdt();
             g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
@@ -364,12 +375,7 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
 	index++;
-
-	if (PARAMETER_LEN < index)
-	{
-		ClrWdt();
-		while(1);	//数据长度不正确则触发看门狗复位
-	}
+    
 }
 
 /**
@@ -517,11 +523,6 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
     
-	if (READONLY_PARAMETER_LEN < index)
-	{
-		ClrWdt();
-		while(1);	//数据长度不正确则触发看门狗复位
-	}
 }
 
 /**
@@ -530,90 +531,41 @@ void InitReadonlyParameterCollect(void)
 void RefParameterInit(void)
 {
     uint8_t error = 0;
-    uint32_t kairuValue = 0;
+    uint8_t buffer[8] = {0,0,0,0,0,0,0,0};
     
-    g_pointData.pData = g_data;
-    g_pointData.len = 8;
+    BufferData.pData = buffer;
+    BufferData.len = 8;
     
     //合分闸次数初始化
-    ReadWord_EEPROM(JG1_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount1);
-    ReadWord_EEPROM(JG1_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount1);
 	ClrWdt();
-    ReadWord_EEPROM(JG2_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount2);
-    ReadWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
+    ReadActionCount(JG1_HE_COUNT_ADDRESS, &g_ActionCount.hezhaCount1);
+    ReadActionCount(JG1_FEN_COUNT_ADDRESS, &g_ActionCount.fenzhaCount1);
+    ReadActionCount(JG2_HE_COUNT_ADDRESS, &g_ActionCount.hezhaCount2);
+    ReadActionCount(JG2_FEN_COUNT_ADDRESS, &g_ActionCount.fenzhaCount2);
 	
-	ClrWdt();
-    if(CAP3_STATE)
-    {
-        ReadWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
-        ReadWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
-        if(g_ActionCount.fenzhaCount3 == 0xFFFF)
-        {
-            g_ActionCount.fenzhaCount3 = 0;
-            WriteWord_EEPROM(JG3_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount3);
-        }
-        if(g_ActionCount.hezhaCount3 == 0xFFFF)
-        {
-            g_ActionCount.hezhaCount3 = 0;
-            WriteWord_EEPROM(JG3_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount3);
-        }
-    }
-    else
-    {
-        g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
-        g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
-    }
-    
-    if(g_ActionCount.hezhaCount1 == 0xFFFF)
-    {
-        g_ActionCount.hezhaCount1 = 0;
-        WriteWord_EEPROM(JG1_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount1);
-    }
-    if(g_ActionCount.hezhaCount2 == 0xFFFF)
-    {
-        g_ActionCount.hezhaCount2 = 0;
-        WriteWord_EEPROM(JG2_HE_COUNT_ADDRESS,&g_ActionCount.hezhaCount2);
-    }
-    if(g_ActionCount.fenzhaCount1 == 0xFFFF)
-    {
-        g_ActionCount.fenzhaCount1 = 0;
-        WriteWord_EEPROM(JG1_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount1);
-    }
-    if(g_ActionCount.fenzhaCount2 == 0xFFFF)
-    {
-        g_ActionCount.fenzhaCount2 = 0;
-        WriteWord_EEPROM(JG2_FEN_COUNT_ADDRESS,&g_ActionCount.fenzhaCount2);
-    }
+#if(CAP3_STATE)
+    ReadActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
+    ReadActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
+#else
+    g_ActionCount.hezhaCount3 = 0;  //实际需要读取EEPROM
+    g_ActionCount.fenzhaCount3 = 0;  //实际需要读取EEPROM
+#endif  
     
     //系统电容电压初始化
-    g_SystemVoltageParameter.workVoltage = 0x0490;   //实际需要读取ADC值
+    g_SystemVoltageParameter.workVoltage = 0;   //实际需要读取ADC值
     g_SystemVoltageParameter.temp = DS18B20GetTemperature();
 	ClrWdt();
     
     //系统状态值初始化
-    g_SystemState.heFenState1 = CHECK_1_FEN_STATE;    //默认为分位
-    g_SystemState.heFenState2 = CHECK_2_FEN_STATE;    //默认为分位
-    g_SystemState.heFenState3 = CHECK_3_FEN_STATE;    //默认为分位
+    g_SystemState.heFenState1 = 0x00;
+    g_SystemState.heFenState2 = 0x00;
+    g_SystemState.heFenState3 = 0x00;
 	ClrWdt();
     
-    //远方与本地的初始化
-    kairuValue = ReHC74165();
-    Delay_ms(10);
-	ClrWdt();
-    kairuValue = ReHC74165();
-    if (kairuValue == YUAN_INPUT)//远控
-    {
-		ClrWdt();
-        g_SystemState.yuanBenState = YUAN_STATE;   //远方
-    }
-    else
-    {
-        g_SystemState.yuanBenState = BEN_STATE;   //就地
-    }
-    
-    
-    g_SystemState.workMode = WORK_STATE;    //工作模式，默认值
-    g_SystemState.warning = 0x00;           //默认无警告
+    g_SystemState.yuanBenState = 0x00;  //远方本地初始化
+    g_SystemState.workMode = 0x00;      //工作模式，默认值
+    g_SystemState.warning = 0x00;       //默认无警告
+    g_SystemState.charged = 0;          //默认不带电
     
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
@@ -622,7 +574,7 @@ void RefParameterInit(void)
     error = AccumulateSumVerify();  //累加和校验    
     if(error)
     {
-        g_changeLedTime = 100;
+        g_TimeStampCollect.changeLedTime.delayTime = 100;
         //系统参数上下限
         g_SystemLimit.workVoltage.upper = 6.0f;
         g_SystemLimit.workVoltage.down =  2.7f;
@@ -636,9 +588,9 @@ void RefParameterInit(void)
         g_SystemLimit.capVoltage2.down = 181.1f;
         g_SystemLimit.capVoltage2.down = 182.0f;
         
-        g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1.03;
-        g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1.03;
-        g_SystemCalibrationCoefficient.capVoltageCoefficient3 = 1.03;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1;
+        g_SystemCalibrationCoefficient.capVoltageCoefficient3 = 1;
         
         g_DelayTime.hezhaTime1 = 50;
         g_DelayTime.hezhaTime2 = 50;
@@ -651,7 +603,7 @@ void RefParameterInit(void)
         //同步预制等待时间
         g_SyncReadyWaitTime = 3000;
         g_RemoteWaitTime = 3000;
-        g_LocalMac = 0x0D;
+        g_LocalMac = 0x0A;
     }    
 }
 
@@ -889,27 +841,33 @@ void WriteAccumulateSum(void)
 {
     uint8_t i = 0;
     uint8_t id = 1;    
-    uint8_t len = 0;
     uint16_t totalSum = 0;
-    for(i = 0;i < PARAMETER_LEN;i++)
+    for(id = 1;id <= PARAMETER_LEN ;id++)
     {
+        i = id - 1;
 		ClrWdt();
-        id = i + 1;
+        
         if(g_SetParameterCollect[i].ID == id)
-        {			
+        {		
+            BufferData.len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
 			ClrWdt();	
-            len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
-            g_pointData.len = len;
-            ReadEEPROM(id, &g_pointData);
+            g_SetParameterCollect[i].fGetValue(&BufferData, g_SetParameterCollect + i);
+            if(BufferData.len == 0)
+            {
+                continue;   //立即进行下一次循环
+            }
+            ParameterWriteByID(id , &BufferData);   //写EEPROM          
+            
+            ParameterReadByID(id, &BufferData);
 			ClrWdt();
-            for(uint8_t j = 0;j < g_pointData.len;j++)
+            for(uint8_t j = 0;j < BufferData.len;j++)
             {
 				ClrWdt();
-                totalSum += g_pointData.pData[j];
+                totalSum += BufferData.pData[j];
             }
         }
     }
-    WriteAccumulateSum_EEPROM(&totalSum);  //将累加和写入到EEPROM中
+    WriteAccumulateSumEEPROM(&totalSum);  //将累加和写入到EEPROM中
     //此处可加校验，如果写到EEPROM中的和读取出来的不一致则报错
 }
 /**
@@ -926,7 +884,7 @@ uint8_t AccumulateSumVerify(void)
     uint16_t readAddData = 0;
     uint16_t addData = 0;
     
-    for(id = 1;id < PARAMETER_LEN;id++)
+    for(id = 1;id <= PARAMETER_LEN;id++)
     {
 		ClrWdt();
         i = id - 1;
@@ -934,21 +892,21 @@ uint8_t AccumulateSumVerify(void)
         {
             //为了获取数据长度
             len = g_SetParameterCollect[i].type >> 4;
-            g_pointData.len = len;
-            ReadEEPROM(id, &g_pointData);
+            BufferData.len = len;
+            ParameterReadByID(id, &BufferData);
 			ClrWdt();
             
             //初始化各个变量
-            g_SetParameterCollect[i].fSetValue(&g_pointData, g_SetParameterCollect + i);
-            for(i = 0;i < g_pointData.len;i++)
+            g_SetParameterCollect[i].fSetValue(&BufferData, g_SetParameterCollect + i);
+            for(i = 0;i < BufferData.len;i++)
             {
 				ClrWdt();
-                addData += g_pointData.pData[i];
+                addData += BufferData.pData[i];
             }
         }
     }
 	ClrWdt();
-    ReadAccumulateSum(&readAddData);
+    ReadAccumulateSumEEPROM(&readAddData);
     if(readAddData == addData)
     {
 		ClrWdt();
@@ -961,3 +919,84 @@ uint8_t AccumulateSumVerify(void)
         return 0xFF;
     }
 }
+
+/**
+ * 
+ * <p>Function name: [ParameterReadByID]</p>
+ * <p>Discription: [读取EEPROM中的定值]</p>
+ * @param id  配置号
+ * @param data 指向数据的指针
+ */
+void ParameterReadByID(uint8_t id, PointUint8* pPoint)
+{    
+    uint16_t readData = 0;
+    uint8_t i = 0;
+    ClrWdt();
+    _prog_addressT address;
+    address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
+    for(i = 0;i < pPoint->len;i += 2)
+    { 
+        ClrWdt();
+        ReadWord_EEPROM(address + i,&readData);
+        pPoint->pData[i] = (readData & 0x00FF); //低位先读取
+        if((pPoint->len % 2) == 0)  //对长度进行奇数校验
+        {
+            pPoint->pData[i + 1] = (readData >> 8);               
+        }
+    }
+}
+
+/**
+ * 
+ * <p>Function name: [ParameterWriteByID]</p>
+ * <p>Discription: [将定值写入EEPROM]</p>
+ * @param id  配置号
+ * @param data 指向数据的指针
+ */
+void ParameterWriteByID(uint8_t id,PointUint8* pPoint)
+{
+    uint16_t data[2] = {0,0};
+    uint8_t i = 0;
+    ClrWdt();
+    _prog_addressT address;
+    address = (_prog_addressT)(id * EEPROM_OFFSET_ADDRESS) + EEPROM_STAR_ADDRESS;
+    for(i = 0;i < pPoint->len;i += 2)
+    {
+        ClrWdt();
+        if((pPoint->len % 2) == 0)  //对长度进行奇数校验
+        {
+            data[i] = pPoint->pData[i + 1];               
+        }
+        data[i] = data[i] << 8 | pPoint->pData[i];
+        WriteWord_EEPROM(address + i,&data[i]);
+    }
+}
+/**
+ * 
+ * <p>Function name: [WriteAccumulateSumEEPROM]</p>
+ * <p>Discription: [写累加和到EEPROM中]</p>
+ * @param writeData 所需写的数据
+ */
+void WriteAccumulateSumEEPROM(uint16_t* writeData)
+{
+    OFF_CAN_INT();  //不允许CAN中断
+    ClrWdt();
+    _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
+    WriteWord_EEPROM(address,writeData);    //写EEPROM时关闭CAN中断
+    
+    ON_CAN_INT();  //允许CAN中断
+}
+
+/**
+ * 
+ * <p>Function name: [ReadAccumulateSumEEPROM]</p>
+ * <p>Discription: [读累加和]</p>
+ * @param writeData 所需读取的数据
+ */
+void ReadAccumulateSumEEPROM(uint16_t* readData)
+{
+    _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
+    ClrWdt();
+    ReadWord_EEPROM(address,readData);    
+}
+

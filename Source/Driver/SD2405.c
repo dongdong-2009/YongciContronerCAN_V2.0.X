@@ -159,7 +159,7 @@ void GetTime(void)
 {
     uint8_t year = g_CheckTime.year - 2000;
     uint8_t data[8] = {0};
-    OFF_INT();
+    OFF_COMMUNICATION_INT();
     
     IIC_MasterReadByte(SEC_ADDR , &g_CheckTime.sec);
     IIC_MasterReadByte(MIN_ADDR , &g_CheckTime.min);
@@ -179,7 +179,7 @@ void GetTime(void)
     g_CheckTime.mouth = turnTime(g_CheckTime.mouth);
 	g_CheckTime.year =  turnTime(year) + 2000;
     I2CMasterRead(data,7);
-    ON_INT();
+    ON_COMMUNICATION_INT();
     ClrWdt();
     ClrWdt();
     ClrWdt();

@@ -19,6 +19,8 @@
 #define TURN_ON  0x00
 #define TURN_OFF 0xFF
 
+#define HIGH 1
+#define LOW  0
 /**
  * <p>Discription:[IGBT 控制---A]</p>
  */
@@ -153,6 +155,7 @@
 /**
  * <p>Discription:[LED灯定义]</p>
  */
+#ifdef	SMALL_CHOSE
 #define CAP1_RELAY   RELAY1_OPEN    //电容1储能指示继电器
 #define CAP2_RELAY   RELAY2_OPEN    //电容2储能指示继电器
 #define CAP3_RELAY   RELAY3_OPEN    //电容3储能指示继电器
@@ -174,6 +177,30 @@
 #define FENWEI2_RELAY   RELAY14_OPEN    //机构2分位指示继电器
 #define FENWEI3_RELAY   RELAY15_OPEN    //机构3分位指示继电器
 
+#elif BIG_CHOSE
+//*********************************************
+#define CAP1_RELAY   RELAY16_OPEN    //电容1储能指示继电器
+#define CAP2_RELAY   RELAY15_OPEN    //电容2储能指示继电器
+#define CAP3_RELAY   RELAY14_OPEN    //电容3储能指示继电器
+
+#define ERROR1_RELAY    RELAY13_OPEN //故障指示继电器1
+#define ERROR2_RELAY    RELAY12_OPEN //故障指示继电器2
+#define ERROR3_RELAY    RELAY11_OPEN //故障指示继电器3
+
+#define RUN_RELAY   RELAY10_OPEN     //运行指示继电器
+
+#define Z_HEWEI_RELAY    RELAY9_OPEN    //总合位指示继电器
+#define Z_FENWEI_RELAY   RELAY8_OPEN    //总分位指示继电器
+    
+#define HEWEI1_RELAY    RELAY7_OPEN    //机构1合位指示继电器
+#define HEWEI2_RELAY    RELAY6_OPEN    //机构2合位指示继电器
+#define HEWEI3_RELAY    RELAY5_OPEN    //机构3合位指示继电器
+
+#define FENWEI1_RELAY   RELAY4_OPEN    //机构1分位指示继电器
+#define FENWEI2_RELAY   RELAY3_OPEN    //机构2分位指示继电器
+#define FENWEI3_RELAY   RELAY2_OPEN    //机构3分位指示继电器
+#endif
+//*********************************************
 //*********************************************
 //set 0-led on
 //set 1-led off
@@ -224,9 +251,9 @@
 #define CAP2_LED LED2_ON    //电容2储能指示灯
 #define CAP3_LED LED1_ON    //电容3储能指示灯
 
-#define ERROR1_LED  LED6_ON //故障指示灯1
-#define ERROR2_LED  LED5_ON //故障指示灯1
-#define ERROR3_LED  LED4_ON //故障指示灯1
+#define ERROR1_LED  LED6_ON     //故障指示灯1
+#define ERROR2_LED  LED5_ON     //故障指示灯1
+#define ERROR3_LED  LED4_ON     //故障指示灯1
 
 #define HEWEI1_LED  LED12_ON    //机构1合位指示灯
 #define HEWEI2_LED  LED11_ON    //机构2合位指示灯
@@ -242,6 +269,7 @@
 #define RUN_LED LED13_ON    //工作指示灯
 
 //Binary Input
+//对于以下开入量注释，均为正常状态下注释
 //*************************
 #define KR1_H  0x00000001   //Work or Debug
 #define KR2_H  0x00000002   //ON 1
@@ -275,6 +303,7 @@
 
 //以上均为按位取反后的值
 //***************************************
+#ifdef	SMALL_CHOSE
 #define WORK_INPUT  KR1_H
 
 #define YUAN_INPUT  KR3_H
@@ -309,6 +338,43 @@
 #define HEWEI3_INPUT  KR10_H
 #define FENWEI3_INPUT KR12_H
 
+#elif BIG_CHOSE
+
+#define WORK_INPUT  KR23_H
+
+#define YUAN_INPUT  KR21_H
+
+#define YUAN_AND_WORK() (KR23_H | KR21_H)
+
+#define DIANXIAN_INPUT KR19_H
+
+//合闸、分闸1、2、3的输入
+#define HZHA1_INPUT KR17_H
+#define FZHA1_INPUT KR15_H
+
+#define HZHA2_INPUT KR13_H
+#define FZHA2_INPUT KR11_H
+
+#define HZHA3_INPUT KR9_H
+#define FZHA3_INPUT KR7_H
+
+/**
+ * 总的合闸、分闸输入
+ */
+#define Z_HEZHA_INPUT  KR3_H
+#define Z_FENZHA_INPUT KR1_H
+
+//合位、分位1、2、3的输入
+#define HEWEI1_INPUT  KR24_H
+#define FENWEI1_INPUT KR22_H
+
+#define HEWEI2_INPUT  KR20_H
+#define FENWEI2_INPUT KR18_H
+
+#define HEWEI3_INPUT  KR16_H
+#define FENWEI3_INPUT KR14_H
+
+#endif
 //******************************************
 
 //光纤模块
@@ -328,7 +394,7 @@
 //*****************************************
 
 void InitDeviceIO(void);
-unsigned long ReHC74165(void);
+uint32_t ReadHC165(void);
 
 void InitInt2(void);
 void TurnOnInt2(void);

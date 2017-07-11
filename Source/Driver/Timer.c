@@ -16,14 +16,16 @@
 //Timer2 周期计数
 uint16_t g_TPR2Count = 0;
 
+//Timer4 周期计数
+uint16_t TPR4Count = 0;
 /**
  * 
- * <p>Function name: [Init_Timer1]</p>
+ * <p>Function name: [InitTimer1]</p>
  * <p>Discription: [TIMER1 定时器设置 用于永磁合分闸计时]</p>
  * @param ms 定时器周期
  * @drif 由于该定时器作为永磁分合闸的时间定时器，所以其中断优先级应该为最高
  */
-void Init_Timer1( unsigned int  ms)
+void InitTimer1( unsigned int  ms)
 {
     ClrWdt();
     T1CON = 0;
@@ -54,10 +56,10 @@ inline void StartTimer1(void)
 }
 /**
  * 
- * <p>Function name: [ResetTimer1]</p>
+ * <p>Function name: [StopTimer1]</p>
  * <p>Discription: [复位定时器]</p>
  */
-inline  void ResetTimer1(void)
+inline  void StopTimer1(void)
 {
     T1CON = 0;
     TMR1 = 0; 
@@ -69,11 +71,11 @@ inline  void ResetTimer1(void)
 
 /**
  * 
- * <p>Function name: [SetTimer2]</p>
- * <p>Discription: [TIMER2 定时器设置 —— 用于通讯超时检测]</p>
+ * <p>Function name: [InitTimer2]</p>
+ * <p>Discription: [TIMER2 定时器设置 —— 用于系统ms中断]</p>
  * @param ms 定时器周期
  */
-void SetTimer2(uint16_t ms)
+void InitTimer2(uint16_t ms)
 {
     ClrWdt();
     IPC1bits.T2IP = 1;  //最低的优先级
@@ -120,14 +122,14 @@ inline void StopTimer2(void)
 
 /**
  * 
- * <p>Function name: [Init_Timer3]</p>
+ * <p>Function name: [InitTimer3]</p>
  * <p>Discription: [TIMER3用于永磁同步合闸偏移时间计时]</p>
  * @param ms 定时器周期
  */
-void Init_Timer3(void)
+void InitTimer3(void)
 {
     ClrWdt();
-    T1CON = 0;
+    T3CON = 0;
     IPC1bits.T3IP = 7;  //最高的优先级
     IFS0bits.T3IF = 0;
 
@@ -148,7 +150,8 @@ void Init_Timer3(void)
  */
 inline void StartTimer3(unsigned int us)
 {
-    PR3 = us + 2;   //误差量
+    TMR3 = 0;
+    PR3 = us/2 + 2;   //误差量
     ClrWdt();
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
@@ -156,10 +159,24 @@ inline void StartTimer3(unsigned int us)
 }
 /**
  * 
- * <p>Function name: [ResetTimer3]</p>
+ * <p>Function name: [StartTimer3]</p>
+ * <p>Discription: [启动定时器]</p>
+ * @param us 延时时间
+ */
+inline void ChangeTimerPeriod3(unsigned int us)
+{
+    T3CONbits.TON = 0;
+    IFS0bits.T3IF = 0;
+    TMR3 = 0;
+    PR3 = us/2 + 2;   //误差量
+    T3CONbits.TON = 1;
+}
+/**
+ * 
+ * <p>Function name: [StopTimer3]</p>
  * <p>Discription: [复位定时器]</p>
  */
-inline  void ResetTimer3(void)
+inline  void StopTimer3(void)
 {
     ClrWdt();
     T3CONbits.TON = 0;
@@ -170,18 +187,19 @@ inline  void ResetTimer3(void)
 
 /**
  * 
- * <p>Function name: [Init_Timer4]</p>
- * <p>Discription: [初始化定时器4，用于同步信号判断]/p>
+ * <p>Function name: [InitTimer4]</p>
+ * <p>Discription: [初始化定时器4，普通合分闸控制/p>
  * @param ms 定时器周期
  */
-void Init_Timer4(void)
+void InitTimer4(unsigned int ms)
 {
     ClrWdt();
-    T1CON = 0;
+   
     IPC5bits.T4IP = 2;  //优先级较低
     IFS1bits.T4IF = 0;
 
-    T4CONbits.TCKPS = 0b00; //1:1
+    T4CON = 0;
+    T4CONbits.TCKPS = 0b11; //1:256
     T4CONbits.TCS = 0;
     T4CONbits.TGATE = 0;
 
@@ -189,8 +207,27 @@ void Init_Timer4(void)
     IEC1bits.T4IE = 0;  //不允许中断
     ClrWdt();
     
-    TMR4 = 0;
+    
+    TMR4 = 0;     
+    PR4 = (unsigned int)((float32_t)FCY/1000.00/256.0*(float32_t)ms)-1;
+    ClrWdt();
+    TPR4Count = PR2;
+    T2CONbits.TON = 0;
+    
+    
 } 
+
+/**
+ * 改变定时器4的定时周期
+ * @param ms  定时时间ms
+ */
+inline void ChangeTimerPeriod4(unsigned int ms)
+{
+  
+    TPR4Count = (unsigned int)((float32_t)FCY/1000.00/256.0*(float32_t)ms)-1;
+    PR4 =  TPR4Count;
+}
+
 /**
  * 
  * <p>Function name: [StartTimer4]</p>
@@ -198,31 +235,27 @@ void Init_Timer4(void)
  */
 inline void StartTimer4(void)
 {
+    T4CONbits.TON = 0;
     ClrWdt();
-    TMR4 = 0;
+    TMR4 = 0;    
+    PR4 =  TPR4Count;
     IFS1bits.T4IF = 0;
     T4CONbits.TON = 1;
 }
 /**
  * 
- * <p>Function name: [ResetTimer4]</p>
+ * <p>Function name: [StopTimer4]</p>
  * <p>Discription: [复位定时器]</p>
- */
-inline  void ResetTimer4(void)
-{
-    ClrWdt();
-    TMR4 = 0;
-}
-
-/**
- * 
- * <p>Function name: [ResetTimer4]</p>
- * <p>Discription: [关闭定时器]</p>
  */
 inline  void StopTimer4(void)
 {
     ClrWdt();
     TMR4 = 0;
-    IFS1bits.T4IF = 0;
     T4CONbits.TON = 0;
+    IFS1bits.T4IF = 0;
+    IEC1bits.T4IE = 0;
 }
+
+
+
+

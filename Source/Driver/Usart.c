@@ -11,7 +11,6 @@
  */
 #include "usart.h"
 #include <xc.h>
-#include "../SerialPort/RtuFrame.h"
 #include  "../Header.h"
 
 
@@ -84,19 +83,24 @@ void UsartInit(void)
     InitPortsUART1();
     InitUART1(9600);
 }
-void UsartSend(unsigned char abyte)
+void UsartSend(uint8_t abyte)
 {
+    uint32_t time = 0;
     RX_TX_MODE = TX_MODE;   //--鉴于光耦响应时间，须有一定的延时
     U1TXREG = abyte;
+   
     while(!U1STAbits.TRMT)
     {
-        //此处需要添加超时复位
-        ClrWdt(); //2ms超时后,看门狗复位
+        //估算值
+        if( time ++ > 40000)
+        {
+            return;
+        }
     }
     
     RX_TX_MODE = RX_MODE;
 }
-void UsartRecive(unsigned char abyte)
+void UsartRecive(uint8_t abyte)
 {
     ClrWdt();
 }
@@ -106,7 +110,6 @@ void __attribute__ ((interrupt, no_auto_psv)) _U1RXInterrupt(void)
     
     ClrWdt();
     IFS0bits.U1RXIF = 0;
-    ReciveErrorFlag = FrameQueneIn(U2RXREG);
     
 }
 void __attribute__ ((interrupt, no_auto_psv)) _U1TXInterrupt(void)

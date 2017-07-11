@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RtuFrame.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
+SOURCEFILES_QUOTED_IF_SPACED=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/Buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RtuFrame.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d ${OBJECTDIR}/Source/Driver/AdcSample.o.d ${OBJECTDIR}/Source/Driver/CAN.o.d ${OBJECTDIR}/Source/Driver/DeviceIO.o.d ${OBJECTDIR}/Source/Driver/Timer.o.d ${OBJECTDIR}/Source/Driver/Usart.o.d ${OBJECTDIR}/Source/Driver/traps.o.d ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d ${OBJECTDIR}/Source/Driver/InitTemp.o.d ${OBJECTDIR}/Source/Driver/Delay.o.d ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d ${OBJECTDIR}/Source/Driver/SD2405.o.d ${OBJECTDIR}/Source/SerialPort/Action.o.d ${OBJECTDIR}/Source/SerialPort/CRC16.o.d ${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d ${OBJECTDIR}/Source/Yongci/yongci.o.d ${OBJECTDIR}/Source/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/Buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d ${OBJECTDIR}/Source/Driver/AdcSample.o.d ${OBJECTDIR}/Source/Driver/CAN.o.d ${OBJECTDIR}/Source/Driver/DeviceIO.o.d ${OBJECTDIR}/Source/Driver/Timer.o.d ${OBJECTDIR}/Source/Driver/Usart.o.d ${OBJECTDIR}/Source/Driver/traps.o.d ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d ${OBJECTDIR}/Source/Driver/InitTemp.o.d ${OBJECTDIR}/Source/Driver/Delay.o.d ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d ${OBJECTDIR}/Source/Driver/SD2405.o.d ${OBJECTDIR}/Source/Driver/Buffer.o.d ${OBJECTDIR}/Source/SerialPort/Action.o.d ${OBJECTDIR}/Source/SerialPort/CRC16.o.d ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d ${OBJECTDIR}/Source/Yongci/yongci.o.d ${OBJECTDIR}/Source/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RtuFrame.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
+OBJECTFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/Buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
 
 # Source Files
-SOURCEFILES=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RtuFrame.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
+SOURCEFILES=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/Buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
 
 
 CFLAGS=
@@ -92,140 +92,140 @@ ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o: Source/DeviceNet/DeviceNet.c  nbproje
 	@${MKDIR} "${OBJECTDIR}/Source/DeviceNet" 
 	@${RM} ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d 
 	@${RM} ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/DeviceNet/DeviceNet.c  -o ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/DeviceNet/DeviceNet.c  -o ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/AdcSample.o: Source/Driver/AdcSample.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/AdcSample.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/AdcSample.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/AdcSample.c  -o ${OBJECTDIR}/Source/Driver/AdcSample.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/AdcSample.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/AdcSample.c  -o ${OBJECTDIR}/Source/Driver/AdcSample.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/AdcSample.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/AdcSample.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/CAN.o: Source/Driver/CAN.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/CAN.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/CAN.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/CAN.c  -o ${OBJECTDIR}/Source/Driver/CAN.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/CAN.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/CAN.c  -o ${OBJECTDIR}/Source/Driver/CAN.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/CAN.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/CAN.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/DeviceIO.o: Source/Driver/DeviceIO.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/DeviceIO.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/DeviceIO.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/DeviceIO.c  -o ${OBJECTDIR}/Source/Driver/DeviceIO.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/DeviceIO.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/DeviceIO.c  -o ${OBJECTDIR}/Source/Driver/DeviceIO.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/DeviceIO.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/DeviceIO.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Timer.o: Source/Driver/Timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Timer.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Timer.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Timer.c  -o ${OBJECTDIR}/Source/Driver/Timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Timer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Timer.c  -o ${OBJECTDIR}/Source/Driver/Timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Timer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Timer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Usart.o: Source/Driver/Usart.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Usart.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Usart.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Usart.c  -o ${OBJECTDIR}/Source/Driver/Usart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Usart.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Usart.c  -o ${OBJECTDIR}/Source/Driver/Usart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Usart.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Usart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/traps.o: Source/Driver/traps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/traps.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/traps.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/traps.c  -o ${OBJECTDIR}/Source/Driver/traps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/traps.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/traps.c  -o ${OBJECTDIR}/Source/Driver/traps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/traps.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/traps.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/EEPROMOperate.o: Source/Driver/EEPROMOperate.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/EEPROMOperate.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/EEPROMOperate.c  -o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/EEPROMOperate.c  -o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/InitTemp.o: Source/Driver/InitTemp.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/InitTemp.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/InitTemp.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/InitTemp.c  -o ${OBJECTDIR}/Source/Driver/InitTemp.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/InitTemp.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/InitTemp.c  -o ${OBJECTDIR}/Source/Driver/InitTemp.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/InitTemp.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/InitTemp.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Delay.o: Source/Driver/Delay.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Delay.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Delay.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Delay.c  -o ${OBJECTDIR}/Source/Driver/Delay.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Delay.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Delay.c  -o ${OBJECTDIR}/Source/Driver/Delay.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Delay.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Delay.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/ImitationIIC.o: Source/Driver/ImitationIIC.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/ImitationIIC.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/ImitationIIC.c  -o ${OBJECTDIR}/Source/Driver/ImitationIIC.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/ImitationIIC.c  -o ${OBJECTDIR}/Source/Driver/ImitationIIC.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/SD2405.o: Source/Driver/SD2405.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/SD2405.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/SD2405.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/SD2405.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/Source/Driver/Buffer.o: Source/Driver/Buffer.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
+	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o.d 
+	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Buffer.c  -o ${OBJECTDIR}/Source/Driver/Buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Buffer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/Action.o: Source/SerialPort/Action.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/Action.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/Action.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/Action.c  -o ${OBJECTDIR}/Source/SerialPort/Action.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/Action.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/Action.c  -o ${OBJECTDIR}/Source/SerialPort/Action.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/Action.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/Action.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/CRC16.o: Source/SerialPort/CRC16.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/CRC16.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/CRC16.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/CRC16.c  -o ${OBJECTDIR}/Source/SerialPort/CRC16.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/CRC16.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/CRC16.c  -o ${OBJECTDIR}/Source/SerialPort/CRC16.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/CRC16.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/CRC16.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/Source/SerialPort/RtuFrame.o: Source/SerialPort/RtuFrame.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
-	@${RM} ${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d 
-	@${RM} ${OBJECTDIR}/Source/SerialPort/RtuFrame.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RtuFrame.c  -o ${OBJECTDIR}/Source/SerialPort/RtuFrame.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
-	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/RefParameter.o: Source/SerialPort/RefParameter.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/RefParameter.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RefParameter.c  -o ${OBJECTDIR}/Source/SerialPort/RefParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RefParameter.c  -o ${OBJECTDIR}/Source/SerialPort/RefParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/DeviceParameter.o: Source/Yongci/DeviceParameter.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/DeviceParameter.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/DeviceParameter.c  -o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/DeviceParameter.c  -o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/SwtichCondition.o: Source/Yongci/SwtichCondition.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/SwtichCondition.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/SwtichCondition.c  -o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/SwtichCondition.c  -o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/yongci.o: Source/Yongci/yongci.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/yongci.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/yongci.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/yongci.c  -o ${OBJECTDIR}/Source/Yongci/yongci.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/yongci.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/yongci.c  -o ${OBJECTDIR}/Source/Yongci/yongci.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/yongci.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/yongci.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/main.o: Source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source" 
 	@${RM} ${OBJECTDIR}/Source/main.o.d 
 	@${RM} ${OBJECTDIR}/Source/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/main.c  -o ${OBJECTDIR}/Source/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/main.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/main.c  -o ${OBJECTDIR}/Source/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/main.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
@@ -233,140 +233,140 @@ ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o: Source/DeviceNet/DeviceNet.c  nbproje
 	@${MKDIR} "${OBJECTDIR}/Source/DeviceNet" 
 	@${RM} ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d 
 	@${RM} ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/DeviceNet/DeviceNet.c  -o ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/DeviceNet/DeviceNet.c  -o ${OBJECTDIR}/Source/DeviceNet/DeviceNet.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/AdcSample.o: Source/Driver/AdcSample.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/AdcSample.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/AdcSample.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/AdcSample.c  -o ${OBJECTDIR}/Source/Driver/AdcSample.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/AdcSample.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/AdcSample.c  -o ${OBJECTDIR}/Source/Driver/AdcSample.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/AdcSample.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/AdcSample.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/CAN.o: Source/Driver/CAN.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/CAN.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/CAN.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/CAN.c  -o ${OBJECTDIR}/Source/Driver/CAN.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/CAN.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/CAN.c  -o ${OBJECTDIR}/Source/Driver/CAN.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/CAN.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/CAN.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/DeviceIO.o: Source/Driver/DeviceIO.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/DeviceIO.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/DeviceIO.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/DeviceIO.c  -o ${OBJECTDIR}/Source/Driver/DeviceIO.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/DeviceIO.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/DeviceIO.c  -o ${OBJECTDIR}/Source/Driver/DeviceIO.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/DeviceIO.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/DeviceIO.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Timer.o: Source/Driver/Timer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Timer.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Timer.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Timer.c  -o ${OBJECTDIR}/Source/Driver/Timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Timer.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Timer.c  -o ${OBJECTDIR}/Source/Driver/Timer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Timer.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Timer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Usart.o: Source/Driver/Usart.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Usart.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Usart.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Usart.c  -o ${OBJECTDIR}/Source/Driver/Usart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Usart.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Usart.c  -o ${OBJECTDIR}/Source/Driver/Usart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Usart.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Usart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/traps.o: Source/Driver/traps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/traps.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/traps.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/traps.c  -o ${OBJECTDIR}/Source/Driver/traps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/traps.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/traps.c  -o ${OBJECTDIR}/Source/Driver/traps.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/traps.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/traps.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/EEPROMOperate.o: Source/Driver/EEPROMOperate.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/EEPROMOperate.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/EEPROMOperate.c  -o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/EEPROMOperate.c  -o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/InitTemp.o: Source/Driver/InitTemp.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/InitTemp.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/InitTemp.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/InitTemp.c  -o ${OBJECTDIR}/Source/Driver/InitTemp.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/InitTemp.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/InitTemp.c  -o ${OBJECTDIR}/Source/Driver/InitTemp.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/InitTemp.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/InitTemp.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/Delay.o: Source/Driver/Delay.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/Delay.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/Delay.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Delay.c  -o ${OBJECTDIR}/Source/Driver/Delay.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Delay.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Delay.c  -o ${OBJECTDIR}/Source/Driver/Delay.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Delay.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Delay.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/ImitationIIC.o: Source/Driver/ImitationIIC.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/ImitationIIC.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/ImitationIIC.c  -o ${OBJECTDIR}/Source/Driver/ImitationIIC.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/ImitationIIC.c  -o ${OBJECTDIR}/Source/Driver/ImitationIIC.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/ImitationIIC.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Driver/SD2405.o: Source/Driver/SD2405.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
 	@${RM} ${OBJECTDIR}/Source/Driver/SD2405.o.d 
 	@${RM} ${OBJECTDIR}/Source/Driver/SD2405.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/SD2405.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/Source/Driver/Buffer.o: Source/Driver/Buffer.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
+	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o.d 
+	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Buffer.c  -o ${OBJECTDIR}/Source/Driver/Buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Buffer.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/Action.o: Source/SerialPort/Action.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/Action.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/Action.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/Action.c  -o ${OBJECTDIR}/Source/SerialPort/Action.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/Action.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/Action.c  -o ${OBJECTDIR}/Source/SerialPort/Action.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/Action.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/Action.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/CRC16.o: Source/SerialPort/CRC16.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/CRC16.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/CRC16.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/CRC16.c  -o ${OBJECTDIR}/Source/SerialPort/CRC16.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/CRC16.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/CRC16.c  -o ${OBJECTDIR}/Source/SerialPort/CRC16.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/CRC16.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/CRC16.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
-	
-${OBJECTDIR}/Source/SerialPort/RtuFrame.o: Source/SerialPort/RtuFrame.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
-	@${RM} ${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d 
-	@${RM} ${OBJECTDIR}/Source/SerialPort/RtuFrame.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RtuFrame.c  -o ${OBJECTDIR}/Source/SerialPort/RtuFrame.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
-	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/RtuFrame.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/RefParameter.o: Source/SerialPort/RefParameter.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d 
 	@${RM} ${OBJECTDIR}/Source/SerialPort/RefParameter.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RefParameter.c  -o ${OBJECTDIR}/Source/SerialPort/RefParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/SerialPort/RefParameter.c  -o ${OBJECTDIR}/Source/SerialPort/RefParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/SerialPort/RefParameter.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/DeviceParameter.o: Source/Yongci/DeviceParameter.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/DeviceParameter.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/DeviceParameter.c  -o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/DeviceParameter.c  -o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/SwtichCondition.o: Source/Yongci/SwtichCondition.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/SwtichCondition.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/SwtichCondition.c  -o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/SwtichCondition.c  -o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/Yongci/yongci.o: Source/Yongci/yongci.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Yongci" 
 	@${RM} ${OBJECTDIR}/Source/Yongci/yongci.o.d 
 	@${RM} ${OBJECTDIR}/Source/Yongci/yongci.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/yongci.c  -o ${OBJECTDIR}/Source/Yongci/yongci.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/yongci.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Yongci/yongci.c  -o ${OBJECTDIR}/Source/Yongci/yongci.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Yongci/yongci.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Yongci/yongci.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/main.o: Source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source" 
 	@${RM} ${OBJECTDIR}/Source/main.o.d 
 	@${RM} ${OBJECTDIR}/Source/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/main.c  -o ${OBJECTDIR}/Source/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/main.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/main.c  -o ${OBJECTDIR}/Source/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/main.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif

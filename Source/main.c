@@ -97,75 +97,43 @@ int main()
     uint16_t cn = 0;
     
     //延时4s判断启动
-    while(cn++ < 4000)
+    while(cn++ < 3000)
     {
         __delay_ms(1);
+        if((cn % 100) == 0)
+        {
+            InitDeviceIO(); //IO初始化 首先禁止中断   517cys
+        }
         ClrWdt();
     }
-    
-    InitDeviceIO(); //IO初始化 首先禁止中断
-//    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
-    
+    ClrWdt();
+
     AdcInit(); //ADC采样初始化
-    ClrWdt();
-
-    //是用485通信
-    if(APPLY_485 == TRUE)
-    {
-        ClrWdt(); 
-        UsartInit(); //串口初始化 9600bps 785cycs 上
-
-        ClrWdt(); 
-
-        RX_TX_MODE = TX_MODE; //串口发送    
-        __delay_us(20);
-
-        UsartSend(0xAA);
-        UsartSend(0x55);
-        UsartSend(0x0A);
-
-        RX_TX_MODE = RX_MODE;
-        ClrWdt(); //204cys 
-        ReciveFrameDataInit();              //接收帧初始化
-        ClrWdt(); //452cycs
-    }
     
-    SetTimer2(1);   //用于超时检测，且作为系统心跳时钟，优先级为1
-    Init_Timer3();  //用于永磁控制器的同步合闸偏移时间，精度2us
-    
-    g_SysTimeStamp.TickTime = 0;     //初始化系统时间
-    
+    InitTimer2(1);  //系统心跳时钟，优先级为1，时钟1ms
+    InitTimer3();   //用于永磁控制器的同步合闸偏移时间，精度2us    
+    InitSystemTime();     //初始化系统时间    
     StartTimer2();  //开启系统时钟
-    sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
-    ClrWdt(); //21cys
+    ClrWdt(); 
+    ActionParameterInit();
+    //SD2405_Init();  //时钟芯片初始化    
 
-    SD2405_Init();  //时钟芯片初始化
-    
-    ClrWdt();
         
     cn = 0;
-    
-    if(APPLY_CAN == TRUE)
-    {
-        OFF_UART_INT(); //485通信不开启
+#if(APPLY_CAN == TRUE)
+    BufferInit();     
+    InitStandardCAN(0, 0);      //初始化CAN模块
+    ClrWdt();
+    InitDeviceNet();            //初始化DeviceNet服务
+    ClrWdt();
+    RefParameterInit(); //参数设置初始化
+#endif
         
-        InitStandardCAN(0, 0);      //初始化CAN模块
-
-        ClrWdt();
-        InitDeviceNet();            //初始化DeviceNet服务
-
-        ClrWdt();
-        RefParameterInit(); //参数设置初始化
-    }
-    
-    GetCapVolatageState();  //获取电容电压状态
-    
+    DisplayBufferInit();    //显示缓冲区初始化
+    GetCapVolatageState();  //获取电容电压状态    
     YongciFirstInit();      //永磁合闸参数初始化
-    ClrWdt(); //33cys
-    
-    //测试完成后需要更改回原来的位置
-    UpdateIndicateState(RUN_RELAY,RUN_LED,TURN_ON); //开启运行指示灯和指示继电器
-    
+    ClrWdt(); //33cys    
+    UpdateIndicateState(RUN_RELAY, RUN_LED, TURN_ON); //开启运行指示灯和指示继电器    
     while(TRUE)
     {
         ClrWdt();
