@@ -27,8 +27,6 @@ uint8_t CheckCloseCondition(void);
 uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
 uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
 
-
-extern uint8_t volatile SendFrameData[SEND_FRAME_LEN];
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
 
@@ -48,8 +46,8 @@ ActionAttribute g_NormalAttribute;
 uint8_t LastCommand[8] = {0};//最新的命令字
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
-struct DefFrameData g_qSendFrame;   //CAN数据帧
-PointUint8 g_pPoint;   
+struct DefFrameData ActionCommandTemporaryAck;   //CAN数据帧
+PointUint8 g_ParameterBuffer;   
 
 
 
@@ -128,9 +126,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
      * 发送数据帧赋值
      */
     pSendFrame->ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame->pBuffer[0] = id | 0x80;
-    g_qSendFrame.pBuffer[0] = id | 0x80;  //数据传递
     ClrWdt();
 
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
@@ -141,17 +137,19 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         return;
     }
     
+    ActionCommandTemporaryAck.ID = pSendFrame->ID;
+    ActionCommandTemporaryAck.pBuffer[0] = pSendFrame->pBuffer[0];  //数据传递
 	if(id <= 5)
 	{
 		for(i = 1;i < pReciveFrame->len;i++)
 		{
             ClrWdt();
 			pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
-            g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
+            ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
 		}
 		pSendFrame->len = pReciveFrame->len;
 	}
-    g_qSendFrame.len = pReciveFrame->len;
+    ActionCommandTemporaryAck.len = pReciveFrame->len;
     
     switch(id)
     {
@@ -202,8 +200,8 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             ClrWdt();
             pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
-            g_pPoint.pData = pReciveFrame->pBuffer + 2;
-            error = SetParamValue(pReciveFrame->pBuffer[1],&g_pPoint);
+            g_ParameterBuffer.pData = pReciveFrame->pBuffer + 2;
+            error = SetParamValue(pReciveFrame->pBuffer[1],&g_ParameterBuffer);
             if(error == 0xFF)
             {
                 ClrWdt();
@@ -216,12 +214,12 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
                 SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
                 return;
             }
-            pSendFrame->pBuffer[2] = g_pPoint.pData[0];
-            pSendFrame->pBuffer[3] = g_pPoint.pData[1];
-            pSendFrame->len = g_pPoint.len + 2;
+            pSendFrame->pBuffer[2] = g_ParameterBuffer.pData[0];
+            pSendFrame->pBuffer[3] = g_ParameterBuffer.pData[1];
+            pSendFrame->len = g_ParameterBuffer.len + 2;
             ClrWdt();
             SendData(pSendFrame);
-            g_RemoteControlState.SetFixedValue = TRUE;  //设置定值成功
+            g_RemoteControlState.setFixedValue = TRUE;  //设置定值成功
             
             break;
         }
@@ -266,14 +264,13 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     }
      
     //是否已经预制或者超时                 
-    if((g_RemoteControlState.ReceiveStateFlag != order) || 
+    if((g_RemoteControlState.receiveStateFlag != order) || 
         (g_RemoteControlState.overTimeFlag != TRUE))
     {
         ClrWdt();
         SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
-        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令
         g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-
     }
        //比较配置字是否一致
     for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
@@ -288,7 +285,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     g_RemoteControlState.orderId = id;
     OnLock();   //上锁             
     g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
-    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;  //空闲命令                
+    g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令                
     ClrWdt();               
     SendData(pSendFrame);
     
@@ -310,9 +307,9 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
     {       
         return WORK_MODE_ERROR;
     }      
-     if (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER)//检测是否多次预制
+     if (g_RemoteControlState.receiveStateFlag != IDLE_ORDER)//检测是否多次预制
     {                
-        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;       
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;       
         return SEVERAL_PERFABRICATE_ERROR;
     }   
     result = GetLoopSet(pReciveFrame);   //获取回路   
@@ -345,8 +342,9 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
     memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
     g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
     SendData(pSendFrame);
-    g_RemoteControlState.ReceiveStateFlag = order;    //合闸命令
-    SetOverTime(g_RemoteWaitTime);   //设置预制超时等待时间      
+    g_RemoteControlState.receiveStateFlag = order;    //合闸命令
+    g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置预制超时等待时间     
+    g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks; 
     return 0;
 }
 
@@ -455,18 +453,19 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     //返回的数据帧赋值传递
     for(uint8_t i = 0;i < pSendFrame->len;i++)
     {
-        g_qSendFrame.pBuffer[i] = pSendFrame->pBuffer[i];
+        ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
         ClrWdt();
     }
     
 
-    if(g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER)
+    if(g_RemoteControlState.receiveStateFlag == IDLE_ORDER)
     {               
         ClrWdt();              
         SendData(pSendFrame);
-        SetOverTime(g_SyncReadyWaitTime);   //设置同步预制超时等待时间
+        g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置同步预制超时等待时间
+        g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks;
         ClrWdt();
-        g_RemoteControlState.ReceiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
+        g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
         g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
         TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
        
@@ -474,7 +473,7 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     else
     {
         TurnOffInt2();
-        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return SEVERAL_PERFABRICATE_ERROR;    //多次预制
     }
     return 0;
@@ -734,10 +733,10 @@ void CheckOrder(uint16_t lastOrder)
     if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))
     {
         lastOrder = g_RemoteControlState.lastReceiveOrder;        
-        g_qSendFrame.complteFlag = TRUE;
+        ActionCommandTemporaryAck.complteFlag = TRUE;
         if(lastOrder != TONGBU_HEZHA)
         {
-            SendData(&g_qSendFrame); //发送执行反馈指令
+            SendData(&ActionCommandTemporaryAck); //发送执行反馈指令
         }        
     }
     switch(lastOrder)
@@ -844,19 +843,17 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_3_FEN_ORDER:
         {
-            #if(CAP3_STATE)
-            {
-                if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
-                {
-                    SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                    g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
-                }
-                else
-                {
-                    g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-                }
-            }
-            #endif  
+#if(CAP3_STATE)
+        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+        {
+            SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+            g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
+        }
+        else
+        {
+            g_SuddenState.RefuseAction = FALSE;  //未发生拒动
+        }
+#endif  
             break;
         }
         default:
@@ -877,18 +874,18 @@ void CheckOrder(uint16_t lastOrder)
 
 /**
  * 
- * <p>Function name: [CheckOrder]</p>
- * <p>Discription: [检测命令是否正确执行]</p>
+ * <p>Function name: [SendMonitorParameter]</p>
+ * <p>Discription: [发送参数]</p>
  */
 void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
-    uint8_t idIndex = g_qSendFrame.pBuffer[1];
+    uint8_t idIndex = pReciveFrame->pBuffer[1];
     uint8_t error = 0;
     uint8_t i = 0;
     struct DefFrameData pSendFrame;   //要发送的数据
     uint8_t data[8] = {0};
     pSendFrame.pBuffer = data;
-    pSendFrame.ID = g_qSendFrame.ID;
+    pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame.complteFlag = 0xFF;
     
     uint8_t start = pReciveFrame->pBuffer[1];
@@ -898,18 +895,18 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
     for(idIndex = start; idIndex <= end;idIndex++)    //抛除ID号所占的长度
     {
         ClrWdt();
-        g_pPoint.len = 8;
-        error = ReadParamValue(idIndex,&g_pPoint);
+        g_ParameterBuffer.len = 8;
+        error = ReadParamValue(idIndex,&g_ParameterBuffer);
         if((error == 0xF1)||(error == 0xF3))    //数据长度错误
         {
             ClrWdt();
             SendErrorFrame(pSendFrame.pBuffer[0],DATA_LEN_ERROR);
         }
         pSendFrame.pBuffer[1] = idIndex;  //配置号  
-        pSendFrame.len = g_pPoint.len + 2;
+        pSendFrame.len = g_ParameterBuffer.len + 2;
         for(i = 0;i < pSendFrame.len;i++)
         {
-            pSendFrame.pBuffer[i + 2] = g_pPoint.pData[i];
+            pSendFrame.pBuffer[i + 2] = g_ParameterBuffer.pData[i];
         }
         ClrWdt();
         SendData(&pSendFrame);
@@ -932,7 +929,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     OFF_COMMUNICATION_INT();
     //*************************************************************************************
     //以下判断防止误触发
-    if(g_RemoteControlState.ReceiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
+    if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
     {
         ON_COMMUNICATION_INT();
         TurnOffInt2();
@@ -967,7 +964,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 	}
 	if((RXD1_LASER == 1) && (i == 4))
 	{
-        g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag   
         SynCloseAction();
         g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;

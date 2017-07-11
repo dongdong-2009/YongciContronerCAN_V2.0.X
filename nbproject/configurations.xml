@@ -16,7 +16,6 @@
       <itemPath>Source/Driver/tydef.h</itemPath>
       <itemPath>Source/SerialPort/Action.h</itemPath>
       <itemPath>Source/SerialPort/CRC16.h</itemPath>
-      <itemPath>Source/SerialPort/RtuFrame.h</itemPath>
       <itemPath>Source/Header.h</itemPath>
       <itemPath>Source/SerialPort/RefParameter.h</itemPath>
       <itemPath>Source/Driver/EEPROMOperate.h</itemPath>
@@ -54,7 +53,6 @@
         <itemPath>Source/SerialPort/Action.c</itemPath>
         <itemPath>Source/SerialPort/CRC16.c</itemPath>
         <itemPath>Source/SerialPort/RefParameter.c</itemPath>
-        <itemPath>Source/SerialPort/RtuFrame.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="Yongci" projectFiles="true">
         <itemPath>Source/Yongci/DeviceParameter.c</itemPath>

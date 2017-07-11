@@ -19,10 +19,8 @@ Source/Driver/Delay.h  \
 Source/Driver/SD2405.h  \
  Source/Driver/buffer.h  \
 Source/SerialPort/Action.h  \
- Source/SerialPort/RtuFrame.h  \
-Source/SerialPort/../Driver/tydef.h  \
+ Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
-Source/SerialPort/RtuFrame.h  \
  Source/Yongci/SwtichCondition.h  \
 Source/Yongci/../Driver/tydef.h  \
  Source/Yongci/yongci.h  \

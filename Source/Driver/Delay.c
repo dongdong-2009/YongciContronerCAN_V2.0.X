@@ -42,6 +42,9 @@ void InitSystemTime()
     g_TimeStampCollect.getCapVolueTime.delayTime = GET_CAP_TIME;    
     g_TimeStampCollect.getCapVolueTime.startTime = 0;
     
+    g_TimeStampCollect.overTime.delayTime = 0;    
+    g_TimeStampCollect.overTime.startTime = 0;
+    
     g_TimeStampCollect.canStartTime.delayTime = 0;
     g_TimeStampCollect.canStartTime.startTime = 0;
     
@@ -117,20 +120,6 @@ inline uint8_t IsOverTimeStamp(TimeStamp* pStamp)
     }
     return 0;
 }
-
-
-/**
- * 
- * <p>Function name: [OverflowDetection]</p>
- * <p>Discription: [检查系统计数是否会溢出]</p>
- */
-//inline void OverflowDetection(uint32_t delayTime)
-//{
-//    if(UINT32_MAX - g_TimeStampCollect.msTicks <= delayTime) //需要延时等待的时间是否会使系统时钟计数溢出
-//    {
-//        g_TimeStampCollect.msTicks = 0;  //会溢出则先进行清零
-//    }
-//}
 
 /**
  * 

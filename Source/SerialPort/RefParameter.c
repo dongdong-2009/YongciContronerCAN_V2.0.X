@@ -562,9 +562,10 @@ void RefParameterInit(void)
     g_SystemState.heFenState3 = 0x00;
 	ClrWdt();
     
-    g_SystemState.yuanBenState = 0x00; //远方本地初始化
-    g_SystemState.workMode = 0x00;    //工作模式，默认值
-    g_SystemState.warning = 0x00;           //默认无警告
+    g_SystemState.yuanBenState = 0x00;  //远方本地初始化
+    g_SystemState.workMode = 0x00;      //工作模式，默认值
+    g_SystemState.warning = 0x00;       //默认无警告
+    g_SystemState.charged = 0;          //默认不带电
     
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    

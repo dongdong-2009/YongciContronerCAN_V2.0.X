@@ -97,32 +97,18 @@ int main()
     uint16_t cn = 0;
     
     //延时4s判断启动
-    while(cn++ < 4000)
+    while(cn++ < 3000)
     {
         __delay_ms(1);
-        InitDeviceIO(); //IO初始化 首先禁止中断 TODO:算一下指令数
+        if((cn % 100) == 0)
+        {
+            InitDeviceIO(); //IO初始化 首先禁止中断   517cys
+        }
         ClrWdt();
     }
     ClrWdt();
 
     AdcInit(); //ADC采样初始化
-    
-    //是用485通信
-#if(APPLY_485 == TRUE)
-        ClrWdt(); 
-        UsartInit(); //串口初始化 9600bps 785cycs 上
-        ClrWdt(); 
-        RX_TX_MODE = TX_MODE; //串口发送    
-        __delay_us(20);
-        UsartSend(0xAA);
-        UsartSend(0x55);
-        UsartSend(0x0A);
-        RX_TX_MODE = RX_MODE;
-        ClrWdt(); //204cys 
-        ReciveFrameDataInit();              //接收帧初始化
-        ClrWdt(); //452cycs
-        sendFrame.address =  LOCAL_ADDRESS; //本机接收地址处理
-#endif
     
     InitTimer2(1);  //系统心跳时钟，优先级为1，时钟1ms
     InitTimer3();   //用于永磁控制器的同步合闸偏移时间，精度2us    
@@ -135,15 +121,12 @@ int main()
         
     cn = 0;
 #if(APPLY_CAN == TRUE)
-    {
-        BufferInit();
-        OFF_UART_INT(); //485通信不开启        
+        BufferInit();     
         InitStandardCAN(0, 0);      //初始化CAN模块
         ClrWdt();
         InitDeviceNet();            //初始化DeviceNet服务
         ClrWdt();
         RefParameterInit(); //参数设置初始化
-    }
 #endif
     
     GetCapVolatageState();  //获取电容电压状态    

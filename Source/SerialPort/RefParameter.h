@@ -190,13 +190,14 @@ typedef struct TagActionCount
  */
 typedef struct TagSystemState
 {
-    uint8_t heFenState1;   //处于合位还是分为
-    uint8_t heFenState2;   //处于合位还是分为
-    uint8_t heFenState3;   //处于合位还是分为
-    uint8_t yuanBenState; //远方或者就地
-    uint8_t workMode;     //工作模式
-    uint8_t warning;      //告警
-    uint8_t MacID;        //MAC地址
+    uint8_t heFenState1;    //处于合位还是分为
+    uint8_t heFenState2;    //处于合位还是分为
+    uint8_t heFenState3;    //处于合位还是分为
+    uint8_t yuanBenState;   //远方或者就地
+    uint8_t workMode;   //工作模式
+    uint8_t warning;    //告警
+    uint8_t MacID;      //MAC地址
+    uint8_t charged;    //电显状态
     
 }SystemState;
 

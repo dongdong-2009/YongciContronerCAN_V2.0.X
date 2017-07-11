@@ -1,8 +1,7 @@
 build/default/production/Source/SerialPort/Action.o:  \
  Source/SerialPort/Action.c  \
 Source/SerialPort/Action.h  \
- Source/SerialPort/RtuFrame.h  \
-Source/SerialPort/../Driver/tydef.h  \
+ Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
  Source/SerialPort/../DeviceNet/../Driver/tydef.h  \
  Source/SerialPort/../Header.h  \
@@ -23,7 +22,6 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Driver/SD2405.h  \
  Source/SerialPort/../Driver/buffer.h  \
  Source/SerialPort/../SerialPort/Action.h  \
- Source/SerialPort/../SerialPort/RtuFrame.h  \
  Source/SerialPort/../Yongci/SwtichCondition.h  \
  Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Yongci/yongci.h  \

@@ -94,6 +94,7 @@ typedef struct TagTimeStampCollect
     TimeStamp changeLedTime; //记录上一次改变指示灯的时间
     TimeStamp getCapVolueTime;   //获取电容电压的时间间隔
     TimeStamp canStartTime;     //CAN启动时间定时器
+    TimeStamp overTime;     //CAN启动时间定时器
 }TimeStampCollect;
 
 

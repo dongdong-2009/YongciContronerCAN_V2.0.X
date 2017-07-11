@@ -235,6 +235,7 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 1.优化继电器和LED灯状态输出，使其扫描时间缩短了一半
 2.将电容的电压读取和显示分开执行
 3.优化了按键扫描策略
+4.优化165扫描读取函数
 
 
 

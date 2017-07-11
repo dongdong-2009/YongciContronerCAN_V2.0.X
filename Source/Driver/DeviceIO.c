@@ -48,7 +48,6 @@
 #define IP595_B_MR     	 LATGbits.LATG14
 #define IP595_B_MR_DIR   TRISGbits.TRISG14
 
-#define NOP()   {Nop();Nop();}
 
 void HC595BSendData(uint16_t SendVal);
 void HC595SendData(uint16_t SendVal);
@@ -168,16 +167,16 @@ void HC595BSendData(uint16_t SendVal)
             IP595_B_DS = 0;
         }
         IP595_B_SHCP = 0;
-        NOP();
+        Nop();
         IP595_B_SHCP = 1;	
-        NOP();
+        Nop();
         SendVal = SendVal << 1;
     }  
     ClrWdt();
     IP595_B_STCP = 0; //set dataline low
-    NOP();
+    Nop();
     IP595_B_STCP = 1; 
-    NOP();
+    Nop();
 }
 
 /**
@@ -201,16 +200,16 @@ void HC595SendData(uint16_t SendVal)
             IP595_DS = 0;
         }
         IP595_SHCP = 0;
-        NOP();
+        Nop();
         IP595_SHCP = 1;	
-        NOP();
+        Nop();
         SendVal = SendVal << 1;
     }  
     ClrWdt();
     IP595_STCP = 0; //set dataline low
-    NOP();
+    Nop();
     IP595_STCP = 1; 
-    NOP();
+    Nop();
 }
 
 /**
@@ -231,19 +230,19 @@ void AllHC595SendData(uint16_t lValue , uint16_t rValue)
         //产生上升沿
         IP595_SHCP = LOW;
         IP595_B_SHCP = LOW;
-        NOP();
+        Nop();
         IP595_SHCP = HIGH;
         IP595_B_SHCP = HIGH;
-        NOP();
+        Nop();
         lValue = lValue << 1; 
         rValue = rValue << 1;
     }
     IP595_STCP = 0; //set dataline low
     IP595_B_STCP = 0; //set dataline low
-    NOP();
+    Nop();
     IP595_STCP = 1; 
     IP595_B_STCP = 1; 
-    NOP();
+    Nop();
 }
 
 /**
@@ -259,20 +258,20 @@ uint32_t ReadHC165(void)
     
     ClrWdt();
     PL = 0;  
-    NOP();
+    Nop();
     PL = 1;
     
     CE = 0;
-    NOP();
+    Nop();
     for(i = 0; i < 24; i++)
     {
         ClrWdt();
         CP = 0;
-        NOP();
+        Nop();
         indata <<= 1;
         indata |= Q7;
         CP = 1;
-        NOP();
+        Nop();
     }
     PL = 1;
     CP = 1;

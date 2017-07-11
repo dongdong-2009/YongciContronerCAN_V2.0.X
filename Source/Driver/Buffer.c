@@ -70,7 +70,7 @@ uint8_t BufferEnqueue( CAN_msg* pMsg)
 uint8_t BufferDequeue( CAN_msg* pMsg)
 {
     FifoInformation* pInf = &FifoInfor;
-     ClrWdt();
+    ClrWdt();
     if (pInf->count > 0)
     {        
         memcpy( pMsg, pInf->pMsg + pInf->head , sizeof(CAN_msg));

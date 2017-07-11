@@ -11,7 +11,6 @@
  */
 #include "usart.h"
 #include <xc.h>
-#include "../SerialPort/RtuFrame.h"
 #include  "../Header.h"
 
 
@@ -111,7 +110,6 @@ void __attribute__ ((interrupt, no_auto_psv)) _U1RXInterrupt(void)
     
     ClrWdt();
     IFS0bits.U1RXIF = 0;
-    ReciveErrorFlag = FrameQueneIn(U2RXREG);
     
 }
 void __attribute__ ((interrupt, no_auto_psv)) _U1TXInterrupt(void)

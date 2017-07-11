@@ -20,10 +20,8 @@ Source/DeviceNet/../Driver/InitTemp.h  \
  Source/DeviceNet/../Driver/SD2405.h  \
 Source/DeviceNet/../Driver/buffer.h  \
  Source/DeviceNet/../SerialPort/Action.h  \
- Source/DeviceNet/../SerialPort/RtuFrame.h  \
  Source/DeviceNet/../SerialPort/../Driver/tydef.h  \
  Source/DeviceNet/../SerialPort/../DeviceNet/DeviceNet.h  \
- Source/DeviceNet/../SerialPort/RtuFrame.h  \
  Source/DeviceNet/../Yongci/SwtichCondition.h  \
  Source/DeviceNet/../Yongci/../Driver/tydef.h  \
  Source/DeviceNet/../Yongci/yongci.h  \

@@ -16,13 +16,11 @@
 
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
 
-frameRtu sendFrame, recvFrame;
-
 SwitchConfig g_SwitchConfig[4];	//配置机构状态
-IndexConfig g_Index[4]; //获取同步合闸偏移时间以及合闸顺序
 
+uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
-uint16_t _PERSISTENT g_lockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
+uint16_t _PERSISTENT g_LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 uint16_t g_lastRunOrder = IDLE_ORDER;
 CAN_msg ReciveMsg;
@@ -36,7 +34,6 @@ void SwitchOpenThirdPhase(SwitchConfig* pConfig);
 void SwitchCloseFirstPhase(SwitchConfig* pConfig);
 void SwitchCloseSecondPhase(SwitchConfig* pConfig);
 void SwitchCloseThirdPhase(SwitchConfig* pConfig);
-void GetSwitchCloseTime(IndexConfig* pIndex);
 
 
 
@@ -73,25 +70,14 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     
 }
 /**
- * @brief 永磁控制器不同分合闸控制
- */
-void __attribute__((interrupt, no_auto_psv)) _T4Interrupt(void)
-{
-    IFS1bits.T4IF = 0;
-    
-    
-    
-    
-}
-/**
  * 
  * <p>Function name: [OnLock]</p>
  * <p>Discription: [上锁]</p>
  */
 inline void OnLock(void)
 {
-    g_lockUp = ON_LOCK;    //上锁
-    g_lockUp = ON_LOCK;    //上锁
+    g_LockUp = ON_LOCK;    //上锁
+    g_LockUp = ON_LOCK;    //上锁
 }
 
 /**
@@ -101,8 +87,8 @@ inline void OnLock(void)
  */
 inline void OffLock(void)
 {
-    g_lockUp = OFF_LOCK;    //解锁
-    g_lockUp = OFF_LOCK;    //解锁
+    g_LockUp = OFF_LOCK;    //解锁
+    g_LockUp = OFF_LOCK;    //解锁
 }
 
 
@@ -115,11 +101,11 @@ void SynCloseAction(void)
     uint8_t i = 0;
     uint8_t count = 0;
     
-    #if CAP3_STATE
-        count = 3;
-    #else
-        count = 2;
-    #endif
+#if CAP3_STATE
+    count = 3;
+#else
+    count = 2;
+#endif
 
     for(i = 0; i < count; i++)
     {
@@ -151,7 +137,7 @@ void SynCloseAction(void)
 	g_SwitchConfig[loop].SwitchClose(g_SwitchConfig + loop);
     
     //判断执行的路数
-      uint8_t nextIndex = ++ g_SynActionAttribute.currentIndex;
+    uint8_t nextIndex = ++ g_SynActionAttribute.currentIndex;
     if(nextIndex < g_SynActionAttribute.count)
     {     
        StartTimer3(g_SynActionAttribute.Attribute[nextIndex].offsetTime);
@@ -167,7 +153,7 @@ void SynCloseAction(void)
  */
 void CloseOperation(void)
 {
-    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
         return;
     }
@@ -175,14 +161,14 @@ void CloseOperation(void)
     ClrWdt();
     uint8_t index = 0;
     //g_NormalAttribute
-     for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
-     {
+    for(uint8_t i = 0; i < g_NormalAttribute.count; i++)
+    {
         if(g_SwitchConfig[index].currentState || g_SwitchConfig[index].order || g_SwitchConfig[index].lastOrder)
         {
             g_Order = IDLE_ORDER;    //将命令清零
             return ;
-        }   
-     }
+        }
+    }
     OFF_COMMUNICATION_INT();  //关闭通信中断
     g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
@@ -209,7 +195,7 @@ void CloseOperation(void)
  */
 void OpenOperation(void)
 {
-    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
         return;
     }
@@ -249,14 +235,14 @@ void OpenOperation(void)
 
 /**
  * 
- * <p>Function name: [HEZHA_Action]</p>
+ * <p>Function name: [SingleCloseOperation]</p>
  * <p>Discription: [对机构执行合闸操作，对外提供接口，方便引用]</p>
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
-void HEZHA_Action(uint8_t index,uint16_t time)
+void SingleCloseOperation(uint8_t index,uint16_t time)
 {
-    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
         return;
     }
@@ -279,14 +265,14 @@ void HEZHA_Action(uint8_t index,uint16_t time)
 
 /**
  * 
- * <p>Function name: [HEZHA_Action]</p>
+ * <p>Function name: [SingleOpenOperation]</p>
  * <p>Discription: [对机构执行合闸操作，对外提供接口，方便引用]</p>
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
-void FENZHA_Action(uint8_t index,uint16_t time)
+void SingleOpenOperation(uint8_t index,uint16_t time)
 {
-    if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行分闸
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行分闸
     {
         return;
     }
@@ -338,56 +324,54 @@ uint8_t  RefreshActionState()
     {
 //        __delay_us(100);
 //        g_SwitchConfig[DEVICE_I].order = IDLE_ORDER;
-//        RESET_CURRENT_A();            
+//        RESET_CURRENT_A();
     }
         
-        //机构2合闸、分闸刷新
-        if((g_SwitchConfig[DEVICE_II].order == HE_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-            g_SwitchConfig[DEVICE_II].SwitchClose(g_SwitchConfig + 1);
-            state |= 0x84;
-        }
-        else if((g_SwitchConfig[DEVICE_II].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
-        {
-            ClrWdt();
-            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-            g_SwitchConfig[DEVICE_II].SwitchOpen(g_SwitchConfig + 1);
-             state |= 0x88;
-        }
-        else    //防止持续合闸或者分闸
-        {
+    //机构2合闸、分闸刷新
+    if((g_SwitchConfig[DEVICE_II].order == HE_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
+    {
+        ClrWdt();
+        OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+        g_SwitchConfig[DEVICE_II].SwitchClose(g_SwitchConfig + 1);
+        state |= 0x84;
+    }
+    else if((g_SwitchConfig[DEVICE_II].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
+    {
+        ClrWdt();
+        OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+        g_SwitchConfig[DEVICE_II].SwitchOpen(g_SwitchConfig + 1);
+        state |= 0x88;
+    }
+    else    //防止持续合闸或者分闸
+    {
 //            __delay_us(100);
 //            g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
 //            RESET_CURRENT_B();
-        }
-        
-        #if(CAP3_STATE)
+    }
+
+#if(CAP3_STATE)
+        //机构3合闸、分闸刷新
+        if((g_SwitchConfig[DEVICE_III].order == HE_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
         {
-            //机构3合闸、分闸刷新
-            if((g_SwitchConfig[DEVICE_III].order == HE_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
-            {
-                ClrWdt();
-                OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-                g_SwitchConfig[DEVICE_III].SwitchClose(g_SwitchConfig + 2);
-                state |= 0x10;
-            }
-            else if((g_SwitchConfig[DEVICE_III].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
-            {
-                ClrWdt();
-                g_SwitchConfig[DEVICE_III].SwitchOpen(g_SwitchConfig + 2);
-                OFF_COMMUNICATION_INT();  //刷新关闭通信中断
-                 state |= 0x20;
-            }
-            else    //防止持续合闸或者分闸
-            {
+            ClrWdt();
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+            g_SwitchConfig[DEVICE_III].SwitchClose(g_SwitchConfig + 2);
+            state |= 0x10;
+        }
+        else if((g_SwitchConfig[DEVICE_III].order == FEN_ORDER) && (g_SwitchConfig[DEVICE_III].currentState == RUN_STATE))
+        {
+            ClrWdt();
+            g_SwitchConfig[DEVICE_III].SwitchOpen(g_SwitchConfig + 2);
+            OFF_COMMUNICATION_INT();  //刷新关闭通信中断
+             state |= 0x20;
+        }
+        else    //防止持续合闸或者分闸
+        {
 //                __delay_us(100);
 //                g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
 //                RESET_CURRENT_C();
-            }
         }
-        #endif
+#endif
 
         //就绪状态则继续等待 TODO：就绪超时
         if((g_SwitchConfig[DEVICE_I].currentState == READY_STATE)
@@ -423,12 +407,12 @@ uint8_t  RefreshIdleState()
     uint8_t result = 0;
 
    //任意一项不是空闲状态
-    if((!(g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
+    if(!((g_SwitchConfig[DEVICE_I].order == IDLE_ORDER) &&
         (g_SwitchConfig[DEVICE_II].order == IDLE_ORDER) && 
-         CHECK_ORDER3()))
+        CHECK_ORDER3()))
     {
-        return 0xF1;        
-    }     
+        return 0xF1;
+    }
 
 
     //空闲状态，状态刷新        
@@ -444,7 +428,7 @@ uint8_t  RefreshIdleState()
         checkOrderDelay = REFUSE_ACTION;
         //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
         UpdateCount();//更新计数
-        ReadCapDropVoltage(g_lastRunOrder);  //读取电容跌落电压
+        ReadCapDropVoltage();  //读取电容跌落电压
         checkOrderTime = g_TimeStampCollect.msTicks;
         //Clear Flag
         g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
@@ -475,7 +459,7 @@ uint8_t  RefreshIdleState()
     //检测是否欠电压， 并更新显示
     if(IsOverTimeStamp(&g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
     {
-        GetCapVolatageState();  //获取电容电压  
+        GetCapVolatageState();  //获取电容电压
         ClrWdt();
         g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
     }  
@@ -511,12 +495,11 @@ uint8_t  RefreshIdleState()
         ClrWdt();
         DsplaySwitchState();    //更新机构的状态显示
         //建立连接且不是在预制状态下才会周期上传
-        if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.ReceiveStateFlag == IDLE_ORDER))   
+        if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.receiveStateFlag == IDLE_ORDER))   
         {
             UpdataState();  //更新状态
         }
         g_SuddenState.SuddenFlag = FALSE;  //Clear
-        //OverflowDetection(SEND_TIME);   //增加溢出判断  TODO:所有事件判断，都将出问题
         g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
     }
 
@@ -535,6 +518,7 @@ uint8_t  RefreshIdleState()
             {
                 InitStandardCAN(0, 0);  //初始化CAN模块
                 g_TimeStampCollect.changeLedTime.delayTime = 500;  //运行指示灯闪烁间隔为500ms
+                g_RemoteControlState.CanErrorFlag = FALSE;  //Clear
             }
             //TODO:什么时候恢复？
         }
@@ -550,29 +534,28 @@ uint8_t  RefreshIdleState()
     }
 
     //超时检测复位
-    if((g_RemoteControlState.overTimeFlag == TRUE) && 
-       (g_RemoteControlState.ReceiveStateFlag != IDLE_ORDER) && 
-       (g_RemoteControlState.orderId <= 4) && (g_RemoteControlState.orderId > 0))  //判断是否需要超时检测
+    if(g_RemoteControlState.overTimeFlag == TRUE)  //判断是否需要超时检测
     {
-        if(!CheckIsOverTime())
+        if(IsOverTimeStamp( &g_TimeStampCollect.overTime))
         {
-            g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
-            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
+            ON_COMMUNICATION_INT();
             SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
             ClrWdt();
             g_RemoteControlState.orderId = 0;   //Clear
+            g_RemoteControlState.receiveStateFlag = IDLE_ORDER; //Clear order
+            g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
             g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
             OffLock();  //解锁
-        }
-        else
-        {
-            g_RemoteControlState.overTimeFlag = TRUE;  //Updata
+            if(g_RemoteControlState.orderId == SyncReadyClose)  //同步合闸预制
+            {
+                TurnOffInt2();
+            }
         }
     }
-    if(g_RemoteControlState.SetFixedValue == TRUE)
+    if(g_RemoteControlState.setFixedValue == TRUE)
     {
         WriteAccumulateSum();  //写入累加和
-        g_RemoteControlState.SetFixedValue = FALSE;
+        g_RemoteControlState.setFixedValue = FALSE;
     }
 
 
@@ -602,35 +585,11 @@ void YongciMainTask(void)
         RESET_CURRENT_A();
         RESET_CURRENT_B();
         RESET_CURRENT_C();
-        result =   RefreshIdleState();      
+        result =  RefreshIdleState();      
         //检测到按钮动作
         if (result)
         {
             continue;
-        }
-        
-        
-        
-        //同步合闸预制是单独执行的
-        while((g_RemoteControlState.ReceiveStateFlag == TONGBU_HEZHA) &&
-                (g_RemoteControlState.orderId == SyncReadyClose) && 
-              (g_RemoteControlState.overTimeFlag == TRUE))
-        {
-            if(!CheckIsOverTime())
-            {
-                ON_COMMUNICATION_INT();
-                TurnOffInt2();
-                g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER; //Clear order
-                g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
-                SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
-                g_RemoteControlState.orderId = 0;   //Clear
-                g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
-                OffLock();  //解锁
-            }
-            else
-            {
-                g_RemoteControlState.overTimeFlag = TRUE;  //Updata
-            }
         }
     }
 }
@@ -643,14 +602,12 @@ void YongciMainTask(void)
 ****************************************************/
 void YongciFirstInit(void)
 {
-    uint8_t index = 0;
-    uint8_t data[8] = {0,0,0,0,0,0,0,0};
     ClrWdt();
     
-    g_pPoint.pData = data;
-    g_pPoint.len = 8;
+    g_ParameterBuffer.pData = ParameterBufferData;
+    g_ParameterBuffer.len = 8;
     
-    g_lockUp = OFF_LOCK;    //处于解锁状态
+    g_LockUp = OFF_LOCK;    //处于解锁状态
     
     //IGBT引脚
     //A
@@ -680,23 +637,6 @@ void YongciFirstInit(void)
     ClrWdt();
     
     g_Order = IDLE_ORDER;   //初始化
-    //默认状态下的同步合闸顺序
-    index = 0;
-    g_Index[index].indexLoop = 0;
-    g_Index[index].GetTime = GetSwitchCloseTime;
-    g_Index[index].GetTime(g_Index + index);
-    index++;
-    
-    g_Index[index].indexLoop = 1;
-    g_Index[index].GetTime = GetSwitchCloseTime;
-    g_Index[index].GetTime(g_Index + index);
-    index++;
-
-    g_Index[index].indexLoop = 2;
-    g_Index[index].GetTime = GetSwitchCloseTime;
-    g_Index[index].GetTime(g_Index + index);
-    index++;
-    
     ClrWdt();
     InitSetSwitchState();
     
@@ -706,19 +646,17 @@ void YongciFirstInit(void)
     g_TimeStampCollect.changeLedTime.startTime = g_TimeStampCollect.msTicks;    
     g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;  
     
-    
     g_TimeStampCollect.changeLedTime.delayTime = 500;    //初始化值为500ms
     
     //远方控制标识位初始化
-    g_RemoteControlState.ReceiveStateFlag = IDLE_ORDER;
+    g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
     g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
     g_RemoteControlState.overTimeFlag = FALSE;
     g_RemoteControlState.orderId = 0x00;    //Clear
-    g_RemoteControlState.SetFixedValue = FALSE;    //Clear    
+    g_RemoteControlState.setFixedValue = FALSE;    //Clear    
     g_RemoteControlState.GetAllValueFalg = FALSE;    //Clear
     g_RemoteControlState.GetOneValueFalg = FALSE;    //Clear
     g_RemoteControlState.CanErrorFlag = FALSE;    //Clear
-    OffLock();  //解锁，可以检测
     
     //****************************************
     //突发状态量更新初始化
@@ -736,13 +674,8 @@ void YongciFirstInit(void)
     g_SuddenState.RefuseAction = FALSE;
     //****************************************
     
-    //数据帧初始化
-    g_qSendFrame.pBuffer = data;
-    g_qSendFrame.complteFlag = 0xFF;
-    g_qSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    
     g_lastRunOrder = IDLE_ORDER;
-    g_lockUp = OFF_LOCK;    //初始化为解锁状态
+    OffLock();  //解锁，可以检测
 }  
 
 /**
@@ -943,90 +876,6 @@ void SwitchOpenThirdPhase(SwitchConfig* pConfig)
 
 //*************************************
 
-/**
- * 
- * <p>Function name: [GetSwitchCloseTime]</p>
- * <p>Discription: [获取机构合闸时间]</p>
- * @param pIndex 
- */
-void GetSwitchCloseTime(IndexConfig* pIndex)
-{
-    switch(pIndex->indexLoop)
-    {
-        case 0:
-            pIndex->onTime = g_DelayTime.hezhaTime1 + 3;
-            break;
-        case 1:
-            pIndex->onTime = g_DelayTime.hezhaTime2 + 3;
-            break;
-        case 2:
-            pIndex->onTime = g_DelayTime.hezhaTime3 + 3;
-            break;
-        default:
-            pIndex->onTime = HEZHA_TIME + 3;
-            break;
-    }
-}
-
-/**
- * 
- * <p>Function name: [GetOffestTime]</p>
- * <p>Discription: [获取机构同步合闸的顺序以及偏移时间]</p>
- * @param pReciveFrame  接收到的数据指针
- * @param pSendFrame    要发送的数据指针
- * @return 0则回路数错误，0xFF正常
- */
-uint8_t GetOffestTime(struct DefFrameData* pReciveFrame)
-{
-    uint16_t highTime = 0;
-    uint16_t lowTime = 0;
-
-	uint8_t len = pReciveFrame->len;
-
-	switch (len)
-	{
-		case 4:	//有两个回路需要同步控制
-		case 6:	//有三个回路需要同步控制
-        {
-			g_Index[0].indexLoop = pReciveFrame->pBuffer[1] & 0x03;
-			g_Index[1].indexLoop = (pReciveFrame->pBuffer[1] & 0x0C) >> 2;
-            g_Index[0].indexLoop -= 1;
-            g_Index[1].indexLoop -= 1;
-
-            ClrWdt();
-            lowTime = pReciveFrame->pBuffer[2];
-            highTime = pReciveFrame->pBuffer[3];
-            g_Index[1].offestTime = (highTime << 8) | lowTime;
-            g_Index[1].offestTime = g_Index[1].offestTime / 2;  //单片机计时时间为2us
-            
-            ClrWdt();
-			g_Index[0].GetTime(g_Index);
-			g_Index[1].GetTime(g_Index + 1);
-            
-            #if(CAP3_STATE)
-            {
-                g_Index[2].indexLoop = (pReciveFrame->pBuffer[1] & 0x30) >> 4;
-                g_Index[2].indexLoop -= 1;
-                ClrWdt();
-                lowTime = pReciveFrame->pBuffer[4];
-                highTime = pReciveFrame->pBuffer[5];
-                g_Index[2].offestTime = (highTime << 8) | lowTime;
-                g_Index[2].offestTime = g_Index[2].offestTime / 2;  //单片机计时时间为2us
-                
-                ClrWdt();
-                g_Index[2].GetTime(g_Index + 2);
-            }
-            #endif
-            return 0xFF;
-        }
-        default:
-        {
-            ClrWdt();
-            return 0;
-        }
-	}
-}
-
 /**************************************************
  *函数名： UpdateCount()
  *功能: 根据合闸与分闸更新EEPROM存在的计数
@@ -1058,20 +907,18 @@ void UpdateCount(void)
         SaveActionCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
     }
     
-    #if(CAP3_STATE)
+#if(CAP3_STATE)
+    if (g_SwitchConfig[DEVICE_III].lastOrder == HE_ORDER)   //机构3合闸
     {
-        if (g_SwitchConfig[DEVICE_III].lastOrder == HE_ORDER)   //机构3合闸
-        {
-            ClrWdt();
-            SaveActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
-        }
-        else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
-        {
-            ClrWdt();
-            SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
-        }
+        ClrWdt();
+        SaveActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
     }
-    #endif
+    else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
+    {
+        ClrWdt();
+        SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
+    }
+#endif
     g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;    //清零防止重复写入
     g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;    //清零防止重复写入
     g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;    //清零防止重复写入

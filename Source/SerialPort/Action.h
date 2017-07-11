@@ -8,7 +8,6 @@
 #ifndef ACTION_H
 #define	ACTION_H
 
-#include "RtuFrame.h"
 #include "../Driver/tydef.h"
 #include "../DeviceNet/DeviceNet.h"
 
@@ -162,7 +161,7 @@ enum CommandIdentify
 extern "C" {
 #endif
     
-typedef struct SaveSystemSuddenState
+typedef struct TagSaveSystemSuddenState
 {
 	uint8_t SwitchState1;		//开关状态
 	uint8_t SwitchState2;		//开关状态
@@ -175,20 +174,20 @@ typedef struct SaveSystemSuddenState
 	uint8_t CapState3;		//电容状态
 	uint8_t SuddenFlag;		//更新状态
     
-    uint8_t Cap1Error;    //电容电压状态
-    uint8_t Cap2Error;    //电容电压状态
-    uint8_t Cap3Error;    //电容电压状态
+    uint8_t CapError1;    //电容电压状态
+    uint8_t CapError2;    //电容电压状态
+    uint8_t CapError3;    //电容电压状态
     
     uint8_t RefuseAction;   //拒动状态
 }SystemSuddenState;
 
 typedef struct RemoteControl
 {
-    uint16_t ReceiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
+    uint16_t receiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
     uint16_t lastReceiveOrder;  //接收到的上一条命令
     uint8_t  overTimeFlag;     //超时标识位
     uint8_t  orderId;           //执行的命令
-    uint8_t  SetFixedValue;     //设置定值指令
+    uint8_t  setFixedValue;     //设置定值指令
     uint8_t  GetAllValueFalg;   //读取所有的连续数据
     uint8_t  GetOneValueFalg;   //读取单个数据
     uint8_t  CanErrorFlag;      //CAN错误标识位
@@ -238,8 +237,7 @@ void ActionParameterInit(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
-extern struct DefFrameData g_qSendFrame;   //CAN数据帧
-extern PointUint8 g_pPoint;   
+extern PointUint8 g_ParameterBuffer;   
 extern ActionAttribute g_SynActionAttribute;
 extern ActionAttribute g_NormalAttribute;
 

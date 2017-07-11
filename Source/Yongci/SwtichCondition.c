@@ -18,7 +18,6 @@
 #include "../Header.h"
 #include "DeviceParameter.h"
 
-uint32_t volatile g_kairuValue = 0;    //165返回值
 
 #define DELAY_MS    20
 
@@ -71,51 +70,54 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 #define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT)    //机构3分闸条件
 
 //远方\本地控制检测
-#define YUAN_BEN_CONDITION()    ((g_kairuValue & YUAN_INPUT) == YUAN_INPUT)
+#define YUAN_BEN_CONDITION()    ((DigitalInputState & YUAN_INPUT) == YUAN_INPUT)
 
 //工作\调试模式检测
-#define WORK_DEBUG_CONDITION()  ((g_kairuValue & WORK_INPUT) == WORK_INPUT)
+#define WORK_DEBUG_CONDITION()  ((DigitalInputState & WORK_INPUT) == WORK_INPUT)
+
+//带电指示
+#define CHARGED_CONDITION()  ((DigitalInputState & DIANXIAN_INPUT) == DIANXIAN_INPUT)
 
 #ifdef SMALL_CHOSE
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     ((g_kairuValue)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     ((DigitalInputState)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
-(g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0)
+(DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
 
 #elif	BIG_CHOSE
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     (g_kairuValue == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     (DigitalInputState == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
-    (g_kairuValue == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT) && (g_kairuValue & DIANXIAN_INPUT) == 0)
+    (DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
 #endif
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((g_kairuValue & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA() &&  \
+#define HEZHA1_CONDITION()      ((DigitalInputState & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA() &&  \
                                  (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((g_kairuValue & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+((DigitalInputState & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
  (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((g_kairuValue & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA() &&  \
+#define HEZHA2_CONDITION()      ((DigitalInputState & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA() &&  \
                                  (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((g_kairuValue & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+((DigitalInputState & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
  (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
 
 //本地的机构3合闸条件：分位2 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((g_kairuValue & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA() &&  \
+#define HEZHA3_CONDITION()      ((DigitalInputState & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA() &&  \
                                  (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
 //本地的机构3分闸条件：合位2 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((g_kairuValue & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (g_kairuValue & DIANXIAN_INPUT) == 0 &&    \
+((DigitalInputState & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
  (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
 
 
@@ -125,19 +127,19 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
  */
 //******************************************************************************
 //机构1的合位检测
-#define HEWEI1_CONDITION()  ((g_kairuValue & HEWEI1_INPUT) == HEWEI1_INPUT)
+#define HEWEI1_CONDITION()  ((DigitalInputState & HEWEI1_INPUT) == HEWEI1_INPUT)
 //机构1的分位检测
-#define FENWEI1_CONDITION()  ((g_kairuValue & FENWEI1_INPUT) == FENWEI1_INPUT)
+#define FENWEI1_CONDITION()  ((DigitalInputState & FENWEI1_INPUT) == FENWEI1_INPUT)
 
 //机构2的合位检测
-#define HEWEI2_CONDITION()  ((g_kairuValue & HEWEI2_INPUT) == HEWEI2_INPUT)
+#define HEWEI2_CONDITION()  ((DigitalInputState & HEWEI2_INPUT) == HEWEI2_INPUT)
 //机构2的分位检测
-#define FENWEI2_CONDITION()  ((g_kairuValue & FENWEI2_INPUT) == FENWEI2_INPUT)
+#define FENWEI2_CONDITION()  ((DigitalInputState & FENWEI2_INPUT) == FENWEI2_INPUT)
 
 //机构3的合位检测
-#define HEWEI3_CONDITION()  ((g_kairuValue & HEWEI3_INPUT) == HEWEI3_INPUT)
+#define HEWEI3_CONDITION()  ((DigitalInputState & HEWEI3_INPUT) == HEWEI3_INPUT)
 //机构3的分位检测
-#define FENWEI3_CONDITION()  ((g_kairuValue & FENWEI3_INPUT) == FENWEI3_INPUT)
+#define FENWEI3_CONDITION()  ((DigitalInputState & FENWEI3_INPUT) == FENWEI3_INPUT)
 //******************************************************************************
 
 
@@ -147,25 +149,26 @@ uint32_t volatile g_kairuValue = 0;    //165返回值
 //***************************************************************************************************
 //机构1的本地错误条件: 合位和分位同时成立 或 同时不成立
 #define ERROR1_CONDITION()      \
-        (((g_kairuValue & (FENWEI1_INPUT | HEWEI1_INPUT)) == (FENWEI1_INPUT | HEWEI1_INPUT)) ||   \
-        ((g_kairuValue & (FENWEI1_INPUT | HEWEI1_INPUT)) == 0))
+        (((DigitalInputState & (FENWEI1_INPUT | HEWEI1_INPUT)) == (FENWEI1_INPUT | HEWEI1_INPUT)) ||   \
+        ((DigitalInputState & (FENWEI1_INPUT | HEWEI1_INPUT)) == 0))
 
 //机构2的本地错误条件: 合位和分位同时成立 或 同时不成立
 #define ERROR2_CONDITION()      \
-        (((g_kairuValue & (FENWEI2_INPUT | HEWEI2_INPUT)) == (FENWEI2_INPUT | HEWEI2_INPUT)) ||   \
-        ((g_kairuValue & (FENWEI2_INPUT | HEWEI2_INPUT)) == 0))
+        (((DigitalInputState & (FENWEI2_INPUT | HEWEI2_INPUT)) == (FENWEI2_INPUT | HEWEI2_INPUT)) ||   \
+        ((DigitalInputState & (FENWEI2_INPUT | HEWEI2_INPUT)) == 0))
 
 //机构3的本地错误条件: 合位和分位同时成立 或 同时不成立
 #define ERROR3_CONDITION()      \
-        ((g_kairuValue & (FENWEI3_INPUT | HEWEI3_INPUT)) == (FENWEI3_INPUT | HEWEI3_INPUT) ||   \
-        ((g_kairuValue & (FENWEI3_INPUT | HEWEI3_INPUT)) == 0))
+        ((DigitalInputState & (FENWEI3_INPUT | HEWEI3_INPUT)) == (FENWEI3_INPUT | HEWEI3_INPUT) ||   \
+        ((DigitalInputState & (FENWEI3_INPUT | HEWEI3_INPUT)) == 0))
 //***************************************************************************************************
 
 
 #define INPUT_FILT_TIME 20   // * 2ms
 #define MIN_EFFECTIVE_TIME  18  //最小的有效时间是（INPUT_FILT_TIME * 90%）
-uint8_t g_timeCount[16] = {0};
-uint8_t g_ScenCount = 0;    //扫描计数
+static uint8_t g_timeCount[17] = {0};
+static uint8_t ScanCount = 0;    //扫描计数
+static uint32_t volatile DigitalInputState = 0;    //165返回值
 
 /**
  * 
@@ -176,6 +179,11 @@ uint8_t g_ScenCount = 0;    //扫描计数
 uint8_t CheckIOState(void)
 {
     ClrWdt();     
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行操作
+    {
+        g_Order = IDLE_ORDER;    //将命令清零
+        return 0xFF;
+    }
     switch (g_Order)
     {
         //检测按键状态
@@ -184,18 +192,13 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState()))
             {
-                if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
-                {
-                    g_Order = IDLE_ORDER;    //将命令清零
-                    return 0xFF;
-                }
                // TongBuHeZha(); TODO:
                 ClrWdt();
-                HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
-                HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
+                SingleCloseOperation(SWITCH_ONE , g_DelayTime.hezhaTime1);
+                SingleCloseOperation(SWITCH_TWO , g_DelayTime.hezhaTime2);
                 #if(CAP3_STATE)  //判断第三块驱动是否存在
                 {
-                    HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
+                    SingleCloseOperation(SWITCH_THREE , g_DelayTime.hezhaTime3);
                 }
                 #endif
                 g_RemoteControlState.orderId = 0x05;    //拒动错误ID号
@@ -214,19 +217,19 @@ uint8_t CheckIOState(void)
         case CHECK_Z_FEN_ORDER: //收到分闸命令
         {
             ClrWdt();
-            if(g_lockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+            if(g_SystemState.charged == TRUE)   //带电不能执行分闸操作
             {
                 g_Order = IDLE_ORDER;    //将命令清零
-                return 0xFF;
+                return;
             }
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
             {
                 ClrWdt();
-                FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
-                FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
+                SingleOpenOperation(SWITCH_ONE , g_DelayTime.fenzhaTime1);
+                SingleOpenOperation(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 #if(CAP3_STATE)  //判断第三块驱动是否存在
                 {
-                    FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
+                    SingleOpenOperation(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 }
                 #endif
                 g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
@@ -248,7 +251,7 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                HEZHA_Action(SWITCH_ONE , g_DelayTime.hezhaTime1);
+                SingleCloseOperation(SWITCH_ONE , g_DelayTime.hezhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x02;
                 g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }
@@ -262,9 +265,14 @@ uint8_t CheckIOState(void)
         case CHECK_1_FEN_ORDER: //收到机构1分闸命令
         {
             ClrWdt();
+            if(g_SystemState.charged == TRUE)   //带电不能执行分闸操作
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+                return;
+            }
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                FENZHA_Action(SWITCH_ONE , g_DelayTime.fenzhaTime1);
+                SingleOpenOperation(SWITCH_ONE , g_DelayTime.fenzhaTime1);
                 g_SuddenState.ExecuteOrder1 = 0x01;
                 g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }
@@ -281,7 +289,7 @@ uint8_t CheckIOState(void)
             ClrWdt();        
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                HEZHA_Action(SWITCH_TWO , g_DelayTime.hezhaTime2);
+                SingleCloseOperation(SWITCH_TWO , g_DelayTime.hezhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x08;
                 g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }
@@ -295,9 +303,14 @@ uint8_t CheckIOState(void)
         case CHECK_2_FEN_ORDER: //收到机构2分闸命令
         {
             ClrWdt();
+            if(g_SystemState.charged == TRUE)   //带电不能执行分闸操作
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+                return;
+            }
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                FENZHA_Action(SWITCH_TWO , g_DelayTime.fenzhaTime2);
+                SingleOpenOperation(SWITCH_TWO , g_DelayTime.fenzhaTime2);
                 g_SuddenState.ExecuteOrder2 = 0x04;
                 g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }
@@ -314,7 +327,7 @@ uint8_t CheckIOState(void)
             ClrWdt();        
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                HEZHA_Action(SWITCH_THREE , g_DelayTime.hezhaTime3);
+                SingleCloseOperation(SWITCH_THREE , g_DelayTime.hezhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x20;
                 g_RemoteControlState.orderId = 0x02;    //拒动错误ID号
             }       
@@ -328,9 +341,14 @@ uint8_t CheckIOState(void)
         case CHECK_3_FEN_ORDER: //收到机构3分闸命令
         {
             ClrWdt();
+            if(g_SystemState.charged == TRUE)   //带电不能执行分闸操作
+            {
+                g_Order = IDLE_ORDER;    //将命令清零
+                return;
+            }
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                FENZHA_Action(SWITCH_THREE , g_DelayTime.fenzhaTime3);
+                SingleOpenOperation(SWITCH_THREE , g_DelayTime.fenzhaTime3);
                 g_SuddenState.ExecuteOrder3 = 0x10;
                 g_RemoteControlState.orderId = 0x04;    //拒动错误ID号
             }       
@@ -359,7 +377,7 @@ void DsplaySwitchState(void)
     uint8_t warningJg2 = g_SystemState.heFenState2; //机构2警告
     uint8_t warningJg3 = g_SystemState.heFenState3; //机构3警告
     ClrWdt();
-    if(g_SuddenState.Cap1Error == CAP1_ERROR || 
+    if(g_SuddenState.CapError1 == CAP1_ERROR || 
        warningJg1 == CHECK_ERROR1_STATE) //机构1错误
     {
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_ON);
@@ -376,7 +394,7 @@ void DsplaySwitchState(void)
         UpdateIndicateState(ERROR1_RELAY,ERROR1_LED,TURN_OFF);
     }
     
-    if(g_SuddenState.Cap2Error == CAP2_ERROR || 
+    if(g_SuddenState.CapError2 == CAP2_ERROR || 
        warningJg2 == CHECK_ERROR2_STATE) //机构2错误
     {
         UpdateIndicateState(ERROR2_RELAY,ERROR2_LED,TURN_ON);
@@ -395,7 +413,7 @@ void DsplaySwitchState(void)
     
     #if(CAP3_STATE)
     {
-        if(g_SuddenState.Cap3Error == CAP3_ERROR || 
+        if(g_SuddenState.CapError3 == CAP3_ERROR || 
            warningJg3 == CHECK_ERROR3_STATE) //机构3错误
         {
             UpdateIndicateState(ERROR3_RELAY,ERROR3_LED,TURN_ON);
@@ -552,8 +570,8 @@ void DsplaySwitchState(void)
  */
 void SwitchScan(void)
 {
-    g_kairuValue = ReadHC165();
-    g_ScenCount++;  //每次扫描均计数
+    DigitalInputState = ReadHC165();
+    ScanCount++;  //每次扫描均计数
     //远方\就地检测
     if(YUAN_BEN_CONDITION())
     {
@@ -569,9 +587,9 @@ void SwitchScan(void)
     //*****************************
     //作用，屏蔽掉远方就地
     uint32_t i = ~YUAN_INPUT;
-    g_kairuValue &= i;
+    DigitalInputState &= i;
     //*****************************
-    if(g_lockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
+    if(g_LockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
     {
         ClrWdt();
         //同时合闸信号检测
@@ -763,12 +781,24 @@ void SwitchScan(void)
             g_timeCount[15] --;
         }
     }
+    //带电闭锁操作
+    if(CHARGED_CONDITION())
+    {
+        g_timeCount[16] ++;
+    }
+    else
+    {
+        if(g_timeCount[16] != 0)
+        {
+            g_timeCount[16] --;
+        }
+    }
     
 //******************************************************************************
     //时间到达后才对各个状态位进行检查
-    if(g_ScenCount >= INPUT_FILT_TIME)
+    if(ScanCount >= INPUT_FILT_TIME)
     {
-        g_ScenCount = 0;    //Clear
+        ScanCount = 0;    //Clear
         //首先对远方就地进行检查
         if(g_timeCount[0] >= MIN_EFFECTIVE_TIME)
         {
@@ -780,10 +810,10 @@ void SwitchScan(void)
             g_SystemState.yuanBenState = BEN_STATE;
             g_timeCount[0] = 0;
         }
-        if(g_lockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
+        if(g_LockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
         {
             //对总合总分信号检测        
-            if(g_timeCount[1] >= MIN_EFFECTIVE_TIME)
+            if((g_timeCount[1] >= MIN_EFFECTIVE_TIME) && (g_timeCount[2] < MIN_EFFECTIVE_TIME))
             {
                 if((g_SystemState.heFenState1 == CHECK_1_FEN_STATE) || 
                    (g_SystemState.heFenState2 == CHECK_2_FEN_STATE) || 
@@ -795,7 +825,7 @@ void SwitchScan(void)
                 g_timeCount[1] = 0;
                 g_timeCount[2] = 0;
             }
-            else if(g_timeCount[2] >= MIN_EFFECTIVE_TIME)
+            else if((g_timeCount[2] >= MIN_EFFECTIVE_TIME) && (g_timeCount[1] < MIN_EFFECTIVE_TIME))
             {
                 if((g_SystemState.heFenState1 == CHECK_1_HE_STATE) || 
                    (g_SystemState.heFenState2 == CHECK_2_HE_STATE) || 
@@ -808,7 +838,7 @@ void SwitchScan(void)
                 g_timeCount[2] = 0;
             }
             //对机构1的合分信号检测
-            if(g_timeCount[3] >= MIN_EFFECTIVE_TIME)
+            if((g_timeCount[3] >= MIN_EFFECTIVE_TIME) && (g_timeCount[4] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState1 == CHECK_1_FEN_STATE)
                 {
@@ -818,7 +848,7 @@ void SwitchScan(void)
                 g_timeCount[3] = 0;
                 g_timeCount[4] = 0;
             }
-            else if(g_timeCount[4] >= MIN_EFFECTIVE_TIME)
+            else if((g_timeCount[4] >= MIN_EFFECTIVE_TIME) && (g_timeCount[3] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState1 == CHECK_1_HE_STATE)
                 {
@@ -829,7 +859,7 @@ void SwitchScan(void)
                 g_timeCount[4] = 0;
             }
             //对机构2的合分信号检测   
-            if(g_timeCount[5] >= MIN_EFFECTIVE_TIME)
+            if((g_timeCount[5] >= MIN_EFFECTIVE_TIME) && (g_timeCount[6] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState2 == CHECK_2_FEN_STATE)
                 {
@@ -839,7 +869,7 @@ void SwitchScan(void)
                 g_timeCount[5] = 0;
                 g_timeCount[6] = 0;
             }
-            else if(g_timeCount[6] >= MIN_EFFECTIVE_TIME)
+            else if((g_timeCount[6] >= MIN_EFFECTIVE_TIME) && (g_timeCount[5] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState2 == CHECK_2_HE_STATE)
                 {
@@ -850,8 +880,8 @@ void SwitchScan(void)
                 g_timeCount[6] = 0;
             }
             //对机构3的合分信号检测   
-            #if(CAP3_STATE)  //判断第三块驱动是否存在
-            if(g_timeCount[7] >= MIN_EFFECTIVE_TIME)
+#if(CAP3_STATE)  //判断第三块驱动是否存在
+            if((g_timeCount[7] >= MIN_EFFECTIVE_TIME) && (g_timeCount[8] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState3 == CHECK_3_FEN_STATE)
                 {
@@ -861,7 +891,7 @@ void SwitchScan(void)
                 g_timeCount[7] = 0;
                 g_timeCount[8] = 0;
             }
-            else if(g_timeCount[8] >= MIN_EFFECTIVE_TIME)
+            else if((g_timeCount[8] >= MIN_EFFECTIVE_TIME) && (g_timeCount[7] < MIN_EFFECTIVE_TIME))
             {
                 if(g_SystemState.heFenState3 == CHECK_3_HE_STATE)
                 {
@@ -871,7 +901,7 @@ void SwitchScan(void)
                 g_timeCount[7] = 0;
                 g_timeCount[8] = 0;
             }
-            #endif
+#endif
         }
         
         //对机构1的合分位进行检查
@@ -926,7 +956,7 @@ void SwitchScan(void)
             g_timeCount[12] = 0;
         }
         
-        #if(CAP3_STATE)  //判断第三块驱动是否存在
+#if(CAP3_STATE)  //判断第三块驱动是否存在
         //对机构3的合分位进行检查
         if((g_timeCount[13] >= MIN_EFFECTIVE_TIME) && (g_timeCount[14] < MIN_EFFECTIVE_TIME))
         {
@@ -952,7 +982,7 @@ void SwitchScan(void)
             g_timeCount[13] = 0;
             g_timeCount[14] = 0;
         }
-        #endif
+#endif
         //工作\调试模式判断
         if(g_timeCount[15] >= MIN_EFFECTIVE_TIME)
         {
@@ -963,6 +993,17 @@ void SwitchScan(void)
         {
             g_SystemState.workMode = DEBUG_STATE;
             g_timeCount[15] = 0;
+        }
+        //首先对远方就地进行检查
+        if(g_timeCount[16] >= MIN_EFFECTIVE_TIME)
+        {
+            g_SystemState.charged = TRUE;
+            g_timeCount[16] = 0;
+        }
+        else
+        {
+            g_SystemState.charged = FALSE;
+            g_timeCount[16] = 0;
         }
     }
 //******************************************************************************
