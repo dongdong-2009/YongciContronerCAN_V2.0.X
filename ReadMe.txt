@@ -237,6 +237,12 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig);
 3.优化了按键扫描策略
 4.优化165扫描读取函数
 
+2017/07/11(修改人：张东旭)
+删除了Rtu文件
+更改了电容状态更新函数
+优化了分合位检测更新函数
+添加了继电器、LED灯的数组操作
+
 
 
 

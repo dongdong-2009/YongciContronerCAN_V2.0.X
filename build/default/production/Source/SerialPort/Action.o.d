@@ -4,6 +4,8 @@ Source/SerialPort/Action.h  \
  Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
  Source/SerialPort/../DeviceNet/../Driver/tydef.h  \
+ Source/SerialPort/../Yongci/yongci.h  \
+ Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Header.h  \
 Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../Driver/AdcSample.h  \
@@ -21,10 +23,9 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Driver/ImitationIIC.h  \
  Source/SerialPort/../Driver/SD2405.h  \
  Source/SerialPort/../Driver/buffer.h  \
- Source/SerialPort/../SerialPort/Action.h  \
  Source/SerialPort/../Yongci/SwtichCondition.h  \
- Source/SerialPort/../Yongci/../Driver/tydef.h  \
  Source/SerialPort/../Yongci/yongci.h  \
  Source/SerialPort/../Yongci/DeviceParameter.h  \
+ Source/SerialPort/../SerialPort/Action.h  \
  Source/SerialPort/../Yongci/DeviceParameter.h  \
  Source/SerialPort/../SerialPort/RefParameter.h 

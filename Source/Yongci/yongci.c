@@ -490,7 +490,7 @@ uint8_t  RefreshIdleState()
 
 
     //周期性状态更新
-    if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || (g_SuddenState.SuddenFlag == TRUE))
+    if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || g_SuddenState.SuddenFlag)
     {
         ClrWdt();
         DsplaySwitchState();    //更新机构的状态显示
@@ -660,17 +660,17 @@ void YongciFirstInit(void)
     
     //****************************************
     //突发状态量更新初始化
-    g_SuddenState.CapState1 = 0;
-    g_SuddenState.CapState2 = 0;
-    g_SuddenState.CapState3 = 0;
-    g_SuddenState.ExecuteOrder1 = 0;
-    g_SuddenState.ExecuteOrder2 = 0;
-    g_SuddenState.ExecuteOrder3 = 0;
+    g_SuddenState.CapState[LOOP_A] = 0;
+    g_SuddenState.CapState[LOOP_B] = 0;
+    g_SuddenState.CapState[LOOP_C] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_A] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_B] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_C] = 0;
     ClrWdt();
-    g_SuddenState.SuddenFlag = TRUE;
-    g_SuddenState.SwitchState1 = 0;
-    g_SuddenState.SwitchState2 = 0;
-    g_SuddenState.SwitchState3 = 0;
+    g_SuddenState.SuddenFlag = FALSE;
+    g_SuddenState.SwitchState[LOOP_A] = 0;
+    g_SuddenState.SwitchState[LOOP_B] = 0;
+    g_SuddenState.SwitchState[LOOP_C] = 0;
     g_SuddenState.RefuseAction = FALSE;
     //****************************************
     

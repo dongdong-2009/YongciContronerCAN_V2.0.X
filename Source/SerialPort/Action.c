@@ -374,9 +374,9 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     configbyte = pReciveFrame->pBuffer[1];
            
     //分合位错误
-    if((g_SystemState.heFenState1 != CHECK_1_FEN_STATE) || 
-       (g_SystemState.heFenState2 != CHECK_2_FEN_STATE) || 
-       (g_SystemState.heFenState3 != CHECK_3_FEN_STATE))
+    if((g_SystemState.heFenState1 != OPEN_STATE) || 
+       (g_SystemState.heFenState2 != OPEN_STATE) || 
+       (g_SystemState.heFenState3 != OPEN_STATE))
     {       
         return HEFEN_STATE_ERROR;
     }   
@@ -519,10 +519,19 @@ void UpdataState(void)
     ClrWdt();
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
 	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
-
-	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState1 | g_SuddenState.SwitchState2 | g_SuddenState.SwitchState3;	
-	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder1 | g_SuddenState.ExecuteOrder2 | g_SuddenState.ExecuteOrder3;	
-	pSendFrame.pBuffer[3] = g_SuddenState.CapState1 | g_SuddenState.CapState2 | g_SuddenState.CapState3;	
+    
+    g_SuddenState.CapState[LOOP_B] <<= 2;
+    g_SuddenState.CapState[LOOP_C] <<= 4;
+    
+    g_SuddenState.ExecuteOrder[LOOP_B] <<= 2;
+    g_SuddenState.ExecuteOrder[LOOP_C] <<= 4;
+    
+    g_SuddenState.SwitchState[LOOP_B] <<= 2;
+    g_SuddenState.SwitchState[LOOP_C] <<= 2;
+    
+	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState[LOOP_A] | g_SuddenState.SwitchState[LOOP_B] | g_SuddenState.SwitchState[LOOP_C];	
+	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder[LOOP_A] | g_SuddenState.ExecuteOrder[LOOP_B] | g_SuddenState.ExecuteOrder[LOOP_C];	
+	pSendFrame.pBuffer[3] = g_SuddenState.CapState[LOOP_A] | g_SuddenState.CapState[LOOP_B] | g_SuddenState.CapState[LOOP_C];	
     
 	if(!g_SystemState.warning)
 	{
@@ -540,9 +549,9 @@ void UpdataState(void)
     SendData(&pSendFrame);
     
     ClrWdt();
-    g_SuddenState.ExecuteOrder1 = 0;
-    g_SuddenState.ExecuteOrder2 = 0;
-    g_SuddenState.ExecuteOrder3 = 0;
+    g_SuddenState.ExecuteOrder[LOOP_A] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_B] = 0;
+    g_SuddenState.ExecuteOrder[LOOP_C] = 0;
 }
 
 
@@ -601,7 +610,7 @@ uint8_t CheckCloseCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+                    if (g_SystemState.heFenState1 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -614,7 +623,7 @@ uint8_t CheckCloseCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+                    if (g_SystemState.heFenState2 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -626,7 +635,7 @@ uint8_t CheckCloseCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+                    if (g_SystemState.heFenState3 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -670,7 +679,7 @@ uint8_t CheckOpenCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+                    if (g_SystemState.heFenState1 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -683,7 +692,7 @@ uint8_t CheckOpenCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+                    if (g_SystemState.heFenState2 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -695,7 +704,7 @@ uint8_t CheckOpenCondition(void)
                     {
                         return CAPVOLTAGE_ERROR;
                     }
-                    if (g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                    if (g_SystemState.heFenState3 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
                     }
@@ -744,9 +753,9 @@ void CheckOrder(uint16_t lastOrder)
         case TONGBU_HEZHA:
         case CHECK_Z_HE_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE || 
-               g_SystemState.heFenState2 != CHECK_2_HE_STATE || 
-               g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+            if(g_SystemState.heFenState1 != CLOSE_STATE || 
+               g_SystemState.heFenState2 != CLOSE_STATE || 
+               g_SystemState.heFenState3 != CLOSE_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_HE_ERROR;  //发生拒动
@@ -759,9 +768,9 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_Z_FEN_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE || 
-               g_SystemState.heFenState2 != CHECK_2_FEN_STATE || 
-               g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+            if(g_SystemState.heFenState1 != OPEN_STATE || 
+               g_SystemState.heFenState2 != OPEN_STATE || 
+               g_SystemState.heFenState3 != OPEN_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = Z_FEN_ERROR;  //发生拒动
@@ -774,7 +783,7 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_1_HE_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_HE_STATE)
+            if(g_SystemState.heFenState1 != CLOSE_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_HE_ERROR;  //发生拒动
@@ -787,7 +796,7 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_1_FEN_ORDER:
         {
-            if(g_SystemState.heFenState1 != CHECK_1_FEN_STATE)
+            if(g_SystemState.heFenState1 != OPEN_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU1_FEN_ERROR;  //发生拒动
@@ -800,7 +809,7 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_2_HE_ORDER:
         {
-            if(g_SystemState.heFenState2 != CHECK_2_HE_STATE)
+            if(g_SystemState.heFenState2 != CLOSE_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_HE_ERROR;  //发生拒动
@@ -813,7 +822,7 @@ void CheckOrder(uint16_t lastOrder)
         }
         case CHECK_2_FEN_ORDER:
         {
-            if(g_SystemState.heFenState2 != CHECK_2_FEN_STATE)
+            if(g_SystemState.heFenState2 != OPEN_STATE)
             {
                 SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                 g_SuddenState.RefuseAction = JIGOU2_FEN_ERROR;  //发生拒动
@@ -828,7 +837,7 @@ void CheckOrder(uint16_t lastOrder)
         {
             #if(CAP3_STATE)
             {
-                if(g_SystemState.heFenState3 != CHECK_3_HE_STATE)
+                if(g_SystemState.heFenState3 != CLOSE_STATE)
                 {
                     SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
                     g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
@@ -844,7 +853,7 @@ void CheckOrder(uint16_t lastOrder)
         case CHECK_3_FEN_ORDER:
         {
 #if(CAP3_STATE)
-        if(g_SystemState.heFenState3 != CHECK_3_FEN_STATE)
+        if(g_SystemState.heFenState3 != OPEN_STATE)
         {
             SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
             g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动

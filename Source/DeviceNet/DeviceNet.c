@@ -215,7 +215,7 @@ void CANFrameFilter(struct DefFrameData* pReciveFrame, struct DefFrameData* pSen
 	if(mac == DeviceNetObj.MACID)  //仅限组2设备
 	{	        
         ClrWdt();
-        switch( function)
+        switch(function)
         {
             case GROUP2_REPEAT_MACID:  //重复MAC ID检查信息
             {          

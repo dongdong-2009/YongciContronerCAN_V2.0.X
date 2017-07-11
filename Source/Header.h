@@ -33,11 +33,11 @@
 #include "Driver/SD2405.h"
 #include "Driver/buffer.h"
 
-
-#include "SerialPort/Action.h"
 #include "Yongci/SwtichCondition.h"
 #include "Yongci/yongci.h"
 #include "Yongci/DeviceParameter.h"
+
+#include "SerialPort/Action.h"
 
 #define LOCAL_ADDRESS   0xA2 //双路调试控制板子地址
 
@@ -50,11 +50,9 @@
     #define CAP3_DROP_VOLTAGE() {g_SystemVoltageParameter.capDropVoltage3 = ADCBUF3 * LOCAL_CAP_MODULUS * g_SystemCalibrationCoefficient.capVoltageCoefficient3;}    
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
-    //#define CHECK_ORDER3()    (g_SetSwitchState[2].Order == IDLE_ORDER)
-     #define CHECK_ORDER3()    (g_SwitchConfig[DEVICE_III].order == IDLE_ORDER)   
-    //#define CHECK_LAST_ORDER3()     (g_SetSwitchState[2].LastOrder != IDLE_ORDER)
+    #define CHECK_ORDER3()    (g_SwitchConfig[DEVICE_III].order == IDLE_ORDER)   
     #define CHECK_LAST_ORDER3()     ( g_SwitchConfig[DEVICE_III].lastOrder != IDLE_ORDER)
-    #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down)
+    #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down + THRESHOLD_VALUE)
     #define MAC_ID (0x10)   //缺省A相
 
 #elif BIG_CHOSE
@@ -90,6 +88,9 @@
 #endif
 //**************************************
 
+#define OPEN_STATE    0x01  //机构分闸状态
+#define CLOSE_STATE   0x02  //机构合闸状态
+#define ERROR_STATE   0x03  //机构错误,分合位同时存在，或者同时不存在
 
 #define Reset() {__asm__ volatile ("RESET");}
 

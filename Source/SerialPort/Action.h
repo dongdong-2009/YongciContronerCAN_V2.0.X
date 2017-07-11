@@ -10,6 +10,7 @@
 
 #include "../Driver/tydef.h"
 #include "../DeviceNet/DeviceNet.h"
+#include "../Yongci/yongci.h"
 
 #define  RESET_MCU   0x01
 
@@ -160,23 +161,13 @@ enum CommandIdentify
 #ifdef	__cplusplus
 extern "C" {
 #endif
-    
+
 typedef struct TagSaveSystemSuddenState
 {
-	uint8_t SwitchState1;		//开关状态
-	uint8_t SwitchState2;		//开关状态
-	uint8_t SwitchState3;		//开关状态
-	uint8_t ExecuteOrder1;	//开关执行的命令
-	uint8_t ExecuteOrder2;	//开关执行的命令
-	uint8_t ExecuteOrder3;	//开关执行的命令
-	uint8_t CapState1;		//电容状态
-	uint8_t CapState2;		//电容状态
-	uint8_t CapState3;		//电容状态
-	uint8_t SuddenFlag;		//更新状态
-    
-    uint8_t CapError1;    //电容电压状态
-    uint8_t CapError2;    //电容电压状态
-    uint8_t CapError3;    //电容电压状态
+	uint8_t SwitchState[LOOP_QUANTITY];		//开关状态
+	uint8_t ExecuteOrder[LOOP_QUANTITY];	//开关执行的命令
+	uint8_t CapState[LOOP_QUANTITY];		//电容状态
+	uint8_t SuddenFlag;		//突发状态
     
     uint8_t RefuseAction;   //拒动状态
 }SystemSuddenState;

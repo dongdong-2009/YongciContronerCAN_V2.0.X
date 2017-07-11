@@ -42,14 +42,6 @@ extern "C" {
 
     
 //IO 检测对应状态
-#define CHECK_ERROR1_STATE 0x10  //机构1错误,分合位同时存在
-#define CHECK_ERROR2_STATE 0x11  //机构2错误,分合位同时存在
-#define CHECK_ERROR3_STATE 0x12  //机构3错误,分合位同时存在
-    
-#define CHECK_ERROR4_STATE 0x13  //机构1错误，同时输入了合闸、分闸信号
-#define CHECK_ERROR5_STATE 0x14  //机构2错误，同时输入了合闸、分闸信号
-#define CHECK_ERROR6_STATE 0x15  //机构3错误，同时输入了合闸、分闸信号
-    
 #define CHECK_ERROR7_STATE 0x16  //同时输入了总的合闸、分闸信号
     
 #define NO_ERROR    0x00
@@ -66,15 +58,6 @@ extern "C" {
 #define CHECK_3_HE_ORDER  0xAA28  //执行机构3合闸动作
 #define CHECK_3_FEN_ORDER 0xAA29  //执行机构3分闸动作
 
-#define CHECK_1_HE_STATE  0x34  //机构1合闸状态
-#define CHECK_1_FEN_STATE 0x35  //机构1分闸状态
-    
-#define CHECK_2_HE_STATE  0x36  //机构2合闸状态
-#define CHECK_2_FEN_STATE 0x37  //机构2分闸状态
-    
-#define CHECK_3_HE_STATE  0x38  //机构3合闸状态
-#define CHECK_3_FEN_STATE 0x39  //机构3分闸状态
-    
 //************************************************
 //拒动错误值
 #define Z_HE_ERROR      0xB2    //总合拒动错误
@@ -89,9 +72,11 @@ extern "C" {
 #define JIGOU3_FEN_ERROR    0xB9  //机构3分位错误
 //************************************************
     
-#define SWITCH_ONE  0   //第一个动作的机构
-#define SWITCH_TWO  1   //第二个动作的机构
-#define SWITCH_THREE 2  //第三个动作的机构
+#define LOOP_QUANTITY   3   //与下面的宏定义一起使用
+    
+#define LOOP_A  0   //第一个动作的机构
+#define LOOP_B  1   //第二个动作的机构
+#define LOOP_C  2   //第三个动作的机构
 
 #define ON_LOCK     0xAA55    
 #define OFF_LOCK    0x0000

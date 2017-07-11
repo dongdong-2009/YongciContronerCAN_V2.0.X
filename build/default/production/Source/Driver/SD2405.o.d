@@ -18,12 +18,13 @@ Source/Driver/../Driver/InitTemp.h  \
 Source/Driver/../Driver/ImitationIIC.h  \
  Source/Driver/../Driver/SD2405.h  \
 Source/Driver/../Driver/buffer.h  \
- Source/Driver/../SerialPort/Action.h  \
- Source/Driver/../SerialPort/../Driver/tydef.h  \
- Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
  Source/Driver/../Yongci/SwtichCondition.h  \
  Source/Driver/../Yongci/../Driver/tydef.h  \
  Source/Driver/../Yongci/yongci.h  \
  Source/Driver/../Yongci/DeviceParameter.h  \
-Source/Driver/ImitationIIC.h  \
- Source/Driver/SD2405.h 
+ Source/Driver/../SerialPort/Action.h  \
+ Source/Driver/../SerialPort/../Driver/tydef.h  \
+ Source/Driver/../SerialPort/../DeviceNet/DeviceNet.h  \
+ Source/Driver/../SerialPort/../Yongci/yongci.h  \
+ Source/Driver/ImitationIIC.h  \
+Source/Driver/SD2405.h 
