@@ -4,13 +4,13 @@
 #define TRUE 0xFF
 #define FALSE 0
 
-#define BUFFER_LEN  16
+#define buffer_LEN  16
 #include <xc.h>
 
 /**
  *缓冲空间，暂定为16个 
  */
-CAN_msg CanMsg[BUFFER_LEN];
+CAN_msg CanMsg[buffer_LEN];
 
 /**
  *缓冲队列信息
@@ -20,9 +20,9 @@ FifoInformation FifoInfor;
 /**
  *初始化缓冲区
  */
-void BufferInit(void)
+void bufferInit(void)
 {
-    FifoInfor.capacity = BUFFER_LEN;
+    FifoInfor.capacity = buffer_LEN;
     FifoInfor.count = 0;
     FifoInfor.end = 0;
     FifoInfor.head = 0;
@@ -40,7 +40,7 @@ void BufferInit(void)
  *                  <code>FASLE</code>  失败
  */
 uint8_t len = 0;
-uint8_t BufferEnqueue( CAN_msg* pMsg)
+uint8_t bufferEnqueue( CAN_msg* pMsg)
 {
     FifoInformation* pInf = &FifoInfor;
     //队列未满
@@ -63,11 +63,11 @@ uint8_t BufferEnqueue( CAN_msg* pMsg)
  * <p>
  * 
  * @param  pInf     FIFO信息
- * @param  pMsg    入队信息
+ * @param  pMsg    出队信息
  * @return          <code>TRUE</code>   成功出队
  *                  <code>FASLE</code>  失败
  */
-uint8_t BufferDequeue( CAN_msg* pMsg)
+uint8_t bufferDequeue( CAN_msg* pMsg)
 {
     FifoInformation* pInf = &FifoInfor;
     ClrWdt();

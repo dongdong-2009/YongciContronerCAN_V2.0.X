@@ -23,7 +23,7 @@ Source/Yongci/SwtichCondition.h  \
 Source/Yongci/yongci.h  \
  Source/Yongci/DeviceParameter.h  \
 Source/SerialPort/Action.h  \
- Source/SerialPort/../Driver/tydef.h  \
+ Source/SerialPort/../Header.h  \
+Source/SerialPort/../Driver/tydef.h  \
  Source/SerialPort/../DeviceNet/DeviceNet.h  \
- Source/SerialPort/../Yongci/yongci.h  \
 Source/DeviceNet/DeviceNet.h 

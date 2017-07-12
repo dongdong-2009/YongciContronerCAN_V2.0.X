@@ -1,5 +1,5 @@
-#ifndef __BUFFER_H
-#define __BUFFER_H
+#ifndef __buffer_H
+#define __buffer_H
 
 
 #include <stdint.h> 
@@ -25,9 +25,9 @@ typedef struct TagFIFO
 }FifoInformation;
 
 
-extern void BufferInit(void);
-extern uint8_t BufferEnqueue( CAN_msg* pMsg);
-extern uint8_t BufferDequeue( CAN_msg* pMsg);
+extern void bufferInit(void);
+extern uint8_t bufferEnqueue( CAN_msg* pMsg);
+extern uint8_t bufferDequeue( CAN_msg* pMsg);
 
 #endif
 

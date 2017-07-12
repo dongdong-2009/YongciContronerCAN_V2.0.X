@@ -8,9 +8,9 @@
 #ifndef ACTION_H
 #define	ACTION_H
 
+#include "../Header.h"
 #include "../Driver/tydef.h"
 #include "../DeviceNet/DeviceNet.h"
-#include "../Yongci/yongci.h"
 
 #define  RESET_MCU   0x01
 
@@ -153,6 +153,7 @@ enum CommandIdentify
 #define HEFEN_STATE_ERROR 0x0A      //合、分位错误
 #define REFUSE_ERROR 0x0B       //拒动错误
 #define ERROR_DIFF_CONFIG    0x0C//合闸预制配置不同
+#define ERROR_CHARGED_CONFIG    0x0D//开关带电分闸操作错误
     
 //*************************************************************************
 
@@ -164,10 +165,13 @@ extern "C" {
 
 typedef struct TagSaveSystemSuddenState
 {
-	uint8_t SwitchState[LOOP_QUANTITY];		//开关状态
-	uint8_t ExecuteOrder[LOOP_QUANTITY];	//开关执行的命令
-	uint8_t CapState[LOOP_QUANTITY];		//电容状态
-	uint8_t SuddenFlag;		//突发状态
+	uint8_t switchState[LOOP_QUANTITY];		//开关状态
+	uint8_t executeOrder[LOOP_QUANTITY];	//开关执行的命令
+	uint8_t capState[LOOP_QUANTITY];		//电容状态
+	uint8_t buffer[LOOP_QUANTITY];		//存储状态
+	uint8_t suddenFlag;		//突发状态
+    uint8_t switchsuddenFlag;   //分合位状态突变
+    uint8_t capSuddentFlag; //电容状态突变
     
     uint8_t RefuseAction;   //拒动状态
 }SystemSuddenState;
@@ -228,7 +232,7 @@ void ActionParameterInit(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
-extern PointUint8 g_ParameterBuffer;   
+extern PointUint8 g_Parameterbuffer;   
 extern ActionAttribute g_SynActionAttribute;
 extern ActionAttribute g_NormalAttribute;
 

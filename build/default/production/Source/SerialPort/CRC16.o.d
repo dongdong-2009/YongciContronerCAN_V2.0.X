@@ -25,6 +25,6 @@ Source/SerialPort/../Driver/InitTemp.h  \
  Source/SerialPort/../Yongci/yongci.h  \
  Source/SerialPort/../Yongci/DeviceParameter.h  \
  Source/SerialPort/../SerialPort/Action.h  \
+ Source/SerialPort/../SerialPort/../Header.h  \
  Source/SerialPort/../SerialPort/../Driver/tydef.h  \
- Source/SerialPort/../SerialPort/../DeviceNet/DeviceNet.h  \
- Source/SerialPort/../SerialPort/../Yongci/yongci.h 
+ Source/SerialPort/../SerialPort/../DeviceNet/DeviceNet.h 

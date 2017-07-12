@@ -71,12 +71,6 @@ extern "C" {
 #define JIGOU3_HE_ERROR     0xB8  //机构3合位错误
 #define JIGOU3_FEN_ERROR    0xB9  //机构3分位错误
 //************************************************
-    
-#define LOOP_QUANTITY   3   //与下面的宏定义一起使用
-    
-#define LOOP_A  0   //第一个动作的机构
-#define LOOP_B  1   //第二个动作的机构
-#define LOOP_C  2   //第三个动作的机构
 
 #define ON_LOCK     0xAA55    
 #define OFF_LOCK    0x0000

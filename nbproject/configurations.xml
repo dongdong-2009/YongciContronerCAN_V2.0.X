@@ -23,7 +23,7 @@
       <itemPath>Source/Driver/Delay.h</itemPath>
       <itemPath>Source/Driver/ImitationIIC.h</itemPath>
       <itemPath>Source/Driver/SD2405.h</itemPath>
-      <itemPath>Source/Driver/Buffer.h</itemPath>
+      <itemPath>Source/Driver/buffer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -47,7 +47,7 @@
         <itemPath>Source/Driver/Delay.c</itemPath>
         <itemPath>Source/Driver/ImitationIIC.c</itemPath>
         <itemPath>Source/Driver/SD2405.c</itemPath>
-        <itemPath>Source/Driver/Buffer.c</itemPath>
+        <itemPath>Source/Driver/buffer.c</itemPath>
       </logicalFolder>
       <logicalFolder name="SerialPort" displayName="SerialPort" projectFiles="true">
         <itemPath>Source/SerialPort/Action.c</itemPath>

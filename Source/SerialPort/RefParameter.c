@@ -97,7 +97,8 @@ ConfigData g_ReadOnlyParameterCollect[READONLY_PARAMETER_LEN]; //参数合集--�
 /**
  * 
  */
-PointUint8 BufferData;
+PointUint8 bufferData;
+uint8_t GetDatabuffer[8] = {0,0,0,0,0,0,0,0};
 /**
  * 设置参数
  * @param id      配置号
@@ -119,10 +120,10 @@ uint8_t SetParamValue(uint8_t id,PointUint8* pPoint)
 				return 0xF1;
 			}
             
-//            BufferData.len = pPoint->len;
+//            bufferData.len = pPoint->len;
 //            ParameterWriteByID(id , pPoint);   //写EEPROM           
 //            ClrWdt();
-//            ParameterReadByID(id , &BufferData);      //读取EEPROM
+//            ParameterReadByID(id , &bufferData);      //读取EEPROM
             //添加判断读取出来的数据是否与变换之后的一致性
             ClrWdt();
             g_SetParameterCollect[i].fGetValue(pPoint, g_SetParameterCollect + i);
@@ -531,10 +532,9 @@ void InitReadonlyParameterCollect(void)
 void RefParameterInit(void)
 {
     uint8_t error = 0;
-    uint8_t buffer[8] = {0,0,0,0,0,0,0,0};
     
-    BufferData.pData = buffer;
-    BufferData.len = 8;
+    bufferData.pData = GetDatabuffer;
+    bufferData.len = 8;
     
     //合分闸次数初始化
 	ClrWdt();
@@ -849,21 +849,21 @@ void WriteAccumulateSum(void)
         
         if(g_SetParameterCollect[i].ID == id)
         {		
-            BufferData.len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
+            bufferData.len = g_SetParameterCollect[i].type >> 4;   //使用数据属性确定数据长度
 			ClrWdt();	
-            g_SetParameterCollect[i].fGetValue(&BufferData, g_SetParameterCollect + i);
-            if(BufferData.len == 0)
+            g_SetParameterCollect[i].fGetValue(&bufferData, g_SetParameterCollect + i);
+            if(bufferData.len == 0)
             {
                 continue;   //立即进行下一次循环
             }
-            ParameterWriteByID(id , &BufferData);   //写EEPROM          
+            ParameterWriteByID(id , &bufferData);   //写EEPROM          
             
-            ParameterReadByID(id, &BufferData);
+            ParameterReadByID(id, &bufferData);
 			ClrWdt();
-            for(uint8_t j = 0;j < BufferData.len;j++)
+            for(uint8_t j = 0;j < bufferData.len;j++)
             {
 				ClrWdt();
-                totalSum += BufferData.pData[j];
+                totalSum += bufferData.pData[j];
             }
         }
     }
@@ -892,16 +892,16 @@ uint8_t AccumulateSumVerify(void)
         {
             //为了获取数据长度
             len = g_SetParameterCollect[i].type >> 4;
-            BufferData.len = len;
-            ParameterReadByID(id, &BufferData);
+            bufferData.len = len;
+            ParameterReadByID(id, &bufferData);
 			ClrWdt();
             
             //初始化各个变量
-            g_SetParameterCollect[i].fSetValue(&BufferData, g_SetParameterCollect + i);
-            for(i = 0;i < BufferData.len;i++)
+            g_SetParameterCollect[i].fSetValue(&bufferData, g_SetParameterCollect + i);
+            for(i = 0;i < bufferData.len;i++)
             {
 				ClrWdt();
-                addData += BufferData.pData[i];
+                addData += bufferData.pData[i];
             }
         }
     }

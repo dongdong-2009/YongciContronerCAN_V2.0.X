@@ -602,7 +602,7 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         ReadRx0Frame(&point);
         ClrWdt();
         CAN_RxRdy = 1;                            /*  set receive flag */
-        BufferEnqueue(&CAN_RxMsg);
+        bufferEnqueue(&CAN_RxMsg);
       //  DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
     }
     else if(C2INTFbits.RX1IF)

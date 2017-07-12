@@ -23,9 +23,9 @@ Source/Yongci/../Driver/buffer.h  \
  Source/Yongci/../Yongci/yongci.h  \
  Source/Yongci/../Yongci/DeviceParameter.h  \
  Source/Yongci/../SerialPort/Action.h  \
+ Source/Yongci/../SerialPort/../Header.h  \
  Source/Yongci/../SerialPort/../Driver/tydef.h  \
  Source/Yongci/../SerialPort/../DeviceNet/DeviceNet.h  \
- Source/Yongci/../SerialPort/../Yongci/yongci.h  \
  Source/Yongci/../Driver/AdcSample.h  \
 Source/Yongci/DeviceParameter.h  \
  Source/Yongci/../SerialPort/RefParameter.h 

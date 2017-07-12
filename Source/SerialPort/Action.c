@@ -13,7 +13,6 @@
  * @version ver 1.0
  */
 #include "../Header.h"
-#include "../Yongci/DeviceParameter.h"
 #include "../SerialPort/RefParameter.h"
 #include <string.h>
 #define  SUDDEN_ID 0x9A     //突发状态上传ID
@@ -47,7 +46,7 @@ uint8_t LastCommand[8] = {0};//最新的命令字
 
 SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
 struct DefFrameData ActionCommandTemporaryAck;   //CAN数据帧
-PointUint8 g_ParameterBuffer;   
+PointUint8 g_Parameterbuffer;   
 
 
 
@@ -65,14 +64,11 @@ void ActionParameterInit(void)
     g_SynActionAttribute.Attribute[0].offsetTime = 0;
     g_SynActionAttribute.Attribute[0].readyFlag = 0;
       
-  
     g_SynActionAttribute.Attribute[1].enable = 0;
     g_SynActionAttribute.Attribute[1].loop = 0;   
     g_SynActionAttribute.Attribute[1].offsetTime = 0;
     g_SynActionAttribute.Attribute[1].readyFlag = 0;
    
-    
-
     g_SynActionAttribute.Attribute[2].enable = 0;
     g_SynActionAttribute.Attribute[2].loop = 0;
     g_SynActionAttribute.Attribute[2].offsetTime = 0;
@@ -87,19 +83,15 @@ void ActionParameterInit(void)
     g_NormalAttribute.Attribute[0].offsetTime = 0;
     g_NormalAttribute.Attribute[0].readyFlag = 0;
       
-  
     g_NormalAttribute.Attribute[1].enable = 0;
     g_NormalAttribute.Attribute[1].loop = 0;   
     g_NormalAttribute.Attribute[1].offsetTime = 0;
     g_NormalAttribute.Attribute[1].readyFlag = 0;
    
-    
-
     g_NormalAttribute.Attribute[2].enable = 0;
     g_NormalAttribute.Attribute[2].loop = 0;
     g_NormalAttribute.Attribute[2].offsetTime = 0;
     g_NormalAttribute.Attribute[2].readyFlag = 0;   
-    
     
 }
 
@@ -113,12 +105,12 @@ void ActionParameterInit(void)
  */
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
-    if(pReciveFrame->pBuffer[0] > 0x13)
+    if(pReciveFrame->pbuffer[0] > 0x13)
     {
         return;
     }
     uint8_t i = 1;    
-    uint8_t id = pReciveFrame->pBuffer[0];
+    uint8_t id = pReciveFrame->pbuffer[0];
     uint8_t error = 0;  //错误号
     uint8_t result = 0;
     
@@ -126,26 +118,26 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
      * 发送数据帧赋值
      */
     pSendFrame->ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    pSendFrame->pBuffer[0] = id | 0x80;
+    pSendFrame->pbuffer[0] = id | 0x80;
     ClrWdt();
 
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
 	if((id < 0x10) && (g_SystemState.yuanBenState == 0x55))
     {
         ClrWdt();
-        SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
+        SendErrorFrame(pReciveFrame->pbuffer[0],WORK_MODE_ERROR);
         return;
     }
     
     ActionCommandTemporaryAck.ID = pSendFrame->ID;
-    ActionCommandTemporaryAck.pBuffer[0] = pSendFrame->pBuffer[0];  //数据传递
+    ActionCommandTemporaryAck.pbuffer[0] = pSendFrame->pbuffer[0];  //数据传递
 	if(id <= 5)
 	{
 		for(i = 1;i < pReciveFrame->len;i++)
 		{
             ClrWdt();
-			pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
-            ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
+			pSendFrame->pbuffer[i] = pReciveFrame->pbuffer[i];
+            ActionCommandTemporaryAck.pbuffer[i] = pSendFrame->pbuffer[i];
 		}
 		pSendFrame->len = pReciveFrame->len;
 	}
@@ -174,7 +166,14 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         }
         case ReadyOpen: //分闸预制
         {
-            result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+            if(g_SystemState.charged)   //带电情况下不能执行分闸操作
+            {
+                result = ERROR_CHARGED_CONFIG;
+            }
+            else
+            {
+                result = ReadyCloseOrOpen( pReciveFrame, pSendFrame, id);
+            }
             if (result)
             {
                 SendErrorFrame(id, result);
@@ -199,24 +198,24 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         case MasterParameterSetOne:  //非顺序参数设置
         {
             ClrWdt();
-            pSendFrame->pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
-            g_ParameterBuffer.pData = pReciveFrame->pBuffer + 2;
-            error = SetParamValue(pReciveFrame->pBuffer[1],&g_ParameterBuffer);
+            pSendFrame->pbuffer[1] = pReciveFrame->pbuffer[1];  //配置号
+            g_Parameterbuffer.pData = pReciveFrame->pbuffer + 2;
+            error = SetParamValue(pReciveFrame->pbuffer[1],&g_Parameterbuffer);
             if(error == 0xFF)
             {
                 ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
+                SendErrorFrame(pReciveFrame->pbuffer[0],ID_ERROR);
                 return;
             }
             else if(error)
             {
                 ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
+                SendErrorFrame(pReciveFrame->pbuffer[0],DATA_LEN_ERROR);
                 return;
             }
-            pSendFrame->pBuffer[2] = g_ParameterBuffer.pData[0];
-            pSendFrame->pBuffer[3] = g_ParameterBuffer.pData[1];
-            pSendFrame->len = g_ParameterBuffer.len + 2;
+            pSendFrame->pbuffer[2] = g_Parameterbuffer.pData[0];
+            pSendFrame->pbuffer[3] = g_Parameterbuffer.pData[1];
+            pSendFrame->len = g_Parameterbuffer.len + 2;
             ClrWdt();
             SendData(pSendFrame);
             g_RemoteControlState.setFixedValue = TRUE;  //设置定值成功
@@ -232,7 +231,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             //错误的ID号处理
             ClrWdt();
-            SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
+            SendErrorFrame(pReciveFrame->pbuffer[0],ID_ERROR);
             break;
         }          
     }
@@ -275,14 +274,13 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
        //比较配置字是否一致
     for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
     {
-        if (pReciveFrame->pBuffer[i] != LastCommand[i])
+        if (pReciveFrame->pbuffer[i] != LastCommand[i])
         {          
             return ERROR_DIFF_CONFIG;
         }
     }     
     
      
-    g_RemoteControlState.orderId = id;
     OnLock();   //上锁             
     g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
     g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令                
@@ -339,10 +337,11 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
     } 
     ClrWdt();  
 
-    memcpy(LastCommand, pReciveFrame->pBuffer, pReciveFrame->len);//暂存预制指令
+    memcpy(LastCommand, pReciveFrame->pbuffer, pReciveFrame->len);//暂存预制指令
     g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
     SendData(pSendFrame);
     g_RemoteControlState.receiveStateFlag = order;    //合闸命令
+    g_RemoteControlState.orderId = id;
     g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置预制超时等待时间     
     g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks; 
     return 0;
@@ -370,8 +369,8 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
         return DATA_LEN_ERROR;
     }
         
-    id  = pReciveFrame->pBuffer[0];
-    configbyte = pReciveFrame->pBuffer[1];
+    id  = pReciveFrame->pbuffer[0];
+    configbyte = pReciveFrame->pbuffer[1];
            
     //分合位错误
     if((g_SystemState.heFenState1 != OPEN_STATE) || 
@@ -439,8 +438,8 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
          
         g_SynActionAttribute.Attribute[i].enable = TRUE;
         g_SynActionAttribute.Attribute[i].loop = loop[i];       
-        time = pReciveFrame->pBuffer[2*i + 1];   
-        time = (time<<8)|  pReciveFrame->pBuffer[2*i];   
+        time = pReciveFrame->pbuffer[2*i + 1];   
+        time = (time<<8)|  pReciveFrame->pbuffer[2*i];   
         g_SynActionAttribute.Attribute[i].offsetTime = time;
     }   
     for (uint8_t i = count; i < 3;i++)
@@ -453,7 +452,7 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     //返回的数据帧赋值传递
     for(uint8_t i = 0;i < pSendFrame->len;i++)
     {
-        ActionCommandTemporaryAck.pBuffer[i] = pSendFrame->pBuffer[i];
+        ActionCommandTemporaryAck.pbuffer[i] = pSendFrame->pbuffer[i];
         ClrWdt();
     }
     
@@ -488,14 +487,14 @@ void SendErrorFrame(uint8_t receiveID, uint8_t errorID)
     uint8_t data[8] = {0,0,0,0,0,0,0,0};
     struct DefFrameData pSendFrame;
     
-    pSendFrame.pBuffer = data;
+    pSendFrame.pbuffer = data;
     pSendFrame.complteFlag = 0xFF;
     ClrWdt();
     pSendFrame.ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
-    pSendFrame.pBuffer[0] = ERROR_REPLY_ID;   //错误应答ID
-    pSendFrame.pBuffer[1] = receiveID;  //主站发送ID
-    pSendFrame.pBuffer[2] = errorID;   //错误代码
-    pSendFrame.pBuffer[3] = ERROR_EXTEND_ID;  //扩展ID号            
+    pSendFrame.pbuffer[0] = ERROR_REPLY_ID;   //错误应答ID
+    pSendFrame.pbuffer[1] = receiveID;  //主站发送ID
+    pSendFrame.pbuffer[2] = errorID;   //错误代码
+    pSendFrame.pbuffer[3] = ERROR_EXTEND_ID;  //扩展ID号            
     pSendFrame.len = ERROR_DATA_LEN;   //错误帧长度
     ClrWdt();
     SendData(&pSendFrame);
@@ -510,48 +509,72 @@ void SendErrorFrame(uint8_t receiveID, uint8_t errorID)
 void UpdataState(void)
 {
     uint8_t data[8] = {0,0,0,0,0,0,0,0};
-
+    uint8_t offsetCount = 0;
+    uint8_t i = 0;
+    
     struct DefFrameData pSendFrame;
 
-    pSendFrame.pBuffer = data;
+    pSendFrame.pbuffer = data;
     pSendFrame.complteFlag = 0xFF;
 
     ClrWdt();
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
-	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
+	pSendFrame.pbuffer[0] = SUDDEN_ID;   //突发状态ID
     
-    g_SuddenState.CapState[LOOP_B] <<= 2;
-    g_SuddenState.CapState[LOOP_C] <<= 4;
+    if(g_SuddenState.suddenFlag)
+    {
+        if(g_SuddenState.switchsuddenFlag)
+        {
+            g_SuddenState.buffer[0] = 0;    //Clear
+            g_SuddenState.switchsuddenFlag = FALSE; //Clear
+        }
+        if(g_SuddenState.capSuddentFlag)
+        {
+            g_SuddenState.buffer[1] = 0;    //Clear
+            g_SuddenState.capSuddentFlag = FALSE;   //Clear
+        }
+        for(i = 0;i < LOOP_QUANTITY; i++)   //循环赋值
+        {
+            if(g_LastswitchState[i] != g_SuddenState.switchState[i])
+            {
+                g_LastswitchState[i] = g_SuddenState.switchState[i];
+                g_SuddenState.switchState[i] <<= offsetCount;
+                g_SuddenState.buffer[0] |= g_SuddenState.switchState[i];
+            }
+            if(g_LastcapState[i] != g_SuddenState.capState[i])
+            {
+                g_LastcapState[i] = g_SuddenState.capState[i];
+                g_SuddenState.capState[i] <<= offsetCount;
+                g_SuddenState.buffer[1] |= g_SuddenState.capState[i];
+            }
+            g_SuddenState.executeOrder[i] <<= offsetCount;
+            offsetCount += 2;   
+        }
+    }
     
-    g_SuddenState.ExecuteOrder[LOOP_B] <<= 2;
-    g_SuddenState.ExecuteOrder[LOOP_C] <<= 4;
-    
-    g_SuddenState.SwitchState[LOOP_B] <<= 2;
-    g_SuddenState.SwitchState[LOOP_C] <<= 2;
-    
-	pSendFrame.pBuffer[1] = g_SuddenState.SwitchState[LOOP_A] | g_SuddenState.SwitchState[LOOP_B] | g_SuddenState.SwitchState[LOOP_C];	
-	pSendFrame.pBuffer[2] = g_SuddenState.ExecuteOrder[LOOP_A] | g_SuddenState.ExecuteOrder[LOOP_B] | g_SuddenState.ExecuteOrder[LOOP_C];	
-	pSendFrame.pBuffer[3] = g_SuddenState.CapState[LOOP_A] | g_SuddenState.CapState[LOOP_B] | g_SuddenState.CapState[LOOP_C];	
+    pSendFrame.pbuffer[1] = g_SuddenState.buffer[0];	
+    pSendFrame.pbuffer[2] = g_SuddenState.executeOrder[LOOP_A] | g_SuddenState.executeOrder[LOOP_B] | g_SuddenState.executeOrder[LOOP_C];	
+    pSendFrame.pbuffer[3] = g_SuddenState.buffer[1];	
     
 	if(!g_SystemState.warning)
 	{
         ClrWdt();
-		pSendFrame.pBuffer[4] = 1;
+		pSendFrame.pbuffer[4] = 1;
 	}
 	else
 	{
         ClrWdt();
-		pSendFrame.pBuffer[4] = 0;
+		pSendFrame.pbuffer[4] = 0;
 	}
-	pSendFrame.pBuffer[5] = g_SystemState.yuanBenState;  
+	pSendFrame.pbuffer[5] = g_SystemState.yuanBenState;  
 
     pSendFrame.len = 6;   //数据帧长度
     SendData(&pSendFrame);
     
     ClrWdt();
-    g_SuddenState.ExecuteOrder[LOOP_A] = 0;
-    g_SuddenState.ExecuteOrder[LOOP_B] = 0;
-    g_SuddenState.ExecuteOrder[LOOP_C] = 0;
+    g_SuddenState.executeOrder[LOOP_A] = 0;
+    g_SuddenState.executeOrder[LOOP_B] = 0;
+    g_SuddenState.executeOrder[LOOP_C] = 0;
 }
 
 
@@ -565,8 +588,8 @@ uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
     {
         return DATA_LEN_ERROR;
     }
-    uint8_t configLoop =  pReciveFrame->pBuffer[1];//回路选择配置字
-    uint8_t actionTime =  pReciveFrame->pBuffer[2];//合分闸时间
+    uint8_t configLoop =  pReciveFrame->pbuffer[1];//回路选择配置字
+    uint8_t actionTime =  pReciveFrame->pbuffer[2];//合分闸时间
     if ((configLoop == 0) || (configLoop > 0x07))
     {
         return  LOOP_ERROR;
@@ -878,7 +901,7 @@ void CheckOrder(uint16_t lastOrder)
     {
         g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
     }
-    g_SuddenState.SuddenFlag = TRUE;  //发送突发错误
+    g_SuddenState.suddenFlag = TRUE;  //发送突发错误
 }
 
 /**
@@ -888,34 +911,34 @@ void CheckOrder(uint16_t lastOrder)
  */
 void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
-    uint8_t idIndex = pReciveFrame->pBuffer[1];
+    uint8_t idIndex = pReciveFrame->pbuffer[1];
     uint8_t error = 0;
     uint8_t i = 0;
     struct DefFrameData pSendFrame;   //要发送的数据
     uint8_t data[8] = {0};
-    pSendFrame.pBuffer = data;
+    pSendFrame.pbuffer = data;
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
     pSendFrame.complteFlag = 0xFF;
     
-    uint8_t start = pReciveFrame->pBuffer[1];
-    uint8_t end = pReciveFrame->pBuffer[2];
+    uint8_t start = pReciveFrame->pbuffer[1];
+    uint8_t end = pReciveFrame->pbuffer[2];
     
-    pSendFrame.pBuffer[0] = 0x92;
+    pSendFrame.pbuffer[0] = 0x92;
     for(idIndex = start; idIndex <= end;idIndex++)    //抛除ID号所占的长度
     {
         ClrWdt();
-        g_ParameterBuffer.len = 8;
-        error = ReadParamValue(idIndex,&g_ParameterBuffer);
+        g_Parameterbuffer.len = 8;
+        error = ReadParamValue(idIndex,&g_Parameterbuffer);
         if((error == 0xF1)||(error == 0xF3))    //数据长度错误
         {
             ClrWdt();
-            SendErrorFrame(pSendFrame.pBuffer[0],DATA_LEN_ERROR);
+            SendErrorFrame(pSendFrame.pbuffer[0],DATA_LEN_ERROR);
         }
-        pSendFrame.pBuffer[1] = idIndex;  //配置号  
-        pSendFrame.len = g_ParameterBuffer.len + 2;
+        pSendFrame.pbuffer[1] = idIndex;  //配置号  
+        pSendFrame.len = g_Parameterbuffer.len + 2;
         for(i = 0;i < pSendFrame.len;i++)
         {
-            pSendFrame.pBuffer[i + 2] = g_ParameterBuffer.pData[i];
+            pSendFrame.pbuffer[i + 2] = g_Parameterbuffer.pData[i];
         }
         ClrWdt();
         SendData(&pSendFrame);

@@ -24,9 +24,9 @@ Source/DeviceNet/../Driver/buffer.h  \
  Source/DeviceNet/../Yongci/yongci.h  \
  Source/DeviceNet/../Yongci/DeviceParameter.h  \
  Source/DeviceNet/../SerialPort/Action.h  \
+ Source/DeviceNet/../SerialPort/../Header.h  \
  Source/DeviceNet/../SerialPort/../Driver/tydef.h  \
  Source/DeviceNet/../SerialPort/../DeviceNet/DeviceNet.h  \
- Source/DeviceNet/../SerialPort/../Yongci/yongci.h  \
  Source/DeviceNet/../Driver/CAN.h  \
 Source/DeviceNet/../Driver/Timer.h  \
  Source/DeviceNet/../SerialPort/Action.h  \

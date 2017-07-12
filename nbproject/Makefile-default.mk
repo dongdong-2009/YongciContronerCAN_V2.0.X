@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/Buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
+SOURCEFILES_QUOTED_IF_SPACED=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/Buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d ${OBJECTDIR}/Source/Driver/AdcSample.o.d ${OBJECTDIR}/Source/Driver/CAN.o.d ${OBJECTDIR}/Source/Driver/DeviceIO.o.d ${OBJECTDIR}/Source/Driver/Timer.o.d ${OBJECTDIR}/Source/Driver/Usart.o.d ${OBJECTDIR}/Source/Driver/traps.o.d ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d ${OBJECTDIR}/Source/Driver/InitTemp.o.d ${OBJECTDIR}/Source/Driver/Delay.o.d ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d ${OBJECTDIR}/Source/Driver/SD2405.o.d ${OBJECTDIR}/Source/Driver/Buffer.o.d ${OBJECTDIR}/Source/SerialPort/Action.o.d ${OBJECTDIR}/Source/SerialPort/CRC16.o.d ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d ${OBJECTDIR}/Source/Yongci/yongci.o.d ${OBJECTDIR}/Source/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o.d ${OBJECTDIR}/Source/Driver/AdcSample.o.d ${OBJECTDIR}/Source/Driver/CAN.o.d ${OBJECTDIR}/Source/Driver/DeviceIO.o.d ${OBJECTDIR}/Source/Driver/Timer.o.d ${OBJECTDIR}/Source/Driver/Usart.o.d ${OBJECTDIR}/Source/Driver/traps.o.d ${OBJECTDIR}/Source/Driver/EEPROMOperate.o.d ${OBJECTDIR}/Source/Driver/InitTemp.o.d ${OBJECTDIR}/Source/Driver/Delay.o.d ${OBJECTDIR}/Source/Driver/ImitationIIC.o.d ${OBJECTDIR}/Source/Driver/SD2405.o.d ${OBJECTDIR}/Source/Driver/buffer.o.d ${OBJECTDIR}/Source/SerialPort/Action.o.d ${OBJECTDIR}/Source/SerialPort/CRC16.o.d ${OBJECTDIR}/Source/SerialPort/RefParameter.o.d ${OBJECTDIR}/Source/Yongci/DeviceParameter.o.d ${OBJECTDIR}/Source/Yongci/SwtichCondition.o.d ${OBJECTDIR}/Source/Yongci/yongci.o.d ${OBJECTDIR}/Source/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/Buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
+OBJECTFILES=${OBJECTDIR}/Source/DeviceNet/DeviceNet.o ${OBJECTDIR}/Source/Driver/AdcSample.o ${OBJECTDIR}/Source/Driver/CAN.o ${OBJECTDIR}/Source/Driver/DeviceIO.o ${OBJECTDIR}/Source/Driver/Timer.o ${OBJECTDIR}/Source/Driver/Usart.o ${OBJECTDIR}/Source/Driver/traps.o ${OBJECTDIR}/Source/Driver/EEPROMOperate.o ${OBJECTDIR}/Source/Driver/InitTemp.o ${OBJECTDIR}/Source/Driver/Delay.o ${OBJECTDIR}/Source/Driver/ImitationIIC.o ${OBJECTDIR}/Source/Driver/SD2405.o ${OBJECTDIR}/Source/Driver/buffer.o ${OBJECTDIR}/Source/SerialPort/Action.o ${OBJECTDIR}/Source/SerialPort/CRC16.o ${OBJECTDIR}/Source/SerialPort/RefParameter.o ${OBJECTDIR}/Source/Yongci/DeviceParameter.o ${OBJECTDIR}/Source/Yongci/SwtichCondition.o ${OBJECTDIR}/Source/Yongci/yongci.o ${OBJECTDIR}/Source/main.o
 
 # Source Files
-SOURCEFILES=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/Buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
+SOURCEFILES=Source/DeviceNet/DeviceNet.c Source/Driver/AdcSample.c Source/Driver/CAN.c Source/Driver/DeviceIO.c Source/Driver/Timer.c Source/Driver/Usart.c Source/Driver/traps.c Source/Driver/EEPROMOperate.c Source/Driver/InitTemp.c Source/Driver/Delay.c Source/Driver/ImitationIIC.c Source/Driver/SD2405.c Source/Driver/buffer.c Source/SerialPort/Action.c Source/SerialPort/CRC16.c Source/SerialPort/RefParameter.c Source/Yongci/DeviceParameter.c Source/Yongci/SwtichCondition.c Source/Yongci/yongci.c Source/main.c
 
 
 CFLAGS=
@@ -172,12 +172,12 @@ ${OBJECTDIR}/Source/Driver/SD2405.o: Source/Driver/SD2405.c  nbproject/Makefile-
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/SD2405.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/Source/Driver/Buffer.o: Source/Driver/Buffer.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/Source/Driver/buffer.o: Source/Driver/buffer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
-	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o.d 
-	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Buffer.c  -o ${OBJECTDIR}/Source/Driver/Buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Buffer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
-	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	@${RM} ${OBJECTDIR}/Source/Driver/buffer.o.d 
+	@${RM} ${OBJECTDIR}/Source/Driver/buffer.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/buffer.c  -o ${OBJECTDIR}/Source/Driver/buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/buffer.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1    -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/Action.o: Source/SerialPort/Action.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 
@@ -313,12 +313,12 @@ ${OBJECTDIR}/Source/Driver/SD2405.o: Source/Driver/SD2405.c  nbproject/Makefile-
 	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/SD2405.c  -o ${OBJECTDIR}/Source/Driver/SD2405.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/SD2405.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
 	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/SD2405.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
-${OBJECTDIR}/Source/Driver/Buffer.o: Source/Driver/Buffer.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/Source/Driver/buffer.o: Source/Driver/buffer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/Driver" 
-	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o.d 
-	@${RM} ${OBJECTDIR}/Source/Driver/Buffer.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/Buffer.c  -o ${OBJECTDIR}/Source/Driver/Buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/Buffer.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
-	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/Buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	@${RM} ${OBJECTDIR}/Source/Driver/buffer.o.d 
+	@${RM} ${OBJECTDIR}/Source/Driver/buffer.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  Source/Driver/buffer.c  -o ${OBJECTDIR}/Source/Driver/buffer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/Source/Driver/buffer.o.d"        -g -omf=elf -DXPRJ_default=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O1 -msmart-io=1 -Wall -msfr-warn=off   -std=gnu99
+	@${FIXDEPS} "${OBJECTDIR}/Source/Driver/buffer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/Source/SerialPort/Action.o: Source/SerialPort/Action.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Source/SerialPort" 

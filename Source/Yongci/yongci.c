@@ -18,7 +18,7 @@
 
 SwitchConfig g_SwitchConfig[4];	//配置机构状态
 
-uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
+uint8_t ParameterbufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
 uint16_t _PERSISTENT g_LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
@@ -26,7 +26,7 @@ uint16_t g_lastRunOrder = IDLE_ORDER;
 CAN_msg ReciveMsg;
 
 
-void InitSetSwitchState(void);
+void InitSetswitchState(void);
 void UpdateCount(void);
 void SwitchOpenFirstPhase(SwitchConfig* pConfig);
 void SwitchOpenSecondPhase(SwitchConfig* pConfig);
@@ -480,7 +480,7 @@ uint8_t  RefreshIdleState()
     //始终进行处理，处理完缓冲区。 TODO:远方本地检测?
     do
     {
-        result = BufferDequeue(&ReciveMsg);
+        result = bufferDequeue(&ReciveMsg);
         if (result)
         {
             DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
@@ -490,16 +490,16 @@ uint8_t  RefreshIdleState()
 
 
     //周期性状态更新
-    if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || g_SuddenState.SuddenFlag)
+    if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || g_SuddenState.suddenFlag)
     {
         ClrWdt();
-        DsplaySwitchState();    //更新机构的状态显示
+        DsplayswitchState();    //更新机构的状态显示
         //建立连接且不是在预制状态下才会周期上传
         if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.receiveStateFlag == IDLE_ORDER))   
         {
             UpdataState();  //更新状态
         }
-        g_SuddenState.SuddenFlag = FALSE;  //Clear
+        g_SuddenState.suddenFlag = FALSE;  //Clear
         g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
     }
 
@@ -604,8 +604,8 @@ void YongciFirstInit(void)
 {
     ClrWdt();
     
-    g_ParameterBuffer.pData = ParameterBufferData;
-    g_ParameterBuffer.len = 8;
+    g_Parameterbuffer.pData = ParameterbufferData;
+    g_Parameterbuffer.len = 8;
     
     g_LockUp = OFF_LOCK;    //处于解锁状态
     
@@ -638,7 +638,7 @@ void YongciFirstInit(void)
     
     g_Order = IDLE_ORDER;   //初始化
     ClrWdt();
-    InitSetSwitchState();
+    InitSetswitchState();
     
     g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
     g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;   
@@ -660,18 +660,15 @@ void YongciFirstInit(void)
     
     //****************************************
     //突发状态量更新初始化
-    g_SuddenState.CapState[LOOP_A] = 0;
-    g_SuddenState.CapState[LOOP_B] = 0;
-    g_SuddenState.CapState[LOOP_C] = 0;
-    g_SuddenState.ExecuteOrder[LOOP_A] = 0;
-    g_SuddenState.ExecuteOrder[LOOP_B] = 0;
-    g_SuddenState.ExecuteOrder[LOOP_C] = 0;
     ClrWdt();
-    g_SuddenState.SuddenFlag = FALSE;
-    g_SuddenState.SwitchState[LOOP_A] = 0;
-    g_SuddenState.SwitchState[LOOP_B] = 0;
-    g_SuddenState.SwitchState[LOOP_C] = 0;
+    g_SuddenState.suddenFlag = FALSE;
     g_SuddenState.RefuseAction = FALSE;
+    
+    g_SuddenState.capSuddentFlag = FALSE;
+    g_SuddenState.switchsuddenFlag = FALSE;
+    
+    g_SuddenState.buffer[0] = 0;
+    g_SuddenState.buffer[1] = 0;
     //****************************************
     
     g_lastRunOrder = IDLE_ORDER;
@@ -680,10 +677,10 @@ void YongciFirstInit(void)
 
 /**
  * 
- * <p>Function name: [InitSetSwitchState]</p>
+ * <p>Function name: [InitSetswitchState]</p>
  * <p>Discription: [机构状态的初始化]</p>
  */
-void InitSetSwitchState(void)
+void InitSetswitchState(void)
 {
 	g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;	//默认为空闲状态
 	g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //默认未执行
