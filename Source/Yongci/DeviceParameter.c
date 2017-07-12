@@ -177,21 +177,21 @@ uint16_t GetCapVolatageState(void)
  */
 void UpdataCapVoltageState(void)
 {
-    GetcapState(LOOP_A, g_SystemLimit.capVoltage1.down, g_SystemLimit.capVoltage1.upper, g_SystemVoltageParameter.voltageCap1);
-    GetcapState(LOOP_B, g_SystemLimit.capVoltage2.down, g_SystemLimit.capVoltage2.upper, g_SystemVoltageParameter.voltageCap2);
-    if(g_LastcapState[LOOP_A] != g_SuddenState.capState[LOOP_A])
+    GetcapState(DEVICE_I, g_SystemLimit.capVoltage1.down, g_SystemLimit.capVoltage1.upper, g_SystemVoltageParameter.voltageCap1);
+    GetcapState(DEVICE_II, g_SystemLimit.capVoltage2.down, g_SystemLimit.capVoltage2.upper, g_SystemVoltageParameter.voltageCap2);
+    if(g_LastcapState[DEVICE_I] != g_SuddenState.capState[DEVICE_I])
     {
         g_SuddenState.suddenFlag = TRUE;    //发送突发状态
         g_SuddenState.capSuddentFlag = TRUE;
     }
-    if(g_LastcapState[LOOP_B] != g_SuddenState.capState[LOOP_B])
+    if(g_LastcapState[DEVICE_II] != g_SuddenState.capState[DEVICE_II])
     {
         g_SuddenState.suddenFlag = TRUE;    //发送突发状态
         g_SuddenState.capSuddentFlag = TRUE;
     }
 #if(CAP3_STATE)
-    GetcapState(LOOP_C, g_SystemLimit.capVoltage3.down, g_SystemLimit.capVoltage3.upper, g_SystemVoltageParameter.voltageCap3);
-    if(g_LastcapState[LOOP_C] != g_SuddenState.capState[LOOP_C])
+    GetcapState(DEVICE_III, g_SystemLimit.capVoltage3.down, g_SystemLimit.capVoltage3.upper, g_SystemVoltageParameter.voltageCap3);
+    if(g_LastcapState[DEVICE_III] != g_SuddenState.capState[DEVICE_III])
     {
         g_SuddenState.suddenFlag = TRUE;    //发送突发状态
         g_SuddenState.capSuddentFlag = TRUE;

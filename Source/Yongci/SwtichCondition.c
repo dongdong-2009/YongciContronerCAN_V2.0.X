@@ -217,23 +217,23 @@ uint8_t CheckIOState(void)
     switch (g_Order)
     {
         //检测按键状态
-        case CHECK_Z_HE_ORDER: //收到合闸命令 需要判断一下电容电压能否达到要求
+        case HE_ORDER: //收到合闸命令 需要判断一下电容电压能否达到要求
         {
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState()))
             {
                // TongBuHeZha(); TODO:
                 ClrWdt();
-                SingleCloseOperation(LOOP_A , g_DelayTime.hezhaTime1);
-                SingleCloseOperation(LOOP_B , g_DelayTime.hezhaTime2);
+                SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
+                SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
 #if(CAP3_STATE)  //判断第三块驱动是否存在
-                SingleCloseOperation(LOOP_C , g_DelayTime.hezhaTime3);
+                SingleCloseOperation(DEVICE_III , g_DelayTime.hezhaTime3);
 #endif
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
                 ClrWdt();
-                g_SuddenState.executeOrder[LOOP_A] = CLOSE_STATE;
-                g_SuddenState.executeOrder[LOOP_B] = CLOSE_STATE;
-                g_SuddenState.executeOrder[LOOP_C] = CLOSE_STATE;
+                g_SuddenState.executeOrder[DEVICE_I] = CLOSE_STATE;
+                g_SuddenState.executeOrder[DEVICE_II] = CLOSE_STATE;
+                g_SuddenState.executeOrder[DEVICE_III] = CLOSE_STATE;
                 return 0xFF;
             }
             else
@@ -242,7 +242,7 @@ uint8_t CheckIOState(void)
                 return 0xFF;
             }
         }
-        case CHECK_Z_FEN_ORDER: //收到分闸命令
+        case FEN_ORDER: //收到分闸命令
         {
             ClrWdt();
             if(g_SystemState.charged == TRUE)   //带电不能执行分闸操作
@@ -253,16 +253,16 @@ uint8_t CheckIOState(void)
             if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
             {
                 ClrWdt();
-                SingleOpenOperation(LOOP_A , g_DelayTime.fenzhaTime1);
-                SingleOpenOperation(LOOP_B , g_DelayTime.fenzhaTime2);
+                SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
+                SingleOpenOperation(DEVICE_II , g_DelayTime.fenzhaTime2);
 #if(CAP3_STATE)  //判断第三块驱动是否存在
-                SingleOpenOperation(LOOP_C , g_DelayTime.fenzhaTime3);
+                SingleOpenOperation(DEVICE_III , g_DelayTime.fenzhaTime3);
 #endif
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
                 ClrWdt();
-                g_SuddenState.executeOrder[LOOP_A] = OPEN_STATE;
-                g_SuddenState.executeOrder[LOOP_B] = OPEN_STATE;
-                g_SuddenState.executeOrder[LOOP_C] = OPEN_STATE;
+                g_SuddenState.executeOrder[DEVICE_I] = OPEN_STATE;
+                g_SuddenState.executeOrder[DEVICE_II] = OPEN_STATE;
+                g_SuddenState.executeOrder[DEVICE_III] = OPEN_STATE;
                 return 0xFF;
             }
             else
@@ -277,8 +277,8 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                SingleCloseOperation(LOOP_A , g_DelayTime.hezhaTime1);
-                g_SuddenState.executeOrder[LOOP_A] = CLOSE_STATE;
+                SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
+                g_SuddenState.executeOrder[DEVICE_I] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
             }
             else
@@ -298,8 +298,8 @@ uint8_t CheckIOState(void)
             }
             if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
             {
-                SingleOpenOperation(LOOP_A , g_DelayTime.fenzhaTime1);
-                g_SuddenState.executeOrder[LOOP_A] = OPEN_STATE;
+                SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
+                g_SuddenState.executeOrder[DEVICE_I] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
             }
             else
@@ -315,8 +315,8 @@ uint8_t CheckIOState(void)
             ClrWdt();        
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                SingleCloseOperation(LOOP_B , g_DelayTime.hezhaTime2);
-                g_SuddenState.executeOrder[LOOP_B] = CLOSE_STATE;
+                SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
+                g_SuddenState.executeOrder[DEVICE_II] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
             }
             else
@@ -336,8 +336,8 @@ uint8_t CheckIOState(void)
             }
             if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
             {
-                SingleOpenOperation(LOOP_B , g_DelayTime.fenzhaTime2);
-                g_SuddenState.executeOrder[LOOP_B] = OPEN_STATE;
+                SingleOpenOperation(DEVICE_II , g_DelayTime.fenzhaTime2);
+                g_SuddenState.executeOrder[DEVICE_II] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
             }
             else
@@ -353,8 +353,8 @@ uint8_t CheckIOState(void)
             ClrWdt();        
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                SingleCloseOperation(LOOP_C , g_DelayTime.hezhaTime3);
-                g_SuddenState.executeOrder[LOOP_C] = CLOSE_STATE;
+                SingleCloseOperation(DEVICE_III , g_DelayTime.hezhaTime3);
+                g_SuddenState.executeOrder[DEVICE_III] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
             }       
             else
@@ -374,8 +374,8 @@ uint8_t CheckIOState(void)
             }
             if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
             {
-                SingleOpenOperation(LOOP_C , g_DelayTime.fenzhaTime3);
-                g_SuddenState.executeOrder[LOOP_C] = OPEN_STATE;
+                SingleOpenOperation(DEVICE_III , g_DelayTime.fenzhaTime3);
+                g_SuddenState.executeOrder[DEVICE_III] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
             }       
             else
@@ -409,10 +409,10 @@ void DsplayswitchState(void)
         return;
     }
     
-    waringbuffer[LOOP_A] = g_SystemState.heFenState1; //机构1警告
-    waringbuffer[LOOP_B] = g_SystemState.heFenState2; //机构2警告
+    waringbuffer[DEVICE_I] = g_SystemState.heFenState1; //机构1警告
+    waringbuffer[DEVICE_II] = g_SystemState.heFenState2; //机构2警告
 #if(CAP3_STATE)
-    waringbuffer[LOOP_C] = g_SystemState.heFenState3; //机构3警告
+    waringbuffer[DEVICE_III] = g_SystemState.heFenState3; //机构3警告
 #else
     g_SystemState.heFenState3 = g_SystemState.heFenState2;  //主要应用在判断总分合位
 #endif
@@ -436,6 +436,11 @@ void DsplayswitchState(void)
                 UpdateIndicateState(OpenDisplaybuffer[index], OpenDisplaybuffer[index + offestIndex], TURN_ON);     //开启分位指示灯
                 UpdateIndicateState(ErrorDisplaybuffer[index], ErrorDisplaybuffer[index + offestIndex], TURN_OFF);  //关闭错误指示灯
                 g_SystemState.warning = waringbuffer[index];
+                if(g_SuddenState.RefuseAction == FEN_ERROR)
+                {
+                    g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
+                    g_SuddenState.RefuseAction = FALSE;
+                }
                 break;
             }
             case CLOSE_STATE:
@@ -444,6 +449,11 @@ void DsplayswitchState(void)
                 UpdateIndicateState(OpenDisplaybuffer[index], OpenDisplaybuffer[index + offestIndex], TURN_OFF);    //关闭分位指示灯
                 UpdateIndicateState(ErrorDisplaybuffer[index], ErrorDisplaybuffer[index + offestIndex], TURN_OFF);  //关闭错误指示灯
                 g_SystemState.warning = waringbuffer[index];
+                if(g_SuddenState.RefuseAction == HE_ERROR)
+                {
+                    g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
+                    g_SuddenState.RefuseAction = FALSE;
+                }
                 break;
             }
         }
@@ -484,11 +494,6 @@ void DsplayswitchState(void)
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_ON);
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_OFF);
         ClrWdt();
-        if(g_SuddenState.RefuseAction == Z_HE_ERROR)
-        {
-            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
-            g_SuddenState.RefuseAction = FALSE; //Clear
-        }
     }
     else if((g_SystemState.heFenState2 == CLOSE_STATE)&&(g_SystemState.heFenState1 == CLOSE_STATE) && 
        (g_SystemState.heFenState3 == CLOSE_STATE)) //合闸状态
@@ -497,11 +502,6 @@ void DsplayswitchState(void)
         UpdateIndicateState(Z_HEWEI_RELAY,Z_HEWEI_LED,TURN_ON);
         UpdateIndicateState(Z_FENWEI_RELAY,Z_FENWEI_LED,TURN_OFF);
         ClrWdt();
-        if(g_SuddenState.RefuseAction == Z_FEN_ERROR)
-        {
-            g_TimeStampCollect.changeLedTime.delayTime = 500;  //发生拒动错误后，指示灯闪烁间隔变短
-            g_SuddenState.RefuseAction = FALSE; //Clear
-        }
     }
     else
     {
@@ -761,7 +761,7 @@ void SwitchScan(void)
                    (g_SystemState.heFenState2 == OPEN_STATE) && 
                    (g_SystemState.heFenState3 == OPEN_STATE))
                 {
-                    g_Order = CHECK_Z_HE_ORDER;     //同时合闸命令
+                    g_Order = HE_ORDER;     //同时合闸命令
                     OnLock();   //上锁
                 }
                 g_timeCount[1] = 0;
@@ -773,7 +773,7 @@ void SwitchScan(void)
                    (g_SystemState.heFenState2 == CLOSE_STATE) && 
                    (g_SystemState.heFenState3 == CLOSE_STATE) )
                 {
-                    g_Order = CHECK_Z_FEN_ORDER;     //同时分闸命令
+                    g_Order = FEN_ORDER;     //同时分闸命令
                     OnLock();   //上锁
                 }
                 g_timeCount[1] = 0;
@@ -942,22 +942,22 @@ void SwitchScan(void)
  */
 void UpdataswitchState(void)
 {
-    if(g_LastswitchState[LOOP_A] != g_SystemState.heFenState1)
+    if(g_LastswitchState[DEVICE_I] != g_SystemState.heFenState1)
     {
-        g_SuddenState.switchState[LOOP_A] = g_SystemState.heFenState1;
+        g_SuddenState.switchState[DEVICE_I] = g_SystemState.heFenState1;
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }
-    if(g_LastswitchState[LOOP_B] != g_SystemState.heFenState2)
+    if(g_LastswitchState[DEVICE_II] != g_SystemState.heFenState2)
     {
-        g_SuddenState.switchState[LOOP_B] = g_SystemState.heFenState2;
+        g_SuddenState.switchState[DEVICE_II] = g_SystemState.heFenState2;
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }
 #if(CAP3_STATE)
-    if(g_LastswitchState[LOOP_C] != g_SystemState.heFenState3)
+    if(g_LastswitchState[DEVICE_III] != g_SystemState.heFenState3)
     {
-        g_SuddenState.switchState[LOOP_C] = g_SystemState.heFenState3;
+        g_SuddenState.switchState[DEVICE_III] = g_SystemState.heFenState3;
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }

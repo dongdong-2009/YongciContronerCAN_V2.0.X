@@ -30,25 +30,18 @@ extern "C" {
 #define WORK_STATE  0x3F    //工作状态
 #define DEBUG_STATE 0xCF    //调试状态
     
-    
-//IGBT工作状态
-#define HE_ORDER     0xAAAA     //总的合闸命令
-#define FEN_ORDER    0xAA55     //总的分闸命令
-    
 #define IDLE_ORDER   0x0000     //空闲命令
 
 #define HEZHA_TIME  50 //合闸时间 默认
 #define FENZHA_TIME 30 //分闸时间 默认
 
-    
-//IO 检测对应状态
-#define CHECK_ERROR7_STATE 0x16  //同时输入了总的合闸、分闸信号
-    
 #define NO_ERROR    0x00
     
-#define CHECK_Z_HE_ORDER  0xAA22  //执行同时合闸动作
-#define CHECK_Z_FEN_ORDER 0xAA23  //执行同时分闸动作
+//IGBT工作状态
+#define HE_ORDER  0xAAAA  //执行同时合闸动作
+#define FEN_ORDER 0xAA55  //执行同时分闸动作
     
+//以下用于按键
 #define CHECK_1_HE_ORDER  0xAA24  //执行机构1合闸动作
 #define CHECK_1_FEN_ORDER 0xAA25  //执行机构1分闸动作
     
@@ -60,16 +53,8 @@ extern "C" {
 
 //************************************************
 //拒动错误值
-#define Z_HE_ERROR      0xB2    //总合拒动错误
-#define Z_FEN_ERROR     0xB3    //总分拒动错误
-#define JIGOU1_HE_ERROR     0xB4  //机构1合位错误
-#define JIGOU1_FEN_ERROR    0xB5  //机构1分位错误
-    
-#define JIGOU2_HE_ERROR     0xB6  //机构2合位错误
-#define JIGOU2_FEN_ERROR    0xB7  //机构2分位错误
-    
-#define JIGOU3_HE_ERROR     0xB8  //机构3合位错误
-#define JIGOU3_FEN_ERROR    0xB9  //机构3分位错误
+#define HE_ERROR      0xB2    //合拒动错误
+#define FEN_ERROR     0xB3    //分拒动错误
 //************************************************
 
 #define ON_LOCK     0xAA55    
@@ -82,14 +67,13 @@ extern "C" {
 #define  DEVICE_II 1
 #define  DEVICE_III 2
   
-    
-    
  /**
   * 分合闸控制
   */
 typedef struct TagSwitchConfig
 {
 	uint8_t   currentState;	//当前的状态
+    uint8_t   alreadyAction;   //是否已经动作了
 	uint16_t  order;	//分合闸命令
     uint16_t  lastOrder;  //上一次执行的指令
 	uint16_t  powerOnTime;   //合闸动作时间
@@ -112,10 +96,11 @@ void OffLock(void);
 void SynCloseAction(void);
 void CloseOperation(void);
 void OpenOperation(void);
+void UpdateCount(void);
 extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 //extern uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime; //改变LED灯闪烁时间 (ms) TODO:为什么？
 extern uint16_t _PERSISTENT g_LockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
-
+extern SwitchConfig g_SwitchConfig[4];	//配置机构状态
 
 #ifdef	__cplusplus
 }

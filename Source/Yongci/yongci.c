@@ -22,12 +22,10 @@ uint8_t ParameterbufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
 uint16_t _PERSISTENT g_LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
-uint16_t g_lastRunOrder = IDLE_ORDER;
 CAN_msg ReciveMsg;
 
 
 void InitSetswitchState(void);
-void UpdateCount(void);
 void SwitchOpenFirstPhase(SwitchConfig* pConfig);
 void SwitchOpenSecondPhase(SwitchConfig* pConfig);
 void SwitchOpenThirdPhase(SwitchConfig* pConfig);
@@ -419,15 +417,14 @@ uint8_t  RefreshIdleState()
     ON_COMMUNICATION_INT();
     StopTimer3();  //刷新关闭定时器3
     ClrWdt();
-    if((g_SwitchConfig[DEVICE_I].lastOrder != IDLE_ORDER) || 
-        (g_SwitchConfig[DEVICE_II].lastOrder != IDLE_ORDER) || 
+    if((g_SwitchConfig[DEVICE_I].alreadyAction == TRUE) || 
+       (g_SwitchConfig[DEVICE_II].alreadyAction == TRUE) || 
         CHECK_LAST_ORDER3())
     {
         ON_COMMUNICATION_INT();
         ClrWdt();
         checkOrderDelay = REFUSE_ACTION;
         //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
-        UpdateCount();//更新计数
         ReadCapDropVoltage();  //读取电容跌落电压
         checkOrderTime = g_TimeStampCollect.msTicks;
         //Clear Flag
@@ -437,20 +434,32 @@ uint8_t  RefreshIdleState()
         g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
         g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
         g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_I].alreadyAction = FALSE;
+        g_SwitchConfig[DEVICE_II].alreadyAction = FALSE;
+        g_SwitchConfig[DEVICE_III].alreadyAction = FALSE;
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         OffLock();  //解锁
     }
 
     //拒动错误检测
     if(g_TimeStampCollect.msTicks - checkOrderTime >= checkOrderDelay)//TODO：错误是
     {
-        CheckOrder(g_lastRunOrder);  //检测命令是否执行
+        CheckOrder();  //检测命令是否执行
+        if(g_SuddenState.RefuseAction != FALSE)
+        {
+            g_TimeStampCollect.changeLedTime.delayTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+        }
+        else
+        {
+            g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
+            UpdateCount();//没有拒动才会更新计数
+        }
+        g_SuddenState.suddenFlag = TRUE;  //发送突发错误
+        g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
         checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
         checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
-        g_lastRunOrder = IDLE_ORDER;     //上一次执行的命令清空
-        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER; //清空上一次执行的命令
         OffLock();  //解锁
     }
     ClrWdt();
@@ -472,7 +481,6 @@ uint8_t  RefreshIdleState()
     }
     if (CheckIOState()) //收到合分闸指令，退出后立即进行循环
     {
-        g_lastRunOrder = g_Order;
         g_Order = IDLE_ORDER;    //将命令清零
         return 0xff;
     }
@@ -544,7 +552,6 @@ uint8_t  RefreshIdleState()
             g_RemoteControlState.orderId = 0;   //Clear
             g_RemoteControlState.receiveStateFlag = IDLE_ORDER; //Clear order
             g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
-            g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
             OffLock();  //解锁
             if(g_RemoteControlState.orderId == SyncReadyClose)  //同步合闸预制
             {
@@ -650,7 +657,6 @@ void YongciFirstInit(void)
     
     //远方控制标识位初始化
     g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
-    g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;
     g_RemoteControlState.overTimeFlag = FALSE;
     g_RemoteControlState.orderId = 0x00;    //Clear
     g_RemoteControlState.setFixedValue = FALSE;    //Clear    
@@ -671,7 +677,6 @@ void YongciFirstInit(void)
     g_SuddenState.buffer[1] = 0;
     //****************************************
     
-    g_lastRunOrder = IDLE_ORDER;
     OffLock();  //解锁，可以检测
 }  
 
@@ -683,6 +688,7 @@ void YongciFirstInit(void)
 void InitSetswitchState(void)
 {
 	g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[DEVICE_I].alreadyAction = FALSE;	//默认未动作
 	g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //默认未执行
     g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
 	g_SwitchConfig[DEVICE_I].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
@@ -694,6 +700,7 @@ void InitSetswitchState(void)
     ClrWdt();
 
 	g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[DEVICE_II].alreadyAction = FALSE;	//默认未动作
 	g_SwitchConfig[DEVICE_II].order = IDLE_ORDER; //默认未执行
     g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
 	g_SwitchConfig[DEVICE_II].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
@@ -705,6 +712,7 @@ void InitSetswitchState(void)
     ClrWdt();
 
 	g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;	//默认为空闲状态
+	g_SwitchConfig[DEVICE_III].alreadyAction = FALSE;	//默认未动作
 	g_SwitchConfig[DEVICE_III].order = IDLE_ORDER; //默认未执行
     g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER; //默认上一次未执行任何指令
 	g_SwitchConfig[DEVICE_III].powerOnTime = HEZHA_TIME;  //默认合闸时间50ms
@@ -743,6 +751,7 @@ void SwitchCloseFirstPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -767,6 +776,7 @@ void SwitchCloseSecondPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -791,6 +801,7 @@ void SwitchCloseThirdPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = HE_ORDER; //刚执行完合闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -820,6 +831,7 @@ void SwitchOpenFirstPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -844,6 +856,7 @@ void SwitchOpenSecondPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -868,6 +881,7 @@ void SwitchOpenThirdPhase(SwitchConfig* pConfig)
 		pConfig->currentState = IDLE_ORDER;
         ClrWdt();
         pConfig->lastOrder = FEN_ORDER; //刚执行完分闸指令
+        pConfig->alreadyAction = TRUE; //已经动作了
 	}
 }
 
@@ -915,12 +929,7 @@ void UpdateCount(void)
         ClrWdt();
         SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
     }
-#endif
-    g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;    //清零防止重复写入
-    g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;    //清零防止重复写入
-    g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;    //清零防止重复写入
-    ClrWdt();
-    
+#endif    
 }
 
 

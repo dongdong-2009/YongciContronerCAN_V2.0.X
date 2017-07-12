@@ -269,7 +269,6 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
         ClrWdt();
         SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令
-        g_RemoteControlState.lastReceiveOrder = IDLE_ORDER;  //Clear
     }
        //比较配置字是否一致
     for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
@@ -282,8 +281,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     
      
     OnLock();   //上锁             
-    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag
-    g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令                
+    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag         
     ClrWdt();               
     SendData(pSendFrame);
     
@@ -449,14 +447,6 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     
     g_RemoteControlState.orderId = id;
     
-    //返回的数据帧赋值传递
-    for(uint8_t i = 0;i < pSendFrame->len;i++)
-    {
-        ActionCommandTemporaryAck.pbuffer[i] = pSendFrame->pbuffer[i];
-        ClrWdt();
-    }
-    
-
     if(g_RemoteControlState.receiveStateFlag == IDLE_ORDER)
     {               
         ClrWdt();              
@@ -538,14 +528,12 @@ void UpdataState(void)
             if(g_LastswitchState[i] != g_SuddenState.switchState[i])
             {
                 g_LastswitchState[i] = g_SuddenState.switchState[i];
-                g_SuddenState.switchState[i] <<= offsetCount;
-                g_SuddenState.buffer[0] |= g_SuddenState.switchState[i];
+                g_SuddenState.buffer[0] |= g_SuddenState.switchState[i] << offsetCount;
             }
             if(g_LastcapState[i] != g_SuddenState.capState[i])
             {
                 g_LastcapState[i] = g_SuddenState.capState[i];
-                g_SuddenState.capState[i] <<= offsetCount;
-                g_SuddenState.buffer[1] |= g_SuddenState.capState[i];
+                g_SuddenState.buffer[1] |= g_SuddenState.capState[i] << offsetCount;
             }
             g_SuddenState.executeOrder[i] <<= offsetCount;
             offsetCount += 2;   
@@ -553,7 +541,7 @@ void UpdataState(void)
     }
     
     pSendFrame.pbuffer[1] = g_SuddenState.buffer[0];	
-    pSendFrame.pbuffer[2] = g_SuddenState.executeOrder[LOOP_A] | g_SuddenState.executeOrder[LOOP_B] | g_SuddenState.executeOrder[LOOP_C];	
+    pSendFrame.pbuffer[2] = g_SuddenState.executeOrder[DEVICE_I] | g_SuddenState.executeOrder[DEVICE_II] | g_SuddenState.executeOrder[DEVICE_III];	
     pSendFrame.pbuffer[3] = g_SuddenState.buffer[1];	
     
 	if(!g_SystemState.warning)
@@ -572,9 +560,9 @@ void UpdataState(void)
     SendData(&pSendFrame);
     
     ClrWdt();
-    g_SuddenState.executeOrder[LOOP_A] = 0;
-    g_SuddenState.executeOrder[LOOP_B] = 0;
-    g_SuddenState.executeOrder[LOOP_C] = 0;
+    g_SuddenState.executeOrder[DEVICE_I] = 0;
+    g_SuddenState.executeOrder[DEVICE_II] = 0;
+    g_SuddenState.executeOrder[DEVICE_III] = 0;
 }
 
 
@@ -759,149 +747,46 @@ uint8_t CheckOpenCondition(void)
  * <p>Discription: [检测命令是否正确执行]</p>
  * @param lastOrder 上一次执行的命令
  */
-void CheckOrder(uint16_t lastOrder)
+void CheckOrder(void)
 {
-    //远方与就地命令的转换
-    if((lastOrder == IDLE_ORDER) && (g_RemoteControlState.lastReceiveOrder != IDLE_ORDER))
+    uint8_t i = 0;
+    uint8_t closeOrderCount = 0;
+    uint8_t openOrderCount = 0;
+    
+    for(i = 0; i < LOOP_QUANTITY; i++)
     {
-        lastOrder = g_RemoteControlState.lastReceiveOrder;        
-        ActionCommandTemporaryAck.complteFlag = TRUE;
-        if(lastOrder != TONGBU_HEZHA)
+        if(g_SwitchConfig[i].lastOrder == HE_ORDER)
         {
-            SendData(&ActionCommandTemporaryAck); //发送执行反馈指令
-        }        
-    }
-    switch(lastOrder)
-    {
-        case TONGBU_HEZHA:
-        case CHECK_Z_HE_ORDER:
-        {
-            if(g_SystemState.heFenState1 != CLOSE_STATE || 
-               g_SystemState.heFenState2 != CLOSE_STATE || 
-               g_SystemState.heFenState3 != CLOSE_STATE)
+            if(g_SuddenState.switchState[i] != CLOSE_STATE)
             {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = Z_HE_ERROR;  //发生拒动
+                closeOrderCount++;
             }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
         }
-        case CHECK_Z_FEN_ORDER:
+        else if(g_SwitchConfig[i].lastOrder == FEN_ORDER)
         {
-            if(g_SystemState.heFenState1 != OPEN_STATE || 
-               g_SystemState.heFenState2 != OPEN_STATE || 
-               g_SystemState.heFenState3 != OPEN_STATE)
+            if(g_SuddenState.switchState[i] != OPEN_STATE)
             {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = Z_FEN_ERROR;  //发生拒动
+                openOrderCount++;
             }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
-        }
-        case CHECK_1_HE_ORDER:
-        {
-            if(g_SystemState.heFenState1 != CLOSE_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU1_HE_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
-        }
-        case CHECK_1_FEN_ORDER:
-        {
-            if(g_SystemState.heFenState1 != OPEN_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU1_FEN_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
-        }
-        case CHECK_2_HE_ORDER:
-        {
-            if(g_SystemState.heFenState2 != CLOSE_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU2_HE_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
-        }
-        case CHECK_2_FEN_ORDER:
-        {
-            if(g_SystemState.heFenState2 != OPEN_STATE)
-            {
-                SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                g_SuddenState.RefuseAction = JIGOU2_FEN_ERROR;  //发生拒动
-            }
-            else
-            {
-                g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-            }
-            break;
-        }
-        case CHECK_3_HE_ORDER:
-        {
-            #if(CAP3_STATE)
-            {
-                if(g_SystemState.heFenState3 != CLOSE_STATE)
-                {
-                    SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-                    g_SuddenState.RefuseAction = JIGOU3_HE_ERROR;  //发生拒动
-                }
-                else
-                {
-                    g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-                }
-            }
-            #endif  
-            break;
-        }
-        case CHECK_3_FEN_ORDER:
-        {
-#if(CAP3_STATE)
-        if(g_SystemState.heFenState3 != OPEN_STATE)
-        {
-            SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
-            g_SuddenState.RefuseAction = JIGOU3_FEN_ERROR;  //发生拒动
-        }
-        else
-        {
-            g_SuddenState.RefuseAction = FALSE;  //未发生拒动
-        }
-#endif  
-            break;
-        }
-        default:
-        {
-            break;
         }
     }
-    if(g_SuddenState.RefuseAction != FALSE)
+    ActionCommandTemporaryAck.complteFlag = TRUE;
+    SendData(&ActionCommandTemporaryAck); //发送执行反馈指令
+    if(closeOrderCount > 0)
     {
-        g_TimeStampCollect.changeLedTime.delayTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+        SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+        g_SuddenState.RefuseAction = HE_ERROR;  //发生拒动
+    }
+    else if(openOrderCount > 0)
+    {
+        SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
+        g_SuddenState.RefuseAction = FEN_ERROR;  //发生拒动
     }
     else
     {
-        g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
+        g_SuddenState.RefuseAction = FALSE;  //未发生拒动
     }
-    g_SuddenState.suddenFlag = TRUE;  //发送突发错误
+    
 }
 
 /**
@@ -996,10 +881,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 	}
 	if((RXD1_LASER == 1) && (i == 4))
 	{
-        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag   
         SynCloseAction();
-        g_RemoteControlState.lastReceiveOrder = TONGBU_HEZHA;
         TurnOffInt2();
 	}
 }

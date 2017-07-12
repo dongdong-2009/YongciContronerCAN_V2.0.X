@@ -179,7 +179,6 @@ typedef struct TagSaveSystemSuddenState
 typedef struct RemoteControl
 {
     uint16_t receiveStateFlag;  //分合状态指令 单片机在看门狗复位的情况下不会改变该值
-    uint16_t lastReceiveOrder;  //接收到的上一条命令
     uint8_t  overTimeFlag;     //超时标识位
     uint8_t  orderId;           //执行的命令
     uint8_t  setFixedValue;     //设置定值指令
@@ -224,7 +223,7 @@ typedef struct TagActionAttribute
 
 void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
-void CheckOrder(uint16_t lastOrder);
+void CheckOrder(void);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 
 void SendMonitorParameter(struct DefFrameData* pReciveFrame);

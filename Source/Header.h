@@ -29,7 +29,7 @@
     #define CAP3_STATE  0xFF    //用于判断其是否被激活
     #define NUM_CHS2SCAN 4 //扫描几路ADC就相应的赋值即可
     #define CHECK_ORDER3()    (g_SwitchConfig[DEVICE_III].order == IDLE_ORDER)   
-    #define CHECK_LAST_ORDER3()     ( g_SwitchConfig[DEVICE_III].lastOrder != IDLE_ORDER)
+    #define CHECK_LAST_ORDER3()     ( g_SwitchConfig[DEVICE_III].alreadyAction == TRUE)
     #define CHECK_VOLTAGE_CAP3()    (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down + THRESHOLD_VALUE)
     #define MAC_ID (0x10)   //缺省A相
 
@@ -110,10 +110,6 @@
 
 extern uint8_t g_LastswitchState[LOOP_QUANTITY];   //获取上一次开关分合位状态
 extern uint8_t g_LastcapState[LOOP_QUANTITY];   //获取上一次开关分合位状态
-
-#define LOOP_A  0   //第一个动作的机构
-#define LOOP_B  1   //第二个动作的机构
-#define LOOP_C  2   //第三个动作的机构
 
 #define Reset() {__asm__ volatile ("RESET");}
 
