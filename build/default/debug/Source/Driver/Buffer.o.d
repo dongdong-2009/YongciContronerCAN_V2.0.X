@@ -1,3 +1,3 @@
-build/default/debug/Source/Driver/Buffer.o:  \
-Source/Driver/Buffer.c  \
+build/default/debug/Source/Driver/buffer.o:  \
+Source/Driver/buffer.c  \
  Source/Driver/buffer.h 

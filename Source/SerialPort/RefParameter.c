@@ -582,11 +582,11 @@ void RefParameterInit(void)
 
         g_SystemLimit.capVoltage1.upper = 240.0f;
         g_SystemLimit.capVoltage2.upper = 241.0f;
-        g_SystemLimit.capVoltage2.upper = 242.0f;
+        g_SystemLimit.capVoltage3.upper = 242.0f;
 
         g_SystemLimit.capVoltage1.down = 180.0f;
         g_SystemLimit.capVoltage2.down = 181.1f;
-        g_SystemLimit.capVoltage2.down = 182.0f;
+        g_SystemLimit.capVoltage3.down = 182.0f;
         
         g_SystemCalibrationCoefficient.capVoltageCoefficient1 = 1;
         g_SystemCalibrationCoefficient.capVoltageCoefficient2 = 1;

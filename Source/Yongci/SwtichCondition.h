@@ -23,7 +23,7 @@ extern "C" {
 void SwitchScan(void);
 uint8_t CheckIOState(void);
 void DsplayswitchState(void);   //显示相应的状态
-void DisplaybufferInit(void);
+void DisplayBufferInit(void);
 
 
 

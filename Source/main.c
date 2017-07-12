@@ -96,7 +96,7 @@ int main()
 {
     uint16_t cn = 0;
     
-    //延时4s判断启动
+    //延时3s判断启动
     while(cn++ < 3000)
     {
         __delay_ms(1);
@@ -121,7 +121,7 @@ int main()
         
     cn = 0;
 #if(APPLY_CAN == TRUE)
-    bufferInit();     
+    BufferInit();     
     InitStandardCAN(0, 0);      //初始化CAN模块
     ClrWdt();
     InitDeviceNet();            //初始化DeviceNet服务
@@ -129,7 +129,7 @@ int main()
     RefParameterInit(); //参数设置初始化
 #endif
         
-    DisplaybufferInit();    //显示缓冲区初始化
+    DisplayBufferInit();    //显示缓冲区初始化
     GetCapVolatageState();  //获取电容电压状态    
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    

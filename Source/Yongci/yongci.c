@@ -18,7 +18,7 @@
 
 SwitchConfig g_SwitchConfig[4];	//配置机构状态
 
-uint8_t ParameterbufferData[8] = {0,0,0,0,0,0,0,0};
+uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
 uint16_t _PERSISTENT g_LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
@@ -488,7 +488,7 @@ uint8_t  RefreshIdleState()
     //始终进行处理，处理完缓冲区。 TODO:远方本地检测?
     do
     {
-        result = bufferDequeue(&ReciveMsg);
+        result = BufferDequeue(&ReciveMsg);
         if (result)
         {
             DeviceNetReciveCenter(&ReciveMsg.id, ReciveMsg.data, ReciveMsg.len);
@@ -611,8 +611,8 @@ void YongciFirstInit(void)
 {
     ClrWdt();
     
-    g_Parameterbuffer.pData = ParameterbufferData;
-    g_Parameterbuffer.len = 8;
+    g_ParameterBuffer.pData = ParameterBufferData;
+    g_ParameterBuffer.len = 8;
     
     g_LockUp = OFF_LOCK;    //处于解锁状态
     

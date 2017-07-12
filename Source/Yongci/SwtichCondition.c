@@ -142,10 +142,10 @@ void UpdataswitchState(void);
 
 /**
  * 
- * <p>Function name: [DisplaybufferInit]</p>
+ * <p>Function name: [DisplayBufferInit]</p>
  * <p>Discription: [初始化显示缓冲数组，数组指向继电器和指示灯]</p>
  */
-void DisplaybufferInit(void)
+void DisplayBufferInit(void)
 {
     uint8_t index = 0;
     CloseDisplaybuffer[index] = HEWEI1_RELAY;

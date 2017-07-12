@@ -572,14 +572,12 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 //    uint8_t rxErrorCount = C2EC & 0x00FF;
 //    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
         
-    ClrWdt();
     IFS2bits.C2IF = 0;         //Clear interrupt flag
     /*该错误是在CAN总线上产生任何一个错误都会引起该标志位置位*/
     C2INTFbits.IVRIF = 0; //该错误表示在CAN总线上不需要采取任何动作
 
     if(C2INTFbits.TX0IF)
     {
-        ClrWdt();
         C2INTFbits.TX0IF = 0;  //If the Interrupt is due to Transmit0 of CAN1 Clear the Interrupt
     }  
     else if(C2INTFbits.TX1IF)
@@ -601,63 +599,57 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
       
         ReadRx0Frame(&point);
         ClrWdt();
-        CAN_RxRdy = 1;                            /*  set receive flag */
-        bufferEnqueue(&CAN_RxMsg);
+        CAN_RxRdy = 1;    
+        BufferEnqueue(&CAN_RxMsg);  /*  set receive flag */
       //  DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
     }
     else if(C2INTFbits.RX1IF)
     {  
         C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
-        ClrWdt();
     }
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {
-        ClrWdt();
         //总线关断，需要报错，但是此时可以退出中断服务程序，但是不会改变TXBO位
         //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
         C2INTFbits.ERRIF = 0;   //退出中断服务
-        C2INTEbits.ERRIE = 0;   //关闭错误中断
         g_RemoteControlState.CanErrorFlag = TRUE;    //发生了总线关断错误
-        g_TimeStampCollect.changeLedTime.delayTime = 1500;   //运行指示灯闪烁间隔为1500ms
+        g_TimeStampCollect.changeLedTime.delayTime = 50;   //运行指示灯闪烁间隔为50ms
+        OFF_COMMUNICATION_INT();    //关闭通信中断
         return;
     }
     
     if(C2INTFbits.ERRIF == 1)
     {
+        C2INTFbits.ERRIF = 0;
         /*接收错误中断处理*/
         if(C2INTFbits.RX0OVR)
         {
             C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
-            ClrWdt();
             C2INTEbits.RXB0IE = 1;
+            return;
         }
         else if(C2INTFbits.RX1OVR)
         {
-            ClrWdt();
             C2INTFbits.RX1OVR = 0;  //清除接收缓冲器1溢出中断
         }
         
         if((C2INTFbits.EWARN) && (C2INTFbits.RXWAR)) //接收错误计数器警告
         {
-            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
         }
         if(C2INTFbits.RXBP) //接收错误计数器警告
         {
-            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
         }
 
         /*发送错误中断处理*/
         if((C2INTFbits.EWARN) && (C2INTFbits.TXWAR)) //发送错误计数器警告
         {
-            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
         }
         if(C2INTFbits.TXEP) //发送错误计数器警告
         {
-            ClrWdt();
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
         }
         C2INTFbits.ERRIF = 0;

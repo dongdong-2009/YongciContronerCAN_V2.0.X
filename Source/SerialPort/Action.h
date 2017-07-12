@@ -231,7 +231,7 @@ void ActionParameterInit(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位
 extern SystemSuddenState g_SuddenState;    //需要上传的机构状态值
-extern PointUint8 g_Parameterbuffer;   
+extern PointUint8 g_ParameterBuffer;   
 extern ActionAttribute g_SynActionAttribute;
 extern ActionAttribute g_NormalAttribute;
 

@@ -206,7 +206,7 @@ struct DefFrameData
 {
       DINT ID;     //11bitID标识
       BYTE len;    //数据长度
-      BYTE* pbuffer; //缓冲数据  
+      BYTE* pBuffer; //缓冲数据  
       volatile BYTE complteFlag; //处理完成标志 非0--未处理完成；0--处理已经完成，可以重复使用
 };
 
