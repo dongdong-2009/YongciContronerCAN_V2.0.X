@@ -257,7 +257,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
         return LOOP_ERROR;
     }
 #endif
-    result = CheckAllLoopCapVoltage(loopID);  //检测所有电容电压状态是否正确
+    result = CheckLoopCapVoltage(loopID);  //检测所有电容电压状态是否正确
     if(result)
     {
         return result;
@@ -332,7 +332,7 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
         return result;
     }   
     loop = pReciveFrame->pBuffer[1];
-    result = CheckAllLoopCapVoltage(loop);  //检测所有电容电压状态是否正确
+    result = CheckLoopCapVoltage(loop);  //检测所有电容电压状态是否正确
     if(result)
     {
         return result;
@@ -403,7 +403,7 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     }   
     
     //电容电压未达到设定电压错误
-    if(CheckAllLoopCapVoltage(ALL_LOOP_ID))
+    if(CheckLoopCapVoltage(LOOP_ID_ALL))
     {
         return CAPVOLTAGE_ERROR;
     }

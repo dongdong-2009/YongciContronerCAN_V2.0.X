@@ -150,12 +150,12 @@ void GetCapVoltage(void)
 
 /**
  * 
- * <p>Function name: [CheckAllLoopCapVoltage]</p>
+ * <p>Function name: [CheckLoopCapVoltage]</p>
  * <p>Discription: [获取电压状态]</p>
  * @param loop 回路数
  * @return 电压状态，正常为0
  */
-uint8_t CheckAllLoopCapVoltage(uint8_t loop)
+uint8_t CheckLoopCapVoltage(uint8_t loop)
 {
     uint8_t i = 0;
     GetCapVoltage();

@@ -124,12 +124,11 @@ int main()
     BufferInit();     
     InitStandardCAN(0, 0);      //初始化CAN模块
     ClrWdt();
-    InitDeviceNet();            //初始化DeviceNet服务
+//    InitDeviceNet();            //初始化DeviceNet服务
     ClrWdt();
     RefParameterInit(); //参数设置初始化
 #endif
         
-    DisplayBufferInit();    //显示缓冲区初始化
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    
     UpdateIndicateState(RUN_RELAY, RUN_LED, TURN_ON); //开启运行指示灯和指示继电器    

@@ -496,8 +496,8 @@ uint8_t  RefreshIdleState()
 
     if(IsOverTimeStamp(&g_TimeStampCollect.scanTime)) //大约每2ms扫描一次
     {
-        SwitchScan();   //执行按键扫描程序 TODO:用时时长
         ClrWdt();
+        SwitchScan();   //执行按键扫描程序 TODO:用时时长 764cyc or 615cyc
         g_TimeStampCollect.scanTime.startTime = g_TimeStampCollect.msTicks;  
     }
     if (CheckIOState()) //收到合分闸指令，退出后立即进行循环

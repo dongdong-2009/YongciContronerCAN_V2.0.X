@@ -49,18 +49,18 @@
 #if(CAP3_STATE)
 
 #define LOOP_COUNT   3   //与下面的宏定义一起使用
-#define ALL_LOOP_ID 0x07
+#define LOOP_ID_ALL 0x07
 
 #else
 
 #define LOOP_COUNT  2   //与下面的宏定义一起使用
-#define ALL_LOOP_ID 0x03
+#define LOOP_ID_ALL 0x03
 
 #endif
 
-#define I_LOOP_ID   0x01
-#define II_LOOP_ID  0x02
-#define III_LOOP_ID 0x04
+#define LOOP_ID_I   0x01
+#define LOOP_ID_II  0x02
+#define LOOP_ID_III 0x04
 //**************************************
 
 #include "Driver/tydef.h"
