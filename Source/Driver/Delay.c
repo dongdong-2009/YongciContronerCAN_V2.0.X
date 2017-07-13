@@ -17,6 +17,7 @@
 #define GET_CAP_TIME    300     //按键扫描间隔时间
 #define SCAN_TIME       2       //按键扫描间隔时间
 #define GET_TEMP_TIME   20000   //获取温度数据时间   (ms)
+#define OFFLINE_TIME    250000  //获取温度数据时间   (ms)
 
 
 /**
@@ -48,6 +49,8 @@ void InitSystemTime()
     g_TimeStampCollect.canStartTime.delayTime = 0;
     g_TimeStampCollect.canStartTime.startTime = 0;
     
+    g_TimeStampCollect.offlineTime.delayTime = OFFLINE_TIME;
+    g_TimeStampCollect.offlineTime.startTime = 0;
 }
 
 /**

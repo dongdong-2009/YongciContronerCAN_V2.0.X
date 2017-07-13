@@ -27,6 +27,12 @@
 #if(CAP3_STATE)
 #define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT | WORK_INPUT)   //机构3合闸条件
 #define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT | WORK_INPUT)    //机构3分闸条件
+#define ALL_HEZHA()     (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT)
+#define ALL_FENZHA()    (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT)
+
+#else
+#define ALL_HEZHA()     (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT)
+#define ALL_FENZHA()    (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT)
 #endif
 
 //远方\本地控制检测
@@ -38,23 +44,11 @@
 //带电指示
 #define CHARGED_CONDITION()  ((DigitalInputState & DIANXIAN_INPUT) == DIANXIAN_INPUT)
 
-#if(CAP3_STATE)
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     ((DigitalInputState)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT))
+#define Z_HEZHA_CONDITION()     ((DigitalInputState & (ALL_HEZHA() | WORK_INPUT)) == ALL_HEZHA())
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
-#define Z_FENZHA_CONDITION()    \
-(DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
-
-#else
-//本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     (DigitalInputState == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT))
-
-//本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
-#define Z_FENZHA_CONDITION()    \
-    (DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
-#endif
-
+#define Z_FENZHA_CONDITION()    ((DigitalInputState & (ALL_FENZHA() | DIANXIAN_INPUT | WORK_INPUT)) == ALL_FENZHA())
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
 #define HEZHA1_CONDITION()      ((DigitalInputState & COIL1_HEZHA()) == COIL1_HEZHA())
@@ -124,7 +118,7 @@
 //***************************************************************************************************
 
 
-#define INPUT_FILT_TIME 20   // * 2ms
+#define INPUT_FILT_TIME 30   // * 2ms
 #define MIN_EFFECTIVE_TIME  18  //最小的有效时间是（INPUT_FILT_TIME * 90%）
 
 
@@ -142,7 +136,7 @@ static uint8_t DigitalInputValidCount[17] = {0};
 static uint8_t ScanCount = 0;    //扫描计数
 static uint32_t volatile DigitalInputState = 0;    //165返回值
 
-uint8_t g_LastswitchState[LOOP_COUNT] = {0};   //获取上一次开关分合位状态
+uint8_t g_LastSwitchState[LOOP_COUNT] = {0};   //获取上一次开关分合位状态
 
 //**********************************************
 //显示字，主要用于存放继电器和LED灯的数据 
@@ -859,22 +853,25 @@ uint8_t CheckSwitchOrder(void)
  */
 void UpdateSwitchState(void)
 {
-    if(g_LastswitchState[DEVICE_I] != g_SystemState.heFenState1)
+    if(g_LastSwitchState[DEVICE_I] != g_SystemState.heFenState1)
     {
         g_SuddenState.switchState[DEVICE_I] = g_SystemState.heFenState1;
+        g_LastSwitchState[DEVICE_I] = g_SuddenState.switchState[DEVICE_I];
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }
-    if(g_LastswitchState[DEVICE_II] != g_SystemState.heFenState2)
+    if(g_LastSwitchState[DEVICE_II] != g_SystemState.heFenState2)
     {
         g_SuddenState.switchState[DEVICE_II] = g_SystemState.heFenState2;
+        g_LastSwitchState[DEVICE_II] = g_SuddenState.switchState[DEVICE_II];
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }
 #if(CAP3_STATE)
-    if(g_LastswitchState[DEVICE_III] != g_SystemState.heFenState3)
+    if(g_LastSwitchState[DEVICE_III] != g_SystemState.heFenState3)
     {
         g_SuddenState.switchState[DEVICE_III] = g_SystemState.heFenState3;
+        g_LastSwitchState[DEVICE_III] = g_SuddenState.switchState[DEVICE_III];
         g_SuddenState.suddenFlag = TRUE;    //状态发生突变
         g_SuddenState.switchsuddenFlag = TRUE;  //开关分合位状态突变
     }

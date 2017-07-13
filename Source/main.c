@@ -95,7 +95,7 @@
 int main()
 {
     uint16_t cn = 0;
-    
+    InitDeviceIO(); //IO初始化 首先禁止中断   517cys
     //延时3s判断启动
     while(cn++ < 3000)
     {
@@ -124,7 +124,7 @@ int main()
     BufferInit();     
     InitStandardCAN(0, 0);      //初始化CAN模块
     ClrWdt();
-//    InitDeviceNet();            //初始化DeviceNet服务
+    InitDeviceNet();            //初始化DeviceNet服务
     ClrWdt();
     RefParameterInit(); //参数设置初始化
 #endif

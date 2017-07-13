@@ -87,14 +87,15 @@ typedef struct TagTimeStamp
 
 typedef struct TagTimeStampCollect
 {
-    uint32_t  msTicks; //系统时间MsTick
-    TimeStamp getTempTime;   //记录上一次获取温度值的时间
-    TimeStamp sendDataTime;  //记录上一次上传数据的时间
-    TimeStamp scanTime;      //记录上一次按键扫描的时间
-    TimeStamp changeLedTime; //记录上一次改变指示灯的时间
-    TimeStamp getCapVolueTime;   //获取电容电压的时间间隔
+    uint32_t  msTicks;          //系统时间MsTick
+    TimeStamp getTempTime;      //记录上一次获取温度值的时间
+    TimeStamp sendDataTime;     //记录上一次上传数据的时间
+    TimeStamp scanTime;         //记录上一次按键扫描的时间
+    TimeStamp changeLedTime;    //记录上一次改变指示灯的时间
+    TimeStamp getCapVolueTime;  //获取电容电压的时间间隔
     TimeStamp canStartTime;     //CAN启动时间定时器
-    TimeStamp overTime;     //CAN启动时间定时器
+    TimeStamp overTime;         //超时检测时间
+    TimeStamp offlineTime;      //DeviceNet 离线时间    
 }TimeStampCollect;
 
 

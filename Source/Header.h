@@ -18,8 +18,8 @@
 #include <libpic30.h>
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
-//#define SMALL_CHOSE 0xF1
-#define BIG_CHOSE   0xF2
+#define SMALL_CHOSE 0xF1
+//#define BIG_CHOSE   0xF2
 
 //**************************************
 #ifdef	SMALL_CHOSE
@@ -111,7 +111,7 @@
 #define CLOSE_STATE   0x02  //机构合闸状态
 #define ERROR_STATE   0x03  //机构错误,分合位同时存在，或者同时不存在
 
-extern uint8_t g_LastswitchState[LOOP_COUNT];   //获取上一次开关分合位状态
+extern uint8_t g_LastSwitchState[LOOP_COUNT];   //获取上一次开关分合位状态
 extern uint8_t g_LastcapState[LOOP_COUNT];   //获取上一次开关分合位状态
 
 #define Reset() {__asm__ volatile ("RESET");}

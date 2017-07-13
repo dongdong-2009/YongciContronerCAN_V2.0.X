@@ -99,6 +99,7 @@ void SynCloseAction(void)
     uint8_t i = 0;
     if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
     }
     for(i = 0; i < LOOP_COUNT; i++)
@@ -151,6 +152,7 @@ void CloseOperation(void)
 {
     if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
     }
     //不允许多次执行相同/不同的操作   
@@ -195,6 +197,7 @@ void OpenOperation(void)
 {
     if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
     }
     //不允许多次执行相同/不同的操作   
@@ -244,6 +247,7 @@ void SingleCloseOperation(uint8_t index,uint16_t time)
 {
     if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
     {
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
     }
     //不允许多次执行相同/不同的操作
@@ -274,6 +278,7 @@ void SingleOpenOperation(uint8_t index,uint16_t time)
 {
     if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行分闸
     {
+        g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
     }
     //不允许多次执行相同/不同的操作
@@ -532,6 +537,12 @@ uint8_t  RefreshIdleState()
         g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
     }
 
+    //DeviceNet超时离线检测
+    if(IsOverTimeStamp( &g_TimeStampCollect.offlineTime))
+    {
+        StatusChangedConnedctionObj.state = 0;  //Clear
+        Reset();    //软件复位
+    }
     ClrWdt();
 
 

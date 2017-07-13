@@ -370,7 +370,7 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
 }
 
 
-uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
     uint8_t id = 0;
     uint8_t configbyte = 0;
@@ -485,7 +485,8 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
         g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks;
         ClrWdt();
         g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
-        g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测
+        g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测        
+        OnLock();
         TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
        
     }
@@ -541,33 +542,26 @@ void UpdataState(void)
     pSendFrame.ID = MAKE_GROUP1_ID(GROUP1_STATUS_CYCLE_ACK, DeviceNetObj.MACID);
 	pSendFrame.pBuffer[0] = SUDDEN_ID;   //突发状态ID
     
-    if(g_SuddenState.suddenFlag)
+    if(g_SuddenState.switchsuddenFlag || g_SuddenState.capSuddentFlag)
     {
+        offsetCount = 0;
         if(g_SuddenState.switchsuddenFlag)
         {
             g_SuddenState.buffer[0] = 0;    //Clear
-            g_SuddenState.switchsuddenFlag = FALSE; //Clear
         }
         if(g_SuddenState.capSuddentFlag)
         {
             g_SuddenState.buffer[1] = 0;    //Clear
-            g_SuddenState.capSuddentFlag = FALSE;   //Clear
         }
         for(i = 0;i < LOOP_COUNT; i++)   //循环赋值
         {
-            if(g_LastswitchState[i] != g_SuddenState.switchState[i])
-            {
-                g_LastswitchState[i] = g_SuddenState.switchState[i];
-                g_SuddenState.buffer[0] |= g_SuddenState.switchState[i] << offsetCount;
-            }
-            if(g_LastcapState[i] != g_SuddenState.capState[i])
-            {
-                g_LastcapState[i] = g_SuddenState.capState[i];
-                g_SuddenState.buffer[1] |= g_SuddenState.capState[i] << offsetCount;
-            }
+            g_SuddenState.buffer[0] |= (g_SuddenState.switchState[i] << offsetCount);
+            g_SuddenState.buffer[1] |= (g_SuddenState.capState[i] << offsetCount);
             g_SuddenState.executeOrder[i] <<= offsetCount;
             offsetCount += 2;   
         }
+        g_SuddenState.switchsuddenFlag = FALSE; //Clear
+        g_SuddenState.capSuddentFlag = FALSE;   //Clear
     }
     
     pSendFrame.pBuffer[1] = g_SuddenState.buffer[0];	

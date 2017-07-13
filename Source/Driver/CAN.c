@@ -601,6 +601,8 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         ClrWdt();
         CAN_RxRdy = 1;    
         BufferEnqueue(&CAN_RxMsg);  /*  set receive flag */
+        
+        g_TimeStampCollect.offlineTime.startTime = g_TimeStampCollect.msTicks;
       //  DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
     }
     else if(C2INTFbits.RX1IF)

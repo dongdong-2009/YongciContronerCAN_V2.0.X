@@ -461,71 +461,31 @@ void UnconVisibleMsgService(struct DefFrameData* pReciveFrame, struct DefFrameDa
 		DeviceNetObj.assign_info.select |= config;       //配置字节
         ClrWdt();
 
-		if(config & CYC_INQUIRE)                          //分配I/O轮询连接
+		if(config & (CYC_INQUIRE| VISIBLE_MSG|STATUS_CHANGE))                          //分配I/O轮询连接
 		{	
             ClrWdt();
 			InitCycleInquireConnectionObj();                       //I/O轮询连接配置函数
 			CycleInquireConnedctionObj.produced_connection_id = MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK , DeviceNetObj.MACID) ;//	produced_connection_id ?
 			CycleInquireConnedctionObj.consumed_connection_id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, DeviceNetObj.MACID) ;// consumed_connection_id
- 	        //成功执行响应
-			pSendFrame->ID =  MAKE_GROUP2_ID(GROUP2_VISIBLE_UCN, DeviceNetObj.MACID);   
-			pSendFrame->pBuffer[0] = pReciveFrame->pBuffer[0] & 0x7F;   // 目的MAC ID(主站ID) 
-			pSendFrame->pBuffer[1]= (0x80 | SVC_AllOCATE_MASTER_SlAVE_CONNECTION_SET);
-			pSendFrame->pBuffer[2] = 0;	               //信息体格式0,8/8：Class ID = 8 位整数，Instance ID = 8 位整数
-            pSendFrame->len = 3;
-            pReciveFrame->complteFlag = 0;
-            ClrWdt();
-			SendData(pSendFrame);             //发送报文
-			return ;
-		}
-		if(config & VISIBLE_MSG)
-		{	
-            ClrWdt();
-			InitVisibleConnectionObj();//分配显式信息连接  
+            
+            InitVisibleConnectionObj();//分配显式信息连接  
 			VisibleConnectionObj.produced_connection_id =  MAKE_GROUP2_ID(GROUP2_VISIBLE_UCN, DeviceNetObj.MACID);
 			VisibleConnectionObj.consumed_connection_id =  MAKE_GROUP2_ID(GROUP2_VSILBLE, DeviceNetObj.MACID);
-			//成功执行响应
-            ClrWdt();
-			pSendFrame->ID =  MAKE_GROUP2_ID(GROUP2_VISIBLE_UCN, DeviceNetObj.MACID);   
-			pSendFrame->pBuffer[0] = pReciveFrame->pBuffer[0] & 0x7F;
-			pSendFrame->pBuffer[1]= (0x80 | SVC_AllOCATE_MASTER_SlAVE_CONNECTION_SET);
-			pSendFrame->pBuffer[2] = 0;	//信息体格式0,8/8：类Class ID = 8 位整数，实例Instance ID = 8 位整数
-            pSendFrame->len = 3;
-            pReciveFrame->complteFlag = 0;
-            ClrWdt();
-			//发送
-			SendData(pSendFrame);			
-		}
-      if(config & STATUS_CHANGE)                          //分配主从
-		{	
-            ClrWdt();
-			InitStatusChangedConnectionObj();                       //状态改变连接配置函数
+            
+            InitStatusChangedConnectionObj();                       //状态改变连接配置函数
 			StatusChangedConnedctionObj.produced_connection_id = MAKE_GROUP1_ID( GROUP1_STATUS_CYCLE_ACK , DeviceNetObj.MACID) ;//	produced_connection_id ?
 			StatusChangedConnedctionObj.consumed_connection_id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, DeviceNetObj.MACID) ;// consumed_connection_id
  	        //成功执行响应
-            ClrWdt();
 			pSendFrame->ID =  MAKE_GROUP2_ID(GROUP2_VISIBLE_UCN, DeviceNetObj.MACID);   
 			pSendFrame->pBuffer[0] = pReciveFrame->pBuffer[0] & 0x7F;   // 目的MAC ID(主站ID) 
 			pSendFrame->pBuffer[1]= (0x80 | SVC_AllOCATE_MASTER_SlAVE_CONNECTION_SET);
-			pSendFrame->pBuffer[2] = 0;	               //信息体格式0,8/8：Class ID = 8 位整数，Instance ID = 8 位整数
+			pSendFrame->pBuffer[2] = config;	               //信息体格式0,8/8：Class ID = 8 位整数，Instance ID = 8 位整数
             pSendFrame->len = 3;
             pReciveFrame->complteFlag = 0;
             ClrWdt();
 			SendData(pSendFrame);             //发送报文
-			return ;
 		}
-		if(config &  BIT_STROKE) //分配位选通连接
-		{	
-            ClrWdt();
-//			pSendFrame->ID =  MAKE_GROUP2_ID(GROUP2_VISIBLE_UCN, DeviceNetObj.MACID);   
-//			pSendFrame->pBuffer[0] = pReciveFrame->pBuffer[0] & 0x7F;
-//			pSendFrame->pBuffer[1]= (0x80 | SVC_AllOCATE_MASTER_SlAVE_CONNECTION_SET);
-//			pSendFrame->pBuffer[2] = 0;	//信息体格式0,8/8
-//          pSendFrame->len = 3;
-            ClrWdt();
-//			SendData(pSendFrame);
-			return ;
-		}
+		
 		IdentifierObj.device_state |= 0x01;	//设备已和主站连接
 		return ;
 	}
