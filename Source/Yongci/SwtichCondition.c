@@ -18,14 +18,16 @@
 #include "../Header.h"
 #include "DeviceParameter.h"
 
-#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT)   //机构1合闸条件
-#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT)    //机构1分闸条件
+#define COIL1_HEZHA()   (HZHA1_INPUT | FENWEI1_INPUT | WORK_INPUT)   //机构1合闸条件
+#define COIL1_FENZHA()  (FZHA1_INPUT | HEWEI1_INPUT | WORK_INPUT)    //机构1分闸条件
 
-#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT)   //机构2合闸条件
-#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT)    //机构2分闸条件
+#define COIL2_HEZHA()   (HZHA2_INPUT | FENWEI2_INPUT | WORK_INPUT)   //机构2合闸条件
+#define COIL2_FENZHA()  (FZHA2_INPUT | HEWEI2_INPUT | WORK_INPUT)    //机构2分闸条件
 
-#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT)   //机构3合闸条件
-#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT)    //机构3分闸条件
+#if(CAP3_STATE)
+#define COIL3_HEZHA()   (HZHA3_INPUT | FENWEI3_INPUT | WORK_INPUT)   //机构3合闸条件
+#define COIL3_FENZHA()  (FZHA3_INPUT | HEWEI3_INPUT | WORK_INPUT)    //机构3分闸条件
+#endif
 
 //远方\本地控制检测
 #define YUAN_BEN_CONDITION()    ((DigitalInputState & YUAN_INPUT) == YUAN_INPUT)
@@ -38,39 +40,41 @@
 
 #if(CAP3_STATE)
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     ((DigitalInputState)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     ((DigitalInputState)== (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | FENWEI3_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
-(DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT | WORK_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
+(DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | HEWEI3_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
 
 #else
 //本地的总合闸条件：总分位 && 总合闸信号 && 本地控制 && 工作模式 && 电压满足 && 合闸信号未输入
-#define Z_HEZHA_CONDITION()     (DigitalInputState == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT | WORK_INPUT))
+#define Z_HEZHA_CONDITION()     (DigitalInputState == (Z_HEZHA_INPUT | FENWEI1_INPUT | FENWEI2_INPUT))
 
 //本地的总分闸条件：总合位 && 总分闸信号 && 本地控制 && 工作模式 && 不带电 && 电压满足 && 分闸信号未输入
 #define Z_FENZHA_CONDITION()    \
-    (DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT | WORK_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
+    (DigitalInputState == (Z_FENZHA_INPUT | HEWEI1_INPUT | HEWEI2_INPUT) && (DigitalInputState & DIANXIAN_INPUT) == 0)
 #endif
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((DigitalInputState & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA())
+#define HEZHA1_CONDITION()      ((DigitalInputState & COIL1_HEZHA()) == COIL1_HEZHA())
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((DigitalInputState & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
+((DigitalInputState & (COIL1_FENZHA() | DIANXIAN_INPUT)) == COIL1_FENZHA())
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((DigitalInputState & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA())
+#define HEZHA2_CONDITION()      ((DigitalInputState & COIL2_HEZHA()) == COIL2_HEZHA())
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((DigitalInputState & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
+((DigitalInputState & (COIL2_FENZHA() | DIANXIAN_INPUT)) == COIL2_FENZHA())
 
-//本地的机构3合闸条件：分位2 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((DigitalInputState & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA())
-//本地的机构3分闸条件：合位2 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
+#if(CAP3_STATE)
+//本地的机构3合闸条件：分位3 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
+#define HEZHA3_CONDITION()      ((DigitalInputState & COIL3_HEZHA()) == COIL3_HEZHA())
+//本地的机构3分闸条件：合位3 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((DigitalInputState & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
+((DigitalInputState & (COIL3_FENZHA() | DIANXIAN_INPUT)) == COIL3_FENZHA())
+#endif
 
 
 /**
@@ -88,10 +92,12 @@
 //机构2的分位检测
 #define FENWEI2_CONDITION()  ((DigitalInputState & FENWEI2_INPUT) == FENWEI2_INPUT)
 
+#if(CAP3_STATE)
 //机构3的合位检测
 #define HEWEI3_CONDITION()  ((DigitalInputState & HEWEI3_INPUT) == HEWEI3_INPUT)
 //机构3的分位检测
 #define FENWEI3_CONDITION()  ((DigitalInputState & FENWEI3_INPUT) == FENWEI3_INPUT)
+#endif
 //******************************************************************************
 
 
@@ -109,10 +115,12 @@
         (((DigitalInputState & (FENWEI2_INPUT | HEWEI2_INPUT)) == (FENWEI2_INPUT | HEWEI2_INPUT)) ||   \
         ((DigitalInputState & (FENWEI2_INPUT | HEWEI2_INPUT)) == 0))
 
+#if(CAP3_STATE)
 //机构3的本地错误条件: 合位和分位同时成立 或 同时不成立
 #define ERROR3_CONDITION()      \
         ((DigitalInputState & (FENWEI3_INPUT | HEWEI3_INPUT)) == (FENWEI3_INPUT | HEWEI3_INPUT) ||   \
         ((DigitalInputState & (FENWEI3_INPUT | HEWEI3_INPUT)) == 0))
+#endif
 //***************************************************************************************************
 
 
@@ -203,11 +211,6 @@ void DisplayBufferInit(void)
 uint8_t CheckIOState(void)
 {
     ClrWdt();     
-    if(g_LockUp)    //上锁状态下不能进行操作
-    {
-        g_Order = IDLE_ORDER;    //将命令清零
-        return 0;
-    }
     switch (g_Order)
     {
         //检测按键状态
@@ -216,7 +219,6 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (!CheckAllLoopCapVoltage(ALL_LOOP_ID)))
             {
-               // TongBuHeZha(); TODO:
                 ClrWdt();
                 SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
                 SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
@@ -227,7 +229,9 @@ uint8_t CheckIOState(void)
                 ClrWdt();
                 g_SuddenState.executeOrder[DEVICE_I] = CLOSE_STATE;
                 g_SuddenState.executeOrder[DEVICE_II] = CLOSE_STATE;
+#if(CAP3_STATE)  //判断第三块驱动是否存在
                 g_SuddenState.executeOrder[DEVICE_III] = CLOSE_STATE;
+#endif
                 return 0xFF;
             }
             else
@@ -256,7 +260,9 @@ uint8_t CheckIOState(void)
                 ClrWdt();
                 g_SuddenState.executeOrder[DEVICE_I] = OPEN_STATE;
                 g_SuddenState.executeOrder[DEVICE_II] = OPEN_STATE;
+#if(CAP3_STATE)  //判断第三块驱动是否存在
                 g_SuddenState.executeOrder[DEVICE_III] = OPEN_STATE;
+#endif
                 return 0xFF;
             }
             else
@@ -900,12 +906,12 @@ void SwitchScan(void)
         //工作\调试模式判断
         if(g_timeCount[15] >= MIN_EFFECTIVE_TIME)
         {
-            g_SystemState.workMode = WORK_STATE;
+            g_SystemState.workMode = DEBUG_STATE;
             g_timeCount[15] = 0;
         }
         else
         {
-            g_SystemState.workMode = DEBUG_STATE;
+            g_SystemState.workMode = WORK_STATE;
             g_timeCount[15] = 0;
         }
         //对开关是否带电进行检查

@@ -287,7 +287,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
         SendErrorFrame(id, NOT_PERFABRICATE_ERROR);
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令
     }
-       //比较配置字是否一致
+   //比较配置字是否一致
     for(uint8_t i = 1 ; i < pReciveFrame->len; i++)
     {
         if (pReciveFrame->pBuffer[i] != LastCommand[i])
@@ -411,10 +411,18 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     uint8_t count = (pReciveFrame->len - 2) / 2 + 1;//参数时间为差值，比回路数少一个
     
     //检查回路数
+#if(CAP3_STATE)
     if (count > 3)
     {
         return LOOP_ERROR;
     }
+#else
+    if (count > 2)
+    {
+        return LOOP_ERROR;
+    }
+#endif
+    
      //获取回路参数   
     for(uint8_t i = 0; i < count; i++)
     {
@@ -444,13 +452,13 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     }
     
     //按照执行顺序参数赋值    
-     g_SynActionAttribute.count = count;
-     g_SynActionAttribute.loopByte = configbyte;
-     g_SynActionAttribute.currentIndex = 0;
-      
-     g_SynActionAttribute.Attribute[0].enable = TRUE;
-     g_SynActionAttribute.Attribute[0].loop = loop[0];        
-     g_SynActionAttribute.Attribute[0].offsetTime = 0;
+    g_SynActionAttribute.count = count;
+    g_SynActionAttribute.loopByte = configbyte;
+    g_SynActionAttribute.currentIndex = 0;
+
+    g_SynActionAttribute.Attribute[0].enable = TRUE;
+    g_SynActionAttribute.Attribute[0].loop = loop[0];        
+    g_SynActionAttribute.Attribute[0].offsetTime = 0;
         
     uint16_t time = 0;
     for(uint8_t i = 1; i < count; i++)
@@ -563,7 +571,13 @@ void UpdataState(void)
     }
     
     pSendFrame.pBuffer[1] = g_SuddenState.buffer[0];	
+    
+#if(CAP3_STATE)
     pSendFrame.pBuffer[2] = g_SuddenState.executeOrder[DEVICE_I] | g_SuddenState.executeOrder[DEVICE_II] | g_SuddenState.executeOrder[DEVICE_III];	
+#else
+    pSendFrame.pBuffer[2] = g_SuddenState.executeOrder[DEVICE_I] | g_SuddenState.executeOrder[DEVICE_II];	
+#endif
+  
     pSendFrame.pBuffer[3] = g_SuddenState.buffer[1];	
     
 	if(!g_SystemState.warning)
@@ -584,7 +598,9 @@ void UpdataState(void)
     ClrWdt();
     g_SuddenState.executeOrder[DEVICE_I] = 0;
     g_SuddenState.executeOrder[DEVICE_II] = 0;
+#if(CAP3_STATE)
     g_SuddenState.executeOrder[DEVICE_III] = 0;
+#endif
 }
 
 
@@ -658,6 +674,7 @@ uint8_t CheckCloseCondition(void)
                     }
                     break;
                 }
+#if(CAP3_STATE)
                 case 3:
                 {
                     if (g_SystemState.heFenState3 != OPEN_STATE)
@@ -666,6 +683,7 @@ uint8_t CheckCloseCondition(void)
                     }
                      break;
                 }
+#endif
                 default:
                 {
                     return  LOOP_ERROR;
@@ -715,6 +733,7 @@ uint8_t CheckOpenCondition(void)
                     }
                     break;
                 }
+#if(CAP3_STATE)
                 case 3:
                 {
                     if (g_SystemState.heFenState3 != CLOSE_STATE)
@@ -723,6 +742,7 @@ uint8_t CheckOpenCondition(void)
                     }
                      break;
                 }
+#endif
                 default:
                 {
                     return  LOOP_ERROR;

@@ -995,8 +995,10 @@ void WriteAccumulateSumEEPROM(uint16_t* writeData)
  */
 void ReadAccumulateSumEEPROM(uint16_t* readData)
 {
+    OFF_CAN_INT();  //不允许CAN中断
     _prog_addressT address = ACCUMULATE_SUM_ADDRESS;
     ClrWdt();
-    ReadWord_EEPROM(address,readData);    
+    ReadWord_EEPROM(address,readData); 
+    ON_CAN_INT();  //允许CAN中断   
 }
 

@@ -16,7 +16,7 @@
 
 #define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
 
-SwitchConfig g_SwitchConfig[4];	//配置机构状态
+SwitchConfig g_SwitchConfig[LOOP_COUNT];	//配置机构状态
 
 uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
@@ -115,7 +115,9 @@ void SynCloseAction(void)
 	uint8_t loop = 0;
     g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
+#if(CAP3_STATE)
     g_SwitchConfig[2].powerOnTime = g_DelayTime.hezhaTime3 + 3;   //使用示波器发现时间少3ms左右
+#endif
     g_SynActionAttribute.currentIndex = 0;
     for(uint8_t i = 1; i < g_SynActionAttribute.count; i++)
     {
@@ -166,7 +168,9 @@ void CloseOperation(void)
     OFF_COMMUNICATION_INT();  //关闭通信中断
     g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
+#if(CAP3_STATE)
     g_SwitchConfig[2].powerOnTime = g_DelayTime.hezhaTime3 + 3;   //使用示波器发现时间少3ms左右
+#endif
     for(uint8_t i = 0; i < LOOP_COUNT; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
@@ -208,7 +212,9 @@ void OpenOperation(void)
     OFF_COMMUNICATION_INT();  //关闭通信中断
     g_SwitchConfig[0].powerOffTime = g_DelayTime.fenzhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOffTime = g_DelayTime.fenzhaTime2 + 3;   //使用示波器发现时间少3ms左右
+#if(CAP3_STATE)
     g_SwitchConfig[2].powerOffTime = g_DelayTime.fenzhaTime3 + 3;   //使用示波器发现时间少3ms左右
+#endif
     for(uint8_t i = 0; i < LOOP_COUNT; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
@@ -368,6 +374,7 @@ uint8_t  RefreshActionState()
 #endif
 
         //就绪状态则继续等待 TODO：就绪超时
+#if(CAP3_STATE)
         if((g_SwitchConfig[DEVICE_I].currentState == READY_STATE)
             || (g_SwitchConfig[DEVICE_II].currentState == READY_STATE)
             ||(g_SwitchConfig[DEVICE_III].currentState == READY_STATE))
@@ -382,6 +389,20 @@ uint8_t  RefreshActionState()
         {
             state |= 0x80;
         }
+#else
+        if((g_SwitchConfig[DEVICE_I].currentState == READY_STATE)
+            || (g_SwitchConfig[DEVICE_II].currentState == READY_STATE))
+        {
+            state |= 0x40;
+        }
+       
+        //再次检测是否处于运行状态，若处于则继续执行。
+        if((g_SwitchConfig[DEVICE_I].currentState == RUN_STATE)
+            || (g_SwitchConfig[DEVICE_II].currentState == RUN_STATE))
+        {
+            state |= 0x80;
+        }
+#endif
         return state;
 }
 /**
@@ -425,14 +446,16 @@ uint8_t  RefreshIdleState()
         checkOrderTime = g_TimeStampCollect.msTicks;
         //Clear Flag
         g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
-        g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
         g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
-        g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
         g_SwitchConfig[DEVICE_I].alreadyAction = FALSE;
+        g_SwitchConfig[DEVICE_II].order = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_II].currentState = IDLE_ORDER;
         g_SwitchConfig[DEVICE_II].alreadyAction = FALSE;
+#if(CAP3_STATE)
+        g_SwitchConfig[DEVICE_III].order = IDLE_ORDER;
         g_SwitchConfig[DEVICE_III].alreadyAction = FALSE;
+        g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
+#endif
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         OffLock();  //解锁
     }
@@ -443,7 +466,7 @@ uint8_t  RefreshIdleState()
         CheckOrder();  //检测命令是否执行
         if(g_SuddenState.RefuseAction != FALSE)
         {
-            g_TimeStampCollect.changeLedTime.delayTime = 100;  //发生拒动错误后，指示灯闪烁间隔变短
+            g_TimeStampCollect.changeLedTime.delayTime = 200;  //发生拒动错误后，指示灯闪烁间隔变短
         }
         else
         {
@@ -453,7 +476,9 @@ uint8_t  RefreshIdleState()
         g_SuddenState.suddenFlag = TRUE;  //发送突发错误
         g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
         g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
+#if(CAP3_STATE)
         g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
+#endif
         checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
         checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
         OffLock();  //解锁
@@ -543,12 +568,12 @@ uint8_t  RefreshIdleState()
         if(IsOverTimeStamp( &g_TimeStampCollect.overTime))
         {
             ON_COMMUNICATION_INT();
+            OffLock();  //解锁
             SendErrorFrame(g_RemoteControlState.orderId , OVER_TIME_ERROR);
             ClrWdt();
             g_RemoteControlState.orderId = 0;   //Clear
             g_RemoteControlState.receiveStateFlag = IDLE_ORDER; //Clear order
             g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
-            OffLock();  //解锁
             if(g_RemoteControlState.orderId == SyncReadyClose)  //同步合闸预制
             {
                 TurnOffInt2();
@@ -706,7 +731,7 @@ void InitSetswitchState(void)
 	g_SwitchConfig[DEVICE_II].SwitchClose = SwitchCloseSecondPhase;
 	g_SwitchConfig[DEVICE_II].SwitchOpen = SwitchOpenSecondPhase;
     ClrWdt();
-
+#if(CAP3_STATE)
 	g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;	//默认为空闲状态
 	g_SwitchConfig[DEVICE_III].alreadyAction = FALSE;	//默认未动作
 	g_SwitchConfig[DEVICE_III].order = IDLE_ORDER; //默认未执行
@@ -717,7 +742,7 @@ void InitSetswitchState(void)
 	g_SwitchConfig[DEVICE_III].systemTime = 0;    //默认系统时间为零
 	g_SwitchConfig[DEVICE_III].SwitchClose = SwitchCloseThirdPhase;
 	g_SwitchConfig[DEVICE_III].SwitchOpen = SwitchOpenThirdPhase;
-
+#endif
     ClrWdt();
     
 }

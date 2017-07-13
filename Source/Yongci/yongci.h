@@ -65,7 +65,10 @@ extern "C" {
  */    
 #define  DEVICE_I  0
 #define  DEVICE_II 1
+
+#if(CAP3_STATE)
 #define  DEVICE_III 2
+#endif
   
  /**
   * 分合闸控制
@@ -100,7 +103,7 @@ void UpdateCount(void);
 extern uint16_t _PERSISTENT g_Order;  //需要执行的命令,在单片机发生复位的情况下该值依然可以保存
 //extern uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime; //改变LED灯闪烁时间 (ms) TODO:为什么？
 extern uint16_t _PERSISTENT g_LockUp;   //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
-extern SwitchConfig g_SwitchConfig[4];	//配置机构状态
+extern SwitchConfig g_SwitchConfig[LOOP_COUNT];	//配置机构状态
 
 #ifdef	__cplusplus
 }
