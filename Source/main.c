@@ -54,8 +54,8 @@
 // FWDT
 #pragma config FWPSB = WDTPSB_5         // WDT Prescaler B (1:5)
 #pragma config FWPSA = WDTPSA_1         // WDT Prescaler A (1:1)
-//#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
-#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
+#pragma config WDT = WDT_ON             // Watchdog Timer (Enabled)
+//#pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 // FBORPOR
 #pragma config FPWRT = PWRT_64          // POR Timer Value (64ms)
@@ -130,7 +130,6 @@ int main()
 #endif
         
     DisplayBufferInit();    //显示缓冲区初始化
-    GetCapVolatageState();  //获取电容电压状态    
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    
     UpdateIndicateState(RUN_RELAY, RUN_LED, TURN_ON); //开启运行指示灯和指示继电器    

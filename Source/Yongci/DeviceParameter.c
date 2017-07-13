@@ -32,9 +32,9 @@ typedef struct TagAdcFilter
     VoltageColect value;
 }AdcFilter;
 
-uint8_t g_LastcapState[LOOP_QUANTITY] = {0};   //获取上一次电容电压状态
+uint8_t g_LastcapState[LOOP_COUNT] = {0};   //获取上一次电容电压状态
 
-void GetcapState(uint8_t loop, float min, float max, float capVale);
+uint8_t CheckSingleLoopCapVoltage(UpDownValue* value, float capVale);
 /**
  * 
  * <p>Function name: [GetCapVoltage]</p>
@@ -150,24 +150,31 @@ void GetCapVoltage(void)
 
 /**
  * 
- * <p>Function name: [GetCapVolatageState]</p>
+ * <p>Function name: [CheckAllLoopCapVoltage]</p>
  * <p>Discription: [获取电压状态]</p>
- * @return 电压状态，大于最小值为0xAAAA
+ * @param loop 回路数
+ * @return 电压状态，正常为0
  */
-uint16_t GetCapVolatageState(void)
+uint8_t CheckAllLoopCapVoltage(uint8_t loop)
 {
+    uint8_t i = 0;
     GetCapVoltage();
-    ClrWdt();
-    if ((g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down + THRESHOLD_VALUE) && 
-        (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down + THRESHOLD_VALUE) && 
-        CHECK_VOLTAGE_CAP3())
+    g_SuddenState.capState[DEVICE_I] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage1, g_SystemVoltageParameter.voltageCap1);
+    g_SuddenState.capState[DEVICE_II] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage2, g_SystemVoltageParameter.voltageCap2);
+#if(CAP3_STATE)
+    g_SuddenState.capState[DEVICE_III] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage3, g_SystemVoltageParameter.voltageCap3);
+#endif
+    for(i = 0; i < LOOP_COUNT; i++)
     {
-        return 0xAAAA;
+        if(loop & (1 << i))
+        {
+            if(g_SuddenState.capState[i] != CAP_NORMAL_STATE)
+            {
+                return CAPVOLTAGE_ERROR;
+            }
+        }
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 /**
@@ -177,8 +184,9 @@ uint16_t GetCapVolatageState(void)
  */
 void UpdataCapVoltageState(void)
 {
-    GetcapState(DEVICE_I, g_SystemLimit.capVoltage1.down, g_SystemLimit.capVoltage1.upper, g_SystemVoltageParameter.voltageCap1);
-    GetcapState(DEVICE_II, g_SystemLimit.capVoltage2.down, g_SystemLimit.capVoltage2.upper, g_SystemVoltageParameter.voltageCap2);
+    GetCapVoltage();
+    g_SuddenState.capState[DEVICE_I] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage1, g_SystemVoltageParameter.voltageCap1);
+    g_SuddenState.capState[DEVICE_II] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage2, g_SystemVoltageParameter.voltageCap2);
     if(g_LastcapState[DEVICE_I] != g_SuddenState.capState[DEVICE_I])
     {
         g_SuddenState.suddenFlag = TRUE;    //发送突发状态
@@ -190,7 +198,7 @@ void UpdataCapVoltageState(void)
         g_SuddenState.capSuddentFlag = TRUE;
     }
 #if(CAP3_STATE)
-    GetcapState(DEVICE_III, g_SystemLimit.capVoltage3.down, g_SystemLimit.capVoltage3.upper, g_SystemVoltageParameter.voltageCap3);
+    g_SuddenState.capState[DEVICE_III] = CheckSingleLoopCapVoltage(&g_SystemLimit.capVoltage3, g_SystemVoltageParameter.voltageCap3);
     if(g_LastcapState[DEVICE_III] != g_SuddenState.capState[DEVICE_III])
     {
         g_SuddenState.suddenFlag = TRUE;    //发送突发状态
@@ -198,34 +206,34 @@ void UpdataCapVoltageState(void)
     }
 #endif
 }
+
 /**
  * 
- * <p>Function name: [GetcapState]</p>
- * <p>Discription: [获取电容状态]</p>
- * @param loop  回路数
- * @param min   电容电压最小值
- * @param max   电容电压最大值
- * @param capVale   电容电压值
+ * <p>Function name: [CheckSingleLoopCapVoltage]</p>
+ * <p>Discription: [检测电容电压状态]</p>
+ * @param value 极值
+ * @param capVale 电容电压
+ * @return 返回电容状态
  */
-void GetcapState(uint8_t loop, float min, float max, float capVale)
+uint8_t CheckSingleLoopCapVoltage(UpDownValue* value, float capVale)
 {
-    float minValue = min + THRESHOLD_VALUE;
+    float minValue = value->down + THRESHOLD_VALUE;
     
-    if (capVale  >= max)    //超过上限
+    if (capVale  > value->upper)    //超过上限
     {
-        g_SuddenState.capState[loop] = CAP_UPPER_STATE; //超压状态
+        return CAP_UPPER_STATE; //超压状态
     }
-    else if((capVale < max) && (capVale >= minValue))
+    else if((capVale <= value->upper) && (capVale >= minValue))
     {
-        g_SuddenState.capState[loop] = CAP_NORMAL_STATE; //正常状态
+        return CAP_NORMAL_STATE; //正常状态
     }
-    else if(capVale <= min)
+    else if(capVale <= value->down)
     {
-        g_SuddenState.capState[loop] = CAP_LOW_STATE; //欠压状态
+        return CAP_LOW_STATE; //欠压状态
     }
-    else
+    else    //在死区中
     {
-        g_SuddenState.capState[loop] = 0;   //错误状态
+        return 0;   //错误状态
     }
 }
 /**

@@ -97,15 +97,11 @@ inline void OffLock(void)
 void SynCloseAction(void)
 {
     uint8_t i = 0;
-    uint8_t count = 0;
-    
-#if CAP3_STATE
-    count = 3;
-#else
-    count = 2;
-#endif
-
-    for(i = 0; i < count; i++)
+    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    {
+        return;
+    }
+    for(i = 0; i < LOOP_COUNT; i++)
     {
         //不允许多次执行相同/不同的操作
         if(g_SwitchConfig[i].currentState || g_SwitchConfig[i].order || g_SwitchConfig[i].lastOrder)
@@ -171,7 +167,7 @@ void CloseOperation(void)
     g_SwitchConfig[0].powerOnTime = g_DelayTime.hezhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOnTime = g_DelayTime.hezhaTime2 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[2].powerOnTime = g_DelayTime.hezhaTime3 + 3;   //使用示波器发现时间少3ms左右
-    for(uint8_t i = 0; i < 3; i++)
+    for(uint8_t i = 0; i < LOOP_COUNT; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
         {
@@ -213,7 +209,7 @@ void OpenOperation(void)
     g_SwitchConfig[0].powerOffTime = g_DelayTime.fenzhaTime1 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[1].powerOffTime = g_DelayTime.fenzhaTime2 + 3;   //使用示波器发现时间少3ms左右
     g_SwitchConfig[2].powerOffTime = g_DelayTime.fenzhaTime3 + 3;   //使用示波器发现时间少3ms左右
-    for(uint8_t i = 0; i < 3; i++)
+    for(uint8_t i = 0; i < LOOP_COUNT; i++)
     {
         if (g_NormalAttribute.Attribute[i].enable)
         {
@@ -468,7 +464,7 @@ uint8_t  RefreshIdleState()
     //检测是否欠电压， 并更新显示
     if(IsOverTimeStamp(&g_TimeStampCollect.getCapVolueTime)) //大约每300ms获取一次电容电压值
     {
-        GetCapVolatageState();  //获取电容电压
+        UpdataCapVoltageState();  //获取电容电压
         ClrWdt();
         g_TimeStampCollect.getCapVolueTime.startTime = g_TimeStampCollect.msTicks;           
     }  
@@ -501,7 +497,7 @@ uint8_t  RefreshIdleState()
     if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || g_SuddenState.suddenFlag)
     {
         ClrWdt();
-        DsplayswitchState();    //更新机构的状态显示
+        DsplaySwitchState();    //更新机构的状态显示
         //建立连接且不是在预制状态下才会周期上传
         if((StatusChangedConnedctionObj.state == STATE_LINKED) && (g_RemoteControlState.receiveStateFlag == IDLE_ORDER))   
         {

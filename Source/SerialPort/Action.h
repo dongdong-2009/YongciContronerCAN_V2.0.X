@@ -165,10 +165,10 @@ extern "C" {
 
 typedef struct TagSaveSystemSuddenState
 {
-	uint8_t switchState[LOOP_QUANTITY];		//开关状态
-	uint8_t executeOrder[LOOP_QUANTITY];	//开关执行的命令
-	uint8_t capState[LOOP_QUANTITY];		//电容状态
-	uint8_t buffer[LOOP_QUANTITY];		//存储状态
+	uint8_t switchState[LOOP_COUNT];		//开关状态
+	uint8_t executeOrder[LOOP_COUNT];	//开关执行的命令
+	uint8_t capState[LOOP_COUNT];		//电容状态
+	uint8_t buffer[LOOP_COUNT];		//存储状态
 	uint8_t suddenFlag;		//突发状态
     uint8_t switchsuddenFlag;   //分合位状态突变
     uint8_t capSuddentFlag; //电容状态突变

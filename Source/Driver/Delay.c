@@ -13,10 +13,10 @@
 #include "../Header.h"
 #include "Delay.h"
 
-#define SEND_TIME   2000        //发送在线状态间隔时间 (ms)
-#define GET_CAP_TIME   300      //按键扫描间隔时间
-#define SCAN_TIME   2           //按键扫描间隔时间
-#define GET_TEMP_TIME   10000   //获取温度数据时间   (ms)
+#define SEND_TIME       2000    //发送在线状态间隔时间 (ms)
+#define GET_CAP_TIME    300     //按键扫描间隔时间
+#define SCAN_TIME       2       //按键扫描间隔时间
+#define GET_TEMP_TIME   20000   //获取温度数据时间   (ms)
 
 
 /**

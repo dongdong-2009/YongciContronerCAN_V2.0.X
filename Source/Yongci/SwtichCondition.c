@@ -55,28 +55,22 @@
 
 
 //本地的机构1合闸条件：分位1 && 合闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA1_CONDITION()      ((DigitalInputState & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA() &&  \
-                                 (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
+#define HEZHA1_CONDITION()      ((DigitalInputState & (COIL1_HEZHA() | WORK_INPUT)) == COIL1_HEZHA())
 //本地的机构1分闸条件：合位1 && 分闸1信号 && 电压1满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA1_CONDITION()    \
-((DigitalInputState & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
- (g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down))
+((DigitalInputState & (COIL1_FENZHA() | WORK_INPUT)) == COIL1_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
 
 //本地的机构2合闸条件：分位2 && 合闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA2_CONDITION()      ((DigitalInputState & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA() &&  \
-                                 (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
+#define HEZHA2_CONDITION()      ((DigitalInputState & (COIL2_HEZHA() | WORK_INPUT)) == COIL2_HEZHA())
 //本地的机构2分闸条件：合位2 && 分闸2信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA2_CONDITION()    \
-((DigitalInputState & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
- (g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down))
+((DigitalInputState & (COIL2_FENZHA() | WORK_INPUT)) == COIL2_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
 
 //本地的机构3合闸条件：分位2 && 合闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 合闸信号未输入
-#define HEZHA3_CONDITION()      ((DigitalInputState & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA() &&  \
-                                 (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
+#define HEZHA3_CONDITION()      ((DigitalInputState & (COIL3_HEZHA() | WORK_INPUT)) == COIL3_HEZHA())
 //本地的机构3分闸条件：合位2 && 分闸3信号 && 电压2满足 && 本地控制 && 调试模式 && 不带电 && 分闸信号未输入
 #define FENZHA3_CONDITION()    \
-((DigitalInputState & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0 &&    \
- (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))
+((DigitalInputState & (COIL3_FENZHA() | WORK_INPUT)) == COIL3_FENZHA() && (DigitalInputState & DIANXIAN_INPUT) == 0)
 
 
 /**
@@ -128,7 +122,7 @@ static uint8_t g_timeCount[17] = {0};
 static uint8_t ScanCount = 0;    //扫描计数
 static uint32_t volatile DigitalInputState = 0;    //165返回值
 
-uint8_t g_LastswitchState[LOOP_QUANTITY] = {0};   //获取上一次开关分合位状态
+uint8_t g_LastswitchState[LOOP_COUNT] = {0};   //获取上一次开关分合位状态
 
 //**********************************************
 //显示缓冲，主要用于存放继电器和LED灯的数据
@@ -220,7 +214,7 @@ uint8_t CheckIOState(void)
         case HE_ORDER: //收到合闸命令 需要判断一下电容电压能否达到要求
         {
             ClrWdt();
-            if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState()))
+            if((g_SystemState.workMode == WORK_STATE) && (!CheckAllLoopCapVoltage(ALL_LOOP_ID)))
             {
                // TongBuHeZha(); TODO:
                 ClrWdt();
@@ -250,7 +244,7 @@ uint8_t CheckIOState(void)
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
-            if((g_SystemState.workMode == WORK_STATE) && (GetCapVolatageState())) //多加入一重验证
+            if((g_SystemState.workMode == WORK_STATE) && (!CheckAllLoopCapVoltage(ALL_LOOP_ID))) //多加入一重验证
             {
                 ClrWdt();
                 SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
@@ -275,7 +269,7 @@ uint8_t CheckIOState(void)
         case CHECK_1_HE_ORDER: //收到机构1合闸命令
         {
             ClrWdt();
-            if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
+            if(!CheckAllLoopCapVoltage(I_LOOP_ID))
             {
                 SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
                 g_SuddenState.executeOrder[DEVICE_I] = CLOSE_STATE;
@@ -296,7 +290,7 @@ uint8_t CheckIOState(void)
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
-            if(g_SystemVoltageParameter.voltageCap1  >= g_SystemLimit.capVoltage1.down)
+            if(!CheckAllLoopCapVoltage(I_LOOP_ID))
             {
                 SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
                 g_SuddenState.executeOrder[DEVICE_I] = OPEN_STATE;
@@ -313,7 +307,7 @@ uint8_t CheckIOState(void)
         case CHECK_2_HE_ORDER: //收到机构2合闸命令
         {
             ClrWdt();        
-            if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
+            if(!CheckAllLoopCapVoltage(II_LOOP_ID))
             {
                 SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
                 g_SuddenState.executeOrder[DEVICE_II] = CLOSE_STATE;
@@ -334,7 +328,7 @@ uint8_t CheckIOState(void)
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
-            if(g_SystemVoltageParameter.voltageCap2  >= g_SystemLimit.capVoltage2.down)
+            if(!CheckAllLoopCapVoltage(II_LOOP_ID))
             {
                 SingleOpenOperation(DEVICE_II , g_DelayTime.fenzhaTime2);
                 g_SuddenState.executeOrder[DEVICE_II] = OPEN_STATE;
@@ -347,11 +341,11 @@ uint8_t CheckIOState(void)
             }
             return 0xFF;
         }
-        
+#if(CAP3_STATE)
         case CHECK_3_HE_ORDER: //收到机构3合闸命令
         {
             ClrWdt();        
-            if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
+            if(!CheckAllLoopCapVoltage(III_LOOP_ID))  //判断第三块驱动是否存在
             {
                 SingleCloseOperation(DEVICE_III , g_DelayTime.hezhaTime3);
                 g_SuddenState.executeOrder[DEVICE_III] = CLOSE_STATE;
@@ -361,7 +355,7 @@ uint8_t CheckIOState(void)
             {
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0xFF;
-            }     
+            } 
             return 0xFF;
         }
         case CHECK_3_FEN_ORDER: //收到机构3分闸命令
@@ -372,7 +366,7 @@ uint8_t CheckIOState(void)
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
-            if(CAP3_STATE && (g_SystemVoltageParameter.voltageCap3  >= g_SystemLimit.capVoltage3.down))  //判断第三块驱动是否存在
+            if(!CheckAllLoopCapVoltage(III_LOOP_ID))  //判断第三块驱动是否存在
             {
                 SingleOpenOperation(DEVICE_III , g_DelayTime.fenzhaTime3);
                 g_SuddenState.executeOrder[DEVICE_III] = OPEN_STATE;
@@ -385,6 +379,7 @@ uint8_t CheckIOState(void)
             }     
             return 0xFF;
         }
+#endif
         default:
         {
             ClrWdt();
@@ -397,17 +392,12 @@ uint8_t CheckIOState(void)
  * <p>Function name: [CheckswitchState]</p>
  * <p>Discription: [执行相应的指示]</p>
  */
-void DsplayswitchState(void)
+void DsplaySwitchState(void)
 {    
-    uint8_t waringbuffer[LOOP_QUANTITY];
+    uint8_t waringbuffer[LOOP_COUNT];
     uint8_t offestIndex = 3;
     
     UpdataCapVoltageState();   //更新电容电压显示状态
-    
-    if(!g_SuddenState.suddenFlag)   //没有突发状态不执行
-    {
-        return;
-    }
     
     waringbuffer[DEVICE_I] = g_SystemState.heFenState1; //机构1警告
     waringbuffer[DEVICE_II] = g_SystemState.heFenState2; //机构2警告
@@ -417,7 +407,7 @@ void DsplayswitchState(void)
     g_SystemState.heFenState3 = g_SystemState.heFenState2;  //主要应用在判断总分合位
 #endif
     
-    for(uint8_t index = 0; index < LOOP_QUANTITY; index++)
+    for(uint8_t index = 0; index < LOOP_COUNT; index++)
     {
         ClrWdt();
         switch (waringbuffer[index])

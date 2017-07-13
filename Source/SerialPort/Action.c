@@ -120,7 +120,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
     if(id <= 5)
     {
-        if((g_SystemState.yuanBenState == BEN_STATE) || (g_SystemState.workMode == DEBUG_STATE))
+        if((g_SystemState.yuanBenState == BEN_STATE) || (g_SystemState.workMode == DEBUG_STATE) || (g_LockUp == ON_LOCK))
         {
             SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
             return;
@@ -235,14 +235,34 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
 }
 uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
 {
+    uint8_t loopID = 0;
     uint8_t result = 0;
     uint16_t order = 0;
     
     
-    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    if(g_SystemState.yuanBenState == BEN_STATE  || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
     {        
         return WORK_MODE_ERROR;
     }   
+    
+    loopID = pReciveFrame->pBuffer[1];
+#if(CAP3_STATE)
+    if ((loopID == 0) || (loopID > 0x07))
+    {
+        return LOOP_ERROR;
+    }
+#else
+    if ((loopID == 0) || (loopID > 0x03))
+    {
+        return LOOP_ERROR;
+    }
+#endif
+    result = CheckAllLoopCapVoltage(loopID);  //检测所有电容电压状态是否正确
+    if(result)
+    {
+        return result;
+    }
+    
      //区分合分闸检测
     if (id == CloseAction )
     {
@@ -295,8 +315,9 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
 uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
 {
     uint8_t result = 0;
+    uint8_t loop = 0;
     uint16_t order = 0;
-    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    if(g_SystemState.yuanBenState == BEN_STATE || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
     {       
         return WORK_MODE_ERROR;
     }      
@@ -310,6 +331,12 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
     {       
         return result;
     }   
+    loop = pReciveFrame->pBuffer[1];
+    result = CheckAllLoopCapVoltage(loop);  //检测所有电容电压状态是否正确
+    if(result)
+    {
+        return result;
+    }
     //区分合分闸检测
     if (id == ReadyClose)
     {
@@ -348,7 +375,7 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     uint8_t id = 0;
     uint8_t configbyte = 0;
     uint8_t loop[3] = {0};
-    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    if(g_SystemState.yuanBenState == BEN_STATE || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
     {       
         return WORK_MODE_ERROR;
     }
@@ -376,10 +403,8 @@ uint8_t  SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* p
     }   
     
     //电容电压未达到设定电压错误
-    if(GetCapVolatageState() == 0)
+    if(CheckAllLoopCapVoltage(ALL_LOOP_ID))
     {
-        ClrWdt();
-        SendErrorFrame(id, CAPVOLTAGE_ERROR);
         return CAPVOLTAGE_ERROR;
     }
     
@@ -520,7 +545,7 @@ void UpdataState(void)
             g_SuddenState.buffer[1] = 0;    //Clear
             g_SuddenState.capSuddentFlag = FALSE;   //Clear
         }
-        for(i = 0;i < LOOP_QUANTITY; i++)   //循环赋值
+        for(i = 0;i < LOOP_COUNT; i++)   //循环赋值
         {
             if(g_LastswitchState[i] != g_SuddenState.switchState[i])
             {
@@ -574,13 +599,19 @@ uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
         return DATA_LEN_ERROR;
     }
     uint8_t configLoop =  pReciveFrame->pBuffer[1];//回路选择配置字
-    uint8_t actionTime =  pReciveFrame->pBuffer[2];//合分闸时间
+#if(CAP3_STATE)
     if ((configLoop == 0) || (configLoop > 0x07))
     {
         return  LOOP_ERROR;
-    }    
-     g_NormalAttribute.count = 0;
-    for(uint8_t i = 0; i < 3; i++)
+    }
+#else
+    if ((configLoop == 0) || (configLoop > 0x03))
+    {
+        return  LOOP_ERROR;
+    }
+#endif
+    g_NormalAttribute.count = 0;
+    for(uint8_t i = 0; i < LOOP_COUNT; i++)
     {       
         if (configLoop & (1<<i))
         {
@@ -595,7 +626,6 @@ uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
         }
             
     }
-    g_NormalAttribute.powerOnTime = actionTime;   
     return 0;
 }
 
@@ -605,8 +635,7 @@ uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
  */
 uint8_t CheckCloseCondition(void)
 {
-    
-    for(uint8_t i = 0; i< 3; i++)
+    for(uint8_t i = 0; i< LOOP_COUNT; i++)
     {
         if( g_NormalAttribute.Attribute[i].enable)
         {
@@ -614,10 +643,6 @@ uint8_t CheckCloseCondition(void)
             {
                 case 1:
                 {
-                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState1 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -627,10 +652,6 @@ uint8_t CheckCloseCondition(void)
                 }
                 case 2:
                 {
-                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState2 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -639,10 +660,6 @@ uint8_t CheckCloseCondition(void)
                 }
                 case 3:
                 {
-                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState3 != OPEN_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -675,7 +692,7 @@ uint8_t CheckCloseCondition(void)
 uint8_t CheckOpenCondition(void)
 {
     
-    for(uint8_t i = 0; i< 3; i++)
+    for(uint8_t i = 0; i< LOOP_COUNT; i++)
     {
         if ( g_NormalAttribute.Attribute[i].enable)
         {
@@ -683,10 +700,6 @@ uint8_t CheckOpenCondition(void)
             {
                 case 1:
                 {
-                    if(g_SystemVoltageParameter.voltageCap1  < g_SystemLimit.capVoltage1.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState1 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -696,10 +709,6 @@ uint8_t CheckOpenCondition(void)
                 }
                 case 2:
                 {
-                    if(g_SystemVoltageParameter.voltageCap2  < g_SystemLimit.capVoltage2.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState2 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -708,10 +717,6 @@ uint8_t CheckOpenCondition(void)
                 }
                 case 3:
                 {
-                     if(g_SystemVoltageParameter.voltageCap3  < g_SystemLimit.capVoltage3.down)
-                    {
-                        return CAPVOLTAGE_ERROR;
-                    }
                     if (g_SystemState.heFenState3 != CLOSE_STATE)
                     {
                         return HEFEN_STATE_ERROR;
@@ -750,7 +755,7 @@ void CheckOrder(void)
     uint8_t closeOrderCount = 0;
     uint8_t openOrderCount = 0;
     
-    for(i = 0; i < LOOP_QUANTITY; i++)
+    for(i = 0; i < LOOP_COUNT; i++)
     {
         if(g_SwitchConfig[i].lastOrder == HE_ORDER)
         {

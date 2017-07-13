@@ -36,7 +36,7 @@
 #elif BIG_CHOSE
     #define ADCS()  {ADCSSL = 0x0007;}  //ADC扫描通道数，扫描AN0--AN2
     #define ADPC()  {ADPCFG = 0xFFF8;}  //AN0--AN2
-//在不使用第三个控制器时，使其变量值始终为0，方便函数GetCapVolatageState（）的移植，以及状态更新
+//在不使用第三个控制器时，使其变量值始终为0，方便函数CheckAllLoopCapVoltage（）的移植，以及状态更新
     #define CAP3_DROP_VOLTAGE() {g_SystemVoltageParameter.capDropVoltage3 = 0;}
     #define CAP3_STATE  0x00    //用于判断其是否被激活
     #define NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可
@@ -50,14 +50,19 @@
 //**************************************
 #if(CAP3_STATE)
 
-#define LOOP_QUANTITY   3   //与下面的宏定义一起使用
+#define LOOP_COUNT   3   //与下面的宏定义一起使用
+#define ALL_LOOP_ID 0x07
 
 #else
 
-#define LOOP_QUANTITY   2   //与下面的宏定义一起使用
+#define LOOP_COUNT  2   //与下面的宏定义一起使用
+#define ALL_LOOP_ID 0x03
 
 #endif
 
+#define I_LOOP_ID   0x01
+#define II_LOOP_ID  0x02
+#define III_LOOP_ID 0x04
 //**************************************
 
 #include "Driver/tydef.h"
@@ -108,8 +113,8 @@
 #define CLOSE_STATE   0x02  //机构合闸状态
 #define ERROR_STATE   0x03  //机构错误,分合位同时存在，或者同时不存在
 
-extern uint8_t g_LastswitchState[LOOP_QUANTITY];   //获取上一次开关分合位状态
-extern uint8_t g_LastcapState[LOOP_QUANTITY];   //获取上一次开关分合位状态
+extern uint8_t g_LastswitchState[LOOP_COUNT];   //获取上一次开关分合位状态
+extern uint8_t g_LastcapState[LOOP_COUNT];   //获取上一次开关分合位状态
 
 #define Reset() {__asm__ volatile ("RESET");}
 

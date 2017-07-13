@@ -28,7 +28,7 @@ extern "C" {
 //获取电压
 void GetCapVoltage(void);
 //获取电压状态
-uint16_t GetCapVolatageState(void);
+uint8_t CheckAllLoopCapVoltage(uint8_t loop);
 void UpdataCapVoltageState(void);
 void ReadCapDropVoltage(void);
 
