@@ -116,7 +116,6 @@ enum CommandIdentify
 
 
 
-
     };
 
 
@@ -141,19 +140,22 @@ enum CommandIdentify
 /**
  * @description: 错误代码
  */
-#define ID_ERROR     0x01       //ID号错误
-#define DATA_LEN_ERROR   0x02   //数据长度错误
-#define LOOP_ERROR   0x03       //回路数错误
-#define SET_VALUE_ERROR   0x04  //设置值错误
-#define WORK_MODE_ERROR   0x05  //在处于就地控制时使用了远方控制
-#define OVER_TIME_ERROR   0x06  //预制超时错误
-#define NOT_PERFABRICATE_ERROR  0x07        //没有预制就先执行的错误
+#define ID_ERROR        0x01    //ID号错误
+#define DATA_LEN_ERROR  0x02    //数据长度错误
+#define LOOP_ERROR      0x03    //回路数错误
+#define SET_VALUE_ERROR 0x04    //设置值错误
+#define WORK_MODE_ERROR 0x05    //在处于就地控制时使用了远方控制
+#define OVER_TIME_ERROR 0x06    //预制超时错误
+#define NOT_PERFABRICATE_ERROR      0x07    //没有预制就先执行的错误
 #define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
-#define CAPVOLTAGE_ERROR  0x09      //欠压动作错误
-#define HEFEN_STATE_ERROR 0x0A      //合、分位错误
-#define REFUSE_ERROR 0x0B       //拒动错误
-#define ERROR_DIFF_CONFIG    0x0C//合闸预制配置不同
-#define ERROR_CHARGED_CONFIG    0x0D//开关带电分闸操作错误
+#define CAPVOLTAGE_ERROR        0x09        //欠压动作错误
+#define HEFEN_STATE_ERROR       0x0A        //合、分位错误
+#define REFUSE_ERROR            0x0B        //拒动错误
+#define ERROR_DIFF_CONFIG       0x0C        //合闸预制配置不同
+#define ERROR_CHARGED_CONFIG    0x0D        //开关带电分闸操作错误
+#define ERROR_SIGNEL_INVALID    0x0E        //开关带电分闸操作错误
+#define RUN_MODE_ERROR          0x0F        //在调试模式下执行操作
+#define LOCK_ERROR              0x10        //在锁定模式下执行了命令
     
 //*************************************************************************
 

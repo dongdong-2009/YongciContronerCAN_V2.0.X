@@ -25,6 +25,7 @@ uint8_t CheckOpenCondition(void);
 uint8_t CheckCloseCondition(void);
 uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
 uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
+uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
@@ -48,7 +49,8 @@ SystemSuddenState g_SuddenState;    //需要上传的机构状态值Action.h
 struct DefFrameData ActionCommandTemporaryAck;   //CAN数据帧
 PointUint8 g_ParameterBuffer;   
 
-uint8_t AckBuffer[8] = {0};
+static uint8_t AckBuffer[8] = {0};
+static uint16_t EffectiveLevelSignalCount = 0;
 
 
 /**
@@ -117,10 +119,21 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     uint8_t error = 0;  //错误号
     uint8_t result = 0;
     
+    if(g_LockUp == ON_LOCK) //在锁定模式下不允许执行任何的操作
+    {
+        SendErrorFrame(pReciveFrame->pBuffer[0],LOCK_ERROR);
+        return;
+    }
+    
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
     if(id <= 5)
     {
-        if((g_SystemState.yuanBenState == BEN_STATE) || (g_SystemState.workMode == DEBUG_STATE) || (g_LockUp == ON_LOCK))
+        if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
+        {
+            SendErrorFrame(pReciveFrame->pBuffer[0],RUN_MODE_ERROR);
+            return;
+        }
+        if(g_SystemState.yuanBenState == BEN_STATE)
         {
             SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
             return;
@@ -223,7 +236,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {    
             SendMonitorParameter(pReciveFrame);
             break;
-        }       
+        }
         default:
         {
             //错误的ID号处理
@@ -240,7 +253,11 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     uint16_t order = 0;
     
     
-    if(g_SystemState.yuanBenState == BEN_STATE  || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
+    if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
+    {
+        return RUN_MODE_ERROR;
+    }
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
     {        
         return WORK_MODE_ERROR;
     }   
@@ -317,7 +334,11 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
     uint8_t result = 0;
     uint8_t loop = 0;
     uint16_t order = 0;
-    if(g_SystemState.yuanBenState == BEN_STATE || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
+    if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
+    {
+        return RUN_MODE_ERROR;
+    }
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
     {       
         return WORK_MODE_ERROR;
     }      
@@ -375,8 +396,16 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     uint8_t id = 0;
     uint8_t configbyte = 0;
     uint8_t loop[3] = {0};
-    if(g_SystemState.yuanBenState == BEN_STATE || (g_SystemState.workMode == DEBUG_STATE)) //本地模式不能执行远方操作
-    {       
+    if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))
+    {
+        return ERROR_SIGNEL_INVALID;
+    }
+    if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
+    {
+        return RUN_MODE_ERROR;
+    }
+    if(g_SystemState.yuanBenState == BEN_STATE) //本地模式不能执行远方操作
+    {
         return WORK_MODE_ERROR;
     }
     //数据长度不对，数据长度不应为奇数
@@ -423,7 +452,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     }
 #endif
     
-     //获取回路参数   
+    //获取回路参数   
     for(uint8_t i = 0; i < count; i++)
     {
         loop[i] = (uint8_t)((configbyte>>(2*i)) & 0x03); 
@@ -486,8 +515,10 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
         ClrWdt();
         g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
         g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测        
+        OnLock();      
+        TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1        
+        OFF_COMMUNICATION_INT();
         OnLock();
-        TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1
        
     }
     else
@@ -498,6 +529,73 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     }
     return 0;
 }
+
+/**
+ * 
+ * @description: 检测同步合闸信号是否正确
+ * @param pReciveFrame
+ * @param pSendFrame
+ * @return 
+ */
+uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+{
+    uint8_t i = 0;
+    uint8_t state = 0x00;
+    uint8_t result = 0;
+    uint32_t waitCount = 0;
+    EffectiveLevelSignalCount = 0;
+    OFF_COMMUNICATION_INT();    //关闭通信中断    
+    while(RXD1_LASER == 0)
+    {
+        ClrWdt();
+        waitCount++;
+        if(waitCount >= 1000000)    //大约1s
+        {
+            return ERROR_SIGNEL_INVALID;   //退出
+        }
+    }
+    //检测高电平
+    for(i = 0; i < 4; i++)
+    {
+        state = ~state;
+        state &= 0x01;
+        while(RXD1_LASER == state)
+        {
+            EffectiveLevelSignalCount++;
+            if(EffectiveLevelSignalCount >= 0xFFFF)    //防止进入死循环//TODO:设定最大值
+            {
+                ON_COMMUNICATION_INT();    //开启通信中断
+                return ERROR_SIGNEL_INVALID;   //退出
+            }
+        }
+        if((EffectiveLevelSignalCount < 60) || (EffectiveLevelSignalCount > 100))  //较宽的范围85~125
+        {
+            break;
+        }
+        EffectiveLevelSignalCount = 0;
+    }
+    if((RXD1_LASER == 1) && (i == 4))
+    {
+        result = 0; //成功接收到
+    }
+    else
+    {
+        result = ERROR_SIGNEL_INVALID;
+    }
+    ON_COMMUNICATION_INT();    //开启通信中断
+    if(result == 0)
+    {
+        for(uint8_t i = 1; i < pReciveFrame->len; i++)
+        {
+            ClrWdt();
+            pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
+        } 
+        SendData(pSendFrame);
+    }
+    return result;
+
+}
+
 /**
  * @description: 发送错误帧数据
  * @param receiveID 主站发送的ID号
@@ -845,21 +943,20 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
         SendData(&pSendFrame);
     }
 }
+
 /**
  * <p>Function name: [_INT2Interrupt]</p>
  * <p>Discription: [外部中断函数]</p>
  */
 
-uint16_t g_validCount = 0;
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
     uint8_t i = 0;
     uint8_t state = 0x00;
     
-    g_validCount = 0;   //初始化全局变量
+    EffectiveLevelSignalCount = 0;   //初始化全局变量
     
     IFS1bits.INT2IF = 0;
-    OFF_COMMUNICATION_INT();
     //*************************************************************************************
     //以下判断防止误触发
     if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
@@ -881,24 +978,22 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 		state &= 0x01;
 		while(RXD1_LASER == state)
 		{
-			g_validCount++;
-            if(g_validCount >= 0xFFFF)    //防止进入死循环//TODO:设定最大值
+			EffectiveLevelSignalCount++;
+            if(EffectiveLevelSignalCount >= 0xFFFF)    //防止进入死循环//TODO:设定最大值
             {
-                i = 10;
                 return;
             }
 		}
-		if((g_validCount < 30) || (g_validCount > 50))  //较宽的范围85~125
+		if((EffectiveLevelSignalCount < 30) || (EffectiveLevelSignalCount > 50))  //较宽的范围85~125
 		{
-            i = 10;
 			return;
 		}
-        g_validCount = 0;
+        EffectiveLevelSignalCount = 0;
 	}
 	if((RXD1_LASER == 1) && (i == 4))
 	{
+        TurnOffInt2();
         g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag   
         SynCloseAction();
-        TurnOffInt2();
 	}
 }

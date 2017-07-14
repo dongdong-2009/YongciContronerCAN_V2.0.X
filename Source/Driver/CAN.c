@@ -465,13 +465,8 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
                     if(C2TX0CONbits.TXERR || C2TX0CONbits.TXLARB)  //发送时发生总线错误或者在发送过程中失去仲裁
                     {
                         C2CTRLbits.ABAT = 1;   //终止报文发送
+                        g_RemoteControlState.CanErrorFlag = CAN_TX_OVER_ERROR;   //CAN发送中断错误
                         C2TX0CONbits.TXREQ = 0;
-                        while(!C2TX0CONbits.TXABT)
-                        {
-                            ClrWdt();
-                            C2CTRLbits.ABAT = 1;
-                            C2TX0CONbits.TXREQ = 0;
-                        }
                         return 0;
                     }
                 }
@@ -562,29 +557,22 @@ inline void GetReciveRX0EID(EIDBits* pEID)
 //-----------------------------------------------------------------------------
 //Interrupt Section for CAN1
 //-----------------------------------------------------------------------------
-CANFrame Rframe;
-uint8_t rlen = 0;
-EIDBits rEID;
- 
+
+static uint16_t PassiveCount = 0;
 void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
 {    
+    uint8_t result = 0;
+    
     ClrWdt();
-//    uint8_t rxErrorCount = C2EC & 0x00FF;
-//    uint8_t txErrorCount = (C2EC & 0xFF00) >> 8;
         
     IFS2bits.C2IF = 0;         //Clear interrupt flag
     /*该错误是在CAN总线上产生任何一个错误都会引起该标志位置位*/
     C2INTFbits.IVRIF = 0; //该错误表示在CAN总线上不需要采取任何动作
-
-    if(C2INTFbits.TX0IF)
-    {
-        C2INTFbits.TX0IF = 0;  //If the Interrupt is due to Transmit0 of CAN1 Clear the Interrupt
-    }  
-    else if(C2INTFbits.TX1IF)
-    {
-        C2INTFbits.TX1IF = 0;   //If the Interrupt is due to Transmit1 of CAN1 Clear the Interrupt 
-    }  
-
+    //未启用中断发送，所以直接清零发送中断标志位
+    C2INTFbits.TX0IF = 0;  //If the Interrupt is due to Transmit0 of CAN1 Clear the Interrupt
+    C2INTFbits.TX1IF = 0;   //If the Interrupt is due to Transmit1 of CAN1 Clear the Interrupt 
+    
+    C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
     if(C2INTFbits.RX0IF)
     {   
         ClrWdt();
@@ -600,22 +588,20 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         ReadRx0Frame(&point);
         ClrWdt();
         CAN_RxRdy = 1;    
-        BufferEnqueue(&CAN_RxMsg);  /*  set receive flag */
-        
-        g_TimeStampCollect.offlineTime.startTime = g_TimeStampCollect.msTicks;
-      //  DeviceNetReciveCenter(&id,Rframe.framDataByte, len);
+        result = BufferEnqueue(&CAN_RxMsg);  /*  set receive flag */
+        if(result)  //成功的接收到并入队
+        {
+            g_TimeStampCollect.offlineTime.startTime = g_TimeStampCollect.msTicks;
+        }
     }
-    else if(C2INTFbits.RX1IF)
-    {  
-        C2INTFbits.RX1IF = 0;  	//If the Interrupt is due to Receive1 of CAN1 Clear the Interrupt
-    }
+    
     /*总线关闭错误中断处理*/
     if(C2INTFbits.TXBO && C2INTFbits.ERRIF) //发送错误
     {
-        //总线关断，需要报错，但是此时可以退出中断服务程序，但是不会改变TXBO位
-        //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复
+        //总线关断，需要报错，但是此时可以退出中断服务程序，并关闭CAN中断，但是不会改变TXBO位
+        //可以选择不退出中断函数，或者报警，进行人为的总线关断恢复（未实现，选择上述方式）
         C2INTFbits.ERRIF = 0;   //退出中断服务
-        g_RemoteControlState.CanErrorFlag = TRUE;    //发生了总线关断错误
+        g_RemoteControlState.CanErrorFlag = CAN_CLOSE_ERROR;    //发生了总线关断错误
         g_TimeStampCollect.changeLedTime.delayTime = 50;   //运行指示灯闪烁间隔为50ms
         OFF_COMMUNICATION_INT();    //关闭通信中断
         return;
@@ -628,30 +614,27 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         if(C2INTFbits.RX0OVR)
         {
             C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
+            C2INTFbits.RX0IF = 0;
             C2INTEbits.RXB0IE = 1;
             return;
         }
         else if(C2INTFbits.RX1OVR)
         {
             C2INTFbits.RX1OVR = 0;  //清除接收缓冲器1溢出中断
+            C2INTFbits.RX1IF = 0;
+            C2INTEbits.RXB1IE = 1;
         }
         
-        if((C2INTFbits.EWARN) && (C2INTFbits.RXWAR)) //接收错误计数器警告
+        if(C2INTFbits.RXBP || C2INTFbits.TXEP) //接收错误计数器警告或者发送错误计数器警告
         {
-            //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
-        }
-        if(C2INTFbits.RXBP) //接收错误计数器警告
-        {
-            //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
-        }
-
-        /*发送错误中断处理*/
-        if((C2INTFbits.EWARN) && (C2INTFbits.TXWAR)) //发送错误计数器警告
-        {
-            //此时应该发出警告指示,错误计数器已经大于95,暂时不做处理
-        }
-        if(C2INTFbits.TXEP) //发送错误计数器警告
-        {
+            PassiveCount++;
+            if(PassiveCount >= 0xFFFF)
+            {
+                g_RemoteControlState.CanErrorFlag = CAN_PASSIVE_ERROR;    //发生了总线被动错误
+                g_TimeStampCollect.changeLedTime.delayTime = 50;   //运行指示灯闪烁间隔为50ms
+                OFF_COMMUNICATION_INT();    //关闭通信中断
+                return; //跳出
+            }
             //此时应该发出警告指示,错误计数器已经大于127，且装置处在总线被动状态
         }
         C2INTFbits.ERRIF = 0;
