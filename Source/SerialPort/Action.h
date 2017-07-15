@@ -151,9 +151,9 @@ enum CommandIdentify
 #define CAPVOLTAGE_ERROR        0x09        //欠压动作错误
 #define HEFEN_STATE_ERROR       0x0A        //合、分位错误
 #define REFUSE_ERROR            0x0B        //拒动错误
-#define ERROR_DIFF_CONFIG       0x0C        //合闸预制配置不同
-#define ERROR_CHARGED_CONFIG    0x0D        //开关带电分闸操作错误
-#define ERROR_SIGNEL_INVALID    0x0E        //开关带电分闸操作错误
+#define DIFF_CONFIG_ERROR       0x0C        //合闸预制配置不同
+#define CHARGED_CONFIG_ERROR    0x0D        //开关带电分闸操作错误
+#define SIGNEL_INVALID_ERROR    0x0E        //无效的同步测试信号
 #define RUN_MODE_ERROR          0x0F        //在调试模式下执行操作
 #define LOCK_ERROR              0x10        //在锁定模式下执行了命令
     

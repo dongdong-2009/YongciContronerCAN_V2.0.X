@@ -119,7 +119,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     uint8_t error = 0;  //错误号
     uint8_t result = 0;
     
-    if(g_LockUp == ON_LOCK) //在锁定模式下不允许执行任何的操作
+    if(!CheckLockState()) //在锁定模式下不允许执行任何的操作
     {
         SendErrorFrame(pReciveFrame->pBuffer[0],LOCK_ERROR);
         return;
@@ -174,7 +174,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {
             if(g_SystemState.charged)   //带电情况下不能执行分闸操作
             {
-                result = ERROR_CHARGED_CONFIG;
+                result = CHARGED_CONFIG_ERROR;
             }
             else
             {
@@ -309,7 +309,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     {
         if (pReciveFrame->pBuffer[i] != LastCommand[i])
         {          
-            return ERROR_DIFF_CONFIG;
+            return DIFF_CONFIG_ERROR;
         }
     }     
     
@@ -398,7 +398,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     uint8_t loop[3] = {0};
     if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))
     {
-        return ERROR_SIGNEL_INVALID;
+        return SIGNEL_INVALID_ERROR;
     }
     if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
     {
@@ -551,7 +551,7 @@ uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameD
         waitCount++;
         if(waitCount >= 1000000)    //大约1s
         {
-            return ERROR_SIGNEL_INVALID;   //退出
+            return SIGNEL_INVALID_ERROR;   //退出
         }
     }
     //检测高电平
@@ -565,7 +565,7 @@ uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameD
             if(EffectiveLevelSignalCount >= 0xFFFF)    //防止进入死循环//TODO:设定最大值
             {
                 ON_COMMUNICATION_INT();    //开启通信中断
-                return ERROR_SIGNEL_INVALID;   //退出
+                return SIGNEL_INVALID_ERROR;   //退出
             }
         }
         if((EffectiveLevelSignalCount < 60) || (EffectiveLevelSignalCount > 100))  //较宽的范围85~125
@@ -580,7 +580,7 @@ uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameD
     }
     else
     {
-        result = ERROR_SIGNEL_INVALID;
+        result = SIGNEL_INVALID_ERROR;
     }
     ON_COMMUNICATION_INT();    //开启通信中断
     if(result == 0)

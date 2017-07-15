@@ -20,7 +20,7 @@ SwitchConfig g_SwitchConfig[LOOP_COUNT];	//配置机构状态
 
 uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
 //uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
-uint16_t _PERSISTENT g_LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
+static uint16_t _PERSISTENT LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 CAN_msg ReciveMsg;
 
@@ -74,8 +74,8 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
  */
 inline void OnLock(void)
 {
-    g_LockUp = ON_LOCK;    //上锁
-    g_LockUp = ON_LOCK;    //上锁
+    LockUp = ON_LOCK;    //上锁
+    LockUp = ON_LOCK;    //上锁
 }
 
 /**
@@ -85,10 +85,26 @@ inline void OnLock(void)
  */
 inline void OffLock(void)
 {
-    g_LockUp = OFF_LOCK;    //解锁
-    g_LockUp = OFF_LOCK;    //解锁
+    LockUp = OFF_LOCK;    //解锁
+    LockUp = OFF_LOCK;    //解锁
 }
 
+/**
+ * <p>Function name: [CheckLockState]</p>
+ * <p>Discription: [检测上锁状态]</p>
+ * @return 处于解锁则返回TRUE 否则返回FALSE
+ */
+inline uint8_t CheckLockState(void)
+{
+    if(LockUp == OFF_LOCK)
+    {
+        return TRUE;
+    }
+    else if(LockUp == ON_LOCK)
+    {
+        return FALSE;
+    }
+}
 
 
 /**
@@ -97,7 +113,7 @@ inline void OffLock(void)
 void SynCloseAction(void)
 {
     uint8_t i = 0;
-    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(CheckLockState())    //解锁状态下不能进行合闸
     {
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
@@ -150,7 +166,7 @@ void SynCloseAction(void)
  */
 void CloseOperation(void)
 {
-    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(CheckLockState())    //解锁状态下不能进行合闸
     {
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
@@ -195,7 +211,7 @@ void CloseOperation(void)
  */
 void OpenOperation(void)
 {
-    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(CheckLockState())    //解锁状态下不能进行合闸
     {
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
@@ -245,7 +261,7 @@ void OpenOperation(void)
  */
 void SingleCloseOperation(uint8_t index,uint16_t time)
 {
-    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行合闸
+    if(CheckLockState())    //解锁状态下不能进行合闸
     {
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
@@ -276,7 +292,7 @@ void SingleCloseOperation(uint8_t index,uint16_t time)
  */
 void SingleOpenOperation(uint8_t index,uint16_t time)
 {
-    if(g_LockUp == OFF_LOCK)    //解锁状态下不能进行分闸
+    if(CheckLockState())    //解锁状态下不能进行分闸
     {
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
         return;
@@ -561,6 +577,7 @@ uint8_t RefreshIdleState()
             UpdataState();  //更新状态
         }
         g_SuddenState.suddenFlag = FALSE;  //Clear
+        OffLock();  //解锁
         g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
     }
 
@@ -657,7 +674,7 @@ void YongciFirstInit(void)
     g_ParameterBuffer.pData = ParameterBufferData;
     g_ParameterBuffer.len = 8;
     
-    g_LockUp = OFF_LOCK;    //处于解锁状态
+    LockUp = OFF_LOCK;    //处于解锁状态
     
     //IGBT引脚
     //A

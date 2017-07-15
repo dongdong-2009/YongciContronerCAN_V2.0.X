@@ -167,6 +167,7 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if((g_SystemState.workMode == WORK_STATE) && (!CheckLoopCapVoltage(LOOP_ID_ALL)))
             {
+                OnLock();   //上锁
                 ClrWdt();
                 SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
                 SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
@@ -198,6 +199,7 @@ uint8_t CheckIOState(void)
             }
             if((g_SystemState.workMode == WORK_STATE) && (!CheckLoopCapVoltage(LOOP_ID_ALL))) //多加入一重验证
             {
+                OnLock();   //上锁
                 ClrWdt();
                 SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
                 SingleOpenOperation(DEVICE_II , g_DelayTime.fenzhaTime2);
@@ -225,6 +227,7 @@ uint8_t CheckIOState(void)
             ClrWdt();
             if(!CheckLoopCapVoltage(LOOP_ID_I))
             {
+                OnLock();   //上锁
                 SingleCloseOperation(DEVICE_I , g_DelayTime.hezhaTime1);
                 g_SuddenState.executeOrder[DEVICE_I] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
@@ -246,6 +249,7 @@ uint8_t CheckIOState(void)
             }
             if(!CheckLoopCapVoltage(LOOP_ID_I))
             {
+                OnLock();   //上锁
                 SingleOpenOperation(DEVICE_I , g_DelayTime.fenzhaTime1);
                 g_SuddenState.executeOrder[DEVICE_I] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
@@ -263,6 +267,7 @@ uint8_t CheckIOState(void)
             ClrWdt();        
             if(!CheckLoopCapVoltage(LOOP_ID_II))
             {
+                OnLock();   //上锁
                 SingleCloseOperation(DEVICE_II , g_DelayTime.hezhaTime2);
                 g_SuddenState.executeOrder[DEVICE_II] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
@@ -284,6 +289,7 @@ uint8_t CheckIOState(void)
             }
             if(!CheckLoopCapVoltage(LOOP_ID_II))
             {
+                OnLock();   //上锁
                 SingleOpenOperation(DEVICE_II , g_DelayTime.fenzhaTime2);
                 g_SuddenState.executeOrder[DEVICE_II] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
@@ -299,8 +305,9 @@ uint8_t CheckIOState(void)
         case CHECK_3_HE_ORDER: //收到机构3合闸命令
         {
             ClrWdt();        
-            if(!CheckLoopCapVoltage(LOOP_ID_III))  //判断第三块驱动是否存在
+            if(!CheckLoopCapVoltage(LOOP_ID_III))  //检测电容电压
             {
+                OnLock();   //上锁
                 SingleCloseOperation(DEVICE_III , g_DelayTime.hezhaTime3);
                 g_SuddenState.executeOrder[DEVICE_III] = CLOSE_STATE;
                 g_RemoteControlState.orderId = CloseAction;    //拒动错误ID号
@@ -320,8 +327,9 @@ uint8_t CheckIOState(void)
                 g_Order = IDLE_ORDER;    //将命令清零
                 return 0;
             }
-            if(!CheckLoopCapVoltage(LOOP_ID_III))  //判断第三块驱动是否存在
+            if(!CheckLoopCapVoltage(LOOP_ID_III))  //检测电容电压
             {
+                OnLock();   //上锁
                 SingleOpenOperation(DEVICE_III , g_DelayTime.fenzhaTime3);
                 g_SuddenState.executeOrder[DEVICE_III] = OPEN_STATE;
                 g_RemoteControlState.orderId = OpenAction;    //拒动错误ID号
@@ -336,6 +344,7 @@ uint8_t CheckIOState(void)
 #endif
         default:
         {
+            OffLock();   //解锁
             ClrWdt();
         }
     }
@@ -384,6 +393,7 @@ void DsplaySwitchState(void)
                 {
                     g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
                     g_SuddenState.RefuseAction = FALSE;
+                    OffLock();
                 }
                 break;
             }
@@ -397,6 +407,7 @@ void DsplaySwitchState(void)
                 {
                     g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
                     g_SuddenState.RefuseAction = FALSE;
+                    OffLock();
                 }
                 break;
             }
@@ -525,60 +536,57 @@ void SwitchScan(void)
     uint32_t negative = ~YUAN_INPUT;
     DigitalInputState &= negative;
     //*****************************
-    if(g_LockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
+    ClrWdt();
+    //同时合闸信号检测
+    if(Z_HEZHA_CONDITION())
     {
-        ClrWdt();
-        //同时合闸信号检测
-        if(Z_HEZHA_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //同时分闸信号检测
-        if(Z_FENZHA_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //机构1合闸信号检测
-        if(HEZHA1_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //机构1分闸信号检测
-        if(FENZHA1_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //机构2合闸信号检测
-        if(HEZHA2_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //机构2分闸信号检测
-        if(FENZHA2_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-#if(CAP3_STATE)  //判断第三块驱动是否存在
-        //机构3合闸信号检测
-        if(HEZHA3_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-        //机构3分闸信号检测
-        if(FENZHA3_CONDITION())
-        {
-            ADD_VALID_COUNT(index);
-        }
-        index++;
-#endif
+        ADD_VALID_COUNT(index);
     }
+    index++;
+    //同时分闸信号检测
+    if(Z_FENZHA_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+    //机构1合闸信号检测
+    if(HEZHA1_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+    //机构1分闸信号检测
+    if(FENZHA1_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+    //机构2合闸信号检测
+    if(HEZHA2_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+    //机构2分闸信号检测
+    if(FENZHA2_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+#if(CAP3_STATE)  //判断第三块驱动是否存在
+    //机构3合闸信号检测
+    if(HEZHA3_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+    //机构3分闸信号检测
+    if(FENZHA3_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
+#endif
     
 //******************************************************************************
 //时间到达后才对各个状态位进行检查
@@ -709,7 +717,7 @@ uint8_t CheckSwitchOrder(void)
 #else
     uint8_t index = 7;
 #endif
-    if(g_LockUp == OFF_LOCK)    //首先判断是否正在执行合闸或者分闸操作
+    if(CheckLockState())    //首先判断是否正在执行合闸或者分闸操作
     {
         //对总合总分信号检测        
         if(DIGITAL_INPUT_EFFECTIVE(index) && DIGITAL_INPUT_EFFECTIVE(index + 1))
@@ -731,7 +739,6 @@ uint8_t CheckSwitchOrder(void)
                (g_SystemState.heFenState3 == OPEN_STATE))
             {
                 g_Order = HE_ORDER;     //同时合闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -744,7 +751,6 @@ uint8_t CheckSwitchOrder(void)
                (g_SystemState.heFenState3 == CLOSE_STATE) )
             {
                 g_Order = FEN_ORDER;     //同时分闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -764,7 +770,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState1 == OPEN_STATE)
             {
                 g_Order = CHECK_1_HE_ORDER;     //同时合闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -775,7 +780,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState1 == CLOSE_STATE)
             {
                 g_Order = CHECK_1_FEN_ORDER;     //同时分闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -795,7 +799,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState2 == OPEN_STATE)
             {
                 g_Order = CHECK_2_HE_ORDER;     //同时合闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -806,7 +809,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState2 == CLOSE_STATE)
             {
                 g_Order = CHECK_2_FEN_ORDER;     //同时分闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -827,7 +829,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState3 == OPEN_STATE)
             {
                 g_Order = CHECK_3_HE_ORDER;     //同时合闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
@@ -838,7 +839,6 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState3 == CLOSE_STATE)
             {
                 g_Order = CHECK_3_FEN_ORDER;     //同时分闸命令
-                OnLock();   //上锁
             }
             return g_Order;
         }
