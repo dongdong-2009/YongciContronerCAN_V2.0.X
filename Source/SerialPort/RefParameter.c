@@ -72,20 +72,20 @@ uint16_t _PERSISTENT g_SyncReadyWaitTime;
  * 遥控预制等待时间
  */
 uint16_t _PERSISTENT g_RemoteWaitTime;   
-/**
- * 本地系统时钟
- */
-uint8_t g_LocalMac;
+
 
 /**
  * 默认同步命令
  */
 SyncCommand g_SyncCommand;
 
+
+
+
 /**
  * 内部所需的宏定义，主要包括ID号初始值、参数列表长度
  */
-#define PARAMETER_LEN 27  //设置参数列表
+#define PARAMETER_LEN 28  //设置参数列表
 #define READONLY_PARAMETER_LEN 21  //只读参数列表
 #define SET_START_ID 0x01   //设置参数ID号开始值
 #define READONLY_START_ID 0x41  //只读参数ID号开始值
@@ -369,14 +369,22 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].type = 0x10;
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
-	index++;
-	g_SetParameterCollect[index].ID = id++;
-	g_SetParameterCollect[index].pData = &g_LocalMac;   //系统时钟
+	
+    index++;
+    g_SetParameterCollect[index].ID = id++;
+	g_SetParameterCollect[index].pData = &g_SystemState.timeSequenceRun;   //时序
 	g_SetParameterCollect[index].type = 0x10;
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
-	index++;
     
+    index++;
+    g_SetParameterCollect[index].ID = id++;
+	g_SetParameterCollect[index].pData = &g_SystemState.sequencePulseWidth;   //时序脉冲宽度
+	g_SetParameterCollect[index].type = 0x20;
+	g_SetParameterCollect[index].fSetValue = SetValueUint16;
+	g_SetParameterCollect[index].fGetValue = GetValueUint16;
+    
+    while( PARAMETER_LEN < index);//若大于说明越限，则退出。    
 }
 
 /**
@@ -567,6 +575,8 @@ void RefParameterInit(void)
     g_SystemState.warning = 0x00;       //默认无警告
     g_SystemState.charged = 0;          //默认不带电
     
+    g_SystemState.timeSequenceRun = 0;
+    g_SystemState.sequencePulseWidth = 5000;//默认为5000us
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
 	ClrWdt();
@@ -603,7 +613,7 @@ void RefParameterInit(void)
         //同步预制等待时间
         g_SyncReadyWaitTime = 3000;
         g_RemoteWaitTime = 3000;
-        g_LocalMac = 0x0A;
+      
     }    
 }
 

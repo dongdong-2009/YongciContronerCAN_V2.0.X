@@ -295,6 +295,7 @@ void InitInt2(void)
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;    //首先禁止中断
     
+    
 }
 
 /**
@@ -311,14 +312,51 @@ inline void TurnOnInt2(void)
 /**
  * 
  * <p>Function name: [TurnOffInt2]</p>
- * <p>Discription: [关闭外部中断2]</p>
+ * <p>Discription: 关闭外部中断2，与此同时关闭中断3</p>
  */
 inline void TurnOffInt2(void)
 {
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;
+    
+    TurnOffInt3();//与此同时关闭 INT3
+}
+/**
+ * @description 外部中断3初始化
+ */
+void InitInt3(void)
+{
+    
+    ClrWdt();
+    IPC9bits.INT3IP = 6;    //优先级次于同步脉冲
+//    INTCON2bits.INT3EP = 1; //负边沿触发中断
+    INTCON2bits.INT3EP = 0;   //正边沿触发中断
+    IFS2bits.INT3IF = 0;
+    IEC2bits.INT3IE = 0;    //首先禁止中断
+    
 }
 
+/**
+ * 
+ * <p>Function name: [TurnOnInt3]</p>
+ * <p>Discription: [开启外部中断3]</p>
+ */
+inline void TurnOnInt3(void)
+{
+    IFS2bits.INT3IF = 0;
+    IEC2bits.INT3IE = 1;
+}
+
+/**
+ * 
+ * <p>Function name: [TurnOffInt3]</p>
+ * <p>Discription: [关闭外部中断3]</p>
+ */
+inline void TurnOffInt3(void)
+{
+    IFS2bits.INT3IF = 0;
+    IEC2bits.INT3IE = 0;
+}
 /**
  * 
  * <p>Function name: [UpdateLEDIndicateState]</p>

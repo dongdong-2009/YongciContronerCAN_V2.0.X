@@ -26,10 +26,11 @@ void ChangeTimerPeriod3(unsigned int us);
 void StopTimer3(void);
 
 
-void InitTimer4(unsigned int ms);
+void InitTimer4();
 void ChangeTimerPeriod4(unsigned int ms);
 void StartTimer4(void);
  void StopTimer4(void);
+ uint16_t GetTimeUs(void);
 #ifdef	__cplusplus
 }
 #endif

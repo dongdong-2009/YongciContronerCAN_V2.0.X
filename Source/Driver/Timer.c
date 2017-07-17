@@ -188,10 +188,10 @@ inline  void StopTimer3(void)
 /**
  * 
  * <p>Function name: [InitTimer4]</p>
- * <p>Discription: [初始化定时器4，普通合分闸控制/p>
+ * <p>Discription: [初始化定时器4，用于脉冲宽度测试，1:1定时器脉冲宽度/p>
  * @param ms 定时器周期
  */
-void InitTimer4(unsigned int ms)
+void InitTimer4()
 {
     ClrWdt();
    
@@ -199,7 +199,7 @@ void InitTimer4(unsigned int ms)
     IFS1bits.T4IF = 0;
 
     T4CON = 0;
-    T4CONbits.TCKPS = 0b11; //1:256
+    T4CONbits.TCKPS = 0; //1：1
     T4CONbits.TCS = 0;
     T4CONbits.TGATE = 0;
 
@@ -209,7 +209,8 @@ void InitTimer4(unsigned int ms)
     
     
     TMR4 = 0;     
-    PR4 = (unsigned int)((float32_t)FCY/1000.00/256.0*(float32_t)ms)-1;
+ //   PR4 = (unsigned int)((float32_t)FCY/256.0*(float32_t)us)-1;
+    PR4 = 0xFFFF;
     ClrWdt();
     TPR4Count = PR2;
     T2CONbits.TON = 0;
@@ -219,15 +220,18 @@ void InitTimer4(unsigned int ms)
 
 /**
  * 改变定时器4的定时周期
- * @param ms  定时时间ms
+ * @param us  定时时间us
  */
-inline void ChangeTimerPeriod4(unsigned int ms)
+inline void ChangeTimerPeriod4(unsigned int us)
 {
   
-    TPR4Count = (unsigned int)((float32_t)FCY/1000.00/256.0*(float32_t)ms)-1;
+    TPR4Count = (unsigned int)((float32_t)FCY/(float32_t)us)-1;
     PR4 =  TPR4Count;
 }
-
+inline uint16_t GetTimeUs(void)
+{
+    return TMR4; //1:1分频比1:1
+}
 /**
  * 
  * <p>Function name: [StartTimer4]</p>
@@ -238,7 +242,7 @@ inline void StartTimer4(void)
     T4CONbits.TON = 0;
     ClrWdt();
     TMR4 = 0;    
-    PR4 =  TPR4Count;
+    PR4 =  0xFFFF;
     IFS1bits.T4IF = 0;
     T4CONbits.TON = 1;
 }
@@ -250,7 +254,6 @@ inline void StartTimer4(void)
 inline  void StopTimer4(void)
 {
     ClrWdt();
-    TMR4 = 0;
     T4CONbits.TON = 0;
     IFS1bits.T4IF = 0;
     IEC1bits.T4IE = 0;

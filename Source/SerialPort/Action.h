@@ -115,6 +115,7 @@ enum CommandIdentify
 	//SyncOrchestratorOpenAction = 0x32,
 
 
+    SynTimeSequence = 0x34, //时序同步脉冲信号
 
     };
 

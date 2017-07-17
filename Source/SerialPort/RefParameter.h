@@ -39,42 +39,11 @@
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "../Driver/tydef.h"
 #include "../DeviceNet/DeviceNet.h"
-// TODO Insert appropriate #include <>
 
-// TODO Insert C++ class definitions if appropriate
-
-// TODO Insert declarations
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
-  
-    <p><b>Summary:</b></p>
-
-    <p><b>Description:</b></p>
-
-    <p><b>Precondition:</b></p>
-
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
- */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
 
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
     
 /**
  * 过程延时时间定义
@@ -198,9 +167,19 @@ typedef struct TagSystemState
     uint8_t warning;    //告警
     uint8_t MacID;      //MAC地址
     uint8_t charged;    //电显状态
-    
+    uint8_t timeSequenceRun;//时序脉冲运行标志
+    uint16_t sequencePulseWidth; //时序脉冲宽度（us）    
 }SystemState;
 
+
+/**
+ *时序模式
+ */
+#define TIME_SEQUENCE 0xA5 
+/**
+ *同步地址
+ */
+#define SYNC_MAC 0x0D
 
 /**
  * 供外部调用的全局变量，且均为读取变量

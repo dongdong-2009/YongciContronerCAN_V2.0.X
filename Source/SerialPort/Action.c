@@ -201,10 +201,9 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             if (result)
             {
                 SendErrorFrame(id, result);
-            }
+            }                   
             break;
-        }
-       
+        }       
         case MasterParameterSetOne:  //非顺序参数设置
         {
             ClrWdt();
@@ -236,7 +235,7 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
         {    
             SendMonitorParameter(pReciveFrame);
             break;
-        }
+        }        
         default:
         {
             //错误的ID号处理
@@ -516,9 +515,19 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
         g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令
         g_RemoteControlState.overTimeFlag = TRUE;  //预制成功后才会开启超时检测        
         OnLock();      
-        TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1        
+        
+                   
+        TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1 
         OFF_COMMUNICATION_INT();
         OnLock();
+        
+        //时序脉冲检测设置
+        if (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE)
+        {
+            InitTimer4();
+            InitInt3();
+            TurnOnInt3();
+        }
        
     }
     else
@@ -954,7 +963,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
     uint8_t i = 0;
     uint8_t state = 0x00;
     
-    EffectiveLevelSignalCount = 0;   //初始化全局变量
+    EffectiveLevelSignalCount = 0;   
     
     IFS1bits.INT2IF = 0;
     //*************************************************************************************
@@ -996,4 +1005,39 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
         g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag   
         SynCloseAction();
 	}
+}
+/**
+ * <p>Function name: [_INT3Interrupt]</p>
+ * <p>Discription: [检测外部脉冲时序]</p>
+ */
+
+void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
+{
+    uint16_t usCount = 0;
+    StartTimer4();
+    
+    IFS2bits.INT3IF = 0;
+    if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
+    {       
+        return;
+    }
+    while(RXD2_LASER == 1)
+    {        
+        if( IFS1bits.T4IF == 1)    //超出设定最大值返回
+        {
+            return;
+        }
+    }
+    StopTimer4();
+    usCount = GetTimeUs();
+    //检查脉冲宽度是否在10us偏差之间
+    if(((g_SystemState.sequencePulseWidth - 20) <= usCount ) && ( usCount <= (g_SystemState.sequencePulseWidth - 20)))  //较宽的范围
+    {
+       uint16_t id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, SYNC_MAC);
+       uint8_t sendData[2] = {0};
+       sendData[0] = SynTimeSequence;
+       sendData[1] =  TIME_SEQUENCE;      
+       CANSendData(id, sendData, 2);
+    }
+ 
 }

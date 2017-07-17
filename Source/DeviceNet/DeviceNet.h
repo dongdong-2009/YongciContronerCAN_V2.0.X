@@ -237,8 +237,7 @@ extern struct DefIdentifierObject   IdentifierObj;
 extern struct DefConnectionObj  StatusChangedConnedctionObj;//状态改变响应
 extern struct DefConnectionObj  VisibleConnectionObj;
 extern struct DefConnectionObj CycleInquireConnedctionObj;
-extern BYTE  send_buf[10];
-extern BYTE  ADC_Data[8];
+
 
 void SendData(struct DefFrameData* pFrame);//需要根据具体平台改写
 
