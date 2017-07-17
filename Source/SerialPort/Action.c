@@ -1018,7 +1018,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
     
     IFS2bits.INT3IF = 0;
     if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
-    {       
+    {
+         SendErrorFrame(SynTimeSequence, ERROR_SEQUENCE_UNRADY);
         return;
     }
     while(RXD2_LASER == 1)

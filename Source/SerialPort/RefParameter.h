@@ -172,14 +172,6 @@ typedef struct TagSystemState
 }SystemState;
 
 
-/**
- *时序模式
- */
-#define TIME_SEQUENCE 0xA5 
-/**
- *同步地址
- */
-#define SYNC_MAC 0x0D
 
 /**
  * 供外部调用的全局变量，且均为读取变量

@@ -33,6 +33,16 @@
 #define ACK  0xFA
 //*****************************************************
 
+/**
+ *时序模式
+ */
+#define TIME_SEQUENCE 0xA5 
+/**
+ *同步地址
+ */
+#define SYNC_MAC 0x0D
+
+
 enum CommandIdentify
 {
 	/// <summary>
@@ -141,22 +151,23 @@ enum CommandIdentify
 /**
  * @description: 错误代码
  */
-#define ID_ERROR        0x01    //ID号错误
-#define DATA_LEN_ERROR  0x02    //数据长度错误
-#define LOOP_ERROR      0x03    //回路数错误
-#define SET_VALUE_ERROR 0x04    //设置值错误
-#define WORK_MODE_ERROR 0x05    //在处于就地控制时使用了远方控制
-#define OVER_TIME_ERROR 0x06    //预制超时错误
-#define NOT_PERFABRICATE_ERROR      0x07    //没有预制就先执行的错误
-#define SEVERAL_PERFABRICATE_ERROR  0x08    //多次预制警告
-#define CAPVOLTAGE_ERROR        0x09        //欠压动作错误
-#define HEFEN_STATE_ERROR       0x0A        //合、分位错误
-#define REFUSE_ERROR            0x0B        //拒动错误
-#define DIFF_CONFIG_ERROR       0x0C        //合闸预制配置不同
-#define CHARGED_CONFIG_ERROR    0x0D        //开关带电分闸操作错误
-#define SIGNEL_INVALID_ERROR    0x0E        //无效的同步测试信号
-#define RUN_MODE_ERROR          0x0F        //在调试模式下执行操作
-#define LOCK_ERROR              0x10        //在锁定模式下执行了命令
+#define ID_ERROR                    1    //ID号错误
+#define DATA_LEN_ERROR              2    //数据长度错误
+#define LOOP_ERROR                  3    //回路数错误
+#define SET_VALUE_ERROR             4    //设置值错误
+#define WORK_MODE_ERROR             5   //在处于就地控制时使用了远方控制
+#define OVER_TIME_ERROR             6    //预制超时错误
+#define NOT_PERFABRICATE_ERROR      7    //没有预制就先执行的错误
+#define SEVERAL_PERFABRICATE_ERROR  8    //多次预制警告
+#define CAPVOLTAGE_ERROR            9        //欠压动作错误
+#define HEFEN_STATE_ERROR           10        //合、分位错误
+#define REFUSE_ERROR                11        //拒动错误
+#define DIFF_CONFIG_ERROR           12        //合闸预制配置不同
+#define CHARGED_CONFIG_ERROR        13        //开关带电分闸操作错误
+#define SIGNEL_INVALID_ERROR        14        //无效的同步测试信号
+#define RUN_MODE_ERROR              15        //在调试模式下执行操作
+#define LOCK_ERROR                  16       //在锁定模式下执行了命令
+#define ERROR_SEQUENCE_UNRADY       17           //非同步合闸预制条件下进入脉冲检测 
     
 //*************************************************************************
 

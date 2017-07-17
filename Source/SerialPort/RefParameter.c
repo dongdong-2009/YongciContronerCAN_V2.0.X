@@ -383,7 +383,9 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].type = 0x20;
 	g_SetParameterCollect[index].fSetValue = SetValueUint16;
 	g_SetParameterCollect[index].fGetValue = GetValueUint16;
-    
+  
+    index++;
+       
     while( PARAMETER_LEN < index);//若大于说明越限，则退出。    
 }
 
