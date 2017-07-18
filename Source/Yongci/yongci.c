@@ -104,6 +104,8 @@ inline uint8_t CheckLockState(void)
     {
         return FALSE;
     }
+    return  FALSE;//TODO: FALSE
+
 }
 
 
@@ -516,7 +518,8 @@ uint8_t RefreshIdleState()
             g_RemoteControlState.receiveStateFlag = IDLE_ORDER; //Clear order
             g_RemoteControlState.overTimeFlag = FALSE;  //Clear Flag
             if(g_RemoteControlState.orderId == SyncReadyClose)  //同步合闸预制
-            {ON_COMMUNICATION_INT();
+            {
+                ON_COMMUNICATION_INT();
                 TurnOffInt2();
             }
         }
@@ -532,6 +535,7 @@ uint8_t RefreshIdleState()
         }
         if(g_RemoteControlState.receiveStateFlag)
         {
+            ClrWdt();
             return 0xFF;
         }
     }

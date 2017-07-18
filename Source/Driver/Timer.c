@@ -199,7 +199,7 @@ void InitTimer4()
     IFS1bits.T4IF = 0;
 
     T4CON = 0;
-    T4CONbits.TCKPS = 0; //1：1
+    T4CONbits.TCKPS = 0b01; //1：8
     T4CONbits.TCS = 0;
     T4CONbits.TGATE = 0;
 
@@ -213,7 +213,7 @@ void InitTimer4()
     PR4 = 0xFFFF;
     ClrWdt();
     TPR4Count = PR2;
-    T2CONbits.TON = 0;
+    T4CONbits.TON = 0;
     
     
 } 
@@ -230,7 +230,7 @@ inline void ChangeTimerPeriod4(unsigned int us)
 }
 inline uint16_t GetTimeUs(void)
 {
-    return TMR4; //1:1分频比1:1
+    return TMR4 * 2; //1:1分频比1:8 8/4
 }
 /**
  * 

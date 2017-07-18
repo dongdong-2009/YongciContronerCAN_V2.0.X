@@ -1,9 +1,27 @@
+2017/7/18
+1.等待脉冲序列中喂狗
+
 2017/7/17
 1.增加时序脉冲timeSequenceRun
 2.开启INT3 ，关闭位置与INT2相同.
 3.检测脉冲宽度默认值为5000us
 4.新增时序脉冲使能与时序脉冲宽度两个设置参数。删除重复的MAC参数。
 5.改错误号为十进制。删去多余的全局变量引用。
+inline uint8_t CheckLockState(void)
+{
+    if(LockUp == OFF_LOCK)
+    {
+        return TRUE;
+    }
+    else if(LockUp == ON_LOCK)
+    {
+        return FALSE;
+    }
+    //TODO:
+
+}
+2.同步合闸预制，删去多余的回复。
+
 
 2017/07/15(张东旭)
 1.测试中发现BUG，在按键按下之后上锁，但是命令不符合未进行解锁操作

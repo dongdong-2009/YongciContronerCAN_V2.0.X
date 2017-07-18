@@ -125,6 +125,11 @@ int main()
     ClrWdt();
     RefParameterInit(); //参数设置初始化
         
+    //测试使用
+//    InitTimer4();
+//    InitInt3();
+//    TurnOnInt3();
+    
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    
     UpdateIndicateState(RUN_RELAY, RUN_LED, TURN_ON); //开启运行指示灯和指示继电器    

@@ -344,7 +344,6 @@ uint8_t CheckIOState(void)
 #endif
         default:
         {
-            OffLock();   //解锁
             ClrWdt();
         }
     }
@@ -393,7 +392,6 @@ void DsplaySwitchState(void)
                 {
                     g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
                     g_SuddenState.RefuseAction = FALSE;
-                    OffLock();
                 }
                 break;
             }
@@ -407,7 +405,6 @@ void DsplaySwitchState(void)
                 {
                     g_TimeStampCollect.changeLedTime.delayTime = 500;  //正常状态下指示灯闪烁的间隔
                     g_SuddenState.RefuseAction = FALSE;
-                    OffLock();
                 }
                 break;
             }

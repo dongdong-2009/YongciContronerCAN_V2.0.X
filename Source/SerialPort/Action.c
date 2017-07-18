@@ -508,7 +508,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     if(g_RemoteControlState.receiveStateFlag == IDLE_ORDER)
     {               
         ClrWdt();              
-        SendData(pSendFrame);
+      
         g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置同步预制超时等待时间
         g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks;
         ClrWdt();
@@ -520,10 +520,14 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
         TurnOnInt2();   //必须是在成功的预制之后才能开启外部中断1 
         OFF_COMMUNICATION_INT();
         OnLock();
-        
+        ClrWdt();
+        __delay_ms(5);
+        ClrWdt();
+        __delay_ms(5); //留出同步控制器进入检测的时间
+        SendData(pSendFrame);
         //时序脉冲检测设置
         if (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE)
-        {
+        {            
             InitTimer4();
             InitInt3();
             TurnOnInt3();
@@ -599,7 +603,7 @@ uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameD
             ClrWdt();
             pSendFrame->pBuffer[i] = pReciveFrame->pBuffer[i];
         } 
-        SendData(pSendFrame);
+      //  SendData(pSendFrame);
     }
     return result;
 
@@ -962,7 +966,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 {
     uint8_t i = 0;
     uint8_t state = 0x00;
-    
+    ClrWdt();
     EffectiveLevelSignalCount = 0;   
     
     IFS1bits.INT2IF = 0;
@@ -1014,7 +1018,7 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
 {
     uint16_t usCount = 0;
-    StartTimer4();
+  
     
     IFS2bits.INT3IF = 0;
     if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
@@ -1022,17 +1026,19 @@ void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
          SendErrorFrame(SynTimeSequence, ERROR_SEQUENCE_UNRADY);
         return;
     }
+    StartTimer4();
     while(RXD2_LASER == 1)
     {        
+        ClrWdt();
         if( IFS1bits.T4IF == 1)    //超出设定最大值返回
-        {
+        {            
             return;
         }
     }
     StopTimer4();
-    usCount = GetTimeUs();
+    usCount = GetTimeUs() + 8;//补偿进入误差
     //检查脉冲宽度是否在10us偏差之间
-    if(((g_SystemState.sequencePulseWidth - 20) <= usCount ) && ( usCount <= (g_SystemState.sequencePulseWidth - 20)))  //较宽的范围
+    if(((g_SystemState.sequencePulseWidth - 20) <= usCount ) && ( usCount <= (g_SystemState.sequencePulseWidth + 20)))  //较宽的范围
     {
        uint16_t id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, SYNC_MAC);
        uint8_t sendData[2] = {0};
