@@ -26,7 +26,7 @@ uint8_t CheckCloseCondition(void);
 uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
 uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
 uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
-
+static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
 
@@ -108,11 +108,11 @@ void ActionParameterInit(void)
  * @param  指向发送数据的指针
  * @bref   对完整帧进行提取判断
  */
-void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
-    if(pReciveFrame->pBuffer[0] > 0x13 || pReciveFrame->len == 0)
+    if(pReciveFrame->pBuffer[0] > 0x20 || pReciveFrame->len == 0)
     {
-        return;
+        return ID_ERROR;
     }
     uint8_t i = 1;    
     uint8_t id = pReciveFrame->pBuffer[0];
@@ -120,23 +120,20 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     uint8_t result = 0;
     
     if(!CheckLockState()) //在锁定模式下不允许执行任何的操作
-    {
-        SendErrorFrame(pReciveFrame->pBuffer[0],LOCK_ERROR);
-        return;
+    {      
+        return LOCK_ERROR;
     }
     
     /*就地控制时可以读取和设置参数，而不能执行分合闸、以及阈值指令*/
     if(id <= 5)
     {
         if(g_SystemState.workMode == DEBUG_STATE) //调试模式下不能执行
-        {
-            SendErrorFrame(pReciveFrame->pBuffer[0],RUN_MODE_ERROR);
-            return;
+        {          
+            return RUN_MODE_ERROR;
         }
         if(g_SystemState.yuanBenState == BEN_STATE)
-        {
-            SendErrorFrame(pReciveFrame->pBuffer[0],WORK_MODE_ERROR);
-            return;
+        {           
+            return WORK_MODE_ERROR;
         }
         for(i = 1;i < pReciveFrame->len;i++)
 		{
@@ -153,22 +150,14 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
     {
         case ReadyClose : //合闸预制
         {      
-            result = ReadyCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
-            if (result)
-            {
-                SendErrorFrame(id, result);
-            }
-            break;
+            pSendFrame->len = 0;//禁止底层发送
+            return ReadyCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
+           
         }
         case CloseAction: //合闸执行
         {           
-            
-            result = ActionCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
-            if (result)
-            {
-                SendErrorFrame(id, result);
-            }            
-            break;
+            pSendFrame->len = 0;//禁止底层发送
+            return ActionCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);        
         }
         case ReadyOpen: //分闸预制
         {
@@ -178,49 +167,41 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             }
             else
             {
+                pSendFrame->len = 0;//禁止底层发送
                 result = ReadyCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
             }
-            if (result)
-            {
-                SendErrorFrame(id, result);
-            }
-            break;
+            return result;
         }
         case OpenAction: //分闸执行
         {
-            result = ActionCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
-            if (result)
-            {
-                SendErrorFrame(id, result);
-            }
-            break;
+           pSendFrame->len = 0;//禁止底层发送
+           return  ActionCloseOrOpen( pReciveFrame, &ActionCommandTemporaryAck, id);
         }        
         case SyncReadyClose: //同步合闸预制
         {
-            result = SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
-            if (result)
-            {
-                SendErrorFrame(id, result);
-            }                   
-            break;
+            pSendFrame->len = 0;//禁止底层发送
+             return SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
         }       
         case MasterParameterSetOne:  //非顺序参数设置
         {
+            pSendFrame->len = 0;//禁止底层发送
+            if (g_SystemState.congfigMode != ENTER_CONFIG)
+            {               
+                return  ERROR_CONFIG_MODE;
+            }
             ClrWdt();
             ActionCommandTemporaryAck.pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
             g_ParameterBuffer.pData = pReciveFrame->pBuffer + 2;
             error = SetParamValue(pReciveFrame->pBuffer[1],&g_ParameterBuffer);
             if(error == 0xFF)
             {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
-                return;
+                ClrWdt();              
+                return ID_ERROR;
             }
             else if(error)
             {
-                ClrWdt();
-                SendErrorFrame(pReciveFrame->pBuffer[0],DATA_LEN_ERROR);
-                return;
+                ClrWdt();               
+                return DATA_LEN_ERROR;
             }
             ActionCommandTemporaryAck.pBuffer[2] = g_ParameterBuffer.pData[0];
             ActionCommandTemporaryAck.pBuffer[3] = g_ParameterBuffer.pData[1];
@@ -229,19 +210,23 @@ void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFr
             SendData(&ActionCommandTemporaryAck);
             g_RemoteControlState.setFixedValue = TRUE;  //设置定值成功
             
-            break;
+            return 0;
         }
         case MasterParameterRead:  //顺序参数读取
         {    
+            pSendFrame->len = 0;//禁止底层发送
             SendMonitorParameter(pReciveFrame);
-            break;
-        }        
+            return 0;
+        }  
+        case ConfigMode:// 配置模式
+        {
+            return ConfigModeOperation(pReciveFrame, pSendFrame);
+        }
         default:
         {
             //错误的ID号处理
             ClrWdt();
-            SendErrorFrame(pReciveFrame->pBuffer[0],ID_ERROR);
-            break;
+            return ID_ERROR;
         }          
     }
 }
@@ -955,6 +940,48 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
         ClrWdt();
         SendData(&pSendFrame);
     }
+}
+static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+{   
+    ClrWdt();
+    if (pReciveFrame->len == 4) //ID+配置号 至少2字节
+    {
+        if (pReciveFrame->pBuffer[1] != DeviceNetObj.MACID)
+        {
+            return ERROR_LOCAL_MAC;
+        }
+        if (pReciveFrame->pBuffer[2] != DeviceNetObj.assign_info.master_MACID)
+        {
+            return ERROR_MASTER_MAC;
+        }
+        if (pReciveFrame->pBuffer[3] == EXIT_CONFIG)//离开配置模式
+        {
+            g_SystemState.congfigMode = pReciveFrame->pBuffer[3];
+             //应答回复
+            pSendFrame->pBuffer[0] = ConfigMode| 0x80;
+            pSendFrame->pBuffer[1] = DeviceNetObj.MACID;
+            pSendFrame->pBuffer[2] = DeviceNetObj.assign_info.master_MACID;
+            pSendFrame->pBuffer[3] = EXIT_CONFIG;
+            pSendFrame->pBuffer[4] = 0;
+            pSendFrame->len = 5;
+            return 0;
+
+        }
+        else if (pReciveFrame->pBuffer[3] == ENTER_CONFIG)//进入配置模式
+        {
+            g_SystemState.congfigMode = pReciveFrame->pBuffer[3];
+            //应答回复
+             pSendFrame->pBuffer[0] = ConfigMode| 0x80;
+            memcpy( pSendFrame->pBuffer + 1, pReciveFrame->pBuffer + 1,
+                 pReciveFrame->len - 1);
+             pSendFrame->len = pReciveFrame->len;           
+            return 0;
+        }
+   
+    
+    }
+    
+    return 0xff;
 }
 
 /**

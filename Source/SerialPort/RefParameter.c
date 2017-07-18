@@ -616,6 +616,7 @@ void RefParameterInit(void)
         g_SyncReadyWaitTime = 3000;
         g_RemoteWaitTime = 3000;
       
+        g_SystemState.congfigMode = 0;
     }    
 }
 

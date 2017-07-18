@@ -168,7 +168,8 @@ typedef struct TagSystemState
     uint8_t MacID;      //MAC地址
     uint8_t charged;    //电显状态
     uint8_t timeSequenceRun;//时序脉冲运行标志
-    uint16_t sequencePulseWidth; //时序脉冲宽度（us）    
+    uint16_t sequencePulseWidth; //时序脉冲宽度（us） 
+    uint8_t congfigMode; //配置模式
 }SystemState;
 
 

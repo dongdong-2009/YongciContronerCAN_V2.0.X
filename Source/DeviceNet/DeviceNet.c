@@ -556,20 +556,40 @@ void UnconVisibleMsgService(struct DefFrameData* pReciveFrame, struct DefFrameDa
 static void  CycleInquireMsgService(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
 
+    uint8_t result = 0;
     if(CycleInquireConnedctionObj.state != STATE_LINKED )	//轮询I/O连接没建立 
     {
         ClrWdt();
         return ;
     }
     
-    FrameServer(pReciveFrame,pSendFrame);
+    result = FrameServer(pReciveFrame, pSendFrame);
     ClrWdt();
-
+    if (result)
+    {
+        DeviceNetSendFrame.pBuffer[0] = 0x14;
+		DeviceNetSendFrame.pBuffer[1] = DeviceNetReciveFrame.pBuffer[0];
+		DeviceNetSendFrame.pBuffer[2] = result;
+		DeviceNetSendFrame.pBuffer[3] = 0xFF;
+		DeviceNetSendFrame.len = 4;
+    }
+    DeviceNetReciveFrame.complteFlag = 0;
+	ClrWdt();
+	PacktIOMessage(&DeviceNetSendFrame);
     pReciveFrame->complteFlag = 0;
     
 	return ;
 }
-
+void PacktIOMessage( struct DefFrameData* pSendFrame)
+{
+	ClrWdt();
+	if (pSendFrame->len == 0)
+	{
+		return;
+	}
+	pSendFrame->ID =  MAKE_GROUP1_ID(GROUP1_POLL_STATUS_CYCLER_ACK, DeviceNetObj.MACID);
+	SendData(pSendFrame);
+}
 
 
 /*******************************************************************************

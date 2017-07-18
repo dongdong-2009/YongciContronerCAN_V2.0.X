@@ -231,6 +231,8 @@ extern uint8_t CheckMACID(struct DefFrameData* pReciveFrame, struct DefFrameData
 extern void DeviceMonitorPluse(void);
 extern BOOL DeviceNetReciveCenter(WORD* pID, BYTE * pbuff, BYTE len);
 extern void InitDeviceNet();
+extern void PacktIOMessage( struct DefFrameData* pSendFrame);
+
 //////////////供其他模块调用的变量/////////////////
 extern struct DefDeviceNetObj  DeviceNetObj;
 extern struct DefIdentifierObject   IdentifierObj;

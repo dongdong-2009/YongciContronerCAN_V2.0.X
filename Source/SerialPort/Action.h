@@ -168,9 +168,16 @@ enum CommandIdentify
 #define RUN_MODE_ERROR              15        //在调试模式下执行操作
 #define LOCK_ERROR                  16       //在锁定模式下执行了命令
 #define ERROR_SEQUENCE_UNRADY       17           //非同步合闸预制条件下进入脉冲检测 
-    
+
+#define ERROR_LOCAL_MAC 			18
+#define ERROR_MASTER_MAC 			19
+#define ERROR_CONFIG_MODE           20      //錯誤的工作模式
 //*************************************************************************
 
+//#define MAIN_MAC 0x0D
+
+#define ENTER_CONFIG  0xAA
+#define EXIT_CONFIG   0x55
 
 
 #ifdef	__cplusplus
@@ -235,7 +242,7 @@ typedef struct TagActionAttribute
 
 
 
-void FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 void UpdataState(void);
 void CheckOrder(void);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
