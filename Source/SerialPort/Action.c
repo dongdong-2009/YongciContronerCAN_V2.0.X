@@ -192,7 +192,7 @@ uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSen
             ClrWdt();
             ActionCommandTemporaryAck.pBuffer[1] = pReciveFrame->pBuffer[1];  //配置号
             g_ParameterBuffer.pData = pReciveFrame->pBuffer + 2;
-            error = SetParamValue(pReciveFrame->pBuffer[1],&g_ParameterBuffer);
+            error = SetParamValue(pReciveFrame->pBuffer[1], &g_ParameterBuffer);
             if(error == 0xFF)
             {
                 ClrWdt();              
@@ -929,7 +929,7 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
         if((error == 0xF1)||(error == 0xF3))    //数据长度错误
         {
             ClrWdt();
-            SendErrorFrame(pSendFrame.pBuffer[0],DATA_LEN_ERROR);
+            SendErrorFrame(pSendFrame.pBuffer[0], DATA_LEN_ERROR);
         }
         pSendFrame.pBuffer[1] = idIndex;  //配置号  
         pSendFrame.len = g_ParameterBuffer.len + 2;

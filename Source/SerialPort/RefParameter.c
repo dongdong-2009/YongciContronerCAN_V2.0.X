@@ -85,8 +85,8 @@ SyncCommand g_SyncCommand;
 /**
  * 内部所需的宏定义，主要包括ID号初始值、参数列表长度
  */
-#define PARAMETER_LEN 28  //设置参数列表
-#define READONLY_PARAMETER_LEN 21  //只读参数列表
+#define PARAMETER_LEN 29  //设置参数列表
+#define READONLY_PARAMETER_LEN 22  //只读参数列表
 #define SET_START_ID 0x01   //设置参数ID号开始值
 #define READONLY_START_ID 0x41  //只读参数ID号开始值
 /**
@@ -385,8 +385,14 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].fGetValue = GetValueUint16;
   
     index++;
-       
-    while( PARAMETER_LEN < index);//若大于说明越限，则退出。    
+    g_SetParameterCollect[index].ID = id++;
+	g_SetParameterCollect[index].pData = &g_SystemState.updatePeriod;   //时序脉冲宽度
+	g_SetParameterCollect[index].type = 0x20;
+	g_SetParameterCollect[index].fSetValue = SetValueUint8;
+	g_SetParameterCollect[index].fGetValue = GetValueUint8;
+  
+    index++;
+    while( PARAMETER_LEN  !=index);//说明超出，则退出。    
 }
 
 /**
@@ -533,7 +539,15 @@ void InitReadonlyParameterCollect(void)
 	g_ReadOnlyParameterCollect[index].fSetValue = 0;
 	g_ReadOnlyParameterCollect[index].fGetValue = GetValueFloatUint16;
 	index++;
-    
+        
+    g_ReadOnlyParameterCollect[index].ID = id++;
+	g_ReadOnlyParameterCollect[index].pData = &g_SystemState.readSuccess;   
+	g_ReadOnlyParameterCollect[index].type = 0x10;
+	g_ReadOnlyParameterCollect[index].fSetValue = 0;
+	g_ReadOnlyParameterCollect[index].fGetValue = GetValueUint8;
+	index++;
+    //禁止越限
+   while( READONLY_PARAMETER_LEN !=index);
 }
 
 /**
@@ -579,6 +593,9 @@ void RefParameterInit(void)
     
     g_SystemState.timeSequenceRun = 0;
     g_SystemState.sequencePulseWidth = 5000;//默认为5000us
+    g_SystemState.updatePeriod = 2;//默认两秒
+    g_SystemState.readSuccess = 0xFF;//默认数据
+    
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
 	ClrWdt();
@@ -617,7 +634,12 @@ void RefParameterInit(void)
         g_RemoteWaitTime = 3000;
       
         g_SystemState.congfigMode = 0;
-    }    
+    }
+    else
+    {
+        g_SystemState.readSuccess = 0;//成功载入数据
+    }
+    
 }
 
 /**

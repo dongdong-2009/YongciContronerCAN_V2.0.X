@@ -583,6 +583,7 @@ uint8_t RefreshIdleState()
         g_SuddenState.suddenFlag = FALSE;  //Clear
         OffLock();  //解锁
         g_TimeStampCollect.sendDataTime.startTime = g_TimeStampCollect.msTicks;  
+        g_TimeStampCollect.sendDataTime.delayTime = g_SystemState.updatePeriod * 1000;//更新周期
     }
 
     //DeviceNet超时离线检测

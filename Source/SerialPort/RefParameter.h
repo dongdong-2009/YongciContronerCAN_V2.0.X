@@ -170,6 +170,8 @@ typedef struct TagSystemState
     uint8_t timeSequenceRun;//时序脉冲运行标志
     uint16_t sequencePulseWidth; //时序脉冲宽度（us） 
     uint8_t congfigMode; //配置模式
+    uint8_t readSuccess;//保存数据读取成功标志，0--成功加载数据，0xff--采用默认数据
+	uint8_t updatePeriod;//上传更新周期s
 }SystemState;
 
 
