@@ -135,7 +135,7 @@ static uint8_t DigitalInputValidCount[17] = {0};
 
 static uint8_t ScanCount = 0;    //扫描计数
 static uint32_t volatile DigitalInputState = 0;    //165返回值
-
+static uint16_t LastSwitchState[3] = {0};   //记忆上一次按键状态
 uint8_t g_LastSwitchState[LOOP_COUNT] = {0};   //获取上一次开关分合位状态
 
 //**********************************************
@@ -709,6 +709,7 @@ void CheckAllLoopSwitchState(void)
  */
 uint8_t CheckSwitchOrder(void)
 {
+    uint8_t lastSwitchStateIndex = 0;
 #if(CAP3_STATE)  //判断第三块驱动是否存在
     uint8_t index = 9;
 #else
@@ -736,6 +737,14 @@ uint8_t CheckSwitchOrder(void)
                (g_SystemState.heFenState3 == OPEN_STATE))
             {
                 g_Order = HE_ORDER;     //同时合闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
@@ -748,9 +757,22 @@ uint8_t CheckSwitchOrder(void)
                (g_SystemState.heFenState3 == CLOSE_STATE) )
             {
                 g_Order = FEN_ORDER;     //同时分闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
+        else
+        {
+            LastSwitchState[lastSwitchStateIndex] = IDLE_ORDER;
+        }
+        lastSwitchStateIndex++;
         index += 2;
         
         //对机构1的合分信号检测     
@@ -767,6 +789,14 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState1 == OPEN_STATE)
             {
                 g_Order = CHECK_1_HE_ORDER;     //同时合闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
@@ -777,9 +807,22 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState1 == CLOSE_STATE)
             {
                 g_Order = CHECK_1_FEN_ORDER;     //同时分闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
+        else
+        {
+            LastSwitchState[lastSwitchStateIndex] = IDLE_ORDER;
+        }
+        lastSwitchStateIndex++;
         index += 2;
         
         //对机构2的合分信号检测     
@@ -796,6 +839,14 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState2 == OPEN_STATE)
             {
                 g_Order = CHECK_2_HE_ORDER;     //同时合闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
@@ -806,9 +857,22 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState2 == CLOSE_STATE)
             {
                 g_Order = CHECK_2_FEN_ORDER;     //同时分闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
+        else
+        {
+            LastSwitchState[lastSwitchStateIndex] = IDLE_ORDER;
+        }
+        lastSwitchStateIndex++;
         index += 2;
         
         //对机构3的合分信号检测   
@@ -826,6 +890,14 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState3 == OPEN_STATE)
             {
                 g_Order = CHECK_3_HE_ORDER;     //同时合闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
         }
@@ -836,8 +908,20 @@ uint8_t CheckSwitchOrder(void)
             if(g_SystemState.heFenState3 == CLOSE_STATE)
             {
                 g_Order = CHECK_3_FEN_ORDER;     //同时分闸命令
+                if(LastSwitchState[lastSwitchStateIndex] == g_Order)
+                {
+                    g_Order = IDLE_ORDER;
+                }
+                else
+                {
+                    LastSwitchState[lastSwitchStateIndex] = g_Order;
+                }
             }
             return g_Order;
+        }
+        else
+        {
+            LastSwitchState[lastSwitchStateIndex] = IDLE_ORDER;
         }
 #endif
     }

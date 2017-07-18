@@ -595,7 +595,8 @@ void RefParameterInit(void)
     g_SystemState.sequencePulseWidth = 5000;//默认为5000us
     g_SystemState.updatePeriod = 2;//默认两秒
     g_SystemState.readSuccess = 0xFF;//默认数据
-    
+    g_SystemState.MacID = MAC_ID;
+     
     InitSetParameterCollect();
     InitReadonlyParameterCollect();    
 	ClrWdt();
@@ -633,7 +634,12 @@ void RefParameterInit(void)
         g_SyncReadyWaitTime = 3000;
         g_RemoteWaitTime = 3000;
       
+        g_SystemState.timeSequenceRun = 0;
+        g_SystemState.sequencePulseWidth = 5000;//默认为5000us
+        g_SystemState.updatePeriod = 2;//默认两秒
+        g_SystemState.readSuccess = 0xFF;//默认数据
         g_SystemState.congfigMode = 0;
+        g_SystemState.MacID = MAC_ID;
     }
     else
     {

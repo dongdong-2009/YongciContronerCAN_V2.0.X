@@ -117,13 +117,14 @@ int main()
     ClrWdt(); 
     ActionParameterInit();
     //SD2405_Init();  //时钟芯片初始化    
-
+    RefParameterInit(); //参数设置初始化 置于前侧
+    
     BufferInit();     
     InitStandardCAN(0, 0);      //初始化CAN模块
     ClrWdt();
     InitDeviceNet();            //初始化DeviceNet服务
     ClrWdt();
-    RefParameterInit(); //参数设置初始化
+    
         
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    

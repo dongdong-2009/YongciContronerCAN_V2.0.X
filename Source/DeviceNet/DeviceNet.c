@@ -79,7 +79,7 @@ void InitDeviceNet()
     ClrWdt();
  
     //////////初始化DeviceNetObj对象////////////////////////////////
-	DeviceNetObj.MACID = MAC_ID;                   //如果跳键没有设置从站地址，默认从站地址0x02
+	DeviceNetObj.MACID = g_SystemState.MacID;                   //如果跳键没有设置从站地址，默认从站地址0x02
     DeviceNetObj.baudrate = 2;                   //500Kbit/s
 	DeviceNetObj.assign_info.select = 0;         //初始的配置选择字节清零
 	DeviceNetObj.assign_info.master_MACID =0x0A; //默认主站地址，在预定义主从连接建立过程中，主站还会告诉从站：主站的地址
