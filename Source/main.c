@@ -124,7 +124,13 @@ int main()
     ClrWdt();
     InitDeviceNet();            //初始化DeviceNet服务
     ClrWdt();
-    
+     //时序脉冲检测设置
+    if (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE)
+    {            
+        InitTimer4();
+        InitInt3();
+        TurnOnInt3();
+    }
         
     YongciFirstInit();      //永磁合闸参数初始化
     ClrWdt(); //33cys    

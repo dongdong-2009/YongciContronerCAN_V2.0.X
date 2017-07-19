@@ -319,7 +319,7 @@ inline void TurnOffInt2(void)
     IFS1bits.INT2IF = 0;
     IEC1bits.INT2IE = 0;
     
-    TurnOffInt3();//与此同时关闭 INT3
+   
 }
 /**
  * @description 外部中断3初始化

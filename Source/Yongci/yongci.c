@@ -589,8 +589,12 @@ uint8_t RefreshIdleState()
     //DeviceNet超时离线检测
     if(IsOverTimeStamp( &g_TimeStampCollect.offlineTime))
     {
-        StatusChangedConnedctionObj.state = 0;  //Clear
-        Reset();    //软件复位
+        StatusChangedConnedctionObj.state = 0;  //Clear        
+        BufferInit();     
+        InitStandardCAN(0, 0);      //初始化CAN模块
+        ClrWdt();
+        InitDeviceNet();            //初始化DeviceNet服务
+        g_TimeStampCollect.offlineTime.startTime = g_TimeStampCollect.msTicks;
     }
     ClrWdt();
 
@@ -629,7 +633,13 @@ uint8_t RefreshIdleState()
         WriteAccumulateSum();  //写入累加和
         g_RemoteControlState.setFixedValue = FALSE;
     }
-
+    if(C2INTFbits.RX0OVR)
+    {
+        C2INTFbits.RX0OVR = 0;  //清除接收缓冲器0溢出中断
+        C2INTFbits.RX0IF = 0;
+        C2INTEbits.RXB0IE = 1;
+       
+    }
 
     return 0;
         

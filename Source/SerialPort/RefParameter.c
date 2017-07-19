@@ -390,8 +390,8 @@ void InitSetParameterCollect(void)
 	g_SetParameterCollect[index].type = 0x20;
 	g_SetParameterCollect[index].fSetValue = SetValueUint8;
 	g_SetParameterCollect[index].fGetValue = GetValueUint8;
+    index++;    
   
-    index++;
     while( PARAMETER_LEN  !=index);//说明超出，则退出。    
 }
 

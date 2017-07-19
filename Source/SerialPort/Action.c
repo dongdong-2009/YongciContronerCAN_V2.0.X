@@ -510,13 +510,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
         ClrWdt();
         __delay_ms(5); //留出同步控制器进入检测的时间
         SendData(pSendFrame);
-        //时序脉冲检测设置
-        if (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE)
-        {            
-            InitTimer4();
-            InitInt3();
-            TurnOnInt3();
-        }
+       
        
     }
     else
@@ -1047,18 +1041,14 @@ void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
     uint16_t usCount = 0;
   
     
-    IFS2bits.INT3IF = 0;
-    if(g_RemoteControlState.receiveStateFlag != TONGBU_HEZHA)   //判断是否执行了同步合闸预制
-    {
-         SendErrorFrame(SynTimeSequence, ERROR_SEQUENCE_UNRADY);
-        return;
-    }
+    IFS2bits.INT3IF = 0;   
     StartTimer4();
     while(RXD2_LASER == 1)
     {        
         ClrWdt();
         if( IFS1bits.T4IF == 1)    //超出设定最大值返回
-        {            
+        {   
+            StopTimer4();
             return;
         }
     }

@@ -17,7 +17,7 @@
 #define GET_CAP_TIME    300     //按键扫描间隔时间
 #define SCAN_TIME       2       //按键扫描间隔时间
 #define GET_TEMP_TIME   20000   //获取温度数据时间   (ms)
-#define OFFLINE_TIME    250000  //获取温度数据时间   (ms)
+#define OFFLINE_TIME    300000  //获取温度数据时间   (ms)
 
 
 /**
