@@ -41,7 +41,7 @@
     #define NUM_CHS2SCAN 3 //扫描几路ADC就相应的赋值即可
     #define CHECK_ORDER3()          (0xFF)
     #define CHECK_LAST_ORDER3()     (0x00)
-    #define MAC_ID                  (0x14) //A-0x10   B-0x12  C-0x14
+    #define MAC_ID                  (0x10) //A-0x10   B-0x12  C-0x14
 #endif
 //**************************************
 

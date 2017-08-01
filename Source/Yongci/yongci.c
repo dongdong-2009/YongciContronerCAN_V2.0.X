@@ -589,7 +589,6 @@ uint8_t RefreshIdleState()
     //DeviceNet超时离线检测
     if(IsOverTimeStamp( &g_TimeStampCollect.offlineTime))
     {
-        StatusChangedConnedctionObj.state = 0;  //Clear        
         BufferInit();     
         InitStandardCAN(0, 0);      //初始化CAN模块
         ClrWdt();

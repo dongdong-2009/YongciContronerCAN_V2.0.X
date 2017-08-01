@@ -591,6 +591,11 @@ void __attribute__((interrupt, no_auto_psv)) _C2Interrupt(void)
         result = BufferEnqueue(&CAN_RxMsg);  /*  set receive flag */
         if(result)  //成功的接收到并入队
         {
+            if(StatusChangedConnedctionObj.state != STATE_LINKED)   //0x0486为上位机建立连接下发ID号
+            {       
+                ClrWdt();
+                return ;    
+            }
             g_TimeStampCollect.offlineTime.startTime = g_TimeStampCollect.msTicks;
         }
     }

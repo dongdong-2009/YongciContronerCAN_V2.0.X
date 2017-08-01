@@ -124,7 +124,7 @@ int main()
     ClrWdt();
     InitDeviceNet();            //初始化DeviceNet服务
     ClrWdt();
-     //时序脉冲检测设置
+    //时序脉冲检测设置
     if (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE)
     {            
         InitTimer4();
