@@ -299,10 +299,10 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     
      
     OnLock();   //上锁             
-    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag         
     ClrWdt();               
     SendData(pSendFrame);
     
+    OnLock();   //上锁 
     if (id == CloseAction )
     {
         CloseOperation();      
@@ -311,6 +311,9 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     {
         OpenOperation();
     }
+    
+    g_RemoteControlState.overTimeFlag = FALSE;  //Clear Overtime Flag    
+    g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令     
     return 0;
 }
 uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
@@ -329,6 +332,7 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
      if (g_RemoteControlState.receiveStateFlag != IDLE_ORDER)//检测是否多次预制
     {                
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;       
+        g_RemoteControlState.overTimeFlag = FALSE;  //预制成功后才会开启超时检测
         return SEVERAL_PERFABRICATE_ERROR;
     }   
     result = GetLoopSet(pReciveFrame);   //获取回路   
@@ -880,12 +884,10 @@ void CheckOrder(void)
     SendData(&ActionCommandTemporaryAck); //发送执行反馈指令
     if(closeOrderCount > 0)
     {
-        SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
         g_SuddenState.RefuseAction = HE_ERROR;  //发生拒动
     }
     else if(openOrderCount > 0)
     {
-        SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
         g_SuddenState.RefuseAction = FEN_ERROR;  //发生拒动
     }
     else

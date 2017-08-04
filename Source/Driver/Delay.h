@@ -96,6 +96,8 @@ typedef struct TagTimeStampCollect
     TimeStamp canStartTime;     //CAN启动时间定时器
     TimeStamp overTime;         //超时检测时间
     TimeStamp offlineTime;      //DeviceNet 离线时间    
+    TimeStamp refusalActionTime; //拒动检测时间    
+    
 }TimeStampCollect;
 
 

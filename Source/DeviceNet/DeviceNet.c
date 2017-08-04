@@ -98,7 +98,7 @@ void InitDeviceNet()
 	IdentifierObj.version.minor_ver = minor_ver;  //minor_ver = 1;版本
 	IdentifierObj.serialID = serialID;            //serialID = 0x001169BC;;序列号
 	IdentifierObj.product_name = product_name;    //product_name = {8, "ADC4"};产品名称
-	IdentifierObj.device_state = 0;    
+	IdentifierObj.device_state = 0;               //Clear 该状态位位于检测是否重复
     WorkMode = MODE_REPEAT_MAC;
     BOOL result = CheckMACID( &DeviceNetReciveFrame, &DeviceNetSendFrame);
     ClrWdt();

@@ -5,7 +5,7 @@
  * <p>company： SOJO</p> 
  * <p>time： 2017.05.20</p> 
  * 
- * @updata:[日期2017-05-20] [张东旭][更改分合闸计时方式，不再采用中断计时，增加三个机构的控制]
+ * @updata:[日期2017-05-20] [张小某][更改分合闸计时方式，不再采用中断计时，增加三个机构的控制]
  * @author Zhangxiaomou 
  * @version ver 1.0
  */
@@ -444,8 +444,6 @@ uint8_t RefreshIdleState()
 {
     static uint8_t runLedState = TURN_ON;
     static uint8_t runLedCount = 0;
-    static uint32_t checkOrderTime = UINT32_MAX;
-    static uint32_t checkOrderDelay = UINT32_MAX;
     uint8_t result = 0;
     
     rxErrorCount = C2EC & 0x00FF;
@@ -464,12 +462,8 @@ uint8_t RefreshIdleState()
        (g_SwitchConfig[DEVICE_II].alreadyAction == TRUE) || 
         CHECK_LAST_ORDER3())
     {
-        ON_COMMUNICATION_INT();
         ClrWdt();
-        checkOrderDelay = REFUSE_ACTION;
-        //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
         ReadCapDropVoltage();  //读取电容跌落电压
-        checkOrderTime = g_TimeStampCollect.msTicks;
         //Clear Flag
         g_SwitchConfig[DEVICE_I].order = IDLE_ORDER; //清零
         g_SwitchConfig[DEVICE_I].currentState = IDLE_ORDER;
@@ -483,6 +477,9 @@ uint8_t RefreshIdleState()
         g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
 #endif
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
+        //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
+        g_TimeStampCollect.refusalActionTime.delayTime = REFUSE_ACTION;
+        g_TimeStampCollect.refusalActionTime.startTime = g_TimeStampCollect.msTicks;
     }
     
     //检测是否欠电压， 并更新显示
@@ -541,17 +538,16 @@ uint8_t RefreshIdleState()
     }
     while(result);
 
-    //空闲状态，状态刷新        
-    ON_COMMUNICATION_INT();
     StopTimer3();  //刷新关闭定时器3
 
     //拒动错误检测
-    if(g_TimeStampCollect.msTicks - checkOrderTime >= checkOrderDelay)//TODO：错误是
+    if(IsOverTimeStamp( &g_TimeStampCollect.refusalActionTime)) //TODO：错误是
     {
         CheckOrder();  //检测命令是否执行
         if(g_SuddenState.RefuseAction != FALSE)
         {
             g_TimeStampCollect.changeLedTime.delayTime = 200;  //发生拒动错误后，指示灯闪烁间隔变短
+            SendErrorFrame(g_RemoteControlState.orderId , REFUSE_ERROR);
         }
         else
         {
@@ -564,12 +560,32 @@ uint8_t RefreshIdleState()
 #if(CAP3_STATE)
         g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
 #endif
-        checkOrderDelay = UINT32_MAX;   //设置时间为最大值，防止其启动检测
-        checkOrderTime = UINT32_MAX;    //设置当前时间为最大的计数时间
+        g_TimeStampCollect.refusalActionTime.delayTime = UINT32_MAX;    //延时时间达到最大
         OffLock();  //解锁
+        //在判断完拒动后才会开启中断
+        ON_COMMUNICATION_INT();
     }
     ClrWdt();
-
+    
+#if(CAP3_STATE)
+    if((g_SwitchConfig[DEVICE_I].lastOrder) || (g_SwitchConfig[DEVICE_II].lastOrder) || (g_SwitchConfig[DEVICE_III].lastOrder))
+    {
+        return 0;     
+    }
+#else
+    if((g_SwitchConfig[DEVICE_I].lastOrder) || (g_SwitchConfig[DEVICE_II].lastOrder))
+    {
+        return 0;
+    }
+#endif
+    
+    //空闲状态，状态刷新  
+    //在判断完拒动后才会开启中断,一个合闸、分闸周期完成
+    
+    ON_COMMUNICATION_INT();
+    g_TimeStampCollect.refusalActionTime.startTime = g_TimeStampCollect.msTicks;
+    
+    
     //周期性状态更新
     if((IsOverTimeStamp( &g_TimeStampCollect.sendDataTime)) || g_SuddenState.suddenFlag)
     {
@@ -974,22 +990,26 @@ void UpdateCount(void)
     {
         ClrWdt();
         SaveActionCount(JG1_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount1);
+        g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
     }
     else if (g_SwitchConfig[DEVICE_I].lastOrder == FEN_ORDER)  //机构1分闸
     {
         ClrWdt();
         SaveActionCount(JG1_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount1);
+        g_SwitchConfig[DEVICE_I].lastOrder = IDLE_ORDER;
     }
     
     if (g_SwitchConfig[DEVICE_II].lastOrder == HE_ORDER)   //机构2合闸
     {
         ClrWdt();
         SaveActionCount(JG2_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount2);
+        g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
     }
     else if (g_SwitchConfig[DEVICE_II].lastOrder == FEN_ORDER)  //机构2分闸
     {
         ClrWdt();
         SaveActionCount(JG2_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount2);
+        g_SwitchConfig[DEVICE_II].lastOrder = IDLE_ORDER;
     }
     
 #if(CAP3_STATE)
@@ -997,11 +1017,13 @@ void UpdateCount(void)
     {
         ClrWdt();
         SaveActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
+        g_SwitchConfig[DEVICE_IiI].lastOrder = IDLE_ORDER;
     }
     else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
     {
         ClrWdt();
         SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
+        g_SwitchConfig[DEVICE_IiI].lastOrder = IDLE_ORDER;
     }
 #endif    
 }

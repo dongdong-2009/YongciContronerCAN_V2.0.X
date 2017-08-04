@@ -51,6 +51,10 @@ void InitSystemTime()
     
     g_TimeStampCollect.offlineTime.delayTime = OFFLINE_TIME;
     g_TimeStampCollect.offlineTime.startTime = 0;
+    
+    
+    g_TimeStampCollect.refusalActionTime.delayTime = UINT32_MAX;
+    g_TimeStampCollect.refusalActionTime.startTime = 0;
 }
 
 /**
