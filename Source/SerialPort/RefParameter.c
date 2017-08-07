@@ -578,6 +578,15 @@ void RefParameterInit(void)
     //系统电容电压初始化
     g_SystemVoltageParameter.workVoltage = 0;   //实际需要读取ADC值
     g_SystemVoltageParameter.temp = DS18B20GetTemperature();
+    if(g_SystemVoltageParameter.temp == 85) //如果温度传感器未能正确的初始化，则需要延时750ms后在读取一次值
+    {
+        uint8_t count = 0;
+        while(count++ < 750)
+        {
+            __delay_ms(1)
+        }
+        g_SystemVoltageParameter.temp = DS18B20GetTemperature();
+    }
 	ClrWdt();
     
     //系统状态值初始化

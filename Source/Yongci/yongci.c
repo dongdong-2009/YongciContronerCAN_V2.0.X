@@ -14,7 +14,7 @@
 #include "yongci.h"
 
 
-#define REFUSE_ACTION   800     //拒动错误检测间隔时间（ms）
+#define REFUSE_ACTION   200     //拒动错误检测间隔时间（ms）
 const uint8_t CompensationTime = 4;    //合分闸时间补偿（ms）
 SwitchConfig g_SwitchConfig[LOOP_COUNT];	//配置机构状态
 
@@ -477,7 +477,7 @@ uint8_t RefreshIdleState()
         g_SwitchConfig[DEVICE_III].currentState = IDLE_ORDER;
 #endif
         g_RemoteControlState.receiveStateFlag = IDLE_ORDER;
-        //此处开启计时功能，延时大约在800ms内判断是否正确执行功能，不是的话返回错误
+        //此处开启计时功能，延时大约在200ms内判断是否正确执行功能，不是的话返回错误
         g_TimeStampCollect.refusalActionTime.delayTime = REFUSE_ACTION;
         g_TimeStampCollect.refusalActionTime.startTime = g_TimeStampCollect.msTicks;
     }
