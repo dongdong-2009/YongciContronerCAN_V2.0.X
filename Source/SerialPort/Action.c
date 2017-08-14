@@ -498,7 +498,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     {               
         ClrWdt();              
       
-        g_TimeStampCollect.overTime.delayTime = g_RemoteWaitTime;//设置同步预制超时等待时间
+        g_TimeStampCollect.overTime.delayTime = g_SyncReadyWaitTime;//设置同步预制超时等待时间
         g_TimeStampCollect.overTime.startTime = g_TimeStampCollect.msTicks;
         ClrWdt();
         g_RemoteControlState.receiveStateFlag = TONGBU_HEZHA;    //同步合闸命令

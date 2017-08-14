@@ -183,10 +183,10 @@ section                    address      alignment gaps    total length  (dec)
 .nbss                        0x810                   0            0x2e  (46)
 .ndata                       0x83e                   0             0x2  (2)
 .nbss                        0x840                   0             0x4  (4)
-_04D3DF005987b81b            0x844                   0             0x2  (2)
-_04D3DF605987b81b            0x846                   0             0x2  (2)
-_04F235405987b81f            0x848                   0             0x2  (2)
-_04F2ACC05987b81f            0x84a                   0             0x2  (2)
+_04D40F005990f061            0x844                   0             0x2  (2)
+_04D40F605990f061            0x846                   0             0x2  (2)
+_04EB35405990f061            0x848                   0             0x2  (2)
+_04EBACC05990f061            0x84a                   0             0x2  (2)
 .bss                         0x84c                   0           0x59c  (1436)
 
                  Total data memory used (bytes):          0x5e8  (1512) 18%
@@ -972,7 +972,7 @@ userdata
 .comment
  *(.comment)
 
-.debug_info       0x000000      0x11e5e
+.debug_info       0x000000      0x11e78
  *(.debug_info)
  .debug_info      0x000000       0x1074 build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_info      0x001074        0xd51 build/default/production/Source/Driver/AdcSample.o
@@ -987,13 +987,13 @@ userdata
  .debug_info      0x00a259        0x789 build/default/production/Source/Driver/ImitationIIC.o
  .debug_info      0x00a9e2        0x5cf build/default/production/Source/Driver/SD2405.o
  .debug_info      0x00afb1        0x348 build/default/production/Source/Driver/buffer.o
- .debug_info      0x00b2f9       0x18a3 build/default/production/Source/SerialPort/Action.o
- .debug_info      0x00cb9c        0x243 build/default/production/Source/SerialPort/CRC16.o
- .debug_info      0x00cddf       0x1477 build/default/production/Source/SerialPort/RefParameter.o
- .debug_info      0x00e256        0x86a build/default/production/Source/Yongci/DeviceParameter.o
- .debug_info      0x00eac0        0xbd6 build/default/production/Source/Yongci/SwtichCondition.o
- .debug_info      0x00f696       0x24e8 build/default/production/Source/Yongci/yongci.o
- .debug_info      0x011b7e        0x2e0 build/default/production/Source/main.o
+ .debug_info      0x00b2f9       0x18bd build/default/production/Source/SerialPort/Action.o
+ .debug_info      0x00cbb6        0x243 build/default/production/Source/SerialPort/CRC16.o
+ .debug_info      0x00cdf9       0x1477 build/default/production/Source/SerialPort/RefParameter.o
+ .debug_info      0x00e270        0x86a build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_info      0x00eada        0xbd6 build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_info      0x00f6b0       0x24e8 build/default/production/Source/Yongci/yongci.o
+ .debug_info      0x011b98        0x2e0 build/default/production/Source/main.o
  *(.gnu.linkonce.wi.*)
 
 .debug_abbrev     0x000000       0x1b20
@@ -1065,7 +1065,7 @@ userdata
  .debug_frame     0x000f42        0x24c build/default/production/Source/Yongci/yongci.o
  .debug_frame     0x00118e         0x36 build/default/production/Source/main.o
 
-.debug_str        0x000000        0xb58
+.debug_str        0x000000        0xb6c
  *(.debug_str)
  .debug_str       0x000000        0x156 build/default/production/Source/DeviceNet/DeviceNet.o
  .debug_str       0x000156         0x53 build/default/production/Source/Driver/AdcSample.o
@@ -1080,13 +1080,13 @@ userdata
  .debug_str       0x000608         0x34 build/default/production/Source/Driver/ImitationIIC.o
  .debug_str       0x00063c         0x15 build/default/production/Source/Driver/SD2405.o
  .debug_str       0x000651          0xa build/default/production/Source/Driver/buffer.o
- .debug_str       0x00065b        0x120 build/default/production/Source/SerialPort/Action.o
- .debug_str       0x00077b         0x14 build/default/production/Source/SerialPort/CRC16.o
- .debug_str       0x00078f        0x12a build/default/production/Source/SerialPort/RefParameter.o
- .debug_str       0x0008b9         0x6f build/default/production/Source/Yongci/DeviceParameter.o
- .debug_str       0x000928         0x9d build/default/production/Source/Yongci/SwtichCondition.o
- .debug_str       0x0009c5        0x185 build/default/production/Source/Yongci/yongci.o
- .debug_str       0x000b4a          0xe build/default/production/Source/main.o
+ .debug_str       0x00065b        0x134 build/default/production/Source/SerialPort/Action.o
+ .debug_str       0x00078f         0x14 build/default/production/Source/SerialPort/CRC16.o
+ .debug_str       0x0007a3        0x12a build/default/production/Source/SerialPort/RefParameter.o
+ .debug_str       0x0008cd         0x6f build/default/production/Source/Yongci/DeviceParameter.o
+ .debug_str       0x00093c         0x9d build/default/production/Source/Yongci/SwtichCondition.o
+ .debug_str       0x0009d9        0x185 build/default/production/Source/Yongci/yongci.o
+ .debug_str       0x000b5e          0xe build/default/production/Source/main.o
 
 .debug_loc
  *(.debug_loc)
@@ -2359,27 +2359,27 @@ __c30_signature
  .nbss              0x0842          0x2 build/default/production/Source/Driver/buffer.o
                     0x0842                  _len
 
-_04D3DF005987b81b
+_04D40F005990f061
                     0x0844          0x2
- _04D3DF005987b81b
+ _04D40F005990f061
                     0x0844          0x2 build/default/production/Source/SerialPort/RefParameter.o
                     0x0844                  _g_SyncReadyWaitTime
 
-_04D3DF605987b81b
+_04D40F605990f061
                     0x0846          0x2
- _04D3DF605987b81b
+ _04D40F605990f061
                     0x0846          0x2 build/default/production/Source/SerialPort/RefParameter.o
                     0x0846                  _g_RemoteWaitTime
 
-_04F235405987b81f
+_04EB35405990f061
                     0x0848          0x2
- _04F235405987b81f
+ _04EB35405990f061
                     0x0848          0x2 build/default/production/Source/Yongci/yongci.o
                     0x0848                  _g_Order
 
-_04F2ACC05987b81f
+_04EBACC05990f061
                     0x084a          0x2
- _04F2ACC05987b81f
+ _04EBACC05990f061
                     0x084a          0x2 build/default/production/Source/Yongci/yongci.o
 
 .bss                0x084c        0x59c
