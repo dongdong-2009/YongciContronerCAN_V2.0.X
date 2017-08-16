@@ -5,7 +5,7 @@
  * <p>company： SOJO</p> 
  * <p>time： 2017.05.20</p> 
  * 
- * @updata:[2017-04-07] [张小某][更改其内容为适应永磁控制器程序]
+ * @updata:[2017-04-07] [ZhangXiaomou][更改其内容为适应永磁控制器程序]
  * @author ZhangXiaomou 
  * @version ver 1.0
  */

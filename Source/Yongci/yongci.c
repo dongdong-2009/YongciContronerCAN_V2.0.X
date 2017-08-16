@@ -5,7 +5,7 @@
  * <p>company： SOJO</p> 
  * <p>time： 2017.05.20</p> 
  * 
- * @updata:[日期2017-05-20] [张小某][更改分合闸计时方式，不再采用中断计时，增加三个机构的控制]
+ * @updata:[日期2017-05-20] [ZhangXiaomou][更改分合闸计时方式，不再采用中断计时，增加三个机构的控制]
  * @author Zhangxiaomou 
  * @version ver 1.0
  */

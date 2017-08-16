@@ -904,7 +904,8 @@ void CheckOrder(void)
  */
 void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
-    uint8_t idIndex = pReciveFrame->pBuffer[1];
+    uint16_t idIndex = 0;
+    idIndex = pReciveFrame->pBuffer[1];
     uint8_t error = 0;
     uint8_t i = 0;
     struct DefFrameData pSendFrame;   //要发送的数据
@@ -917,7 +918,7 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
     uint8_t end = pReciveFrame->pBuffer[2];
     
     pSendFrame.pBuffer[0] = 0x92;
-    for(idIndex = start; idIndex <= end;idIndex++)    //抛除ID号所占的长度
+    for(idIndex = start; idIndex <= end; idIndex++)    //抛除ID号所占的长度
     {
         ClrWdt();
         g_ParameterBuffer.len = 8;
