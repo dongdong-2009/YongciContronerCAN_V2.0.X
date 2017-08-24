@@ -626,6 +626,7 @@ void UpdataState(void)
     uint8_t data[8] = {0,0,0,0,0,0,0,0};
     uint8_t offsetCount = 0;
     uint8_t i = 0;
+    uint8_t state = 0;
     
     struct DefFrameData pSendFrame;
 
@@ -678,8 +679,38 @@ void UpdataState(void)
         ClrWdt();
 		pSendFrame.pBuffer[4] = 0;
 	}
-	pSendFrame.pBuffer[5] = g_SystemState.yuanBenState;  
+    
+    //远方就地
+    if(g_SystemState.yuanBenState == YUAN_STATE) //远方
+    {
+        state |= 1 << 1;
+    }
+    else
+    {
+        state |= 1 << 0;
+    }
+    
+    //工作模式
+    if(g_SystemState.workMode == WORK_STATE)    //工作模式
+    {
+        state |= 1 << 3;
+    }
+    else
+    {
+        state |= 1 << 2;
+    }
 
+    //带电与否
+    if(g_SystemState.charged)   //带电
+    {
+        state |= 1 << 5;
+    }
+    else
+    {
+        state |= 1 << 4;
+    }
+    
+    pSendFrame.pBuffer[5] = state;  //将上述标志赋值上传
     pSendFrame.len = 6;   //数据帧长度
     SendData(&pSendFrame);
     
