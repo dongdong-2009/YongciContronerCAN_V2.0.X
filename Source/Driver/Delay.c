@@ -69,6 +69,10 @@ void InitSystemTime()
  */
 inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 {
+	if(pStamp->startTime == UINT32_MAX)
+	{
+		return 0x00;
+	}
     if (UINT32_MAX - delayTime < startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
         ClrWdt();
@@ -104,6 +108,10 @@ inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
  */
 inline uint8_t IsOverTimeStamp(TimeStamp* pStamp)
 {
+	if(pStamp->startTime == UINT32_MAX)
+	{
+		return 0x00;
+	}
     if (UINT32_MAX - pStamp->delayTime < pStamp->startTime) //判断是否溢出,若溢出则先进行判断是否超出一个周期
     {
         ClrWdt();
