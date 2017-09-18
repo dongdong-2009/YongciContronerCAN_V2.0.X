@@ -69,7 +69,7 @@ void InitSystemTime()
  */
 inline uint8_t IsOverTime(uint32_t startTime, uint32_t delayTime)
 {
-	if(pStamp->startTime == UINT32_MAX)
+	if(startTime == UINT32_MAX)
 	{
 		return 0x00;
 	}

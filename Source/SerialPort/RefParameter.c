@@ -550,6 +550,7 @@ void InitReadonlyParameterCollect(void)
    while( READONLY_PARAMETER_LEN !=index);
 }
 
+static uint8_t count = 0;
 /**
  * 初始化全局变量参数
  */
@@ -580,7 +581,6 @@ void RefParameterInit(void)
     g_SystemVoltageParameter.temp = DS18B20GetTemperature();
     if(g_SystemVoltageParameter.temp == 85) //如果温度传感器未能正确的初始化，则需要延时750ms后在读取一次值
     {
-        uint8_t count = 0;
         while(count++ < 750)
         {
             __delay_ms(1)
