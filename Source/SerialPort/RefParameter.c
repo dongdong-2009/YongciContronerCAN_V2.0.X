@@ -88,6 +88,7 @@ SyncCommand g_SyncCommand;
 #define READONLY_PARAMETER_LEN 22  //只读参数列表
 #define SET_START_ID 0x01   //设置参数ID号开始值
 #define READONLY_START_ID 0x41  //只读参数ID号开始值
+
 /**
  *系统配置参数合集
  */

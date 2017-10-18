@@ -247,7 +247,6 @@ void UpdataState(void);
 void CheckOrder(void);
 void SendErrorFrame(uint8_t receiveID,uint8_t errorID);
 
-void SendMonitorParameter(struct DefFrameData* pReciveFrame);
 void ActionParameterInit(void);
 
 extern RemoteControlState g_RemoteControlState; //远方控制状态标识位

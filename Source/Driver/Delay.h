@@ -76,6 +76,8 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
 #include "tydef.h"
 
+#define GET_TEMP_TIME   20000   //获取温度数据时间   (ms)
+    
 typedef struct TagTimeStamp
 {
     uint32_t startTime;    //超时判断起始时间

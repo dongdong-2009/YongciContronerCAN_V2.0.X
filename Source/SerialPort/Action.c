@@ -13,17 +13,19 @@
 #include "../Header.h"
 #include "../SerialPort/RefParameter.h"
 #include <string.h>
-#define  SUDDEN_ID 0x9A     //突发状态上传ID
+#define SUDDEN_ID 0x9A     //突发状态上传ID
+#define ID_GET_TEMP 0x45    //!< 温度监控参数ID
 
-void SendAckMesssage(uint8_t fun);
-void GetLoopSwitch(struct DefFrameData* pReciveFrame);
-uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
-uint8_t GetLoopSet(struct DefFrameData* pReciveFrame);
-uint8_t CheckOpenCondition(void);
-uint8_t CheckCloseCondition(void);
-uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
-uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
-uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+static void SendAckMesssage(uint8_t fun);
+static void GetLoopSwitch(struct DefFrameData* pReciveFrame);
+static void SendMonitorParameter(struct DefFrameData* pReciveFrame);
+static uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
+static uint8_t GetLoopSet(struct DefFrameData* pReciveFrame);
+static uint8_t CheckOpenCondition(void);
+static uint8_t CheckCloseCondition(void);
+static uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame,  struct DefFrameData* pSendFrame,uint8_t id);
+static uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id);
+static uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame);
 RemoteControlState g_RemoteControlState; //远方控制状态标识位
 
@@ -228,7 +230,7 @@ uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSen
         }          
     }
 }
-uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+static uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
 {
     uint8_t loopID = 0;
     uint8_t result = 0;
@@ -314,7 +316,7 @@ uint8_t ActionCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData
     g_RemoteControlState.receiveStateFlag = IDLE_ORDER;  //空闲命令     
     return 0;
 }
-uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
+static uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame, uint8_t id)
 {
     uint8_t result = 0;
     uint8_t loop = 0;
@@ -377,7 +379,7 @@ uint8_t ReadyCloseOrOpen(struct DefFrameData* pReciveFrame, struct DefFrameData*
 }
 
 
-uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+static uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
     uint8_t id = 0;
     uint8_t configbyte = 0;
@@ -531,7 +533,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
  * @param pSendFrame
  * @return 
  */
-uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
+static uint8_t SyncCloseSingleCheck(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)
 {
     uint8_t i = 0;
     uint8_t state = 0x00;
@@ -725,7 +727,7 @@ void UpdataState(void)
  * 获取合分闸设置回路参数
  * @retrun 错误代码
  */
-uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
+static uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
 {
     if(pReciveFrame->len != 3)
     {
@@ -766,7 +768,7 @@ uint8_t GetLoopSet(struct DefFrameData* pReciveFrame)
  * 检查合闸条件
  * @return 错误代码
  */
-uint8_t CheckCloseCondition(void)
+static uint8_t CheckCloseCondition(void)
 {
     for(uint8_t i = 0; i< LOOP_COUNT; i++)
     {
@@ -824,7 +826,7 @@ uint8_t CheckCloseCondition(void)
  * 检查分闸条件
  * @return 错误代码
  */
-uint8_t CheckOpenCondition(void)
+static uint8_t CheckOpenCondition(void)
 {
     
     for(uint8_t i = 0; i< LOOP_COUNT; i++)
@@ -931,7 +933,7 @@ void CheckOrder(void)
  * @fn SendMonitorParameter
  * @brief 发送参数
  */
-void SendMonitorParameter(struct DefFrameData* pReciveFrame)
+static void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
     uint16_t idIndex = 0;
     idIndex = pReciveFrame->pBuffer[1];
@@ -965,6 +967,10 @@ void SendMonitorParameter(struct DefFrameData* pReciveFrame)
         }
         ClrWdt();
         SendData(&pSendFrame);
+        if(idIndex == ID_GET_TEMP) //获取温度
+        {
+            g_TimeStampCollect.getTempTime.delayTime = 0x00;  //退出发送后立即执行一次获取温度
+        }
     }
 }
 static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct DefFrameData* pSendFrame)

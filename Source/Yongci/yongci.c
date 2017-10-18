@@ -637,7 +637,8 @@ uint8_t RefreshIdleState()
     if(IsOverTimeStamp( &g_TimeStampCollect.getTempTime))
     {                   
         g_SystemVoltageParameter.temp = DS18B20GetTemperature();    //获取温度值            
-        g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;  
+        g_TimeStampCollect.getTempTime.startTime = g_TimeStampCollect.msTicks;         
+        g_TimeStampCollect.getTempTime.delayTime = GET_TEMP_TIME;  
     }
 
     if(g_RemoteControlState.setFixedValue == TRUE)
