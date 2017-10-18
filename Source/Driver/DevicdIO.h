@@ -22,7 +22,7 @@
 #define HIGH 1
 #define LOW  0
 /**
- * <p>Discription:[IGBT 控制---A]</p>
+ * <p>Discription:[IGBT 控制---A
  */
 //合闸桥臂--双IGBT
 #define DRIVER_A_1   LATGbits.LATG3
@@ -37,7 +37,7 @@
 #define DRIVER_C_1_DIR TRISFbits.TRISF4
 
 /**
- * <p>Discription:[A同步输出]</p>
+ * <p>Discription:[A同步输出
  */
 #define DECTA   LATGbits.LATG8
 #define DECTA_DIR TRISGbits.TRISG8
@@ -48,7 +48,7 @@
 
 
 /**
- * <p>Discription:[IGBT 控制---B]</p>
+ * <p>Discription:[IGBT 控制---B
  */
 //合闸桥臂--双IGBT
 #define DRIVER_A_2   LATFbits.LATF6
@@ -63,7 +63,7 @@
 #define DRIVER_C_2_DIR TRISBbits.TRISB15
 
 /**
- * <p>Discription:[B同步输出]</p>
+ * <p>Discription:[B同步输出
  */
 #define DECTB   LATBbits.LATB5
 #define DECTB_DIR TRISBbits.TRISB5
@@ -74,7 +74,7 @@
 
 
 /**
- * <p>Discription:[IGBT 控制---C]</p>
+ * <p>Discription:[IGBT 控制---C
  */
 //合闸桥臂--双IGBT
 #define DRIVER_A_3   LATFbits.LATF5
@@ -89,7 +89,7 @@
 #define DRIVER_C_3_DIR TRISBbits.TRISB14
 
 /**
- * <p>Discription:[C同步输出]</p>
+ * <p>Discription:[C同步输出
  */
 #define DECTC   LATBbits.LATB4
 #define DECTC_DIR TRISBbits.TRISB4
@@ -153,7 +153,7 @@
 #define RELAY16_CLOSE   0xFFFE  
 
 /**
- * <p>Discription:[LED灯定义]</p>
+ * <p>Discription:[LED灯定义
  */
 #ifdef	SMALL_CHOSE
 #define CAP1_RELAY   RELAY1_OPEN    //电容1储能指示继电器
@@ -245,7 +245,7 @@
  * C3  G3  H3  F3  WORK LASER *
  *****************************/
 /**
- * <p>Discription:[LED灯定义]</p>
+ * <p>Discription:[LED灯定义
  */
 #define CAP1_LED LED3_ON    //电容1储能指示灯
 #define CAP2_LED LED2_ON    //电容2储能指示灯

@@ -1,12 +1,11 @@
-/** 
- * <p>application name： CAN.c</p> 
- * <p>application describing： CAN配置程序</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
- * 
- * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
- * @author FreeGo 
+/**
+ * @file CAN.c
+ * @brief CAN配置程序
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.05.20
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "../Header.h"
@@ -31,10 +30,10 @@ unsigned int  CAN_TxRdy;              /* CAN HW ready to transmit a message */
 unsigned int  CAN_RxRdy;              /* CAN HW received a message */
 
 /********************************************
-*函数名： ConfigCANOneBraud()
-*形参：void
-*返回值：void
-*功能：配置CAN1 波特率有关
+* @fn ConfigCANOneBraud()
+* @param void
+* @return void
+* @brief 配置CAN1 波特率有关
 **********************************************/
 inline void ConfigCANOneBraud(void)
 {
@@ -56,10 +55,10 @@ inline void ConfigCANOneBraud(void)
 }
 
 /********************************************
-* 函数名： ConfigCANOneMaskFilterRX0()
-* 形参：void
-* 返回值：void
-* 功能：配置CAN1 RX0接收屏蔽与滤波寄存器寄存器
+*  @fn ConfigCANOneMaskFilterRX0()
+*  @param void
+*  @return void
+*  @brief 配置CAN1 RX0接收屏蔽与滤波寄存器寄存器
 **********************************************/
 inline void ConfigCANOneMaskFilterRX0(EIDBits* pRm0, EIDBits* pRf0)
 {
@@ -73,10 +72,10 @@ inline void ConfigCANOneMaskFilterRX0(EIDBits* pRm0, EIDBits* pRf0)
     C2RXF0SIDbits.SID = pRf0->regBits.SID10_0;	//CAN1 Receive Acceptance Filter2 SID 	 bit 12-2 SID<10:0>： 标准标识符屏蔽位
 }
 /********************************************
-*函数名： ConfigCANOneMaskFilterRX1()
-*形参：void
-*返回值：void
-*功能：配置CAN1 RX1接收屏蔽与滤波寄存器寄存器
+* @fn ConfigCANOneMaskFilterRX1()
+* @param void
+* @return void
+* @brief 配置CAN1 RX1接收屏蔽与滤波寄存器寄存器
 **********************************************/
 inline void ConfigCANOneMaskFilterRX1(EIDBits* pRm1, EIDBits* pRf2)
 {
@@ -97,10 +96,10 @@ inline void ConfigCANOneMaskFilterRX1(EIDBits* pRm1, EIDBits* pRf2)
     C2RXF2EIDLbits.EID5_0 = pRf2->regBits.EID5_0;   //CAN1 Receive Acceptance Filter2 Extended identifier low byte   bit 15-10 EID<5:0>： 扩展标识符位
 }
 /********************************************
-*函数名： InitCANOne()
-*形参：EIDBits* pRm——屏蔽寄存器设置，EIDBits* pRf——滤波寄存器设置
-*返回值：uint16_t 初始化成功返回0xAA 失败返回0
-*功能：初始化系统中的 CAN1 模块
+* @fn InitCANOne()
+* @param EIDBits* pRm——屏蔽寄存器设置，EIDBits* pRf——滤波寄存器设置
+* @return uint16_t 初始化成功返回0xAA 失败返回0
+* @brief 初始化系统中的 CAN1 模块
 **********************************************/
 uint16_t InitCANOne(EIDBits* pRm, EIDBits* pRf)
 {
@@ -201,10 +200,10 @@ uint16_t InitStandardCAN(uint16_t id, uint16_t mask)
     return state;     
 }
 /********************************************
-*函数名：ConfigEIDTX0()
-*形参：EIDBits* pEID 发送扩展标识符
-*返回值：void
-*功能： 配置发送扩展标识符
+* @fn ConfigEIDTX0()
+* @param EIDBits* pEID 发送扩展标识符
+* @return void
+* @brief  配置发送扩展标识符
 **********************************************/
 inline void ConfigEIDTX0(EIDBits* pEID)
 {
@@ -220,10 +219,10 @@ inline void ConfigEIDTX0(EIDBits* pEID)
     C2TX0DLCbits.EID5_0 =  pEID->txBits.EID5_0;
 }
 /********************************************
-*函数名：ConfigDataTXB0()
-*形参：uint8 len 待处理数据长度 ，CANFrame* pframe 帧数据
-*返回值：uint8 ——发送数据长度 0错误 
-*功能： 将待发送数据装入TXB0 发送寄存器
+* @fn ConfigDataTXB0()
+* @param uint8 len 待处理数据长度 ，CANFrame* pframe 帧数据
+* @return uint8 ——发送数据长度 0错误 
+* @brief  将待发送数据装入TXB0 发送寄存器
 **********************************************/
 uint8_t ConfigDataTXB0(uint8_t len, CANFrame* pframe)
 {
@@ -268,10 +267,10 @@ uint8_t ConfigDataTXB0(uint8_t len, CANFrame* pframe)
     return len;
 }
   /********************************************
-*函数名：ConfigDataTXB1()
-*形参：uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
-*返回值：uint8_t ——发送数据长度 0 错误
-*功能： 将待发送数据装入TXB1 发送寄存器
+* @fn ConfigDataTXB1()
+* @param uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
+* @return uint8_t ——发送数据长度 0 错误
+* @brief  将待发送数据装入TXB1 发送寄存器
 **********************************************/
 uint8_t ConfigDataTXB1(uint8_t len, CANFrame* pframe)
 {
@@ -316,10 +315,10 @@ uint8_t ConfigDataTXB1(uint8_t len, CANFrame* pframe)
 }
   
 /********************************************
-*函数名：ConfigDataTXB2()
-*形参：uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
-*返回值：uint8_t ——发送数据长度 0错误
-*功能： 将待发送数据装入TXB2 发送寄存器
+* @fn ConfigDataTXB2()
+* @param uint8_t len 待处理数据长度 ，CANFrame* pframe 帧数据
+* @return uint8_t ——发送数据长度 0错误
+* @brief  将待发送数据装入TXB2 发送寄存器
 **********************************************/
 uint8_t ConfigDataTXB2(uint8_t len, CANFrame* pframe)
 {
@@ -364,10 +363,10 @@ uint8_t ConfigDataTXB2(uint8_t len, CANFrame* pframe)
 }
 
 /********************************************
-*函数名：CANOneSendByTX0()
-*形参：: uint16_t* pID  11bitID标识, uint8_t * pbuff 缓冲数据, uint8_t len 数据长度
-*返回值：uint8_t —— 发送数据总长度 0--数据出错
-*功能： 通过TX0发送带有CRC16的帧数据
+* @fn CANOneSendByTX0()
+* @param : uint16_t* pID  11bitID标识, uint8_t * pbuff 缓冲数据, uint8_t len 数据长度
+* @return uint8_t —— 发送数据总长度 0--数据出错
+* @brief  通过TX0发送带有CRC16的帧数据
 **********************************************/
 uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
 {  
@@ -477,10 +476,10 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
 }
  
 /***********************************************************
-*函数名：ReadRx0Frame()
-*形参：CANFrame* pframe--保存帧地址
-*返回值：uint8 —— 接收数据长度 0--数据出错
-*功能： 读取帧数据 
+* @fn ReadRx0Frame()
+* @param CANFrame* pframe--保存帧地址
+* @return uint8 —— 接收数据长度 0--数据出错
+* @brief  读取帧数据 
 **************************************************************/
 //uint8_t ReadRx0Frame(CANFrame* pframe)
 //{
@@ -541,10 +540,10 @@ uint8_t CANSendData(uint16_t id, uint8_t * pbuff, uint8_t len)
      return len;
  }
 /***********************************************************
-* 函数名：GetReciveRX0EID()
-* 形参：uint8 len --数据长度, CANFrame* pframe --待检测帧数据
-* 返回值：uint8 —— 若为0代表失败， 大于3 代表成功，其值为数据长度
-* 功能： 对接收帧数据进行CRC校验
+*  @fn GetReciveRX0EID()
+*  @param uint8 len --数据长度, CANFrame* pframe --待检测帧数据
+*  @return uint8 —— 若为0代表失败， 大于3 代表成功，其值为数据长度
+*  @brief  对接收帧数据进行CRC校验
 **************************************************************/
 inline void GetReciveRX0EID(EIDBits* pEID)
 {

@@ -1,3 +1,13 @@
+/**
+ * @file Buffer.c
+ * @brief 配置缓冲区
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.05.20
+ *
+ * @author Zhangxiaomou
+ * @version ver 1.0
+ */
 #include "buffer.h"
 #include <string.h>
 #
@@ -8,17 +18,17 @@
 #include <xc.h>
 
 /**
- *缓冲空间，暂定为16个 
+ * 缓冲空间，暂定为16个 
  */
 CAN_msg CanMsg[BUFFER_LEN];
 
 /**
- *缓冲队列信息
+ * 缓冲队列信息
  */
 FifoInformation FifoInfor;
 
 /**
- *初始化缓冲区
+ * 初始化缓冲区
  */
 void BufferInit(void)
 {
@@ -32,7 +42,6 @@ void BufferInit(void)
 
 /**
  * 缓冲数据入队
- * <p>
  * 
  * @param  pInf     FIFO信息
  * @param  pMsg    入队信息
@@ -60,7 +69,6 @@ uint8_t BufferEnqueue(CAN_msg* pMsg)
 }
 /**
  * 缓冲数据出队
- * <p>
  * 
  * @param  pInf     FIFO信息
  * @param  pMsg    出队信息

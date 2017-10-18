@@ -1,17 +1,14 @@
-/** 
- * <p>application name： SwtichCondition.c</p> 
- * <p>application describing： 开入量值获取</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
-
- * 摘要:
+/**
+ * @file SwtichCondition.c
+ * @brief 开入量值获取
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.06.5
+ * @update 
  * 2015/8/10:完善远本转换。
  * 2015/11/17: 改变IO检测模式，由纯延时形式，变成采样点样式。
  * 将远方检测IO与本地合并。
-
- * @updata:[2017-05-20] [ZhangXiaomou][更改IO读取方式，采用的是并口转串口，165采样。扫描改为定时器扫描]
- * @author ZhangXiaomou 
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "SwtichCondition.h"
@@ -73,7 +70,7 @@
 
 /**
  * 
- * <p>Discription: [对机构的合分位检测]</p>
+ * @brief 对机构的合分位检测
  */
 //******************************************************************************
 //机构1的合位检测
@@ -96,7 +93,7 @@
 
 
 /**
- * <p>Discription: [一下错误均为不可屏蔽掉的错误，且错误严重]</p>
+ * @brief 一下错误均为不可屏蔽掉的错误，且错误严重
  */
 //***************************************************************************************************
 //机构1的本地错误条件: 合位和分位同时成立 或 同时不成立
@@ -152,8 +149,8 @@ uint8_t CheckSwitchOrder(void);
 
 /**
  * 
- * <p>Function name: [CheckIOState]</p>
- * <p>Discription: [检测IO状态，并更新状态显示]</p>
+ * @fn CheckIOState
+ * @brief 检测IO状态，并更新状态显示
  * @return 接收到分合闸命令返回0xFF,否则返回0
  */
 uint8_t CheckIOState(void)
@@ -351,8 +348,8 @@ uint8_t CheckIOState(void)
 }
 /**
  * 
- * <p>Function name: [CheckswitchState]</p>
- * <p>Discription: [执行相应的指示]</p>
+ * @fn CheckswitchState
+ * @brief 执行相应的指示
  */
 void DsplaySwitchState(void)
 {    
@@ -463,8 +460,8 @@ void DsplaySwitchState(void)
 }
 /**
  * 
- * <p>Function name: [SwitchScan]</p>
- * <p>Discription: [检测开入量]</p>
+ * @fn SwitchScan
+ * @brief 检测开入量
  */
 void SwitchScan(void)
 {
@@ -603,8 +600,8 @@ void SwitchScan(void)
 
 /**
  * 
- * <p>Function name: [CheckAllLoopSwitchState]</p>
- * <p>Discription: [检测所有回路开关状态]</p>
+ * @fn CheckAllLoopSwitchState
+ * @brief 检测所有回路开关状态
  */
 void CheckAllLoopSwitchState(void)
 {
@@ -703,8 +700,8 @@ void CheckAllLoopSwitchState(void)
 
 /**
  * 
- * <p>Function name: [CheckSwitchOrder]</p>
- * <p>Discription: [检测按键命令]</p>
+ * @fn CheckSwitchOrder
+ * @brief 检测按键命令
  * @return 0 无命令
  */
 uint8_t CheckSwitchOrder(void)
@@ -929,8 +926,8 @@ uint8_t CheckSwitchOrder(void)
 }
 /**
  * 
- * <p>Function name: [UpdateSwitchState]</p>
- * <p>Discription: [更新更新开关分合位状态]</p>
+ * @fn UpdateSwitchState
+ * @brief 更新更新开关分合位状态
  */
 void UpdateSwitchState(void)
 {

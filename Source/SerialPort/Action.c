@@ -1,17 +1,15 @@
-
-#include "Action.h"
-
-/** 
- * <p>application name： Action.c</p> 
- * <p>application describing： 配置Action</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
- * 
- * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
- * @author ZhangXiaomou 
+/**
+ * @file Action.c
+ * @brief 实现相应通讯功能码的功能
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.06.5
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
+#include "Action.h"
+
 #include "../Header.h"
 #include "../SerialPort/RefParameter.h"
 #include <string.h>
@@ -180,7 +178,7 @@ uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSen
         case SyncReadyClose: //同步合闸预制
         {
             pSendFrame->len = 0;//禁止底层发送
-             return SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
+            return SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
         }       
         case MasterParameterSetOne:  //非顺序参数设置
         {
@@ -384,7 +382,7 @@ uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameData* pS
     uint8_t id = 0;
     uint8_t configbyte = 0;
     uint8_t loop[3] = {0};
-    if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))
+    if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))  //检测是否能正常接收到同步时序脉冲
     {
         return SIGNEL_INVALID_ERROR;
     }
@@ -618,8 +616,8 @@ void SendErrorFrame(uint8_t receiveID, uint8_t errorID)
 
 /**
  * 
- * <p>Function name: [UpdataState]</p>
- * <p>Discription: [对运行状态进行更新显示]</p>
+ * @fn UpdataState
+ * @brief 对运行状态进行更新显示
  */
 void UpdataState(void)
 {
@@ -884,8 +882,8 @@ uint8_t CheckOpenCondition(void)
 
 /**
  * 
- * <p>Function name: [CheckOrder]</p>
- * <p>Discription: [检测命令是否正确执行]</p>
+ * @fn CheckOrder
+ * @brief 检测命令是否正确执行
  * @param lastOrder 上一次执行的命令
  */
 void CheckOrder(void)
@@ -930,8 +928,8 @@ void CheckOrder(void)
 
 /**
  * 
- * <p>Function name: [SendMonitorParameter]</p>
- * <p>Discription: [发送参数]</p>
+ * @fn SendMonitorParameter
+ * @brief 发送参数
  */
 void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
@@ -1013,8 +1011,8 @@ static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct Def
 }
 
 /**
- * <p>Function name: [_INT2Interrupt]</p>
- * <p>Discription: [外部中断函数]</p>
+ * @fn _INT2Interrupt
+ * @brief 外部中断函数
  */
 
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
@@ -1066,8 +1064,8 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 	}
 }
 /**
- * <p>Function name: [_INT3Interrupt]</p>
- * <p>Discription: [检测外部脉冲时序]</p>
+ * @fn _INT3Interrupt
+ * @brief 检测外部脉冲时序
  */
 
 void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)

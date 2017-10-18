@@ -1,12 +1,11 @@
-/** 
- * <p>application name： AdcSample.c</p> 
- * <p>application describing： 此文件为配置ADC，以便测量电容电压</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
- * 
- * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
- * @author ZhangXiaomou 
+/**
+ * @file AdcSample.c
+ * @brief 此文件为配置ADC，以便测量电容电压
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.05.20
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "../Header.h"
@@ -14,10 +13,10 @@
 
 
 /********************************************
-*函数名：AdcInit()
-*形参：void
-*返回值：void
-*功能：初始化AN0 为软件触发采样
+* @fn AdcInit()
+* @param void
+* @return void
+* @brief 初始化AN0 为软件触发采样
  * updata 2017-05-09 更改为自动采样、转换触发中断
 **********************************************/
 void AdcInit(void)
@@ -66,9 +65,9 @@ void AdcInit(void)
     INTCON1bits.NSTDIS = 1;     //不允许中断嵌套
 }
 /********************************************
-*函数名： SoftSampleOnce()
-*形参：void
-*功能：软件启动转换，获取ADC值.
+* @fn SoftSampleOnce()
+* @param void
+* @brief 软件启动转换，获取ADC值.
 **********************************************/
 void SoftSampleOnce(void)
 {

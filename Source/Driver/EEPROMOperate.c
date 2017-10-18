@@ -1,12 +1,11 @@
-/** 
- * <p>application name： EEPROMOperate.c</p> 
- * <p>application describing： 配置读写EEPROM函数</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
- * 
- * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
- * @author ZhangXiaomou 
+/**
+ * @file EEPROMOperate.c
+ * @brief 配置读写EEPROM函数
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.05.20
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "../Header.h"
@@ -14,14 +13,14 @@
 
 /**
  * 
- * <p>Function name: [WriteWord_EEPROM]</p>
- * <p>Discription: [按地址写入一个word]</p>
+ * @fn WriteWord_EEPROM
+ * @drief 按地址写入一个word
  * @param addr  EEPROM地址
- * @param data  读取的数据
+ * @param data  写入的数据
  */
 inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
 {
-   //应禁止中断
+   //!< 应禁止中断
     uint8_t cn = 0;
     ClrWdt();
     __builtin_disi(0x3FFF); 
@@ -34,7 +33,7 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
         __builtin_disi(0x3FFF); 
         __delay_us(100);
         ClrWdt();
-        if (cn++ >200) //超过20ms跳出
+        if (cn++ >200) //!< 超过20ms跳出
         {
             break;             
         }
@@ -50,7 +49,7 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
         __builtin_disi(0x3FFF); 
         __delay_us(100);
         ClrWdt();
-        if (cn++ >200) //超过20ms跳出
+        if (cn++ >200) //!< 超过20ms跳出
         {
             break;            
         }
@@ -60,8 +59,8 @@ inline void WriteWord_EEPROM( _prog_addressT addr, uint16_t* data)
 
 /**
  * 
- * <p>Function name: [ReadWord_EEPROM]</p>
- * <p>Discription: [按地址读取一个word]</p>
+ * @fn ReadWord_EEPROM
+ * @drief 按地址读取一个word
  * @param addr  EEPROM地址
  * @param data  读取的数据
  */
@@ -75,18 +74,19 @@ inline void ReadWord_EEPROM( _prog_addressT addr, uint16_t* data)
 
 /**
  * 
- * <p>Function name: [SaveActionCount]</p>
- * <p>Discription: [写入分合闸次数]</p>
- * @param writeData 所需读取的数据
+ * @fn SaveActionCount
+ * @drief 写入分合闸次数
+ * @param addr EEPROM地址
+ * @param eedata 所需写入的数据
  */
 void SaveActionCount(_prog_addressT addr , uint16_t* eedata)
 {
     ReadWord_EEPROM(addr, eedata);
     
     ClrWdt();
-    *eedata += 1;//直接加1 对于未擦除的不予处理，直接溢出
+    *eedata += 1;//!< 直接加1 对于未擦除的不予处理，直接溢出
     
-    OFF_COMMUNICATION_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+    OFF_COMMUNICATION_INT();  //!< 关闭通信中断，防止在写入EEPROM时被打断
     ClrWdt();
     WriteWord_EEPROM(addr, eedata);
     ON_COMMUNICATION_INT();
@@ -94,9 +94,10 @@ void SaveActionCount(_prog_addressT addr , uint16_t* eedata)
 
 /**
  * 
- * <p>Function name: [ReadActionCount]</p>
- * <p>Discription: [写入分合闸次数]</p>
- * @param writeData 所需读取的数据
+ * @fn ReadActionCount
+ * @drief 读取分合闸次数
+ * @param addr EEPROM地址
+ * @param pdata 读取的数据
  */
 void ReadActionCount(_prog_addressT addr , uint16_t* pdata)
 {
@@ -106,7 +107,7 @@ void ReadActionCount(_prog_addressT addr , uint16_t* pdata)
     if(*pdata >= UINT16_MAX)
     {
         *pdata = 0;
-        OFF_COMMUNICATION_INT();  //关闭通信中断，防止在写入EEPROM时被打断
+        OFF_COMMUNICATION_INT();  //!< 关闭通信中断，防止在写入EEPROM时被打断
         ClrWdt();
         WriteWord_EEPROM(addr, pdata);
         ON_COMMUNICATION_INT();

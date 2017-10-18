@@ -1,12 +1,11 @@
-/** 
- * <p>application name： RefParameter.c</p> 
- * <p>application describing： 用来存放计算使用的各种数据</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.05.20</p> 
- * 
- * @updata:[2017-04-07] [ZhangXiaomou][更改其内容为适应永磁控制器程序]
- * @author ZhangXiaomou 
+/**
+ * @file RefParameter.c
+ * @brief 初始化定值参数与监控参数
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.06.5
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "../Header.h"
@@ -721,8 +720,8 @@ void GetValueFloatUint16(PointUint8* pPoint, ConfigData* pConfig)
 
 /**
  * 
- * <p>Function name: [GetValueFloatInt16]</p>
- * <p>Discription: [获取参数，带符号]</p>
+ * @fn GetValueFloatInt16
+ * @brief 获取参数，带符号
  * @param pPoint    指向数据数组
  * @param pConfig   指向当前配置数据
  */
@@ -749,8 +748,8 @@ void SetValueFloatInt32(PointUint8* pPoint, ConfigData* pConfig)
 
 /**
  * 
- * <p>Function name: [GetValueFloatInt16]</p>
- * <p>Discription: [获取参数，带符号]</p>
+ * @fn GetValueFloatInt16
+ * @brief 获取参数，带符号
  * @param pPoint    指向数据数组
  * @param pConfig   指向当前配置数据
  */
@@ -972,8 +971,8 @@ uint8_t AccumulateSumVerify(void)
 
 /**
  * 
- * <p>Function name: [ParameterReadByID]</p>
- * <p>Discription: [读取EEPROM中的定值]</p>
+ * @fn ParameterReadByID
+ * @brief 读取EEPROM中的定值
  * @param id  配置号
  * @param data 指向数据的指针
  */
@@ -998,8 +997,8 @@ void ParameterReadByID(uint8_t id, PointUint8* pPoint)
 
 /**
  * 
- * <p>Function name: [ParameterWriteByID]</p>
- * <p>Discription: [将定值写入EEPROM]</p>
+ * @fn ParameterWriteByID
+ * @brief 将定值写入EEPROM
  * @param id  配置号
  * @param data 指向数据的指针
  */
@@ -1023,8 +1022,8 @@ void ParameterWriteByID(uint8_t id,PointUint8* pPoint)
 }
 /**
  * 
- * <p>Function name: [WriteAccumulateSumEEPROM]</p>
- * <p>Discription: [写累加和到EEPROM中]</p>
+ * @fn WriteAccumulateSumEEPROM
+ * @brief 写累加和到EEPROM中
  * @param writeData 所需写的数据
  */
 void WriteAccumulateSumEEPROM(uint16_t* writeData)
@@ -1039,8 +1038,8 @@ void WriteAccumulateSumEEPROM(uint16_t* writeData)
 
 /**
  * 
- * <p>Function name: [ReadAccumulateSumEEPROM]</p>
- * <p>Discription: [读累加和]</p>
+ * @fn ReadAccumulateSumEEPROM
+ * @brief 读累加和
  * @param writeData 所需读取的数据
  */
 void ReadAccumulateSumEEPROM(uint16_t* readData)

@@ -1,19 +1,18 @@
-/** 
- * <p>application name： DeviceIO.c</p> 
- * <p>application describing： 对单片机的IO口进行初始化</p> 
- * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
- * <p>company： SOJO</p> 
- * <p>time： 2017.07.07</p> 
- * 
- * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
- * @author Zhangxiaomou 
+/**
+ * @file DeviceIO.c
+ * @brief 对单片机的IO口进行初始化
+ * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
+ * company： SOJO
+ * @date 2017.05.20
+ *
+ * @author Zhangxiaomou
  * @version ver 1.0
  */
 #include "../Header.h"
 #include "DevicdIO.h"
 
 /**
- * <p>Discription: [74HC165-IO口定义]</p>
+ * @brief 74HC165-IO口定义
  */
 #define PL         LATDbits.LATD3
 #define PL_DIR     TRISDbits.TRISD3
@@ -25,7 +24,7 @@
 #define Q7_DIR    TRISDbits.TRISD4
 
 /**
- * <p>Discription: [595 继电器IO口定义]</p>
+ * @brief 595 继电器IO口定义
  */
 #define IP595_DS       LATCbits.LATC14
 #define IP595_DS_DIR   TRISCbits.TRISC14
@@ -37,7 +36,7 @@
 #define IP595_MR_DIR   TRISCbits.TRISC13
 
 /**
- * <p>Discription: [595 LEDIO口定义]</p>
+ * @brief 595 LEDIO口定义
  */
 #define IP595_B_DS       LATDbits.LATD7
 #define IP595_B_DS_DIR   TRISDbits.TRISD7
@@ -59,8 +58,8 @@ uint16_t LEDOutState = 0xFFFF;
 uint16_t RelayOutState = 0;
 /**
  * 
- * <p>Function name: [InitDeviceIO]</p>
- * <p>Discription: [初始化基本的IO端口]</p>
+ * @fn InitDeviceIO
+ * @brief 初始化基本的IO端口
  */
 void InitDeviceIO(void)
 {
@@ -147,8 +146,8 @@ void InitDeviceIO(void)
 }
 /**
  * 
- * <p>Function name: [HC595BSendData]</p>
- * <p>Discription: [595控制LED灯函数]</p>
+ * @fn HC595BSendData
+ * @brief 595控制LED灯函数
  * @param SendVal
  */
 void HC595BSendData(uint16_t SendVal)
@@ -181,8 +180,8 @@ void HC595BSendData(uint16_t SendVal)
 
 /**
  * 
- * <p>Function name: [HC595SendData]</p>
- * <p>Discription: [595控制继电器函数]</p>
+ * @fn HC595SendData
+ * @brief 595控制继电器函数
  * @param SendVal
  */
 void HC595SendData(uint16_t SendVal)
@@ -214,8 +213,8 @@ void HC595SendData(uint16_t SendVal)
 
 /**
  * 
- * <p>Function name: [AllHC595SendData]</p>
- * <p>Discription: [595控制继电器函数]</p>
+ * @fn AllHC595SendData
+ * @brief 595控制继电器函数
  * @param lValue
  * @param rValue
  */
@@ -247,8 +246,8 @@ void AllHC595SendData(uint16_t lValue , uint16_t rValue)
 
 /**
  * 
- * <p>Function name: [ReadHC165]</p>
- * <p>Discription: [读取165中的数值]</p>
+ * @fn ReadHC165
+ * @brief 读取165中的数值
  * @return 返回165的值
  */
 uint32_t ReadHC165(void)
@@ -300,8 +299,8 @@ void InitInt2(void)
 
 /**
  * 
- * <p>Function name: [TurnOnInt2]</p>
- * <p>Discription: [开启外部中断2]</p>
+ * @fn TurnOnInt2
+ * @brief 开启外部中断2
  */
 inline void TurnOnInt2(void)
 {
@@ -311,7 +310,7 @@ inline void TurnOnInt2(void)
 
 /**
  * 
- * <p>Function name: [TurnOffInt2]</p>
+ * @fn TurnOffInt2
  * <p>Discription: 关闭外部中断2，与此同时关闭中断3</p>
  */
 inline void TurnOffInt2(void)
@@ -338,8 +337,8 @@ void InitInt3(void)
 
 /**
  * 
- * <p>Function name: [TurnOnInt3]</p>
- * <p>Discription: [开启外部中断3]</p>
+ * @fn TurnOnInt3
+ * @brief 开启外部中断3
  */
 inline void TurnOnInt3(void)
 {
@@ -349,8 +348,8 @@ inline void TurnOnInt3(void)
 
 /**
  * 
- * <p>Function name: [TurnOffInt3]</p>
- * <p>Discription: [关闭外部中断3]</p>
+ * @fn TurnOffInt3
+ * @brief 关闭外部中断3
  */
 inline void TurnOffInt3(void)
 {
@@ -359,8 +358,8 @@ inline void TurnOffInt3(void)
 }
 /**
  * 
- * <p>Function name: [UpdateLEDIndicateState]</p>
- * <p>Discription: [更新LED状态]</p>
+ * @fn UpdateLEDIndicateState
+ * @brief 更新LED状态
  * @param port 从LED,Relay宏定义中选择
  * @param state 开启/关闭 TURN_ON/TURN_OFF
  */
@@ -386,8 +385,8 @@ void UpdateLEDIndicateState(uint16_t port, uint8_t state)
 
 /**
  * 
- * <p>Function name: [UpdateRelayIndicateState]</p>
- * <p>Discription: [更新继电器状态]</p>
+ * @fn UpdateRelayIndicateState
+ * @brief 更新继电器状态
  * @param port 从LED,Relay宏定义中选择
  * @param state 开启/关闭 TURN_ON/TURN_OFF
  */
@@ -413,8 +412,8 @@ void UpdateRelayIndicateState(uint16_t port, uint8_t state)
 
 /**
  * 
- * <p>Function name: [UpdateIndicateState]</p>
- * <p>Discription: [更新LED、继电器的状态]</p>
+ * @fn UpdateIndicateState
+ * @brief 更新LED、继电器的状态
  * @param relayPort 继电器
  * @param ledPort   LED灯的位
  * @param state 状态，TURN_ON \ TURN_OFF
