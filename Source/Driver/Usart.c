@@ -1,11 +1,12 @@
-/**
- * @file Usart.c
- * @brief 配置串口Timer
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： Usart.c</p> 
+ * <p>application describing： 配置Usart</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
  * @version ver 1.0
  */
 #include "usart.h"
@@ -13,12 +14,12 @@
 #include  "../Header.h"
 
 
-/**
- * @fn InitUART2()
- * @brief 初始化UART2
- * @param  unsigned int baud 波特率
- * @return void
- */
+/**************************************************
+ *函数名： InitUART2()
+ *功能:初始化UART2
+ *形参：  unsigned int baud 波特率
+ *返回值：void
+****************************************************/
 void InitUART1(unsigned int baud)
 {
     float32_t value = 0;
@@ -63,12 +64,12 @@ void InitUART1(unsigned int baud)
     
 }
 
-/**
- * @fn InitPortsUART2()
- * @param void
- * @return void
- * @brief 配置串口端口，尤其相对应的485使能发送端口
- */
+/********************************************
+*函数名：InitPortsUART2()
+*形参：void
+*返回值：void
+*功能：配置串口端口，尤其相对应的485使能发送端口
+**********************************************/
 void InitPortsUART1()
 { 
     RX_T = 1;

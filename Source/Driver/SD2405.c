@@ -1,13 +1,15 @@
-/**
- * @file SD2405.c
- * @brief 时钟芯片操作
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： SD2405.c</p> 
+ * <p>application describing： 时钟芯片操作</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.06.05</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
  * @version ver 1.0
  */
+
 
 
 #include "../Header.h"
@@ -28,8 +30,8 @@ uint8_t turnTime(uint8_t time);
 
 /**
  * 
- * @fn SD2405_Init
- * @brief SD2405芯片初始化
+ * <p>Function name: [SD2405_Init]</p>
+ * <p>Discription: [SD2405芯片初始化]</p>
  */
 void SD2405_Init(void)
 {    
@@ -74,8 +76,8 @@ void SD2405_Init(void)
 
 /**
  * 
- * @fn BCD_to_Decimal
- * @brief 获取真实时间
+ * <p>Function name: [BCD_to_Decimal]</p>
+ * <p>Discription: [获取真实时间]</p>
  * @param time  传入的时间参数
  * @return  返回真实的时间
  */
@@ -101,8 +103,8 @@ uint8_t BCD_to_Decimal(uint8_t time)
 
 /**
  * 
- * @fn Decimal_to_BCD
- * @brief 将十进制数转换为BCD码
+ * <p>Function name: [Decimal_to_BCD]</p>
+ * <p>Discription: [将十进制数转换为BCD码]</p>
  * @param data 十进制数据
  * @return 生成的BCD码
  */
@@ -128,8 +130,8 @@ uint8_t Decimal_to_BCD(uint8_t data)
 
 /**
  * 
- * @fn turnTime
- * @brief 获取真实的时间
+ * <p>Function name: [turnTime]</p>
+ * <p>Discription: [获取真实的时间]</p>
  * @param time 读取的时间
  * @return 真正的时间
  */
@@ -150,8 +152,8 @@ uint8_t turnTime(uint8_t time)
 
 /**
  * 
- * @fn GetTime
- * @brief 获取时间
+ * <p>Function name: [GetTime]</p>
+ * <p>Discription: [获取时间]</p>
  */
 void GetTime(void)
 {
@@ -185,8 +187,8 @@ void GetTime(void)
 
 /**
  * 
- * @fn SetTime
- * @brief 初始化设置时间，默认使用24小时制
+ * <p>Function name: [SetTime]</p>
+ * <p>Discription: [初始化设置时间，默认使用24小时制]</p>
  * @param time  指向时间的指针
  * @param twelveOn  选择时间格式选择是24小时格式还是12小时格式
  */

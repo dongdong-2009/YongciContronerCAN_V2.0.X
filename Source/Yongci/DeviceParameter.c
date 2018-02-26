@@ -1,11 +1,12 @@
-/**
- * @file DeviceParameter.c
- * @brief 电容电压读取
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： DeviceParameter.c</p> 
+ * <p>application describing： 电容电压读取</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
  * @version ver 1.0
  */
 #include "../Header.h"
@@ -36,8 +37,8 @@ uint8_t g_LastcapState[LOOP_COUNT] = {0};   //获取上一次电容电压状态
 uint8_t CheckSingleLoopCapVoltage(UpDownValue* value, float capVale);
 /**
  * 
- * @fn GetCapVoltage
- * @brief 软件启动转换，获取ADC值.
+ * <p>Function name: [GetCapVoltage]</p>
+ * <p>Discription: [软件启动转换，获取ADC值.]</p>
  */
 void GetCapVoltage(void)
 {
@@ -149,8 +150,8 @@ void GetCapVoltage(void)
 
 /**
  * 
- * @fn CheckLoopCapVoltage
- * @brief 获取电压状态
+ * <p>Function name: [CheckLoopCapVoltage]</p>
+ * <p>Discription: [获取电压状态]</p>
  * @param loop 回路数
  * @return 电压状态，正常为0
  */
@@ -178,8 +179,8 @@ uint8_t CheckLoopCapVoltage(uint8_t loop)
 
 /**
  * 
- * @fn UpdataCapVoltageState
- * @brief 更新电容指示灯和继电器
+ * <p>Function name: [UpdataCapVoltageState]</p>
+ * <p>Discription: [更新电容指示灯和继电器]</p>
  */
 void UpdataCapVoltageState(void)
 {
@@ -211,8 +212,8 @@ void UpdataCapVoltageState(void)
 
 /**
  * 
- * @fn CheckSingleLoopCapVoltage
- * @brief 检测电容电压状态
+ * <p>Function name: [CheckSingleLoopCapVoltage]</p>
+ * <p>Discription: [检测电容电压状态]</p>
  * @param value 极值
  * @param capVale 电容电压
  * @return 返回电容状态
@@ -240,8 +241,8 @@ uint8_t CheckSingleLoopCapVoltage(UpDownValue* value, float capVale)
 }
 /**
  * 
- * @fn ReadCapDropVoltage
- * @brief 读取在执行合闸或者分闸后电容电压的变化
+ * <p>Function name: [ReadCapDropVoltage]</p>
+ * <p>Discription: [读取在执行合闸或者分闸后电容电压的变化]</p>
  */
 void ReadCapDropVoltage(void)
 {

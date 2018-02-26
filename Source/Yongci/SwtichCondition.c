@@ -1,14 +1,17 @@
-/**
- * @file SwtichCondition.c
- * @brief 开入量值获取
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- * @update 
+/** 
+ * <p>application name： SwtichCondition.c</p> 
+ * <p>application describing： 开入量值获取</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+
+ * 摘要:
  * 2015/8/10:完善远本转换。
  * 2015/11/17: 改变IO检测模式，由纯延时形式，变成采样点样式。
  * 将远方检测IO与本地合并。
- * @author Zhangxiaomou
+
+ * @updata:[2017-05-20] [ZhangXiaomou][更改IO读取方式，采用的是并口转串口，165采样。扫描改为定时器扫描]
+ * @author ZhangXiaomou 
  * @version ver 1.0
  */
 #include "SwtichCondition.h"
@@ -67,10 +70,12 @@
 ((DigitalInputState & (COIL3_FENZHA() | DIANXIAN_INPUT)) == COIL3_FENZHA())
 #endif
 
+//时序合闸命令检测
+#define TIMING_CLOSE_CONDITION()  ((DigitalInputState & TIMING_CLOSE_SIGNAL) == TIMING_CLOSE_SIGNAL)
 
 /**
  * 
- * @brief 对机构的合分位检测
+ * <p>Discription: [对机构的合分位检测]</p>
  */
 //******************************************************************************
 //机构1的合位检测
@@ -93,7 +98,7 @@
 
 
 /**
- * @brief 一下错误均为不可屏蔽掉的错误，且错误严重
+ * <p>Discription: [一下错误均为不可屏蔽掉的错误，且错误严重]</p>
  */
 //***************************************************************************************************
 //机构1的本地错误条件: 合位和分位同时成立 或 同时不成立
@@ -128,7 +133,7 @@
 /**
  * 数字量输入有效计数
  */
-static uint8_t DigitalInputValidCount[17] = {0};    
+static uint8_t DigitalInputValidCount[20] = {0};    
 
 static uint8_t ScanCount = 0;    //扫描计数
 static uint32_t volatile DigitalInputState = 0;    //165返回值
@@ -149,8 +154,8 @@ uint8_t CheckSwitchOrder(void);
 
 /**
  * 
- * @fn CheckIOState
- * @brief 检测IO状态，并更新状态显示
+ * <p>Function name: [CheckIOState]</p>
+ * <p>Discription: [检测IO状态，并更新状态显示]</p>
  * @return 接收到分合闸命令返回0xFF,否则返回0
  */
 uint8_t CheckIOState(void)
@@ -348,8 +353,8 @@ uint8_t CheckIOState(void)
 }
 /**
  * 
- * @fn CheckswitchState
- * @brief 执行相应的指示
+ * <p>Function name: [CheckswitchState]</p>
+ * <p>Discription: [执行相应的指示]</p>
  */
 void DsplaySwitchState(void)
 {    
@@ -460,8 +465,8 @@ void DsplaySwitchState(void)
 }
 /**
  * 
- * @fn SwitchScan
- * @brief 检测开入量
+ * <p>Function name: [SwitchScan]</p>
+ * <p>Discription: [检测开入量]</p>
  */
 void SwitchScan(void)
 {
@@ -524,6 +529,12 @@ void SwitchScan(void)
     }
     index++;
 #endif
+    //注意：开入量扫描增加需要在合分闸信号检测上部进行增加
+    if(TIMING_CLOSE_CONDITION())
+    {
+        ADD_VALID_COUNT(index);
+    }
+    index++;
     
     //*****************************
     //作用，屏蔽掉远方就地
@@ -600,8 +611,8 @@ void SwitchScan(void)
 
 /**
  * 
- * @fn CheckAllLoopSwitchState
- * @brief 检测所有回路开关状态
+ * <p>Function name: [CheckAllLoopSwitchState]</p>
+ * <p>Discription: [检测所有回路开关状态]</p>
  */
 void CheckAllLoopSwitchState(void)
 {
@@ -696,12 +707,24 @@ void CheckAllLoopSwitchState(void)
 #else
     g_SystemState.heFenState3 = g_SystemState.heFenState2;
 #endif
+    //成功接收到时序合闸信号后直接进行处理
+    //启动了时序合闸且该信号到达
+    if(DIGITAL_INPUT_EFFECTIVE(index) && (g_SystemState.timeSequenceRun ==  TIME_SEQUENCE))
+    {
+        uint16_t id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, SYNC_MAC);
+        uint8_t sendData[2] = {0};
+        sendData[0] = SynTimeSequence;
+        sendData[1] =  TIME_SEQUENCE;      
+        CANSendData(id, sendData, 2);
+    }
+    CLEAR_VALID_COUNT(index);
+    index ++;
 }
 
 /**
  * 
- * @fn CheckSwitchOrder
- * @brief 检测按键命令
+ * <p>Function name: [CheckSwitchOrder]</p>
+ * <p>Discription: [检测按键命令]</p>
  * @return 0 无命令
  */
 uint8_t CheckSwitchOrder(void)
@@ -926,8 +949,8 @@ uint8_t CheckSwitchOrder(void)
 }
 /**
  * 
- * @fn UpdateSwitchState
- * @brief 更新更新开关分合位状态
+ * <p>Function name: [UpdateSwitchState]</p>
+ * <p>Discription: [更新更新开关分合位状态]</p>
  */
 void UpdateSwitchState(void)
 {

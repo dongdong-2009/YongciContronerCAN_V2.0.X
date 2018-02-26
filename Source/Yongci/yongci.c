@@ -1,13 +1,15 @@
-/**
- * @file yongci.c
- * @brief 永磁控制器分合闸主流程
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.05.20
- * @update 2017.05.20 更改分合闸计时方式，不再采用中断计时，增加三个机构的控制
- * @author Zhangxiaomou
+/** 
+ * <p>application name： yongci.c</p> 
+ * <p>application describing： 永磁控制器分合闸主流程</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期2017-05-20] [ZhangXiaomou][更改分合闸计时方式，不再采用中断计时，增加三个机构的控制]
+ * @author Zhangxiaomou 
  * @version ver 1.0
  */
+
 #include "../Header.h"
 #include "yongci.h"
 
@@ -17,6 +19,7 @@ const uint8_t CompensationTime = 4;    //合分闸时间补偿（ms）
 SwitchConfig g_SwitchConfig[LOOP_COUNT];	//配置机构状态
 
 uint8_t ParameterBufferData[8] = {0,0,0,0,0,0,0,0};
+//uint32_t _PERSISTENT g_TimeStampCollect.changeLedTime.delayTime;   //改变LED灯闪烁时间 (ms)
 static uint16_t _PERSISTENT LockUp;  //命令上锁，在执行了一次合分闸命令之后应处于上锁状态，在延时800ms之后才可以第二次执行
 uint16_t _PERSISTENT g_Order;    //需要执行的命令，且在单片机发生复位后不会改变
 CAN_msg ReciveMsg;
@@ -66,8 +69,8 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 }
 /**
  * 
- * @fn OnLock
- * @brief 上锁
+ * <p>Function name: [OnLock]</p>
+ * <p>Discription: [上锁]</p>
  */
 inline void OnLock(void)
 {
@@ -77,8 +80,8 @@ inline void OnLock(void)
 
 /**
  * 
- * @fn OffLock
- * @brief 解锁状态
+ * <p>Function name: [OffLock]</p>
+ * <p>Discription: [解锁状态]</p>
  */
 inline void OffLock(void)
 {
@@ -87,8 +90,8 @@ inline void OffLock(void)
 }
 
 /**
- * @fn CheckLockState
- * @brief 检测上锁状态
+ * <p>Function name: [CheckLockState]</p>
+ * <p>Discription: [检测上锁状态]</p>
  * @return 处于解锁则返回TRUE 否则返回FALSE
  */
 inline uint8_t CheckLockState(void)
@@ -161,7 +164,7 @@ void SynCloseAction(void)
 
 
 /**
- * 合闸操作
+ *合闸操作
  */
 void CloseOperation(void)
 {
@@ -253,8 +256,8 @@ void OpenOperation(void)
 
 /**
  * 
- * @fn SingleCloseOperation
- * @brief 对机构执行合闸操作，对外提供接口，方便引用
+ * <p>Function name: [SingleCloseOperation]</p>
+ * <p>Discription: [对机构执行合闸操作，对外提供接口，方便引用]</p>
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
@@ -284,8 +287,8 @@ void SingleCloseOperation(uint8_t index,uint16_t time)
 
 /**
  * 
- * @fn SingleOpenOperation
- * @brief 对机构执行合闸操作，对外提供接口，方便引用
+ * <p>Function name: [SingleOpenOperation]</p>
+ * <p>Discription: [对机构执行合闸操作，对外提供接口，方便引用]</p>
  * @param index 执行机构的索引号
  * @param time IGBT导通时间
  */
@@ -315,8 +318,8 @@ void SingleOpenOperation(uint8_t index,uint16_t time)
 
 /**
  * 
- * @fn  RefreshActionState
- * @brief 刷新合分闸工作状态
+ * <p>Function name: [ RefreshActionState]</p>
+ * <p>Discription: [刷新合分闸工作状态]</p>
  * <p>return :[非0 -- 有正在工作的合分闸动作状态]
  *            0--空闲状态
  *    </p>
@@ -428,8 +431,8 @@ uint8_t RefreshActionState()
 }
 /**
  * 
- * @fn RefreshIdleState
- * @brief 刷新空闲的工作状态
+ * <p>Function name: [RefreshIdleState]</p>
+ * <p>Discription: [刷新空闲的工作状态]</p>
  * <p>return : 非0--跳出
  *              0--正常执行
  *    </p>
@@ -659,10 +662,10 @@ uint8_t RefreshIdleState()
         
 }
 /**************************************************
- * @fn YongciMainTask()
- * @brief  永磁控制主循环 
- * @param  void
- * @return void
+ *函数名：YongciMainTask()
+ *功能: 永磁控制主循环 
+ *形参：  void
+ *返回值：void
 ****************************************************/
 void YongciMainTask(void)
 {
@@ -690,10 +693,10 @@ void YongciMainTask(void)
 }
 
 /**************************************************
- * @fn YongciFirstInit()
- * @brief 初始化IGBT控制端口，合分闸状态检测端口
- * @param  void
- * @return void
+ *函数名：YongciFirstInit()
+ *功能:初始化IGBT控制端口，合分闸状态检测端口
+ *形参：  void
+ *返回值：void
 ****************************************************/
 void YongciFirstInit(void)
 {
@@ -770,8 +773,8 @@ void YongciFirstInit(void)
 
 /**
  * 
- * @fn InitSetswitchState
- * @brief 机构状态的初始化
+ * <p>Function name: [InitSetswitchState]</p>
+ * <p>Discription: [机构状态的初始化]</p>
  */
 void InitSetswitchState(void)
 {
@@ -820,8 +823,8 @@ void InitSetswitchState(void)
 
 /**
  * 
- * @fn SwitchCloseFirstPhase
- * @brief 第一相合闸
+ * <p>Function name: [SwitchCloseFirstPhase]</p>
+ * <p>Discription: [第一相合闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchCloseFirstPhase(SwitchConfig* pConfig)
@@ -845,8 +848,8 @@ void SwitchCloseFirstPhase(SwitchConfig* pConfig)
 
 /**
  * 
- * @fn SwitchCloseSecondPhase
- * @brief 第二相合闸
+ * <p>Function name: [SwitchCloseSecondPhase]</p>
+ * <p>Discription: [第二相合闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchCloseSecondPhase(SwitchConfig* pConfig)
@@ -870,8 +873,8 @@ void SwitchCloseSecondPhase(SwitchConfig* pConfig)
 
 /**
  * 
- * @fn SwitchCloseThirdPhase
- * @brief 第三相合闸
+ * <p>Function name: [SwitchCloseThirdPhase]</p>
+ * <p>Discription: [第三相合闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchCloseThirdPhase(SwitchConfig* pConfig)
@@ -900,8 +903,8 @@ void SwitchCloseThirdPhase(SwitchConfig* pConfig)
 //*************************************
 /**
  * 
- * @fn SwitchOpenFirstPhase
- * @brief 第一相分闸
+ * <p>Function name: [SwitchOpenFirstPhase]</p>
+ * <p>Discription: [第一相分闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchOpenFirstPhase(SwitchConfig* pConfig)
@@ -925,8 +928,8 @@ void SwitchOpenFirstPhase(SwitchConfig* pConfig)
 
 /**
  * 
- * @fn SwitchOpenSecondPhase
- * @brief 第二相分闸
+ * <p>Function name: [SwitchOpenSecondPhase]</p>
+ * <p>Discription: [第二相分闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchOpenSecondPhase(SwitchConfig* pConfig)
@@ -950,8 +953,8 @@ void SwitchOpenSecondPhase(SwitchConfig* pConfig)
 
 /**
  * 
- * @fn SwitchOpenThirdPhase
- * @brief 第三相分闸
+ * <p>Function name: [SwitchOpenThirdPhase]</p>
+ * <p>Discription: [第三相分闸]</p>
  * @param pConfig 执行该函数功能的指针
  */
 void SwitchOpenThirdPhase(SwitchConfig* pConfig)
@@ -976,10 +979,10 @@ void SwitchOpenThirdPhase(SwitchConfig* pConfig)
 //*************************************
 
 /**************************************************
- * @fn UpdateCount()
- * @brief  根据合闸与分闸更新EEPROM存在的计数
- * @param  uint16 state--合闸或分闸命令
- * @return void
+ *函数名： UpdateCount()
+ *功能: 根据合闸与分闸更新EEPROM存在的计数
+ *形参：  uint16 state--合闸或分闸命令
+ *返回值：void
 ****************************************************/
 void UpdateCount(void)
 {
@@ -1015,13 +1018,13 @@ void UpdateCount(void)
     {
         ClrWdt();
         SaveActionCount(JG3_HE_COUNT_ADDRESS , &g_ActionCount.hezhaCount3);
-        g_SwitchConfig[DEVICE_IiI].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
     }
     else if (g_SwitchConfig[DEVICE_III].lastOrder == FEN_ORDER)  //机构3分闸
     {
         ClrWdt();
         SaveActionCount(JG3_FEN_COUNT_ADDRESS , &g_ActionCount.fenzhaCount3);
-        g_SwitchConfig[DEVICE_IiI].lastOrder = IDLE_ORDER;
+        g_SwitchConfig[DEVICE_III].lastOrder = IDLE_ORDER;
     }
 #endif    
 }

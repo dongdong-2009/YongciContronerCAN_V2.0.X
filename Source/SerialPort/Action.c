@@ -1,15 +1,17 @@
-/**
- * @file Action.c
- * @brief 实现相应通讯功能码的功能
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- *
- * @author Zhangxiaomou
- * @version ver 1.0
- */
+
 #include "Action.h"
 
+/** 
+ * <p>application name： Action.c</p> 
+ * <p>application describing： 配置Action</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
+ * @version ver 1.0
+ */
 #include "../Header.h"
 #include "../SerialPort/RefParameter.h"
 #include <string.h>
@@ -180,7 +182,7 @@ uint8_t FrameServer(struct DefFrameData* pReciveFrame, struct DefFrameData* pSen
         case SyncReadyClose: //同步合闸预制
         {
             pSendFrame->len = 0;//禁止底层发送
-            return SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
+             return SynCloseReady(pReciveFrame, &ActionCommandTemporaryAck);
         }       
         case MasterParameterSetOne:  //非顺序参数设置
         {
@@ -384,7 +386,7 @@ static uint8_t SynCloseReady(struct DefFrameData* pReciveFrame, struct DefFrameD
     uint8_t id = 0;
     uint8_t configbyte = 0;
     uint8_t loop[3] = {0};
-    if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))  //检测是否能正常接收到同步时序脉冲
+    if(SyncCloseSingleCheck(pReciveFrame, pSendFrame))
     {
         return SIGNEL_INVALID_ERROR;
     }
@@ -618,8 +620,8 @@ void SendErrorFrame(uint8_t receiveID, uint8_t errorID)
 
 /**
  * 
- * @fn UpdataState
- * @brief 对运行状态进行更新显示
+ * <p>Function name: [UpdataState]</p>
+ * <p>Discription: [对运行状态进行更新显示]</p>
  */
 void UpdataState(void)
 {
@@ -884,8 +886,8 @@ static uint8_t CheckOpenCondition(void)
 
 /**
  * 
- * @fn CheckOrder
- * @brief 检测命令是否正确执行
+ * <p>Function name: [CheckOrder]</p>
+ * <p>Discription: [检测命令是否正确执行]</p>
  * @param lastOrder 上一次执行的命令
  */
 void CheckOrder(void)
@@ -930,8 +932,8 @@ void CheckOrder(void)
 
 /**
  * 
- * @fn SendMonitorParameter
- * @brief 发送参数
+ * <p>Function name: [SendMonitorParameter]</p>
+ * <p>Discription: [发送参数]</p>
  */
 static void SendMonitorParameter(struct DefFrameData* pReciveFrame)
 {
@@ -1017,8 +1019,8 @@ static uint8_t ConfigModeOperation(struct DefFrameData* pReciveFrame, struct Def
 }
 
 /**
- * @fn _INT2Interrupt
- * @brief 外部中断函数
+ * <p>Function name: [_INT2Interrupt]</p>
+ * <p>Discription: [外部中断函数]</p>
  */
 
 void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
@@ -1070,36 +1072,36 @@ void __attribute__((interrupt, no_auto_psv)) _INT2Interrupt(void)
 	}
 }
 /**
- * @fn _INT3Interrupt
- * @brief 检测外部脉冲时序
+ * <p>Function name: [_INT3Interrupt]</p>
+ * <p>Discription: [检测外部脉冲时序]</p>
  */
 
-void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
-{
-    uint16_t usCount = 0;
-  
-    
-    IFS2bits.INT3IF = 0;   
-    StartTimer4();
-    while(RXD2_LASER == 1)
-    {        
-        ClrWdt();
-        if( IFS1bits.T4IF == 1)    //超出设定最大值返回
-        {   
-            StopTimer4();
-            return;
-        }
-    }
-    StopTimer4();
-    usCount = GetTimeUs() + 8;//补偿进入误差
-    //检查脉冲宽度是否在10us偏差之间
-    if(((g_SystemState.sequencePulseWidth - 20) <= usCount ) && ( usCount <= (g_SystemState.sequencePulseWidth + 20)))  //较宽的范围
-    {
-       uint16_t id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, SYNC_MAC);
-       uint8_t sendData[2] = {0};
-       sendData[0] = SynTimeSequence;
-       sendData[1] =  TIME_SEQUENCE;      
-       CANSendData(id, sendData, 2);
-    }
- 
-}
+//void __attribute__((interrupt, no_auto_psv)) _INT3Interrupt(void)
+//{
+//    uint16_t usCount = 0;
+//  
+//    
+//    IFS2bits.INT3IF = 0;   
+//    StartTimer4();
+//    while(RXD2_LASER == 1)
+//    {        
+//        ClrWdt();
+//        if( IFS1bits.T4IF == 1)    //超出设定最大值返回
+//        {   
+//            StopTimer4();
+//            return;
+//        }
+//    }
+//    StopTimer4();
+//    usCount = GetTimeUs() + 8;//补偿进入误差
+//    //检查脉冲宽度是否在10us偏差之间
+//    if(((g_SystemState.sequencePulseWidth - 20) <= usCount ) && ( usCount <= (g_SystemState.sequencePulseWidth + 20)))  //较宽的范围
+//    {
+//       uint16_t id = MAKE_GROUP2_ID(GROUP2_POLL_STATUS_CYCLE, SYNC_MAC);
+//       uint8_t sendData[2] = {0};
+//       sendData[0] = SynTimeSequence;
+//       sendData[1] =  TIME_SEQUENCE;      
+//       CANSendData(id, sendData, 2);
+//    }
+// 
+//}

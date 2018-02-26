@@ -1,13 +1,15 @@
-/**
- * @file Delay.c
- * @brief 使用定时器延时
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.05.20
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： Delay.c</p> 
+ * <p>application describing： 使用定时器延时</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.07.11</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
  * @version ver 1.0
  */
+
 #include "../Header.h"
 #include "Delay.h"
 
@@ -135,8 +137,8 @@ inline uint8_t IsOverTimeStamp(TimeStamp* pStamp)
 
 /**
  * 
- * @fn Delay_ms
- * @brief delays number of tick Systicks 
+ * <p>Function name: [Delay_ms]</p>
+ * <p>Discription: [delays number of tick Systicks ]</p>
  * @param ms 延时时间ms
  */
 inline void DelayMs(uint32_t dlyTicks)
@@ -152,8 +154,8 @@ inline void DelayMs(uint32_t dlyTicks)
 
 /**
  * 
- * @fn _T2Interrupt
- * @brief 定时器2的中断函数，实现时间的累加
+ * <p>Function name: [_T2Interrupt]</p>
+ * <p>Discription: [定时器2的中断函数，实现时间的累加]</p>
  */
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {

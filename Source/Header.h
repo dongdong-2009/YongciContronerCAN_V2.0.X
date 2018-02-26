@@ -18,8 +18,8 @@
 #include <libpic30.h>
 //此处针对第三个控制器做一个全局判断，方便以后更改程序
 //**************************************
-//#define SMALL_CHOSE 0xF1 
-#define BIG_CHOSE   0xF2
+#define SMALL_CHOSE 0xF1 
+//#define BIG_CHOSE   0xF2
 
 //**************************************
 #ifdef	SMALL_CHOSE

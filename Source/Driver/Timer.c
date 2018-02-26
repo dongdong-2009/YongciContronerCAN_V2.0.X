@@ -1,13 +1,15 @@
-/**
- * @file Timer.c
- * @brief 配置定时器Timer
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.06.5
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： Timer.c</p> 
+ * <p>application describing： 配置定时器Timer</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.20</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author ZhangXiaomou 
  * @version ver 1.0
  */
+
 #include  "../Header.h"
 #include "Timer.h"
 
@@ -18,8 +20,8 @@ uint16_t g_TPR2Count = 0;
 uint16_t TPR4Count = 0;
 /**
  * 
- * @fn InitTimer1
- * @brief TIMER1 定时器设置 用于永磁合分闸计时
+ * <p>Function name: [InitTimer1]</p>
+ * <p>Discription: [TIMER1 定时器设置 用于永磁合分闸计时]</p>
  * @param ms 定时器周期
  * @drif 由于该定时器作为永磁分合闸的时间定时器，所以其中断优先级应该为最高
  */
@@ -43,8 +45,8 @@ void InitTimer1( unsigned int  ms)
 } 
 /**
  * 
- * @fn StartTimer1
- * @brief 启动定时器
+ * <p>Function name: [StartTimer1]</p>
+ * <p>Discription: [启动定时器]</p>
  */
 inline void StartTimer1(void)
 {
@@ -54,8 +56,8 @@ inline void StartTimer1(void)
 }
 /**
  * 
- * @fn StopTimer1
- * @brief 复位定时器
+ * <p>Function name: [StopTimer1]</p>
+ * <p>Discription: [复位定时器]</p>
  */
 inline  void StopTimer1(void)
 {
@@ -69,8 +71,8 @@ inline  void StopTimer1(void)
 
 /**
  * 
- * @fn InitTimer2
- * @brief TIMER2 定时器设置 —— 用于系统ms中断
+ * <p>Function name: [InitTimer2]</p>
+ * <p>Discription: [TIMER2 定时器设置 —— 用于系统ms中断]</p>
  * @param ms 定时器周期
  */
 void InitTimer2(uint16_t ms)
@@ -94,8 +96,8 @@ void InitTimer2(uint16_t ms)
 }
 /**
  * 
- * @fn StartTimer2
- * @brief 启动定时器
+ * <p>Function name: [StartTimer2]</p>
+ * <p>Discription: [启动定时器]</p>
  */
 inline void StartTimer2(void)
 {
@@ -108,8 +110,8 @@ inline void StartTimer2(void)
 }
 /**
  * 
- * @fn StopTimer2
- * @brief 停止定时器
+ * <p>Function name: [StopTimer2]</p>
+ * <p>Discription: [停止定时器]</p>
  */
 inline void StopTimer2(void)
 {
@@ -120,8 +122,8 @@ inline void StopTimer2(void)
 
 /**
  * 
- * @fn InitTimer3
- * @brief TIMER3用于永磁同步合闸偏移时间计时
+ * <p>Function name: [InitTimer3]</p>
+ * <p>Discription: [TIMER3用于永磁同步合闸偏移时间计时]</p>
  * @param ms 定时器周期
  */
 void InitTimer3(void)
@@ -143,8 +145,8 @@ void InitTimer3(void)
 } 
 /**
  * 
- * @fn StartTimer3
- * @brief 启动定时器
+ * <p>Function name: [StartTimer3]</p>
+ * <p>Discription: [启动定时器]</p>
  */
 inline void StartTimer3(unsigned int us)
 {
@@ -157,8 +159,8 @@ inline void StartTimer3(unsigned int us)
 }
 /**
  * 
- * @fn StartTimer3
- * @brief 启动定时器
+ * <p>Function name: [StartTimer3]</p>
+ * <p>Discription: [启动定时器]</p>
  * @param us 延时时间
  */
 inline void ChangeTimerPeriod3(unsigned int us)
@@ -171,8 +173,8 @@ inline void ChangeTimerPeriod3(unsigned int us)
 }
 /**
  * 
- * @fn StopTimer3
- * @brief 复位定时器
+ * <p>Function name: [StopTimer3]</p>
+ * <p>Discription: [复位定时器]</p>
  */
 inline  void StopTimer3(void)
 {
@@ -185,8 +187,8 @@ inline  void StopTimer3(void)
 
 /**
  * 
- * @fn InitTimer4
- * @brief 初始化定时器4，用于脉冲宽度测试，1:1定时器脉冲宽度/p>
+ * <p>Function name: [InitTimer4]</p>
+ * <p>Discription: [初始化定时器4，用于脉冲宽度测试，1:1定时器脉冲宽度/p>
  * @param ms 定时器周期
  */
 void InitTimer4()
@@ -223,7 +225,7 @@ void InitTimer4()
 inline void ChangeTimerPeriod4(unsigned int us)
 {
   
-    TPR4Count = (unsigned int)((float32_t)FCY/(float32_t)us)-1;
+    TPR4Count = (unsigned int)((float32_t)FCY / (float32_t)us) - 1;
     PR4 =  TPR4Count;
 }
 inline uint16_t GetTimeUs(void)
@@ -232,8 +234,8 @@ inline uint16_t GetTimeUs(void)
 }
 /**
  * 
- * @fn StartTimer4
- * @brief 启动定时器
+ * <p>Function name: [StartTimer4]</p>
+ * <p>Discription: [启动定时器]</p>
  */
 inline void StartTimer4(void)
 {
@@ -246,8 +248,8 @@ inline void StartTimer4(void)
 }
 /**
  * 
- * @fn StopTimer4
- * @brief 复位定时器
+ * <p>Function name: [StopTimer4]</p>
+ * <p>Discription: [复位定时器]</p>
  */
 inline  void StopTimer4(void)
 {

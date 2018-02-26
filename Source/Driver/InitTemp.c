@@ -1,11 +1,12 @@
-/**
- * @file InitTemp.c
- * @brief 操作DS18B20温度传感器
- * copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.
- * company： SOJO
- * @date 2017.05.20
- *
- * @author Zhangxiaomou
+/** 
+ * <p>application name： InitTemp.c</p> 
+ * <p>application describing： 对单片机的IO口进行初始化</p> 
+ * <p>copyright： Copyright (c) 2017 Beijing SOJO Electric CO., LTD.</p> 
+ * <p>company： SOJO</p> 
+ * <p>time： 2017.05.09</p> 
+ * 
+ * @updata:[日期YYYY-MM-DD] [更改人姓名][变更描述]
+ * @author Zhangxiaomou 
  * @version ver 1.0
  */
 
@@ -35,10 +36,10 @@ uint16_t TemperateValue = 0;
 
 
 /***********************************************************************
- * @fn DS18B20Reset()
- * @param uint8 ch 转换通道
+ *函数名：DS18B20Reset()
+ *形参： uint8 ch 转换通道
  * 返回值;void
- * @brief 初始化：检测总线控制器发出的复位脉冲和ds18b20的任何通讯都要从初始化开始初始化
+ *功能：初始化：检测总线控制器发出的复位脉冲和ds18b20的任何通讯都要从初始化开始初始化
  * 序列包括一个由总线控制器发出的复位脉冲和跟在其后由从机发出的存在脉冲。
  * 初始化：复位脉冲+存在脉冲
  * 具体操作：
@@ -78,10 +79,10 @@ void DS18B20Reset(void)
 }
 
 /**************************************************
- * @fn DS18B20ReadBit()
- * @param uint8 ch 转换通道
- * @return 返回读取bit
- * @brief 读/写时间隙:DS1820 的数据读写是通过时间隙处理位和命令字来确认信息交换。
+ *函数名： DS18B20ReadBit()
+ *形参： uint8 ch 转换通道
+ *返回值：返回读取bit
+ *功能：读/写时间隙:DS1820 的数据读写是通过时间隙处理位和命令字来确认信息交换。
  ************************************************/
 uint8_t DS18B20ReadBit(void)    //读一位
 {
@@ -110,10 +111,10 @@ uint8_t DS18B20ReadBit(void)    //读一位
 
 
 /**************************************************
- * @fn DS18B20ReadByte()
- * @param  uint8 ch 转换通道
- * @return 返回读取字节
- * @brief   读取一个字节
+ *函数名： DS18B20ReadByte()
+ *形参：  uint8 ch 转换通道
+ *返回值：返回读取字节
+ *功能：  读取一个字节
  ****************************************************/
 uint8_t DS18B20ReadByte(void) //读一字节
 {
@@ -131,10 +132,10 @@ uint8_t DS18B20ReadByte(void) //读一字节
 
 
 /**************************************************
- * @fn DS18B20WriteByte()
- * @param  uint8 dat 将要写入的字节
- * @return void
- * @brief   向温度传感器写一个字节
+ *函数名：DS18B20WriteByte()
+ *形参：  uint8 dat 将要写入的字节
+ *返回值：void
+ *功能：  向温度传感器写一个字节
 ****************************************************/
 void DS18B20WriteByte(uint8_t dat) //写一个字节
 {
@@ -181,10 +182,10 @@ void DS18B20WriteByte(uint8_t dat) //写一个字节
 ****************************************************************************/ 
 
 /**************************************************
- * @fn DS18B20StartTranfer()
- * @param  uint8 ch 转换通道
- * @return void
- * @brief   温度转换，先初始化，然后跳过ROM：跳过64位ROM地址，直接向ds18B20发温度转换命令。
+ *函数名：DS18B20StartTranfer()
+ *形参：  uint8 ch 转换通道
+ *返回值：void
+ *功能：  温度转换，先初始化，然后跳过ROM：跳过64位ROM地址，直接向ds18B20发温度转换命令。
 ****************************************************/
 void DS18B20StartTranfer(void)		
 {
@@ -199,10 +200,10 @@ void DS18B20StartTranfer(void)
 }
 
 /**************************************************
- * @fn DS18B20GetTemperature()
- * @param uint8 ch 转换通道
- * @return void
- * @brief   获取温度值
+ *函数名：DS18B20GetTemperature()
+ *形参： uint8 ch 转换通道
+ *返回值：void
+ *功能：  获取温度值
 ****************************************************/
 float32_t DS18B20GetTemperature(void)
 {
